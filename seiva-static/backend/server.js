@@ -352,10 +352,16 @@ app.use(function(req, res, next) {
 });
 
 // ---------- SERVE STATIC ----------
-const adminPath = path.join(__dirname, "..", "admin");
+let adminPath = path.join(__dirname, "..", "admin");
+if (!fs.existsSync(adminPath)) {
+  adminPath = path.join(__dirname, "admin");
+}
 app.use("/admin", express.static(adminPath));
 
-const distPath = path.join(__dirname, "dist");
+let distPath = path.join(__dirname, "dist");
+if (!fs.existsSync(distPath)) {
+  distPath = path.join(__dirname, "..", "dist");
+}
 if (fs.existsSync(distPath)) {
   // New deployment: serve React SPA + API-only backend
   app.use(express.static(distPath));
