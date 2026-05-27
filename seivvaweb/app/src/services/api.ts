@@ -22,7 +22,8 @@ const IMAGE_BASE = window.location.hostname === 'localhost' || window.location.h
 function fixImageUrl(imagen: string): string {
   if (!imagen) return '';
   if (imagen.startsWith('http')) return imagen;
-  return IMAGE_BASE + imagen;
+  const base = IMAGE_BASE || '/img/productos';
+  return base + '/' + imagen.replace(/^\//, '');
 }
 
 export async function fetchProducts(): Promise<Product[]> {

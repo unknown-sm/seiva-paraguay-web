@@ -13,7 +13,12 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "SeivaAdmin2026!";
 
 app.use(cors());
 app.use(express.json({ limit: "5mb" }));
-app.use("/img/productos", express.static(path.join(__dirname, "public", "productos")));
+let imgPath = path.join(__dirname, "public", "productos");
+if (!fs.existsSync(imgPath)) {
+  imgPath = path.join(__dirname, "img", "productos");
+}
+console.log("imgPath: " + imgPath + " exists: " + fs.existsSync(imgPath));
+app.use("/img/productos", express.static(imgPath));
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, "data", "database.sqlite");
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
@@ -88,19 +93,19 @@ function seedProductos() {
   if (row.c > 0) return;
 
   const seed = [
-    ["Almendras con Chocolate Negro", 45000, null, "snacks", "chocolate", "Almendras seleccionadas cubiertas con chocolate negro 70% cacao.", '["nuevo","popular"]', 1, "almendras-chocolate.jpg"],
-    ["Mix de Frutos Secos Premium", 55000, 65000, "snacks", "mix", "Combinacion de almendras, nueces, castanas, arandanos y pasas.", '["oferta"]', 1, "mix-frutos-secos.jpg"],
-    ["Almendras Naturales 500g", 58000, null, "snacks", "almendras", "Almendras crudas sin sal, empacadas al vacio.", '[]', 1, "almendras-naturales.jpg"],
-    ["Datiles Medjool 400g", 42000, null, "snacks", "frutas", "Datiles Medjool premium, naturalmente dulces.", '["nuevo"]', 0, "datiles.jpg"],
-    ["Nueces Pecanas 300g", 62000, null, "snacks", "nueces", "Nueces pecanas frescas, ricas en antioxidantes.", '[]', 0, "nueces-pecanas.jpg"],
-    ["Barritas de Granola Artesanal", 12000, null, "snacks", "barras", "Barritas de granola caseras. Pack x3.", '["popular"]', 1, "granola-bars.jpg"],
-    ["Aceite de Oregano 120 Capsulas", 75000, 90000, "suplementos", "aceites", "Aceite de oregano 500mg. Refuerzo inmune.", '["oferta"]', 0, "aceite-oregano.jpg"],
-    ["Magnesio Quelato 120 Capsulas", 85000, null, "suplementos", "magnesios", "Magnesio quelato de alta absorcion.", '["popular"]', 1, "magnesio-quelato.jpg"],
-    ["Omega 3 Puro 1000mg", 95000, 120000, "suplementos", "omega3", "Omega 3 puro con EPA y DHA. 120 capsulas.", '["oferta"]', 1, "omega3.jpg"],
-    ["Creatina Monohidratada 300g", 78000, null, "suplementos", "gym", "Creatina monohidratada micronizada. 300g.", '[]', 0, "creatina.jpg"],
-    ["Colageno Hidrolizado 500g", 120000, 145000, "suplementos", "colagenos", "Colageno tipo I y III para piel y articulaciones.", '["oferta"]', 0, "colageno.jpg"],
-    ["Curcuma con Pimienta Negra", 65000, null, "suplementos", "naturales", "Curcuma organica con pimienta negra.", '[]', 0, "curcuma.jpg"],
-    ["Combo Omega 3 + Magnesio Citrato", 150000, 205000, "combos", "combos", "Omega 3 Puro + Magnesio Citrato. Combo bienestar.", '["oferta","popular"]', 1, "combo-omega-magnesio.jpg"]
+    ["Almendras con Chocolate Negro", 45000, null, "snacks", "chocolate", "Almendras seleccionadas cubiertas con chocolate negro 70% cacao.", '["nuevo","popular"]', 1, "product-4073.jpg"],
+    ["Mix de Frutos Secos Premium", 55000, 65000, "snacks", "mix", "Combinacion de almendras, nueces, castanas, arandanos y pasas.", '["oferta"]', 1, "product-4079.jpg"],
+    ["Almendras Naturales 500g", 58000, null, "snacks", "almendras", "Almendras crudas sin sal, empacadas al vacio.", '[]', 1, "product-2564.jpg"],
+    ["Datiles Medjool 400g", 42000, null, "snacks", "frutas", "Datiles Medjool premium, naturalmente dulces.", '["nuevo"]', 0, "product-2505.jpg"],
+    ["Nueces Pecanas 300g", 62000, null, "snacks", "nueces", "Nueces pecanas frescas, ricas en antioxidantes.", '[]', 0, "product-3116.jpg"],
+    ["Barritas de Granola Artesanal", 12000, null, "snacks", "barras", "Barritas de granola caseras. Pack x3.", '["popular"]', 1, "product-2468.png"],
+    ["Aceite de Oregano 120 Capsulas", 75000, 90000, "suplementos", "aceites", "Aceite de oregano 500mg. Refuerzo inmune.", '["oferta"]', 0, "aceite-de-ajo-mix-nutri-3.webp"],
+    ["Magnesio Quelato 120 Capsulas", 85000, null, "suplementos", "magnesios", "Magnesio quelato de alta absorcion.", '["popular"]', 1, "magnesio-quelato-bio-120-paraguay.jpg"],
+    ["Omega 3 Puro 1000mg", 95000, 120000, "suplementos", "omega3", "Omega 3 puro con EPA y DHA. 120 capsulas.", '["oferta"]', 1, "product-3995.jpg"],
+    ["Creatina Monohidratada 300g", 78000, null, "suplementos", "gym", "Creatina monohidratada micronizada. 300g.", '[]', 0, "creatina-unilife-paraguay1.jpg"],
+    ["Colageno Hidrolizado 500g", 120000, 145000, "suplementos", "colagenos", "Colageno tipo I y III para piel y articulaciones.", '["oferta"]', 0, "colageno-hidrolisado-rei-terra-120-500mg.webp"],
+    ["Curcuma con Pimienta Negra", 65000, null, "suplementos", "naturales", "Curcuma organica con pimienta negra.", '[]', 0, "curcuma.png"],
+    ["Combo Omega 3 + Magnesio Citrato", 150000, 205000, "combos", "combos", "Omega 3 Puro + Magnesio Citrato. Combo bienestar.", '["oferta","popular"]', 1, "combo-ome.jpeg"]
   ];
 
   const insert = db.prepare("INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, etiquetas, destacado, imagen, stock, activo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 50, 1)");
