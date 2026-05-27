@@ -354,8 +354,23 @@ app.use(function(req, res, next) {
 // ---------- SERVE STATIC ----------
 const adminPath = path.join(__dirname, "..", "admin");
 app.use("/admin", express.static(adminPath));
-const sitePath = path.join(__dirname, "..");
-app.use(express.static(sitePath));
+
+const distPath = path.join(__dirname, "dist");
+if (fs.existsSync(distPath)) {
+  // New deployment: serve React SPA + API-only backend
+  app.use(express.static(distPath));
+  app.get("*", (req, res) => {
+    if (!req.path.startsWith("/api") && !req.path.startsWith("/admin")) {
+      res.sendFile(path.join(distPath, "index.html"));
+    }
+  });
+  console.log("Serving React SPA from dist/");
+} else {
+  // Old deployment: serve static files from parent
+  const sitePath = path.join(__dirname, "..");
+  app.use(express.static(sitePath));
+  console.log("Serving static files from " + sitePath);
+}
 
 app.listen(PORT, () => {
   console.log("Seiva backend running on http://localhost:" + PORT);

@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+*.zip
+*.tar.gz
+*.gz
+.env
+.git
+.gitignore
+*.bat
+*.md
+docs/
+mobile-opencode/
+payment-qr-woo-extracted/
