@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preview — Template B (UI/UX Pro Max)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display+SC:wght@400;700&family=Karla:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #ECFDF5;
+      --surface: #FFFFFF;
+      --primary: #059669;
+      --accent: #D97706;
+      --text: #0F172A;
+      --muted: #64748B;
+      --border: #E1F2ED;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Karla', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 40px 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .badge {
+      display: inline-block;
+      background: var(--primary);
+      color: #fff;
+      padding: 6px 16px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-family: 'Playfair Display SC', serif;
+      font-size: 2.6rem;
+      line-height: 1.1;
+      margin-bottom: 12px;
+      letter-spacing: 0.02em;
+    }
+    .hero-desc {
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 500px;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+    .section-title {
+      font-family: 'Playfair Display SC', serif;
+      font-size: 1.5rem;
+      margin: 48px 0 20px;
+      letter-spacing: 0.02em;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 640px) { .cards { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .card:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 12px 32px rgba(5, 150, 105, 0.15);
+      border-color: var(--primary);
+    }
+    .card-img {
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      opacity: 0.95;
+    }
+    .card-img.amber { background: linear-gradient(135deg, #D97706, #F59E0B, #B45309); }
+    .card-img.green { background: linear-gradient(135deg, #059669, #10B981, #047857); }
+    .card-img.teal { background: linear-gradient(135deg, #0891B2, #22D3EE, #0E7490); }
+    .card-body { padding: 16px; }
+    .card-cat { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.06em; }
+    .card-title { font-size: 0.95rem; font-weight: 700; margin: 6px 0; }
+    .card-price { font-weight: 700; color: var(--primary); font-size: 1.1rem; }
+    .card-old { font-size: 0.75rem; color: var(--muted); text-decoration: line-through; margin-left: 6px; }
+
+    .feature-blocks {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin: 24px 0;
+    }
+    .feature-block {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+    }
+    .feature-block .emoji { font-size: 2rem; margin-bottom: 8px; }
+    .feature-block h4 { font-size: 0.85rem; font-weight: 700; margin-bottom: 4px; }
+    .feature-block p { font-size: 0.8rem; color: var(--muted); }
+
+    .palette {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .swatch {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+    }
+
+    .divider {
+      height: 2px;
+      background: var(--border);
+      margin: 32px 0;
+    }
+    .label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: 0.06em;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="label">Template B — UI/UX Pro Max (Fresh Food Market)</div>
+
+  <div class="badge">Envios a todo Paraguay</div>
+  <h1>FRESCURA NATURAL<br>QUE SE SIENTE</h1>
+  <p class="hero-desc">Almendras con chocolate, frutos secos premium y snacks saludables. Directo a tu puerta.</p>
+  <a href="#" class="btn">Ver Tienda →</a>
+
+  <div class="divider"></div>
+
+  <h2 class="section-title">POR QUE SEIVA</h2>
+  <div class="feature-blocks">
+    <div class="feature-block">
+      <div class="emoji">🇵🇾</div>
+      <h4>100% Paraguayo</h4>
+      <p>Productores locales</p>
+    </div>
+    <div class="feature-block">
+      <div class="emoji">⚡</div>
+      <h4>Rapido y Simple</h4>
+      <p>Pedido en segundos</p>
+    </div>
+    <div class="feature-block">
+      <div class="emoji">💬</div>
+      <h4>Te Asesoramos</h4>
+      <p>WhatsApp directo</p>
+    </div>
+    <div class="feature-block">
+      <div class="emoji">💳</div>
+      <h4>Pago Flexible</h4>
+      <p>Efectivo o transferencia</p>
+    </div>
+  </div>
+
+  <h2 class="section-title">PRODUCTOS DESTACADOS</h2>
+  <div class="cards">
+    <div class="card">
+      <div class="card-img amber">🍫</div>
+      <div class="card-body">
+        <div class="card-cat">Chocolate</div>
+        <div class="card-title">Almendras con Chocolate Negro</div>
+        <span class="card-price">Gs.45.000</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-img green">🥜</div>
+      <div class="card-body">
+        <div class="card-cat">Mix</div>
+        <div class="card-title">Mix de Frutos Secos Premium</div>
+        <span class="card-price">Gs.55.000</span><span class="card-old">Gs.65.000</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-img teal">💊</div>
+      <div class="card-body">
+        <div class="card-cat">Suplementos</div>
+        <div class="card-title">Magnesio Quelato 120 Caps</div>
+        <span class="card-price">Gs.85.000</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <h2 class="section-title">PALETA DE COLORES</h2>
+  <div class="palette">
+    <div class="swatch" style="background:#059669" title="Primary: Fresh Green"></div>
+    <div class="swatch" style="background:#D97706" title="Accent: Food Amber"></div>
+    <div class="swatch" style="background:#ECFDF5" title="Background: Light Green"></div>
+    <div class="swatch" style="background:#0F172A" title="Text: Dark Slate"></div>
+    <div class="swatch" style="background:#64748B" title="Muted"></div>
+  </div>
+
+  <div style="margin-top:24px;font-size:0.85rem;color:var(--muted)">
+    <strong>Tipografia:</strong> Playfair Display SC (small caps, titulos) + Karla (cuerpo)<br>
+    <strong>Estilo:</strong> Block-based, bordes mas marcados, hover mas rapido y motion-driven<br>
+    <strong>Vibe:</strong> Fresco, energico, apetitoso, mercado saludable
+  </div>
+
+</body>
+</html>

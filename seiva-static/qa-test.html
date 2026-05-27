@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head><title>QA Test</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { padding: 20px; background: var(--bg); color: var(--text); }
+    .test-result { padding: 10px; margin: 10px 0; border-radius: 8px; }
+    .pass { background: #5B8C5A20; border: 2px solid #5B8C5A; }
+    .fail { background: #E8784A20; border: 2px solid #E8784A; }
+    .product-card-img__img { width: 100%; height: 100%; object-fit: cover; }
+  </style>
+</head>
+<body>
+  <h1>QA Test - Seiva</h1>
+  <div id="tests"></div>
+  <h2>Product Grid Test</h2>
+  <div class="product-grid" id="test-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); max-width: 800px;"></div>
+
+  <script src="js/productos.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    var tests = document.getElementById("tests");
+    function addTest(name, pass, detail) {
+      var div = document.createElement("div");
+      div.className = "test-result " + (pass ? "pass" : "fail");
+      div.innerHTML = "<strong>" + (pass ? "PASS" : "FAIL") + ": " + name + "</strong><br>" + (detail || "");
+      tests.appendChild(div);
+    }
+
+    // Test 1: PRODUCTOS loaded
+    addTest("PRODUCTOS array exists", typeof PRODUCTOS !== "undefined" && PRODUCTOS.length > 0, "Count: " + (typeof PRODUCTOS !== "undefined" ? PRODUCTOS.length : "undefined"));
+
+    // Test 2: First product has image
+    if (PRODUCTOS && PRODUCTOS.length > 0) {
+      addTest("First product has image", PRODUCTOS[0].imagen && PRODUCTOS[0].imagen.length > 0, "Image: " + PRODUCTOS[0].imagen);
+    }
+
+    // Test 3: Image file accessible
+    var imgTest = new Image();
+    imgTest.onload = function() {
+      addTest("Image loads from server", true, "Loaded: " + this.src);
+    };
+    imgTest.onerror = function() {
+      addTest("Image loads from server", false, "Failed: " + this.src);
+    };
+    imgTest.src = PRODUCTOS[0].imagen;
+
+    // Test 4: Render one product
+    try {
+      if (typeof crearCardProducto === "function" && PRODUCTOS && PRODUCTOS.length > 0) {
+        var card = crearCardProducto(PRODUCTOS[0]);
+        document.getElementById("test-grid").appendChild(card);
+        addTest("Render product card", true, "Card created for: " + PRODUCTOS[0].nombre);
+      } else {
+        addTest("Render product card", false, "crearCardProducto not found");
+      }
+    } catch(e) {
+      addTest("Render product card", false, "Error: " + e.message);
+    }
+
+    // Test 5: Check all images exist
+    var missingImages = [];
+    var checked = 0;
+    var total = Math.min(PRODUCTOS.length, 10); // Check first 10
+
+    for (var i = 0; i < total; i++) {
+      (function(idx) {
+        var img = new Image();
+        img.onload = function() { checked++; };
+        img.onerror = function() {
+          checked++;
+          missingImages.push(PRODUCTOS[idx].nombre + " -> " + PRODUCTOS[idx].imagen);
+        };
+        img.src = PRODUCTOS[idx].imagen;
+      })(i);
+    }
+
+    // Report after 3 seconds
+    setTimeout(function() {
+      addTest("Image files exist (" + total + " checked)", missingImages.length === 0,
+        missingImages.length === 0 ? "All images found" : "Missing: " + missingImages.join(", "));
+    }, 3000);
+  </script>
+</body>
+</html>

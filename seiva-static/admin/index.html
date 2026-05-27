@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard &mdash; Seiva Paraguay</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+<div id="login-screen" class="login-screen">
+  <div class="login-card">
+    <div class="login-logo">&#127807;</div>
+    <h1 class="login-title">Seiva Admin</h1>
+    <p class="login-sub">Panel de administraci&oacute;n</p>
+    <form id="login-form">
+      <input type="password" id="login-password" placeholder="Contrase&ntilde;a" class="login-input" autofocus>
+      <button type="submit" class="login-btn">Ingresar</button>
+      <p id="login-error" class="login-error hidden">Contrase&ntilde;a incorrecta</p>
+    </form>
+  </div>
+</div>
+
+<div id="dashboard-screen" class="dashboard-screen hidden">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-logo">&#127807;</span>
+      <span class="sidebar-brand">Seiva</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="sidebar-link active" data-tab="tab-dashboard"><span class="sidebar-icon">&#128202;</span><span class="sidebar-label">Dashboard</span></button>
+      <button class="sidebar-link" data-tab="tab-pedidos"><span class="sidebar-icon">&#128717;&#65039;</span><span class="sidebar-label">Pedidos</span></button>
+      <button class="sidebar-link" data-tab="tab-productos"><span class="sidebar-icon">&#128230;</span><span class="sidebar-label">Productos</span></button>
+      <button class="sidebar-link" data-tab="tab-stock"><span class="sidebar-icon">&#9888;&#65039;</span><span class="sidebar-label">Alertas de Stock</span></button>
+      <button class="sidebar-link" data-tab="tab-venta"><span class="sidebar-icon">&#128722;</span><span class="sidebar-label">Nueva Venta</span></button>
+      <button class="sidebar-link" data-tab="tab-historico"><span class="sidebar-icon">&#128203;</span><span class="sidebar-label">Hist&oacute;rico</span></button>
+      <button class="sidebar-link" data-tab="tab-contenido"><span class="sidebar-icon">&#128221;</span><span class="sidebar-label">Contenido</span></button>
+      <button class="sidebar-link" data-tab="tab-analytics"><span class="sidebar-icon">&#128200;</span><span class="sidebar-label">Analytics</span></button>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="btn-theme-toggle" class="sidebar-link"><span class="sidebar-icon" id="theme-icon">&#127769;</span><span class="sidebar-label">Modo oscuro</span></button>
+      <button id="btn-logout" class="sidebar-link"><span class="sidebar-icon">&#128682;</span><span class="sidebar-label">Salir</span></button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="content-header">
+      <h1 class="content-title" id="page-title">Dashboard</h1>
+      <span id="version-label">Cargando...</span>
+    </header>
+
+    <div id="tab-dashboard" class="tab-content active">
+      <div class="stats-grid" id="stats-cards"></div>
+      <div class="dashboard-grid">
+        <div class="card"><div class="card-header"><h3>Top 5 Productos</h3><span>30 d&iacute;as</span></div><div class="card-body" id="top-productos"></div></div>
+        <div class="card"><div class="card-header"><h3>&Uacute;ltimas Ventas</h3></div><div class="card-body" id="ultimas-ventas"></div></div>
+      </div>
+    </div>
+
+    <div id="tab-pedidos" class="tab-content">
+      <div class="card">
+        <div class="card-header" style="justify-content:space-between">
+          <h3>Pedidos</h3>
+          <select id="pedidos-filtro" class="form-select" style="width:auto"><option value="">Todos</option><option value="pendiente">Pendiente</option><option value="confirmado">Confirmado</option><option value="enviado">Enviado</option><option value="entregado">Entregado</option><option value="cancelado">Cancelado</option></select>
+        </div>
+        <div class="card-body"><table class="admin-table"><thead><tr><th>ID</th><th>Fecha</th><th>Cliente</th><th>WhatsApp</th><th>Productos</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="pedidos-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <div id="tab-productos" class="tab-content">
+      <div class="card">
+        <div class="card-header" style="justify-content:space-between">
+          <h3>Productos</h3>
+          <div style="display:flex;gap:12px;align-items:center"><input type="text" id="productos-search" placeholder="Buscar..." class="form-input" style="width:200px"><button id="btn-nuevo-producto" class="btn btn-primary">+ Nuevo</button></div>
+        </div>
+        <div class="card-body"><table class="admin-table"><thead><tr><th>Nombre</th><th>Precio</th><th>Categor&iacute;a</th><th>Stock</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="productos-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <div id="tab-stock" class="tab-content">
+      <div class="card">
+        <div class="card-header" style="justify-content:space-between">
+          <h3>&#9888;&#65039; Alertas de Stock Bajo</h3>
+          <span style="color:var(--muted);font-size:0.85rem">Productos con stock menor a 5 unidades</span>
+        </div>
+        <div class="card-body" id="stock-alertas-page"></div>
+      </div>
+    </div>
+
+    <div id="tab-venta" class="tab-content">
+      <div class="card" style="max-width:720px">
+        <div class="card-header"><h3>Registrar Venta</h3></div>
+        <div class="card-body">
+          <form id="venta-form">
+            <div class="form-grid"><div class="form-group"><label>Cliente</label><input type="text" id="venta-cliente" class="form-input"></div><div class="form-group"><label>WhatsApp</label><input type="text" id="venta-whatsapp" class="form-input"></div></div>
+            <div class="form-group"><label>Productos</label><div id="venta-productos"></div><button type="button" id="btn-agregar-producto-venta" class="btn btn-sm">+ Agregar</button></div>
+            <div class="form-grid"><div class="form-group"><label>Total (Gs.)</label><input type="number" id="venta-total" value="0" readonly class="form-input"></div><div class="form-group"><label>M&eacute;todo</label><select id="venta-metodo" class="form-select"><option value="efectivo">Efectivo</option><option value="transferencia">Transferencia</option><option value="qr">QR</option></select></div></div>
+            <button type="submit" class="btn btn-primary">Registrar Venta</button>
+          </form>
+          <p id="venta-msg" class="msg hidden"></p>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-historico" class="tab-content">
+      <div class="card">
+        <div class="card-header" style="justify-content:space-between"><h3>Hist&oacute;rico</h3><input type="date" id="historico-fecha" class="form-input" style="width:auto"></div>
+        <div class="card-body"><table class="admin-table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Productos</th><th>Total</th><th>Pago</th></tr></thead><tbody id="historico-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <div id="tab-contenido" class="tab-content">
+      <div class="card" style="max-width:640px">
+        <div class="card-header"><h3>Contenido del Sitio</h3></div>
+        <div class="card-body">
+          <form id="contenido-form">
+            <div class="form-group"><label>T&iacute;tulo Hero</label><input type="text" id="contenido-hero_titulo" class="form-input"></div>
+            <div class="form-group"><label>Descripci&oacute;n Hero</label><textarea id="contenido-hero_descripcion" rows="2" class="form-input"></textarea></div>
+            <div class="form-group"><label>WhatsApp N&uacute;mero</label><input type="text" id="contenido-whatsapp_numero" placeholder="595992120303" class="form-input"></div>
+            <div class="form-group"><label>T&iacute;tulo SEO</label><input type="text" id="contenido-site_titulo" class="form-input"></div>
+            <div class="form-group"><label>Descripci&oacute;n SEO</label><textarea id="contenido-site_descripcion" rows="2" class="form-input"></textarea></div>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+          </form>
+          <p id="contenido-msg" class="msg hidden"></p>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-analytics" class="tab-content">
+      <div class="card" style="max-width:480px">
+        <div class="card-header"><h3>Google Analytics</h3></div>
+        <div class="card-body">
+          <p class="help-text">Para activar GA4, crea una propiedad en <a href="https://analytics.google.com" target="_blank">analytics.google.com</a> y pega el Measurement ID.</p>
+          <div class="form-group"><label>Measurement ID</label><input type="text" id="analytics-id" placeholder="G-XXXXXXXXXX" class="form-input"></div>
+          <button id="btn-analytics-save" class="btn btn-primary">Guardar</button>
+          <p id="analytics-msg" class="msg hidden"></p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="modal-producto" class="modal hidden">
+  <div class="modal-overlay" id="modal-overlay-prod"></div>
+  <div class="modal-content">
+    <div class="modal-header"><h3 id="modal-title">Nuevo Producto</h3><button class="modal-close" id="modal-close-prod">&times;</button></div>
+    <form id="producto-form">
+      <input type="hidden" id="prod-id" value="">
+      <div class="form-group"><label>Nombre *</label><input type="text" id="prod-nombre" required class="form-input"></div>
+      <div class="form-grid"><div class="form-group"><label>Precio (Gs.) *</label><input type="number" id="prod-precio" required class="form-input"></div><div class="form-group"><label>Precio Anterior</label><input type="number" id="prod-precio-anterior" class="form-input"></div></div>
+      <div class="form-grid"><div class="form-group"><label>Categor&iacute;a</label><select id="prod-categoria" class="form-select"><option value="snacks">Snacks</option><option value="suplementos">Suplementos</option><option value="combos">Combos</option></select></div><div class="form-group"><label>Subcategor&iacute;a</label><select id="prod-subcategoria" class="form-select"><option value="chocolate">Chocolate</option><option value="mix">Mix</option><option value="almendras">Almendras</option><option value="frutas">Frutas</option><option value="nueces">Nueces</option><option value="barras">Barritas</option><option value="castanas">Casta&ntilde;as</option><option value="aceites">Aceites</option><option value="magnesios">Magnesios</option><option value="omega3">Omega 3</option><option value="gym">Gym</option><option value="colagenos">Col&aacute;genos</option><option value="naturales">Naturales</option><option value="minerales">Minerales</option><option value="combos">Combos</option></select></div></div>
+      <div class="form-group"><label>Descripci&oacute;n</label><textarea id="prod-descripcion" rows="3" class="form-input"></textarea></div>
+      <div class="form-grid"><div class="form-group"><label>Stock</label><input type="number" id="prod-stock" value="50" class="form-input"></div><div class="form-group" style="display:flex;align-items:flex-end;gap:16px;padding-bottom:8px"><label><input type="checkbox" id="prod-destacado"> Destacado</label><label><input type="checkbox" id="prod-activo" checked> Activo</label></div></div>
+      <div class="form-group"><label>Etiquetas</label><div style="display:flex;gap:12px"><label><input type="checkbox" class="prod-etiqueta" value="nuevo"> Nuevo</label><label><input type="checkbox" class="prod-etiqueta" value="popular"> Popular</label><label><input type="checkbox" class="prod-etiqueta" value="oferta"> Oferta</label></div></div>
+      <button type="submit" class="btn btn-primary">Guardar Producto</button>
+    </form>
+    <p id="prod-msg" class="msg hidden"></p>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="js/admin.js"></script>
+</body>
+</html>

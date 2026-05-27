@@ -1,0 +1,37 @@
+.woocommerce-yape-peru-upload-wrapper {
+	padding: 34px;
+	border: 2px dotted;
+	width: 150px;
+}
+
+.woocommerce-yape-peru-upload-wrapper span {
+	font-size: 20px;
+	text-align: center;
+	width: 100%;
+	margin-bottom: 15px;
+	display: inline-block;
+}
+
+.wp-core-ui .woocommerce-yape-peru-upload-wrapper button.button-secondary {
+	display: block;
+	margin-top: 20px;
+	margin: 0 auto;
+}
+
+.toplevel_page_woocommerce_yape_perú_license .wp-menu-image img {
+	width: 20px;
+	padding-top: 12px !important;
+}
+
+.yape-preview-area .preview_area {
+	text-align: center;
+    width: 220px;
+}
+
+.yape-preview-area .preview_area .upload_qr, .yape-preview-area .preview_icon_area .upload_icon {
+	display: block;
+    padding: 10px;
+    width: 200px;
+    border: 1px solid;
+    margin-bottom: 10px;
+}

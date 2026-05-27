@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preview — Template A (Actual)</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FAF7F2;
+      --surface: #FFFFFF;
+      --primary: #5B8C5A;
+      --accent: #D4956A;
+      --text: #2C2416;
+      --muted: #8B7E6A;
+      --border: #E8E0D5;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 40px 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .badge {
+      display: inline-block;
+      background: var(--primary);
+      color: #fff;
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.8rem;
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
+    .hero-desc {
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 500px;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 100px;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+    .section-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.6rem;
+      margin: 48px 0 20px;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 640px) { .cards { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(44, 36, 22, 0.12);
+      border-color: var(--primary);
+    }
+    .card-img {
+      height: 160px;
+      background: linear-gradient(135deg, #D4956A, #E8C4A0, #C08050);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      opacity: 0.9;
+    }
+    .card-img.green { background: linear-gradient(135deg, #5B8C5A, #7CAA7A, #3D6B3C); }
+    .card-img.choco { background: linear-gradient(135deg, #4A3020, #6B4530, #3D2218); }
+    .card-body { padding: 14px; }
+    .card-cat { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; font-weight: 600; }
+    .card-title { font-size: 0.9rem; font-weight: 600; margin: 4px 0; }
+    .card-price { font-weight: 700; color: var(--text); font-size: 1rem; }
+    .card-old { font-size: 0.75rem; color: var(--muted); text-decoration: line-through; margin-left: 6px; }
+
+    .palette {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .swatch {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 32px 0;
+    }
+    .label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 8px;
+      letter-spacing: 0.04em;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="label">Template A — Actual (Premium Health)</div>
+
+  <div class="badge">Envios a todo Paraguay</div>
+  <h1>Frescura natural<br>que se siente</h1>
+  <p class="hero-desc">Almendras con chocolate, frutos secos premium y snacks saludables. Directo a tu puerta.</p>
+  <a href="#" class="btn">Ver Tienda →</a>
+
+  <div class="divider"></div>
+
+  <h2 class="section-title">Productos Destacados</h2>
+  <div class="cards">
+    <div class="card">
+      <div class="card-img">🍫</div>
+      <div class="card-body">
+        <div class="card-cat">Chocolate</div>
+        <div class="card-title">Almendras con Chocolate Negro</div>
+        <span class="card-price">Gs.45.000</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-img green">🥜</div>
+      <div class="card-body">
+        <div class="card-cat">Mix</div>
+        <div class="card-title">Mix de Frutos Secos Premium</div>
+        <span class="card-price">Gs.55.000</span><span class="card-old">Gs.65.000</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-img choco">💊</div>
+      <div class="card-body">
+        <div class="card-cat">Suplementos</div>
+        <div class="card-title">Magnesio Quelato 120 Caps</div>
+        <span class="card-price">Gs.85.000</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <h2 class="section-title">Paleta de Colores</h2>
+  <div class="palette">
+    <div class="swatch" style="background:#5B8C5A" title="Primary: Sage Green"></div>
+    <div class="swatch" style="background:#D4956A" title="Accent: Amber"></div>
+    <div class="swatch" style="background:#FAF7F2" title="Background: Cream"></div>
+    <div class="swatch" style="background:#2C2416" title="Text: Dark Brown"></div>
+    <div class="swatch" style="background:#8B7E6A" title="Muted"></div>
+  </div>
+
+  <div style="margin-top:24px;font-size:0.85rem;color:var(--muted)">
+    <strong>Tipografia:</strong> DM Serif Display (titulos) + Plus Jakarta Sans (cuerpo)<br>
+    <strong>Estilo:</strong> Cards redondeadas, sombra suave, hover elevacion 3D<br>
+    <strong>Vibe:</strong> Premium, natural, elegante, bienestar
+  </div>
+
+</body>
+</html>

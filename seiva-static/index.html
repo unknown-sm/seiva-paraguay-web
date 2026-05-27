@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seiva Paraguay — Frescura Natural</title>
+  <meta name="description" content="Suplementos, snacks saludables y frutos secos premium. Envíos a todo Paraguay. Pedí por WhatsApp.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'DM Sans',sans-serif; background:#FAF3E8; color:#3D2817; -webkit-font-smoothing:antialiased; }
+    h1,h2,h3 { font-family:'Playfair Display',serif; }
+
+    .nav { position:fixed; top:0; left:0; right:0; z-index:50; background:rgba(27,67,50,0.95); backdrop-filter:blur(12px); }
+    .nav-inner { max-width:1200px; margin:0 auto; padding:0 24px; display:flex; align-items:center; justify-content:space-between; height:64px; }
+    .nav-logo { display:flex; align-items:center; gap:8px; text-decoration:none; color:#D4A843; font-weight:600; font-size:14px; letter-spacing:0.08em; }
+    .nav-links { display:flex; gap:32px; }
+    .nav-links a { color:rgba(255,255,255,0.85); text-decoration:none; font-size:14px; font-weight:500; transition:color 0.3s; }
+    .nav-links a:hover, .nav-links a.active { color:#fff; }
+    .nav-wa { display:flex; align-items:center; gap:6px; background:#25D366; color:#fff; padding:10px 22px; border-radius:100px; text-decoration:none; font-size:13px; font-weight:600; letter-spacing:0.04em; transition:transform 0.3s; }
+    .nav-wa:hover { transform:scale(1.05); }
+
+    .hero { background:#1B4332; min-height:90vh; display:flex; align-items:center; position:relative; overflow:hidden; padding-top:64px; }
+    .hero-glow { position:absolute; inset:0; background:radial-gradient(circle at 60% 50%, rgba(45,106,79,0.4) 0%, transparent 70%); pointer-events:none; }
+    .hero-inner { max-width:1200px; margin:0 auto; padding:60px 24px; display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:center; position:relative; z-index:1; }
+    .hero-badge { display:inline-block; background:rgba(212,168,67,0.15); border:1px solid rgba(212,168,67,0.3); color:#E9C46A; padding:6px 16px; border-radius:100px; font-size:11px; font-weight:600; letter-spacing:0.08em; margin-bottom:20px; }
+    .hero h1 { color:#fff; font-size:clamp(36px,5vw,64px); line-height:1.05; margin-bottom:16px; text-shadow:0 4px 24px rgba(0,0,0,0.2); }
+    .hero p { color:rgba(255,255,255,0.8); font-size:16px; line-height:1.6; max-width:440px; margin-bottom:28px; }
+    .hero-btns { display:flex; flex-wrap:wrap; gap:14px; }
+    .hero-cta { background:#D4A843; color:#1B4332; padding:14px 30px; border-radius:100px; text-decoration:none; font-weight:600; font-size:14px; letter-spacing:0.08em; box-shadow:0 4px 16px rgba(212,168,67,0.35); transition:transform 0.3s; }
+    .hero-cta:hover { transform:scale(1.05); }
+    .hero-wa { border:2px solid rgba(255,255,255,0.3); color:#fff; padding:14px 30px; border-radius:100px; text-decoration:none; font-weight:600; font-size:14px; letter-spacing:0.08em; display:inline-flex; align-items:center; gap:8px; transition:all 0.3s; }
+    .hero-wa:hover { background:rgba(255,255,255,0.1); }
+    .hero-img { display:flex; justify-content:center; align-items:center; }
+    .hero-img img { max-width:100%; height:auto; max-height:500px; object-fit:contain; filter:drop-shadow(0 20px 40px rgba(0,0,0,0.5)); }
+
+    .stats { background:#FAF3E8; position:relative; z-index:2; margin-top:-20px; border-radius:20px 20px 0 0; box-shadow:0 -4px 24px rgba(0,0,0,0.1); }
+    .stats-inner { max-width:1200px; margin:0 auto; padding:30px 24px; display:flex; justify-content:space-around; align-items:center; flex-wrap:wrap; gap:20px; }
+    .stat { display:flex; align-items:center; gap:12px; }
+    .stat-icon { color:#D4A843; }
+    .stat-val { font-weight:700; font-size:20px; color:#3D2817; }
+    .stat-label { font-size:14px; color:#5C4033; }
+
+    .section { padding:60px 24px; }
+    .section-inner { max-width:1200px; margin:0 auto; }
+    .section-header { text-align:center; margin-bottom:40px; }
+    .section-header h2 { font-size:clamp(28px,3.5vw,44px); color:#3D2817; margin-bottom:8px; }
+    .section-header p { color:#5C4033; font-size:16px; max-width:500px; margin:0 auto; line-height:1.5; }
+
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:20px; }
+    .card { background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 4px 20px rgba(27,67,50,0.08); transition:transform 0.3s,box-shadow 0.3s; text-decoration:none; color:inherit; display:block; }
+    .card:hover { transform:translateY(-4px); box-shadow:0 12px 32px rgba(27,67,50,0.14); }
+    .card-img { position:relative; aspect-ratio:1; overflow:hidden; background:#F5ECD7; }
+    .card-img img { width:100%; height:100%; object-fit:cover; display:block; position:absolute; top:0; left:0; }
+    .card-badge { position:absolute; top:12px; left:12px; background:rgba(27,67,50,0.85); color:#fff; font-size:10px; font-weight:600; padding:4px 10px; border-radius:100px; letter-spacing:0.06em; z-index:1; }
+    .card-oferta { position:absolute; top:12px; right:12px; background:#E63946; color:#fff; font-size:10px; font-weight:700; padding:4px 10px; border-radius:100px; z-index:1; }
+    .card-body { padding:16px; }
+    .card-title { font-family:'Playfair Display',serif; font-size:16px; font-weight:600; color:#3D2817; line-height:1.3; margin-bottom:8px; }
+    .card-prices { display:flex; align-items:baseline; gap:8px; margin-bottom:12px; }
+    .card-price { font-weight:700; font-size:18px; color:#2D6A4F; }
+    .card-price-old { font-size:13px; color:#999; text-decoration:line-through; }
+    .card-wa { display:flex; align-items:center; justify-content:center; gap:6px; width:100%; padding:10px; border-radius:100px; background:#25D366; color:#fff; font-size:13px; font-weight:600; text-decoration:none; letter-spacing:0.04em; transition:transform 0.3s; }
+    .card-wa:hover { transform:scale(1.03); }
+
+    .view-all { text-align:center; margin-top:32px; }
+    .view-all a { background:#1B4332; color:#fff; padding:12px 32px; border-radius:100px; text-decoration:none; font-weight:600; font-size:14px; letter-spacing:0.08em; transition:transform 0.3s; display:inline-block; }
+    .view-all a:hover { transform:scale(1.05); }
+
+    footer { background:#1B4332; color:rgba(255,255,255,0.7); padding:40px 24px; text-align:center; font-size:14px; }
+    footer a { color:#D4A843; text-decoration:none; }
+
+    @media (max-width:768px) {
+      .hero-inner { grid-template-columns:1fr; text-align:center; }
+      .hero p { max-width:100%; }
+      .hero-btns { justify-content:center; }
+      .hero-img { display:none; }
+      .nav-links { display:none; }
+      .grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; }
+      .card-title { font-size:14px; }
+      .card-price { font-size:16px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">🌿 SEIVA</a>
+    <div class="nav-links">
+      <a href="index.html" class="active">Inicio</a>
+      <a href="tienda.html">Tienda</a>
+    </div>
+    <a href="https://wa.me/595992120303" target="_blank" rel="noopener" class="nav-wa">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
+      WhatsApp
+    </a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div>
+      <span class="hero-badge">ENVÍOS A TODO PARAGUAY</span>
+      <h1>Frescura<br>Natural Que<br>Se Siente</h1>
+      <p>Suplementos, snacks saludables y frutos secos premium. Directo a tu puerta sin vueltas.</p>
+      <div class="hero-btns">
+        <a href="tienda.html" class="hero-cta">Ver Tienda</a>
+        <a href="https://wa.me/595992120303" target="_blank" rel="noopener" class="hero-wa">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
+          WhatsApp
+        </a>
+      </div>
+    </div>
+    <div class="hero-img">
+      <img src="/img/logo/seiva-logo-2.png" alt="Seiva Paraguay" onerror="this.style.display='none'">
+    </div>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="stats-inner">
+    <div class="stat"><span class="stat-icon">★</span><div><div class="stat-val">+50</div><div class="stat-label">Productos</div></div></div>
+    <div class="stat"><span class="stat-icon">🚚</span><div><div class="stat-val">Envíos</div><div class="stat-label">Todo Paraguay</div></div></div>
+    <div class="stat"><span class="stat-icon">🛡️</span><div><div class="stat-val">100%</div><div class="stat-label">Natural</div></div></div>
+    <a href="tienda.html" style="background:#1B4332;color:#fff;padding:12px 28px;border-radius:100px;text-decoration:none;font-weight:600;font-size:14px;letter-spacing:0.08em;">Comprar Ahora</a>
+  </div>
+</div>
+
+<section class="section">
+  <div class="section-inner">
+    <div class="section-header">
+      <h2>Productos Destacados</h2>
+      <p>Calidad premium. Pedidos por WhatsApp. Envíos a todo Paraguay.</p>
+    </div>
+    <div class="grid" id="productos-grid"></div>
+    <div class="view-all"><a href="tienda.html">Ver Todos los Productos</a></div>
+  </div>
+</section>
+
+<footer>
+  © 2026 Seiva Paraguay — WhatsApp: <a href="https://wa.me/595992120303">0992 120303</a>
+</footer>
+
+<script>
+function formatPrice(n) { return 'Gs.' + n.toLocaleString('es-PY'); }
+
+fetch('/api/productos')
+  .then(function(r) { return r.json(); })
+  .then(function(products) {
+    var grid = document.getElementById('productos-grid');
+    if (!grid) return;
+
+    var destacados = products.filter(function(p) { return p.destacado; });
+    var toShow = destacados.length >= 6 ? destacados.slice(0, 6) : products.slice(0, 6);
+
+    for (var i = 0; i < toShow.length; i++) {
+      var p = toShow[i];
+      var card = document.createElement('a');
+      card.className = 'card';
+      card.href = 'producto.html?id=' + p.id;
+
+      var descuentoHTML = '';
+      if (p.precio_anterior) {
+        var pct = Math.round((1 - p.precio / p.precio_anterior) * 100);
+        descuentoHTML = '<span class="card-oferta">-' + pct + '%</span>';
+      }
+
+      card.innerHTML =
+        '<div class="card-img">' +
+          '<img src="' + (p.imagen || '') + '" alt="' + (p.nombre || '') + '" loading="lazy">' +
+          '<span class="card-badge">' + (p.categoria || '').toUpperCase() + '</span>' +
+          descuentoHTML +
+        '</div>' +
+        '<div class="card-body">' +
+          '<h3 class="card-title">' + (p.nombre || '') + '</h3>' +
+          '<div class="card-prices">' +
+            '<span class="card-price">' + formatPrice(p.precio) + '</span>' +
+            (p.precio_anterior ? '<span class="card-price-old">' + formatPrice(p.precio_anterior) + '</span>' : '') +
+          '</div>' +
+          '<a href="https://wa.me/595992120303?text=' + encodeURIComponent('Hola Seiva! Me interesa: ' + p.nombre + ' (' + formatPrice(p.precio) + ')') + '" target="_blank" rel="noopener" class="card-wa" onclick="event.stopPropagation()">' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>' +
+            'Pedir' +
+          '</a>' +
+        '</div>';
+
+      grid.appendChild(card);
+    }
+  })
+  .catch(function() {
+    document.getElementById('productos-grid').innerHTML = '<p style="text-align:center;color:#5C4033;padding:40px;">Cargando productos...</p>';
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seiva — Tienda</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'DM Sans',sans-serif; background:#FAF3E8; color:#3D2817; -webkit-font-smoothing:antialiased; }
+    h1,h2,h3 { font-family:'Playfair Display',serif; }
+
+    .nav { position:fixed; top:0; left:0; right:0; z-index:50; background:rgba(27,67,50,0.95); backdrop-filter:blur(12px); }
+    .nav-inner { max-width:1200px; margin:0 auto; padding:0 24px; display:flex; align-items:center; justify-content:space-between; height:64px; }
+    .nav-logo { display:flex; align-items:center; gap:8px; text-decoration:none; color:#D4A843; font-weight:600; font-size:14px; letter-spacing:0.08em; }
+    .nav-links { display:flex; gap:32px; }
+    .nav-links a { color:rgba(255,255,255,0.85); text-decoration:none; font-size:14px; font-weight:500; transition:color 0.3s; }
+    .nav-links a:hover, .nav-links a.active { color:#fff; }
+    .nav-wa { display:flex; align-items:center; gap:6px; background:#25D366; color:#fff; padding:10px 22px; border-radius:100px; text-decoration:none; font-size:13px; font-weight:600; letter-spacing:0.04em; transition:transform 0.3s; }
+    .nav-wa:hover { transform:scale(1.05); }
+
+    .main { margin-top:64px; min-height:100vh; }
+    .container { max-width:1200px; margin:0 auto; padding:40px 24px; }
+
+    .hero-title { font-size:clamp(28px,4vw,48px); color:#3D2817; margin-bottom:12px; text-align:center; }
+    .hero-sub { color:#5C4033; font-size:16px; text-align:center; margin-bottom:8px; }
+
+    .search-wrap { position:relative; max-width:480px; margin:0 auto 24px; }
+    .search-wrap input { width:100%; padding:14px 48px; border-radius:100px; border:none; font-size:14px; font-family:inherit; background:#fff; box-shadow:0 2px 12px rgba(0,0,0,0.06); outline:none; }
+    .search-wrap svg { position:absolute; left:18px; top:50%; transform:translateY(-50%); color:#999; }
+
+    .filters { display:flex; justify-content:center; flex-wrap:wrap; gap:8px; margin-bottom:32px; }
+    .filters button { padding:10px 24px; border-radius:100px; border:1px solid rgba(61,40,23,0.15); font-family:inherit; font-size:13px; font-weight:600; letter-spacing:0.04em; cursor:pointer; transition:all 0.3s; background:#fff; color:#3D2817; }
+    .filters button.active { background:#1B4332; color:#fff; border-color:#1B4332; }
+
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:20px; }
+    .card { background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 4px 20px rgba(27,67,50,0.08); transition:transform 0.3s,box-shadow 0.3s; text-decoration:none; color:inherit; display:block; }
+    .card:hover { transform:translateY(-4px); box-shadow:0 12px 32px rgba(27,67,50,0.14); }
+    .card-img { position:relative; aspect-ratio:1; overflow:hidden; background:#F5ECD7; }
+    .card-img img { width:100%; height:100%; object-fit:cover; display:block; position:absolute; top:0; left:0; }
+    .card-badge { position:absolute; top:12px; left:12px; background:rgba(27,67,50,0.85); color:#fff; font-size:10px; font-weight:600; padding:4px 10px; border-radius:100px; letter-spacing:0.06em; z-index:1; }
+    .card-oferta { position:absolute; top:12px; right:12px; background:#E63946; color:#fff; font-size:10px; font-weight:700; padding:4px 10px; border-radius:100px; z-index:1; }
+    .card-body { padding:16px; }
+    .card-title { font-family:'Playfair Display',serif; font-size:16px; font-weight:600; color:#3D2817; line-height:1.3; margin-bottom:8px; }
+    .card-prices { display:flex; align-items:baseline; gap:8px; margin-bottom:12px; }
+    .card-price { font-weight:700; font-size:18px; color:#2D6A4F; }
+    .card-price-old { font-size:13px; color:#999; text-decoration:line-through; }
+    .card-wa { display:flex; align-items:center; justify-content:center; gap:6px; width:100%; padding:10px; border-radius:100px; background:#25D366; color:#fff; font-size:13px; font-weight:600; text-decoration:none; letter-spacing:0.04em; transition:transform 0.3s; }
+    .card-wa:hover { transform:scale(1.03); }
+
+    .empty { text-align:center; padding:60px 20px; color:#5C4033; font-size:16px; }
+
+    @media (max-width:768px) {
+      .nav-links { display:none; }
+      .grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; }
+      .card-title { font-size:14px; }
+      .card-price { font-size:16px; }
+    }
+    footer { background:#1B4332; color:rgba(255,255,255,0.7); padding:40px 24px; text-align:center; margin-top:60px; font-size:14px; }
+    footer a { color:#D4A843; text-decoration:none; }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">🌿 SEIVA</a>
+    <div class="nav-links">
+      <a href="index.html">Inicio</a>
+      <a href="tienda.html" class="active">Tienda</a>
+    </div>
+    <a href="https://wa.me/595992120303" target="_blank" rel="noopener" class="nav-wa">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
+      WhatsApp
+    </a>
+  </div>
+</nav>
+
+<main class="main">
+  <div class="container">
+    <h1 class="hero-title">Nuestra Tienda</h1>
+    <p class="hero-sub" id="count-info">Cargando productos...</p>
+
+    <div class="search-wrap">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="search" placeholder="Buscar productos...">
+    </div>
+
+    <div class="filters">
+      <button class="active" data-cat="all">Todos</button>
+      <button data-cat="suplementos">Suplementos</button>
+      <button data-cat="snacks">Snacks</button>
+      <button data-cat="combos">Combos</button>
+    </div>
+
+    <div class="grid" id="grid"></div>
+  </div>
+</main>
+
+<footer>
+  © 2026 Seiva Paraguay — WhatsApp: <a href="https://wa.me/595992120303">0992 120303</a>
+</footer>
+
+<script>
+var allProducts = [];
+var activeFilter = 'all';
+
+function formatPrice(n) { return 'Gs.' + n.toLocaleString('es-PY'); }
+
+function renderProducts(products) {
+  var grid = document.getElementById('grid');
+  if (!products || products.length === 0) {
+    grid.innerHTML = '<div class="empty">No se encontraron productos.</div>';
+    return;
+  }
+  grid.innerHTML = '';
+  for (var i = 0; i < products.length; i++) {
+    var p = products[i];
+    var card = document.createElement('a');
+    card.className = 'card';
+    card.href = 'producto.html?id=' + p.id;
+
+    var descuentoHTML = '';
+    if (p.precio_anterior) {
+      var pct = Math.round((1 - p.precio / p.precio_anterior) * 100);
+      descuentoHTML = '<span class="card-oferta">-' + pct + '%</span>';
+    }
+
+    var precioHTML = '<span class="card-price">' + formatPrice(p.precio) + '</span>';
+    if (p.precio_anterior) {
+      precioHTML += '<span class="card-price-old">' + formatPrice(p.precio_anterior) + '</span>';
+    }
+
+    card.innerHTML =
+      '<div class="card-img">' +
+        '<img src="' + (p.imagen || '') + '" alt="' + (p.nombre || '') + '" loading="lazy">' +
+        '<span class="card-badge">' + (p.categoria || '').toUpperCase() + '</span>' +
+        descuentoHTML +
+      '</div>' +
+      '<div class="card-body">' +
+        '<h3 class="card-title">' + (p.nombre || '') + '</h3>' +
+        '<div class="card-prices">' + precioHTML + '</div>' +
+        '<a href="https://wa.me/595992120303?text=' + encodeURIComponent('Hola Seiva! Me interesa: ' + p.nombre + ' (' + formatPrice(p.precio) + ')') + '" target="_blank" rel="noopener" class="card-wa" onclick="event.stopPropagation()">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>' +
+          'Pedir' +
+        '</a>' +
+      '</div>';
+
+    grid.appendChild(card);
+  }
+}
+
+function filterProducts() {
+  var search = document.getElementById('search').value.toLowerCase();
+  var result = allProducts;
+
+  if (activeFilter !== 'all') {
+    result = result.filter(function(p) { return p.categoria === activeFilter; });
+  }
+  if (search.trim()) {
+    result = result.filter(function(p) {
+      return (p.nombre || '').toLowerCase().includes(search) ||
+             (p.descripcion || '').toLowerCase().includes(search);
+    });
+  }
+  renderProducts(result);
+}
+
+// Load products from API
+fetch('/api/productos')
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    allProducts = data;
+    document.getElementById('count-info').textContent = data.length + ' productos. Pedi por WhatsApp.';
+    renderProducts(data);
+  })
+  .catch(function() {
+    document.getElementById('count-info').textContent = 'Error al cargar productos.';
+  });
+
+// Search
+document.getElementById('search').addEventListener('input', filterProducts);
+
+// Filters
+var filterBtns = document.querySelectorAll('.filters button');
+for (var i = 0; i < filterBtns.length; i++) {
+  filterBtns[i].addEventListener('click', function() {
+    for (var j = 0; j < filterBtns.length; j++) filterBtns[j].classList.remove('active');
+    this.classList.add('active');
+    activeFilter = this.dataset.cat;
+    filterProducts();
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,363 @@
+const express = require("express");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const cors = require("cors");
+const path = require("path");
+const fs = require("fs");
+const { DatabaseSync } = require("node:sqlite");
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+const JWT_SECRET = process.env.JWT_SECRET || "SeivaAdmin2026!";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "SeivaAdmin2026!";
+
+app.use(cors());
+app.use(express.json({ limit: "5mb" }));
+app.use("/img/productos", express.static(path.join(__dirname, "public", "productos")));
+
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, "data", "database.sqlite");
+fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+const db = new DatabaseSync(DB_PATH);
+
+db.exec("PRAGMA journal_mode = WAL");
+db.exec("PRAGMA foreign_keys = ON");
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS productos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    precio INTEGER NOT NULL DEFAULT 0,
+    precio_anterior INTEGER,
+    categoria TEXT NOT NULL DEFAULT 'snacks',
+    subcategoria TEXT NOT NULL DEFAULT '',
+    descripcion TEXT DEFAULT '',
+    etiquetas TEXT DEFAULT '[]',
+    destacado INTEGER DEFAULT 0,
+    imagen TEXT DEFAULT '',
+    stock INTEGER DEFAULT 0,
+    activo INTEGER DEFAULT 1,
+    creado TEXT DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS ventas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    fecha TEXT NOT NULL DEFAULT (datetime('now')),
+    cliente TEXT DEFAULT '',
+    productos TEXT NOT NULL DEFAULT '[]',
+    total INTEGER NOT NULL DEFAULT 0,
+    metodo_pago TEXT DEFAULT 'efectivo',
+    whatsapp TEXT DEFAULT '',
+    creado TEXT DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS contenido (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL DEFAULT ''
+  );
+
+  CREATE TABLE IF NOT EXISTS pedidos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    fecha TEXT NOT NULL DEFAULT (datetime('now')),
+    cliente TEXT NOT NULL DEFAULT '',
+    whatsapp TEXT NOT NULL DEFAULT '',
+    direccion TEXT DEFAULT '',
+    productos TEXT NOT NULL DEFAULT '[]',
+    total INTEGER NOT NULL DEFAULT 0,
+    metodo_pago TEXT DEFAULT 'whatsapp',
+    estado TEXT DEFAULT 'pendiente',
+    notas TEXT DEFAULT '',
+    creado TEXT DEFAULT (datetime('now'))
+  );
+`);
+
+const contenidoDefault = {
+  hero_titulo: "Frescura natural que se siente",
+  hero_descripcion: "Almendras con chocolate, frutos secos premium, snacks saludables y suplementos. Directo a tu puerta. Sin vueltas.",
+  whatsapp_numero: "595992120303",
+  site_titulo: "Seiva Paraguay — Snacks Saludables y Suplementos Naturales",
+  site_descripcion: "Almendras con chocolate, frutos secos, snacks saludables y suplementos naturales. Envios a todo Paraguay. Pedi por WhatsApp."
+};
+
+const insertContenido = db.prepare("INSERT OR IGNORE INTO contenido (key, value) VALUES (?, ?)");
+for (const [key, value] of Object.entries(contenidoDefault)) {
+  insertContenido.run(key, value);
+}
+
+function seedProductos() {
+  const row = db.prepare("SELECT COUNT(*) as c FROM productos").get();
+  if (row.c > 0) return;
+
+  const seed = [
+    ["Almendras con Chocolate Negro", 45000, null, "snacks", "chocolate", "Almendras seleccionadas cubiertas con chocolate negro 70% cacao.", '["nuevo","popular"]', 1, "almendras-chocolate.jpg"],
+    ["Mix de Frutos Secos Premium", 55000, 65000, "snacks", "mix", "Combinacion de almendras, nueces, castanas, arandanos y pasas.", '["oferta"]', 1, "mix-frutos-secos.jpg"],
+    ["Almendras Naturales 500g", 58000, null, "snacks", "almendras", "Almendras crudas sin sal, empacadas al vacio.", '[]', 1, "almendras-naturales.jpg"],
+    ["Datiles Medjool 400g", 42000, null, "snacks", "frutas", "Datiles Medjool premium, naturalmente dulces.", '["nuevo"]', 0, "datiles.jpg"],
+    ["Nueces Pecanas 300g", 62000, null, "snacks", "nueces", "Nueces pecanas frescas, ricas en antioxidantes.", '[]', 0, "nueces-pecanas.jpg"],
+    ["Barritas de Granola Artesanal", 12000, null, "snacks", "barras", "Barritas de granola caseras. Pack x3.", '["popular"]', 1, "granola-bars.jpg"],
+    ["Aceite de Oregano 120 Capsulas", 75000, 90000, "suplementos", "aceites", "Aceite de oregano 500mg. Refuerzo inmune.", '["oferta"]', 0, "aceite-oregano.jpg"],
+    ["Magnesio Quelato 120 Capsulas", 85000, null, "suplementos", "magnesios", "Magnesio quelato de alta absorcion.", '["popular"]', 1, "magnesio-quelato.jpg"],
+    ["Omega 3 Puro 1000mg", 95000, 120000, "suplementos", "omega3", "Omega 3 puro con EPA y DHA. 120 capsulas.", '["oferta"]', 1, "omega3.jpg"],
+    ["Creatina Monohidratada 300g", 78000, null, "suplementos", "gym", "Creatina monohidratada micronizada. 300g.", '[]', 0, "creatina.jpg"],
+    ["Colageno Hidrolizado 500g", 120000, 145000, "suplementos", "colagenos", "Colageno tipo I y III para piel y articulaciones.", '["oferta"]', 0, "colageno.jpg"],
+    ["Curcuma con Pimienta Negra", 65000, null, "suplementos", "naturales", "Curcuma organica con pimienta negra.", '[]', 0, "curcuma.jpg"],
+    ["Combo Omega 3 + Magnesio Citrato", 150000, 205000, "combos", "combos", "Omega 3 Puro + Magnesio Citrato. Combo bienestar.", '["oferta","popular"]', 1, "combo-omega-magnesio.jpg"]
+  ];
+
+  const insert = db.prepare("INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, etiquetas, destacado, imagen, stock, activo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 50, 1)");
+  for (const p of seed) insert.run(...p);
+}
+
+seedProductos();
+
+// ---------- AUTH ----------
+const ADMIN_HASH = bcrypt.hashSync(ADMIN_PASSWORD, 10);
+
+app.post("/api/auth/login", (req, res) => {
+  const { password } = req.body;
+  if (!password || !bcrypt.compareSync(password, ADMIN_HASH)) {
+    return res.status(401).json({ error: "Contrasena incorrecta" });
+  }
+  const token = jwt.sign({ role: "admin" }, JWT_SECRET, { expiresIn: "24h" });
+  res.json({ token });
+});
+
+function auth(req, res, next) {
+  const header = req.headers.authorization;
+  if (!header) return res.status(401).json({ error: "Token requerido" });
+  try {
+    const decoded = jwt.verify(header.replace("Bearer ", ""), JWT_SECRET);
+    if (decoded.role !== "admin") throw new Error();
+    next();
+  } catch {
+    res.status(401).json({ error: "Token invalido" });
+  }
+}
+
+function parseProducto(row) {
+  return {
+    ...row,
+    etiquetas: JSON.parse(row.etiquetas || "[]"),
+    destacado: !!row.destacado,
+    activo: !!row.activo,
+    precio_anterior: row.precio_anterior || null
+  };
+}
+
+// ---------- PRODUCTOS ----------
+app.get("/api/productos", (req, res) => {
+  const rows = db.prepare("SELECT * FROM productos WHERE activo = 1 ORDER BY destacado DESC, id DESC").all();
+  res.json(rows.map(parseProducto));
+});
+
+app.get("/api/productos/all", auth, (req, res) => {
+  const rows = db.prepare("SELECT * FROM productos ORDER BY id DESC").all();
+  res.json(rows.map(parseProducto));
+});
+
+app.post("/api/productos", auth, (req, res) => {
+  const { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, etiquetas, destacado, imagen, stock, activo } = req.body;
+  if (!nombre || !precio) return res.status(400).json({ error: "Nombre y precio requeridos" });
+  const result = db.prepare("INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, etiquetas, destacado, imagen, stock, activo) VALUES (?,?,?,?,?,?,?,?,?,?,?)").run(
+    nombre, precio, precio_anterior || null, categoria || "snacks", subcategoria || "", descripcion || "", JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0
+  );
+  res.json({ id: result.lastInsertRowid });
+});
+
+app.put("/api/productos/:id", auth, (req, res) => {
+  const { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, etiquetas, destacado, imagen, stock, activo } = req.body;
+  db.prepare("UPDATE productos SET nombre=?, precio=?, precio_anterior=?, categoria=?, subcategoria=?, descripcion=?, etiquetas=?, destacado=?, imagen=?, stock=?, activo=? WHERE id=?").run(
+    nombre, precio, precio_anterior || null, categoria, subcategoria, descripcion || "", JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, req.params.id
+  );
+  res.json({ ok: true });
+});
+
+app.patch("/api/productos/:id/toggle", auth, (req, res) => {
+  const row = db.prepare("SELECT activo FROM productos WHERE id = ?").get(req.params.id);
+  if (!row) return res.status(404).json({ error: "No encontrado" });
+  const nuevo = row.activo ? 0 : 1;
+  db.prepare("UPDATE productos SET activo = ? WHERE id = ?").run(nuevo, req.params.id);
+  res.json({ activo: !!nuevo });
+});
+
+// Batch stock update
+app.patch("/api/productos/stock-batch", auth, (req, res) => {
+  const { updates } = req.body;
+  if (!Array.isArray(updates)) return res.status(400).json({ error: "updates debe ser un array" });
+  
+  const updateStmt = db.prepare("UPDATE productos SET stock = ? WHERE id = ?");
+  const transaction = db.transaction((items) => {
+    for (const item of items) {
+      updateStmt.run(item.stock, item.id);
+    }
+  });
+  transaction(updates);
+  res.json({ ok: true, updated: updates.length });
+});
+
+app.delete("/api/productos/:id", auth, (req, res) => {
+  db.prepare("DELETE FROM productos WHERE id = ?").run(req.params.id);
+  res.json({ ok: true });
+});
+
+// ---------- VENTAS ----------
+app.get("/api/ventas", auth, (req, res) => {
+  const limit = parseInt(req.query.limit) || 50;
+  const rows = db.prepare("SELECT * FROM ventas ORDER BY fecha DESC LIMIT ?").all(limit);
+  res.json(rows.map(r => ({ ...r, productos: JSON.parse(r.productos || "[]") })));
+});
+
+app.post("/api/ventas", auth, (req, res) => {
+  const { cliente, productos, total, metodo_pago, whatsapp, fecha } = req.body;
+  if (!productos || !productos.length) return res.status(400).json({ error: "Productos requeridos" });
+  const result = db.prepare("INSERT INTO ventas (fecha, cliente, productos, total, metodo_pago, whatsapp) VALUES (?,?,?,?,?,?)").run(
+    fecha || new Date().toISOString(), cliente || "", JSON.stringify(productos), total || 0, metodo_pago || "efectivo", whatsapp || ""
+  );
+  res.json({ id: result.lastInsertRowid });
+});
+
+// ---------- STATS ----------
+app.get("/api/stats", auth, (req, res) => {
+  const hoy = new Date().toISOString().slice(0, 10);
+  const semanaInicio = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
+  const mesInicio = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
+
+  const ventasHoy = db.prepare("SELECT COALESCE(SUM(total), 0) as total, COUNT(*) as cantidad FROM ventas WHERE fecha >= ?").get(hoy);
+  const ventasSemana = db.prepare("SELECT COALESCE(SUM(total), 0) as total, COUNT(*) as cantidad FROM ventas WHERE fecha >= ?").get(semanaInicio);
+  const ventasMes = db.prepare("SELECT COALESCE(SUM(total), 0) as total, COUNT(*) as cantidad FROM ventas WHERE fecha >= ?").get(mesInicio);
+  const productosCount = db.prepare("SELECT COUNT(*) as c FROM productos WHERE activo = 1").get();
+  const ultimasVentas = db.prepare("SELECT * FROM ventas ORDER BY fecha DESC LIMIT 10").all();
+
+  res.json({
+    hoy: ventasHoy,
+    semana: ventasSemana,
+    mes: ventasMes,
+    productos_activos: productosCount.c,
+    ultimas_ventas: ultimasVentas.map(r => ({ ...r, productos: JSON.parse(r.productos || "[]") }))
+  });
+});
+
+app.get("/api/stats/top-productos", auth, (req, res) => {
+  const mesInicio = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
+  const ventas = db.prepare("SELECT productos FROM ventas WHERE fecha >= ?").all(mesInicio);
+  const conteo = {};
+  for (const v of ventas) {
+    const prods = JSON.parse(v.productos || "[]");
+    for (const p of prods) {
+      const nombre = p.nombre || "";
+      if (nombre) conteo[nombre] = (conteo[nombre] || 0) + (p.cantidad || 1);
+    }
+  }
+  const sorted = Object.entries(conteo).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([nombre, cantidad]) => ({ nombre, cantidad }));
+  res.json(sorted);
+});
+
+// ---------- CONTENIDO ----------
+app.get("/api/contenido", auth, (req, res) => {
+  const rows = db.prepare("SELECT * FROM contenido").all();
+  const obj = {};
+  for (const r of rows) obj[r.key] = r.value;
+  res.json(obj);
+});
+
+app.put("/api/contenido", auth, (req, res) => {
+  const update = db.prepare("INSERT OR REPLACE INTO contenido (key, value) VALUES (?, ?)");
+  for (const [key, value] of Object.entries(req.body)) {
+    update.run(key, String(value));
+  }
+  res.json({ ok: true });
+});
+
+// ---------- PEDIDOS (publico: crear) ----------
+app.post("/api/pedidos", (req, res) => {
+  const { cliente, whatsapp, direccion, productos, total, metodo_pago, notas } = req.body;
+  if (!cliente || !whatsapp || !productos || !productos.length) {
+    return res.status(400).json({ error: "Cliente, whatsapp y productos requeridos" });
+  }
+  const result = db.prepare(
+    "INSERT INTO pedidos (cliente, whatsapp, direccion, productos, total, metodo_pago, notas) VALUES (?, ?, ?, ?, ?, ?, ?)"
+  ).run(
+    cliente, whatsapp, direccion || "", JSON.stringify(productos), total || 0, metodo_pago || "whatsapp", notas || ""
+  );
+  res.json({ id: result.lastInsertRowid, estado: "pendiente" });
+});
+
+// ---------- PEDIDOS (auth: gestionar) ----------
+app.get("/api/pedidos", auth, (req, res) => {
+  const estado = req.query.estado;
+  let sql = "SELECT * FROM pedidos";
+  const params = [];
+  if (estado) { sql += " WHERE estado = ?"; params.push(estado); }
+  sql += " ORDER BY fecha DESC";
+  const rows = db.prepare(sql).all(...params);
+  res.json(rows.map(r => ({ ...r, productos: JSON.parse(r.productos || "[]") })));
+});
+
+app.get("/api/pedidos/:id", auth, (req, res) => {
+  const row = db.prepare("SELECT * FROM pedidos WHERE id = ?").get(req.params.id);
+  if (!row) return res.status(404).json({ error: "No encontrado" });
+  res.json({ ...row, productos: JSON.parse(row.productos || "[]") });
+});
+
+app.patch("/api/pedidos/:id/estado", auth, (req, res) => {
+  const { estado } = req.body;
+  const estadosValidos = ["pendiente", "confirmado", "enviado", "entregado", "cancelado"];
+  if (!estadosValidos.includes(estado)) return res.status(400).json({ error: "Estado invalido" });
+
+  const pedido = db.prepare("SELECT * FROM pedidos WHERE id = ?").get(req.params.id);
+  if (!pedido) return res.status(404).json({ error: "No encontrado" });
+
+  if (estado === "confirmado" && pedido.estado !== "confirmado") {
+    const prods = JSON.parse(pedido.productos || "[]");
+    for (const p of prods) {
+      if (p.id && p.cantidad) {
+        db.prepare("UPDATE productos SET stock = stock - ? WHERE id = ? AND stock >= ?").run(p.cantidad, p.id, p.cantidad);
+      }
+    }
+  }
+  if (estado === "cancelado" && pedido.estado === "confirmado") {
+    const prods = JSON.parse(pedido.productos || "[]");
+    for (const p of prods) {
+      if (p.id && p.cantidad) {
+        db.prepare("UPDATE productos SET stock = stock + ? WHERE id = ?").run(p.cantidad, p.id);
+      }
+    }
+  }
+
+  db.prepare("UPDATE pedidos SET estado = ? WHERE id = ?").run(estado, req.params.id);
+  res.json({ ok: true, estado });
+});
+
+app.delete("/api/pedidos/:id", auth, (req, res) => {
+  db.prepare("DELETE FROM pedidos WHERE id = ?").run(req.params.id);
+  res.json({ ok: true });
+});
+
+// ---------- STOCK ALERTAS ----------
+app.get("/api/stock-alertas", auth, (req, res) => {
+  const limite = parseInt(req.query.limite) || 10;
+  const rows = db.prepare("SELECT id, nombre, stock FROM productos WHERE stock <= ? AND activo = 1 ORDER BY stock ASC").all(limite);
+  res.json(rows);
+});
+
+// Force UTF-8 charset for HTML files
+app.use(function(req, res, next) {
+  var orig = res.setHeader.bind(res);
+  res.setHeader = function(name, value) {
+    if (name.toLowerCase() === 'content-type' && typeof value === 'string' && value.indexOf('text/html') !== -1 && value.indexOf('charset') === -1) {
+      value += '; charset=utf-8';
+    }
+    return orig(name, value);
+  };
+  next();
+});
+
+// ---------- SERVE STATIC ----------
+const adminPath = path.join(__dirname, "..", "admin");
+app.use("/admin", express.static(adminPath));
+const sitePath = path.join(__dirname, "..");
+app.use(express.static(sitePath));
+
+app.listen(PORT, () => {
+  console.log("Seiva backend running on http://localhost:" + PORT);
+  console.log("Admin: http://localhost:" + PORT + "/admin");
+});

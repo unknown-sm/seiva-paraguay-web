@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contacto — Seiva Paraguay</title>
+  <meta name="description" content="Contactanos por WhatsApp, email o visitanos. Envios a todo Paraguay.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="logo">
+      <span class="logo-icon">🌿</span>
+      Seiva
+    </a>
+    <nav class="top-nav">
+      <a href="index.html">Inicio</a>
+      <a href="tienda.html">Tienda</a>
+      <a href="contacto.html" class="active">Contacto</a>
+      <a href="faq.html">FAQ</a>
+    </nav>
+    <button class="theme-toggle-btn" id="theme-toggle" aria-label="Cambiar paleta de colores">🎨</button>
+    <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobile-menu">
+  <button class="mobile-menu-close" id="mobile-menu-close">&times;</button>
+  <a href="index.html">Inicio</a>
+  <a href="tienda.html">Tienda</a>
+  <a href="contacto.html">Contacto</a>
+  <a href="faq.html">FAQ</a>
+  <a href="politicas.html">Políticas</a>
+</div>
+
+<main class="section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Contacto</h2>
+    </div>
+    <p class="mb-4" style="color:var(--muted)">Elegí el canal que prefieras. Respondemos rápido.</p>
+
+    <div class="contact-grid">
+      <a href="https://wa.me/595992120303" target="_blank" rel="noopener" class="contact-card" data-reveal>
+        <div class="contact-card-icon">💬</div>
+        <div>
+          <h4>WhatsApp Principal</h4>
+          <p>0992 120303</p>
+          <p style="font-size:0.8rem;margin-top:4px">Click para abrir chat</p>
+        </div>
+      </a>
+
+      <a href="https://wa.me/595992309367" target="_blank" rel="noopener" class="contact-card" data-reveal>
+        <div class="contact-card-icon">💬</div>
+        <div>
+          <h4>WhatsApp Secundario</h4>
+          <p>0992 309367</p>
+          <p style="font-size:0.8rem;margin-top:4px">Click para abrir chat</p>
+        </div>
+      </a>
+
+      <a href="mailto:contacto@seiva.com.py" class="contact-card" data-reveal>
+        <div class="contact-card-icon">📧</div>
+        <div>
+          <h4>Email</h4>
+          <p>contacto@seiva.com.py</p>
+          <p style="font-size:0.8rem;margin-top:4px">Respondemos en 24h</p>
+        </div>
+      </a>
+
+      <div class="contact-card" data-reveal>
+        <div class="contact-card-icon">📍</div>
+        <div>
+          <h4>Dirección</h4>
+          <p>Capiatá, Departamento Central, Paraguay</p>
+        </div>
+      </div>
+
+      <div class="contact-card" data-reveal>
+        <div class="contact-card-icon">🕐</div>
+        <div>
+          <h4>Horarios</h4>
+          <p>Lunes a Viernes: 8:00 - 18:00</p>
+          <p>Sábados: 8:00 - 13:00</p>
+        </div>
+      </div>
+
+      <div class="contact-card" data-reveal>
+        <div class="contact-card-icon">🚚</div>
+        <div>
+          <h4>Envíos</h4>
+          <p>Asunción y alrededores: entrega el mismo día</p>
+          <p>Interior: por encomienda</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>Tienda</h4>
+        <a href="tienda.html">Todos los productos</a>
+        <a href="tienda.html?cat=snacks">Snacks</a>
+        <a href="tienda.html?cat=suplementos">Suplementos</a>
+        <a href="tienda.html?cat=combos">Combos</a>
+      </div>
+      <div class="footer-col">
+        <h4>Ayuda</h4>
+        <a href="faq.html">Preguntas frecuentes</a>
+        <a href="politicas.html">Políticas</a>
+        <a href="contacto.html">Contacto</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contacto</h4>
+        <a href="https://wa.me/595992120303" target="_blank" rel="noopener">WhatsApp: 0992 120303</a>
+        <a href="mailto:contacto@seiva.com.py">contacto@seiva.com.py</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Seiva Paraguay. Envíos a todo Paraguay.</p>
+    </div>
+  </div>
+</footer>
+
+<div class="theme-overlay" id="theme-overlay"></div>
+<div class="theme-panel" id="theme-panel">
+  <div class="theme-panel-header"><h3>Paleta de Colores</h3><button class="theme-panel-close" id="theme-close">&times;</button></div>
+  <div class="theme-presets">
+    <button class="theme-preset-btn active" data-theme-btn="natural"><div class="theme-preset-swatch"><span style="background:#5B8C5A"></span><span style="background:#D4956A"></span><span style="background:#FAF7F2"></span></div>Natural Fresco</button>
+    <button class="theme-preset-btn" data-theme-btn="oscuro"><div class="theme-preset-swatch"><span style="background:#7CB87B"></span><span style="background:#E8B88A"></span><span style="background:#1A1814"></span></div>Noche Oscura</button>
+    <button class="theme-preset-btn" data-theme-btn="tropical"><div class="theme-preset-swatch"><span style="background:#E8784A"></span><span style="background:#3E9B6D"></span><span style="background:#FFFDF5"></span></div>Tropical Vibrante</button>
+  </div>
+  <div class="theme-custom-section"><h4>Personalizar Colores</h4>
+    <div class="theme-color-grid">
+      <div class="theme-color-row"><label>Fondo</label><input type="color" class="theme-color-input" data-var-name="--bg" id="color---bg"></div>
+      <div class="theme-color-row"><label>Superficie</label><input type="color" class="theme-color-input" data-var-name="--surface" id="color---surface"></div>
+      <div class="theme-color-row"><label>Primario</label><input type="color" class="theme-color-input" data-var-name="--primary" id="color---primary"></div>
+      <div class="theme-color-row"><label>Acento</label><input type="color" class="theme-color-input" data-var-name="--accent" id="color---accent"></div>
+      <div class="theme-color-row"><label>Texto</label><input type="color" class="theme-color-input" data-var-name="--text" id="color---text"></div>
+      <div class="theme-color-row"><label>Secundario</label><input type="color" class="theme-color-input" data-var-name="--muted" id="color---muted"></div>
+      <div class="theme-color-row"><label>Borde</label><input type="color" class="theme-color-input" data-var-name="--border" id="color---border"></div>
+      <div class="theme-color-row"><label>Nav</label><input type="color" class="theme-color-input" data-var-name="--nav-bg" id="color---nav-bg"></div>
+    </div>
+    <button class="btn btn-outline btn-sm mt-2" id="theme-reset">Restaurar default</button>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <a href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Inicio</a>
+  <a href="tienda.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>Tienda</a>
+  <a href="https://wa.me/595992120303" target="_blank" rel="noopener" class="nav-whatsapp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg></a>
+  <a href="contacto.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>Contacto</a>
+  <a href="faq.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>FAQ</a>
+</nav>
+
+<script src="js/productos.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/whatsapp.js"></script>
+<script src="js/main.js"></script>
+<script>
+(function() {
+  var mobileBtn = document.getElementById("mobile-menu-btn");
+  var mobileMenu = document.getElementById("mobile-menu");
+  var mobileClose = document.getElementById("mobile-menu-close");
+  if (mobileBtn && mobileMenu) {
+    mobileBtn.addEventListener("click", function() { mobileMenu.classList.add("open"); });
+  }
+  if (mobileClose && mobileMenu) {
+    mobileClose.addEventListener("click", function() { mobileMenu.classList.remove("open"); });
+  }
+})();
+</script>
+
+</body>
+</html>

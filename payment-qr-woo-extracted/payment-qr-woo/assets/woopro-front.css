@@ -1,0 +1,279 @@
+/* Popup box BEGIN */
+.payment_method_wocommerce_yape_peru img {
+    max-height: 60px !important;
+    margin-top: 15px;
+    float: none !important;
+}
+.popup-wrapper{
+    background:rgba(0,0,0,.4);
+    /*cursor:pointer;*/
+    display:none;
+    height:100%;
+    position:fixed;
+    text-align:center;
+    top:0;
+    width:100%;
+    z-index:10000;
+}
+.popup-wrapper .helper{
+    display:inline-block;
+    height:100%;
+    vertical-align:middle;
+}
+.popup-wrapper > div {
+    background-color: #fff;
+    box-shadow: 10px 10px 60px #555;
+    display: inline-block;
+    height: auto;
+    max-width: 400px;
+    min-height: 100px;
+    vertical-align: middle;
+    width: 60%;
+    position: relative;
+    border-radius: 8px;
+    padding: 15px 15px;
+}
+.popup-wrapper .first-step img {
+    margin-bottom: 20px;
+    width: 75%;
+    margin: 0px auto 0px auto;
+}
+.popup-wrapper .first-step p {
+    font-size: 15px;
+}
+.popup-wrapper .first-step .price {
+    font-size: 20px;
+    display: block;
+    margin: 0px 0px 20px 0px;
+    color: #000;
+    line-height: 40px;
+}
+.popup-wrapper .first-step .amount{
+    font-size: 40px;
+    display: block;
+}
+.popup-wrapper .error{
+    width: 100%;
+    padding: 7px;
+    border: 1px solid #ff0000;
+    color: #ff0000;
+    font-size: 14px;
+    margin-bottom: 15px;
+    display: none;
+}
+.popup-wrapper .loader{
+    display: none;
+    width: 25px;
+    height: auto;
+    margin: 0 auto;
+    position: absolute;
+    right: 60px;
+    bottom: 23px;
+}
+.popupCloseButton {
+    background-color: #fff;
+    border: 3px solid #999;
+    border-radius: 50px;
+    cursor: pointer;
+    display: inline-block;
+    font-family: arial;
+    font-weight: bold;
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    font-size: 22px;
+    line-height: 36px;
+    width: 40px;
+    height: 40px;
+    text-align: center;
+}
+.popupCloseButton:hover {
+    background-color: #ccc;
+}
+.popup-wrapper .btn_submit {
+    background-color: #01b2b2;
+    color: #ffffff;
+    padding: 10px;
+    width: 100%;
+    text-decoration: none;
+    text-transform: capitalize;
+    border-radius: 5px;
+}
+
+/* Popup box BEGIN */
+
+.box{
+    font-size: 1.25rem; /* 20 */
+    background-color: #f1f1f1;
+    position: relative;
+    padding: 35px 20px;
+    margin-bottom: 15px;
+}
+.box.has-advanced-upload{
+    outline: 2px dashed #92b0b3;
+    outline-offset: -10px;
+    -webkit-transition: outline-offset .15s ease-in-out, background-color .15s linear;
+    transition: outline-offset .15s ease-in-out, background-color .15s linear;
+}
+.box.is-dragover{
+    outline-offset: -20px;
+    outline-color: #c8dadf;
+    background-color: #fff;
+}
+.box__dragndrop,
+.box__icon {
+    display: none;
+}
+.box.has-advanced-upload .box__dragndrop {
+    display: inline;
+}
+.box.has-advanced-upload .box__icon {
+    width: 100%;
+    height: 80px;
+    fill: #92b0b3;
+    display: block;
+    margin-bottom: 40px;
+}
+
+.box.is-uploading .box__input,
+.box.is-success .box__input,
+.box.is-error .box__input {
+    visibility: hidden;
+}
+
+.box__input label{
+    color: gray;
+    font-size: 20px;
+}
+
+.box__uploading,
+.box__success,
+.box__error {
+    display: none;
+}
+.box.is-uploading .box__uploading,
+.box.is-success .box__success,
+.box.is-error .box__error {
+    display: block;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    left: 0;
+
+    -webkit-transform: translateY( -50% );
+    transform: translateY( -50% );
+}
+.box__uploading {
+    font-style: italic;
+}
+.box__success {
+    -webkit-animation: appear-from-inside .25s ease-in-out;
+    animation: appear-from-inside .25s ease-in-out;
+}
+@-webkit-keyframes appear-from-inside
+{
+    from    { -webkit-transform: translateY( -50% ) scale( 0 ); }
+    75%     { -webkit-transform: translateY( -50% ) scale( 1.1 ); }
+    to      { -webkit-transform: translateY( -50% ) scale( 1 ); }
+}
+@keyframes appear-from-inside
+{
+    from    { transform: translateY( -50% ) scale( 0 ); }
+    75%     { transform: translateY( -50% ) scale( 1.1 ); }
+    to      { transform: translateY( -50% ) scale( 1 ); }
+}
+
+.box__restart {
+    font-weight: 700;
+}
+.box__restart:focus,
+.box__restart:hover {
+    color: #39bfd3;
+}
+
+.box .box__file {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+.box .box__file + label {
+    max-width: 80%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    display: inline-block;
+    overflow: hidden;
+}
+.box .box__file + label:hover strong,
+.box__file:focus + label strong,
+.box__file.has-focus + label strong {
+    color: #39bfd3;
+}
+.box .box__file:focus + label,
+.box .box__file.has-focus + label {
+    outline: 1px dotted #000;
+    outline: -webkit-focus-ring-color auto 5px;
+}
+.box .box__file + label * {
+    /* pointer-events: none; */ /* in case of FastClick lib use */
+}
+
+.no-js .box__file + label {
+    display: none;
+}
+
+.no-js .box__button {
+    display: block;
+}
+.box__button {
+    background-color: transparent !important;
+    color: #01b2b2 !important;
+    border: 1px solid #01b2b2;
+    font-size: 14px;
+    padding: 15px;
+    text-decoration: none;
+    text-transform: capitalize;
+    border-radius: 5px;
+    padding: 8px 16px;
+    margin: 25px auto 0;
+    display: block;
+}
+.box__button:hover,
+.box__button:focus {
+    text-decoration: none;
+}
+
+.second-step, .popup-price-wrapper {
+    display: none;
+}
+
+.popup-wrapper .first-step .telephone-number {
+    display: block;
+    color: #000;
+    font-size: 18px;
+}
+
+.popup-wrapper .first-step .telephone-number a{
+    display: block;
+    border-radius: 8px;
+    border: dashed 1px #96588a;
+    background: #ccc;
+    font-weight: bold;
+    padding: 10px;
+    outline: none !important;
+    text-decoration: none
+}
+
+.popup-wrapper .first-step .message-limit-amount {
+    color: #e2401c;
+    display: none;
+}
+
+@media screen and (max-width: 480px) {
+    .popup-wrapper > div{
+        width: 86%;
+    }
+}

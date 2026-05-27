@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  mobile-opencode:
+    build: .
+    container_name: mobile-opencode
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ~/.ssh:/root/.ssh:ro
+    environment:
+      - NODE_ENV=production
+      - WORK_DIR=/workspace
+    # Si EasyPanel usa Traefik, descomentar para SSL automatico:
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.opencode.rule=Host(\"opencode.tudominio.com\")"
+    #   - "traefik.http.services.opencode.loadbalancer.server.port=3000"

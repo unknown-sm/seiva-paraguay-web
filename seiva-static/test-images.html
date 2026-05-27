@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Images</title>
+  <style>
+    .product-card-img {
+      position: relative;
+      aspect-ratio: 1;
+      overflow: hidden;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #D4956A, #E8C4A0, #C08050);
+    }
+    .product-card-img--real {
+      background-size: cover !important;
+      background-position: center !important;
+      background-repeat: no-repeat !important;
+    }
+    .card {
+      width: 300px;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Test de Imagen Local</h2>
+  <div class="card">
+    <div class="product-card-img product-card-img--real" style="background-image:url(/img/productos/product-4079.jpg);"></div>
+    <div style="padding: 15px;">
+      <h3>Creatina Limao</h3>
+      <p>Gs. 120.000</p>
+    </div>
+  </div>
+
+  <h2>Test de Imagen Remota</h2>
+  <div class="card">
+    <div class="product-card-img product-card-img--real" style="background-image:url(https://seiva.com.py/wp-content/uploads/creatina-unilife-paraguay1.jpg);"></div>
+    <div style="padding: 15px;">
+      <h3>Creatina Remota</h3>
+      <p>Gs. 120.000</p>
+    </div>
+  </div>
+
+  <script>
+    fetch('/api/productos')
+      .then(r => r.json())
+      .then(data => {
+        console.log('Products loaded:', data.length);
+        console.log('First product:', data[0]);
+      });
+  </script>
+</body>
+</html>
