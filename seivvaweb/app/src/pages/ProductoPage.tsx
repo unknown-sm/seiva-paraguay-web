@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { fetchProducts, type Product, formatPrice } from '../services/api'
+import { fetchProducts, type Product, formatPrice, getDiscountedPrice, getActiveTier } from '../services/api'
 import { useCart } from '../context/CartContext'
-import { ArrowLeft, ShoppingCart, Minus, Plus } from 'lucide-react'
+import { ShoppingCart, Minus, Plus, ChevronLeft, ChevronRight, Tag, Box, Info, Package } from 'lucide-react'
 
 export default function ProductoPage() {
-  const { id } = useParams()
+  const { slug } = useParams()
   const [product, setProduct] = useState<Product | null>(null)
+  const [allProducts, setAllProducts] = useState<Product[]>([])
+  const [selectedImage, setSelectedImage] = useState(0)
   const [loading, setLoading] = useState(true)
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
@@ -16,7 +18,9 @@ export default function ProductoPage() {
   useEffect(() => {
     fetchProducts()
       .then(data => {
-        const found = data.find(p => p.id === Number(id))
+        setAllProducts(data)
+        // Try slug first, fallback to id for backward compat
+        const found = data.find(p => p.slug === slug) || data.find(p => p.id === Number(slug))
         setProduct(found || null)
         setLoading(false)
       })
@@ -24,7 +28,90 @@ export default function ProductoPage() {
         setError(err.message)
         setLoading(false)
       })
-  }, [id])
+  }, [slug])
+
+  // SEO meta tags
+  useEffect(() => {
+    if (!product) return
+
+    const originalTitle = document.title
+    const metaDesc = document.querySelector('meta[name="description"]')
+    const originalDesc = metaDesc?.getAttribute('content') || ''
+
+    // Title
+    document.title = `${product.nombre} - Seiva Paraguay`
+
+    // Meta description
+    if (metaDesc) {
+      const desc = product.seo_descripcion || product.descripcion?.replace(/<[^>]*>/g, '').substring(0, 160) || ''
+      metaDesc.setAttribute('content', desc)
+    }
+
+    // Open Graph tags
+    const setMeta = (property: string, content: string) => {
+      let el = document.querySelector(`meta[property="${property}"]`)
+      if (!el) {
+        el = document.createElement('meta')
+        el.setAttribute('property', property)
+        document.head.appendChild(el)
+      }
+      el.setAttribute('content', content)
+    }
+
+    setMeta('og:title', product.nombre)
+    setMeta('og:description', product.seo_descripcion || product.descripcion?.replace(/<[^>]*>/g, '').substring(0, 160) || '')
+    setMeta('og:type', 'product')
+    setMeta('og:url', window.location.href)
+    if (product.imagen) setMeta('og:image', product.imagen)
+    setMeta('product:price:amount', product.precio.toString())
+    setMeta('product:price:currency', 'PYG')
+
+    return () => {
+      document.title = originalTitle
+      if (metaDesc) metaDesc.setAttribute('content', originalDesc)
+    }
+  }, [product])
+
+  const getCrosssell = (): Product[] => {
+    if (!product || !allProducts.length) return []
+
+    // 1. Manual crosssell (priority)
+    if (product.crosssell && product.crosssell.length) {
+      return product.crosssell
+        .map(cid => allProducts.find(p => p.id === cid))
+        .filter(Boolean) as Product[]
+    }
+
+    // 2. Smart fallback: same category + similar tags, exclude current product
+    const candidates = allProducts
+      .filter(p => p.id !== product.id && p.activo)
+      .map(p => {
+        let score = 0
+        // Same category
+        if (p.categoria === product.categoria) score += 3
+        if (p.subcategoria === product.subcategoria) score += 2
+        // Same brand
+        if (product.marca && p.marca === product.marca) score += 2
+        // Same tags
+        const sharedTags = (product.etiquetas || []).filter(t => (p.etiquetas || []).includes(t))
+        score += sharedTags.length
+        return { product: p, score }
+      })
+      .filter(c => c.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 4)
+      .map(c => c.product)
+
+    return candidates
+  }
+
+  const crosssell = getCrosssell()
+  const allImages = product?.galeria?.length
+    ? product.galeria
+    : product?.imagen ? [product.imagen] : []
+
+  const prevImage = () => setSelectedImage(i => (i > 0 ? i - 1 : allImages.length - 1))
+  const nextImage = () => setSelectedImage(i => (i < allImages.length - 1 ? i + 1 : 0))
 
   if (loading) {
     return (
@@ -38,7 +125,6 @@ export default function ProductoPage() {
               <div className="h-6 w-32 rounded animate-pulse" style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }} />
               <div className="h-4 w-full rounded animate-pulse" style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }} />
               <div className="h-4 w-5/6 rounded animate-pulse" style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }} />
-              <div className="h-12 w-40 rounded-full animate-pulse mt-4" style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }} />
             </div>
           </div>
         </div>
@@ -46,26 +132,11 @@ export default function ProductoPage() {
     )
   }
 
-  if (error) {
-    return (
-      <main className="pt-24 pb-20" style={{ backgroundColor: 'var(--theme-bg, #FAF3E8)', minHeight: '100vh' }}>
-        <div className="container-main text-center">
-          <h1 className="font-body font-bold text-3xl mb-4" style={{ color: '#E63946' }}>Error</h1>
-          <p className="font-body mb-6" style={{ color: 'var(--theme-muted, #5C4033)' }}>{error}</p>
-          <Link to="/tienda" className="font-body font-semibold text-sm px-8 py-3 rounded-full inline-block" style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: '#FFF' }}>
-            Ver Tienda
-          </Link>
-        </div>
-      </main>
-    )
-  }
-
-  if (!product) {
+  if (error || !product) {
     return (
       <main className="pt-24 pb-20" style={{ backgroundColor: 'var(--theme-bg, #FAF3E8)', minHeight: '100vh' }}>
         <div className="container-main text-center">
           <h1 className="font-body font-bold text-3xl mb-4" style={{ color: 'var(--theme-text, #3D2817)' }}>Producto no encontrado</h1>
-          <p className="font-body mb-6" style={{ color: 'var(--theme-muted, #5C4033)' }}>Este producto (ID: {id}) no está disponible actualmente.</p>
           <Link to="/tienda" className="font-body font-semibold text-sm px-8 py-3 rounded-full inline-block" style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: '#FFF' }}>
             Ver Tienda
           </Link>
@@ -78,69 +149,183 @@ export default function ProductoPage() {
     ? Math.round((1 - product.precio / product.precio_anterior) * 100)
     : 0
 
+  const currentPrice = getDiscountedPrice(product, quantity)
+  const activeTier = getActiveTier(product, quantity)
+  const quantitySaving = product.precio - currentPrice
+
   return (
     <main className="pt-24 pb-20" style={{ backgroundColor: 'var(--theme-bg, #FAF3E8)', minHeight: '100vh' }}>
-      <div className="container-main">
-        <Link to="/tienda" className="inline-flex items-center gap-2 font-body text-sm mb-8 hover:underline" style={{ color: 'var(--theme-primary, #2D6A4F)' }}>
-          <ArrowLeft className="w-4 h-4" /> Volver a la tienda
-        </Link>
+      <div className="container-main px-4">
+        {/* Breadcrumbs */}
+        <nav className="flex items-center gap-2 font-body text-sm mb-6 flex-wrap" aria-label="Breadcrumb">
+          <Link to="/" className="hover:underline" style={{ color: 'var(--theme-muted, #5C4033)' }}>Inicio</Link>
+          <span style={{ color: 'var(--theme-muted, #5C4033)' }}>/</span>
+          <Link to="/tienda" className="hover:underline" style={{ color: 'var(--theme-muted, #5C4033)' }}>Tienda</Link>
+          <span style={{ color: 'var(--theme-muted, #5C4033)' }}>/</span>
+          <Link to={`/tienda?categoria=${encodeURIComponent(product.categoria)}`} className="hover:underline" style={{ color: 'var(--theme-muted, #5C4033)' }}>
+            {product.categoria}
+          </Link>
+          {product.subcategoria && (
+            <>
+              <span style={{ color: 'var(--theme-muted, #5C4033)' }}>/</span>
+              <Link to={`/tienda?categoria=${encodeURIComponent(product.categoria)}&subcategoria=${encodeURIComponent(product.subcategoria)}`} className="hover:underline" style={{ color: 'var(--theme-muted, #5C4033)' }}>
+                {product.subcategoria}
+              </Link>
+            </>
+          )}
+          <span style={{ color: 'var(--theme-muted, #5C4033)' }}>/</span>
+          <span className="font-semibold truncate max-w-[200px]" style={{ color: 'var(--theme-text, #3D2817)' }}>
+            {product.nombre}
+          </span>
+        </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
-          {/* Image */}
-          <div className="rounded-3xl overflow-hidden" style={{ backgroundColor: 'var(--theme-border, #E8E0D5)', boxShadow: '0 8px 32px rgba(27,67,50,0.12)' }}>
-            <img
-              src={product.imagen}
-              alt={product.nombre}
-              className="w-full aspect-square object-contain p-4"
-            />
+          {/* Image Gallery */}
+          <div>
+            <div className="relative rounded-3xl overflow-hidden group" style={{ backgroundColor: 'var(--theme-border, #E8E0D5)', boxShadow: '0 8px 32px rgba(27,67,50,0.12)' }}>
+              <img
+                src={allImages[selectedImage]}
+                alt={product.nombre}
+                className="w-full aspect-square object-contain p-4"
+              />
+              {allImages.length > 1 && (
+                <>
+                  <button onClick={prevImage} className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: 'rgba(255,255,255,0.9)', color: 'var(--theme-text, #3D2817)' }}>
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button onClick={nextImage} className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundColor: 'rgba(255,255,255,0.9)', color: 'var(--theme-text, #3D2817)' }}>
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </>
+              )}
+            </div>
+            {allImages.length > 1 && (
+              <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
+                {allImages.map((img: string, i: number) => (
+                  <button key={i} onClick={() => setSelectedImage(i)}
+                    className="shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all"
+                    style={{ borderColor: selectedImage === i ? 'var(--theme-primary, #1B4332)' : 'transparent', opacity: selectedImage === i ? 1 : 0.6 }}>
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Details */}
           <div className="flex flex-col justify-center">
             {descuento > 0 && (
-              <span className="self-start font-body font-bold text-xs px-3 py-1.5 rounded-full mb-4" style={{ backgroundColor: '#E63946', color: '#FFF' }}>
+              <span className="self-start font-body font-bold text-xs px-3 py-1.5 rounded-full mb-3" style={{ backgroundColor: '#E63946', color: '#FFF' }}>
                 AHORRÁ {descuento}%
               </span>
             )}
 
-            <span className="font-body font-semibold text-xs tracking-[0.1em] mb-2" style={{ color: 'var(--theme-primary, #2D6A4F)' }}>
+            <Link 
+              to={`/tienda?categoria=${encodeURIComponent(product.categoria)}`}
+              className="self-start font-body font-semibold text-xs tracking-[0.1em] mb-2 hover:underline" 
+              style={{ color: 'var(--theme-primary, #1B4332)' }}
+            >
               {product.categoria.toUpperCase()}
-            </span>
+            </Link>
 
             <h1 className="font-body font-bold leading-tight" style={{ color: 'var(--theme-text, #3D2817)', fontSize: 'clamp(24px, 3.5vw, 36px)' }}>
               {product.nombre}
             </h1>
 
-            <p className="font-body text-base leading-relaxed mt-4" style={{ color: 'var(--theme-muted, #5C4033)' }}>
-              {product.descripcion || 'Producto natural de alta calidad. Consultános por WhatsApp para más información.'}
-            </p>
+            {/* SKU + Marca */}
+            <div className="flex flex-wrap items-center gap-3 mt-3">
+              {product.marca && (
+                <span className="inline-flex items-center gap-1 font-body text-xs" style={{ color: 'var(--theme-muted, #5C4033)' }}>
+                  <Box className="w-3 h-3" /> {product.marca}
+                </span>
+              )}
+              {product.sku && (
+                <span className="font-body text-xs" style={{ color: '#999' }}>
+                  SKU: {product.sku}
+                </span>
+              )}
+            </div>
+
+            <div 
+              className="font-body text-base leading-relaxed mt-4 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:my-1 [&_p]:mb-2" 
+              style={{ color: 'var(--theme-espresso, #3D2817)' }}
+              dangerouslySetInnerHTML={{ __html: product.descripcion || 'Producto natural de alta calidad.' }}
+            />
 
             {/* Price */}
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mt-6">
-              <span className="font-body font-bold" style={{ color: 'var(--theme-primary, #2D6A4F)', fontSize: 'clamp(24px, 3vw, 48px)' }}>
-                {formatPrice(product.precio)}
+              <span className="font-body font-bold" style={{ color: 'var(--theme-primary, #1B4332)', fontSize: 'clamp(28px, 3vw, 48px)' }}>
+                {formatPrice(currentPrice)}
               </span>
-              {product.precio_anterior && (
+              {currentPrice < product.precio && (
+                <span className="font-body text-sm sm:text-lg line-through" style={{ color: '#999' }}>
+                  {formatPrice(product.precio)}
+                </span>
+              )}
+              {product.precio_anterior && currentPrice >= product.precio && (
                 <span className="font-body text-sm sm:text-lg line-through" style={{ color: '#999' }}>
                   {formatPrice(product.precio_anterior)}
                 </span>
               )}
             </div>
+            {quantitySaving > 0 && (
+              <p className="font-body font-semibold text-sm mt-1" style={{ color: '#2D6A4F' }}>
+                Ahorrás {formatPrice(quantitySaving)} por unidad
+              </p>
+            )}
+
+            {/* Quantity Discount Table */}
+            {product.price_tiers && product.price_tiers.length > 0 && (
+              <div className="mt-4 p-4 rounded-xl" style={{ backgroundColor: 'rgba(27,67,50,0.05)', border: '1px solid rgba(27,67,50,0.1)' }}>
+                <h3 className="font-body font-semibold text-sm mb-3 flex items-center gap-2" style={{ color: 'var(--theme-primary, #1B4332)' }}>
+                  <Tag className="w-4 h-4" /> Descuento por cantidad
+                </h3>
+                <div className="space-y-1.5">
+                  {product.price_tiers.map((tier, i) => {
+                    const isActive = activeTier === tier
+                    const tierPrice = product.precio - tier.descuento
+                    return (
+                      <div 
+                        key={i} 
+                        className="flex items-center justify-between px-3 py-2 rounded-lg transition-all text-sm"
+                        style={{ 
+                          backgroundColor: isActive ? 'var(--theme-primary, #1B4332)' : 'transparent',
+                          color: isActive ? '#FFF' : 'var(--theme-text, #3D2817)',
+                          fontWeight: isActive ? 600 : 400
+                        }}
+                      >
+                        <span>
+                          {tier.min_cantidad} {tier.max_cantidad ? `- ${tier.max_cantidad}` : 'o más'} unid.
+                        </span>
+                        <span className="font-body font-bold">
+                          {formatPrice(tierPrice)}
+                          <span className="font-normal text-xs ml-1 opacity-75">
+                            (-{formatPrice(tier.descuento)})
+                          </span>
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Tags */}
             {product.etiquetas && product.etiquetas.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-4">
                 {product.etiquetas.map(tag => (
-                  <span
-                    key={tag}
-                    className="font-body font-semibold text-[11px] px-3 py-1 rounded-full"
+                  <Link 
+                    key={tag} 
+                    to={`/tienda?etiqueta=${encodeURIComponent(tag)}`}
+                    className="font-body font-semibold text-[11px] px-3 py-1 rounded-full hover:opacity-80 transition-opacity"
                     style={{
-                      backgroundColor: tag === 'oferta' ? 'rgba(230,57,70,0.1)' : 'rgba(45,106,79,0.1)',
-                      color: tag === 'oferta' ? '#E63946' : 'var(--theme-primary, #2D6A4F)',
+                      backgroundColor: ['nuevo', 'popular'].includes(tag) ? 'rgba(45,106,79,0.1)' : 'rgba(230,57,70,0.1)',
+                      color: ['nuevo', 'popular'].includes(tag) ? 'var(--theme-primary, #1B4332)' : '#E63946',
                     }}
                   >
-                    {tag === 'popular' ? 'Popular' : tag === 'oferta' ? 'En Oferta' : tag === 'nuevo' ? 'Nuevo' : tag}
-                  </span>
+                    <Tag className="w-3 h-3 inline mr-1" />
+                    {tag}
+                  </Link>
                 ))}
               </div>
             )}
@@ -148,53 +333,127 @@ export default function ProductoPage() {
             {/* Quantity + Add to Cart */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mt-8">
               <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                  className="w-10 h-10 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: 'var(--theme-border, #E8E0D5)', color: 'var(--theme-text, #3D2817)' }}
-                >
+                <button onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                  className="w-10 h-10 rounded-full flex items-center justify-center border"
+                  style={{ borderColor: 'var(--theme-border, #E8E0D5)', color: 'var(--theme-text, #3D2817)' }}>
                   <Minus className="w-4 h-4" />
                 </button>
-                <span className="font-body font-bold w-8 text-center text-lg" style={{ color: 'var(--theme-text, #3D2817)' }}>
-                  {quantity}
-                </span>
-                <button
-                  onClick={() => setQuantity(q => q + 1)}
-                  className="w-10 h-10 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: 'var(--theme-border, #E8E0D5)', color: 'var(--theme-text, #3D2817)' }}
-                >
+                <span className="font-body font-bold w-8 text-center text-lg" style={{ color: 'var(--theme-text, #3D2817)' }}>{quantity}</span>
+                <button onClick={() => setQuantity(q => q + 1)}
+                  className="w-10 h-10 rounded-full flex items-center justify-center border"
+                  style={{ borderColor: 'var(--theme-border, #E8E0D5)', color: 'var(--theme-text, #3D2817)' }}>
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
-
-              <button
-                onClick={() => {
-                  addItem(product, quantity)
-                  setAdded(true)
-                  setTimeout(() => setAdded(false), 2000)
-                }}
-                className="inline-flex items-center justify-center gap-2 font-body font-semibold text-sm sm:text-base px-5 py-3 sm:px-8 sm:py-4 rounded-full transition-all duration-300 hover:scale-105"
-                style={{
-                  backgroundColor: added ? '#2D6A4F' : '#D4A843',
-                  color: '#FFFFFF',
-                  boxShadow: '0 4px 16px rgba(212,168,67,0.35)',
-                  letterSpacing: '0.04em',
-                }}
-              >
-                <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+              <button onClick={() => { addItem(product, quantity); setAdded(true); setTimeout(() => setAdded(false), 2000) }}
+                className="inline-flex items-center justify-center gap-2 font-body font-semibold text-sm px-8 py-4 rounded-full transition-all duration-300 hover:scale-105"
+                style={{ backgroundColor: added ? '#1B4332' : 'var(--theme-gold, #D4A843)', color: '#FFF', boxShadow: '0 4px 16px rgba(212,168,67,0.35)' }}>
+                <ShoppingCart className="w-4 h-4" />
                 {added ? 'Agregado!' : 'Agregar al carrito'}
               </button>
             </div>
 
-            <Link
-              to="/carrito"
-              className="inline-block mt-4 font-body text-sm underline"
-              style={{ color: 'var(--theme-primary, #2D6A4F)' }}
-            >
+            {/* Stock */}
+            <div className="flex flex-wrap items-center gap-4 mt-4">
+              <span className="inline-flex items-center gap-1.5 font-body text-sm" style={{ color: product.stock > 0 ? '#2D6A4F' : '#E63946' }}>
+                <Package className="w-4 h-4" />
+                {product.stock > 0 ? `${product.stock} disponibles` : 'Agotado'}
+              </span>
+            </div>
+
+            {/* Product Meta (like WordPress) */}
+            <div className="mt-6 pt-4 space-y-2" style={{ borderTop: '1px solid var(--theme-border, #E8E0D5)' }}>
+              {product.sku && (
+                <p className="font-body text-sm" style={{ color: 'var(--theme-muted, #5C4033)' }}>
+                  <span className="font-semibold">SKU:</span> {product.sku}
+                </p>
+              )}
+              <p className="font-body text-sm" style={{ color: 'var(--theme-muted, #5C4033)' }}>
+                <span className="font-semibold">Categoría:</span>{' '}
+                <Link to={`/tienda?categoria=${encodeURIComponent(product.categoria)}`} className="hover:underline" style={{ color: 'var(--theme-primary, #1B4332)' }}>
+                  {product.categoria}
+                </Link>
+                {product.subcategoria && (
+                  <>
+                    ,{' '}
+                    <Link to={`/tienda?categoria=${encodeURIComponent(product.categoria)}&subcategoria=${encodeURIComponent(product.subcategoria)}`} className="hover:underline" style={{ color: 'var(--theme-primary, #1B4332)' }}>
+                      {product.subcategoria}
+                    </Link>
+                  </>
+                )}
+              </p>
+              {product.etiquetas && product.etiquetas.length > 0 && (
+                <p className="font-body text-sm" style={{ color: 'var(--theme-muted, #5C4033)' }}>
+                  <span className="font-semibold">Etiqueta:</span>{' '}
+                  {product.etiquetas.map((tag, i) => (
+                    <span key={tag}>
+                      <Link to={`/tienda?etiqueta=${encodeURIComponent(tag)}`} className="hover:underline" style={{ color: 'var(--theme-primary, #1B4332)' }}>
+                        {tag}
+                      </Link>
+                      {i < product.etiquetas!.length - 1 && ', '}
+                    </span>
+                  ))}
+                </p>
+              )}
+              {product.marca && (
+                <p className="font-body text-sm" style={{ color: 'var(--theme-muted, #5C4033)' }}>
+                  <span className="font-semibold">Marca:</span>{' '}
+                  <Link to={`/tienda?marca=${encodeURIComponent(product.marca)}`} className="hover:underline" style={{ color: 'var(--theme-primary, #1B4332)' }}>
+                    {product.marca}
+                  </Link>
+                </p>
+              )}
+            </div>
+
+            <Link to="/carrito" className="inline-block mt-4 font-body text-sm underline" style={{ color: 'var(--theme-primary, #1B4332)' }}>
               Ver carrito →
             </Link>
           </div>
         </div>
+
+        {/* Descripcion larga */}
+        {product.descripcion_larga && (
+          <section className="mt-16 max-w-3xl mx-auto">
+            <div className="rounded-2xl p-8" style={{ backgroundColor: 'var(--theme-surface, #FFF)', boxShadow: '0 2px 16px rgba(27,67,50,0.06)' }}>
+              <h2 className="font-serif text-2xl mb-6 flex items-center gap-2" style={{ color: 'var(--theme-forest, #1B4332)' }}>
+                <Info className="w-5 h-5" /> Descripción
+              </h2>
+              <div
+                className="font-body text-sm leading-relaxed whitespace-pre-line [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mb-1"
+                style={{ color: 'var(--theme-espresso, #3D2817)' }}
+                dangerouslySetInnerHTML={{ __html: product.descripcion_larga }}
+              />
+            </div>
+          </section>
+        )}
+
+        {/* Crosssell */}
+        {crosssell.length > 0 && (
+          <section className="mt-16">
+            <h2 className="font-serif text-2xl mb-8 text-center" style={{ color: 'var(--theme-forest, #1B4332)' }}>
+              También te puede interesar
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">
+              {crosssell.map(p => (
+                <Link key={p.id} to={`/producto/${p.slug || p.id}`}
+                  className="group rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02]"
+                  style={{ backgroundColor: 'var(--theme-surface, #FFF)', boxShadow: '0 2px 12px rgba(27,67,50,0.06)' }}>
+                  <div className="aspect-square overflow-hidden" style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}>
+                    <img src={p.imagen} alt={p.nombre} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  </div>
+                  <div className="p-4">
+                    <p className="font-body text-xs mb-1" style={{ color: 'var(--theme-primary, #1B4332)' }}>{p.categoria}</p>
+                    <h3 className="font-body font-semibold text-sm leading-tight line-clamp-2 mb-2" style={{ color: 'var(--theme-text, #3D2817)' }}>{p.nombre}</h3>
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-body font-bold text-sm" style={{ color: 'var(--theme-primary, #1B4332)' }}>{formatPrice(p.precio)}</span>
+                      {p.precio_anterior && <span className="font-body text-xs line-through" style={{ color: '#999' }}>{formatPrice(p.precio_anterior)}</span>}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </main>
   )

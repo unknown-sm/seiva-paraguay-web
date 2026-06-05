@@ -1,0 +1,3113 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "ScrollToTop",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ScrollToTop.tsx",
+      "source_location": "L4",
+      "id": "components_scrolltotop_scrolltotop",
+      "community": 14,
+      "norm_label": "scrolltotop"
+    },
+    {
+      "label": "ThemeToggle",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ThemePanel.tsx",
+      "source_location": "L22",
+      "id": "components_themepanel_themetoggle",
+      "community": 15,
+      "norm_label": "themetoggle"
+    },
+    {
+      "label": "ChartConfig",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/chart.tsx",
+      "source_location": "L11",
+      "id": "ui_chart_chartconfig",
+      "community": 16,
+      "norm_label": "chartconfig"
+    },
+    {
+      "label": "CartItem",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/context/CartContext.tsx",
+      "source_location": "L4",
+      "id": "context_cartcontext_cartitem",
+      "community": 17,
+      "norm_label": "cartitem"
+    },
+    {
+      "label": "CartProvider",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/context/CartContext.tsx",
+      "source_location": "L36",
+      "id": "context_cartcontext_cartprovider",
+      "community": 18,
+      "norm_label": "cartprovider"
+    },
+    {
+      "label": "useCart",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/context/CartContext.tsx",
+      "source_location": "L93",
+      "id": "context_cartcontext_usecart",
+      "community": 19,
+      "norm_label": "usecart"
+    },
+    {
+      "label": "ThemeProvider",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/context/ThemeContext.tsx",
+      "source_location": "L88",
+      "id": "context_themecontext_themeprovider",
+      "community": 20,
+      "norm_label": "themeprovider"
+    },
+    {
+      "label": "useTheme",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/context/ThemeContext.tsx",
+      "source_location": "L135",
+      "id": "context_themecontext_usetheme",
+      "community": 21,
+      "norm_label": "usetheme"
+    },
+    {
+      "label": "CiudadData",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/data/ciudades.ts",
+      "source_location": "L4",
+      "id": "data_ciudades_ciudaddata",
+      "community": 22,
+      "norm_label": "ciudaddata"
+    },
+    {
+      "label": "getCiudadesPorDepartamento",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/data/ciudades.ts",
+      "source_location": "L261",
+      "id": "data_ciudades_getciudadespordepartamento",
+      "community": 23,
+      "norm_label": "getciudadespordepartamento"
+    },
+    {
+      "label": "parseCiudadSeleccionada",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/data/ciudades.ts",
+      "source_location": "L269",
+      "id": "data_ciudades_parseciudadseleccionada",
+      "community": 24,
+      "norm_label": "parseciudadseleccionada"
+    },
+    {
+      "label": "useIsMobile",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/hooks/use-mobile.ts",
+      "source_location": "L5",
+      "id": "hooks_use_mobile_useismobile",
+      "community": 25,
+      "norm_label": "useismobile"
+    },
+    {
+      "label": "cn",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/lib/utils.ts",
+      "source_location": "L4",
+      "id": "lib_utils_cn",
+      "community": 0,
+      "norm_label": "cn"
+    },
+    {
+      "label": "Home",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/pages/Home.tsx",
+      "source_location": "L4",
+      "id": "pages_home_home",
+      "community": 26,
+      "norm_label": "home"
+    },
+    {
+      "label": "PoliticasPage",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/pages/PoliticasPage.tsx",
+      "source_location": "L28",
+      "id": "pages_politicaspage_politicaspage",
+      "community": 27,
+      "norm_label": "politicaspage"
+    },
+    {
+      "label": "Product",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/services/api.ts",
+      "source_location": "L5",
+      "id": "services_api_product",
+      "community": 28,
+      "norm_label": "product"
+    },
+    {
+      "label": "fetchProducts",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/services/api.ts",
+      "source_location": "L29",
+      "id": "services_api_fetchproducts",
+      "community": 29,
+      "norm_label": "fetchproducts"
+    },
+    {
+      "label": "formatPrice",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/services/api.ts",
+      "source_location": "L36",
+      "id": "services_api_formatprice",
+      "community": 30,
+      "norm_label": "formatprice"
+    },
+    {
+      "label": "generateWhatsAppLink",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/services/api.ts",
+      "source_location": "L40",
+      "id": "services_api_generatewhatsapplink",
+      "community": 31,
+      "norm_label": "generatewhatsapplink"
+    },
+    {
+      "label": "PedidoPayload",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/services/api.ts",
+      "source_location": "L47",
+      "id": "services_api_pedidopayload",
+      "community": 32,
+      "norm_label": "pedidopayload"
+    },
+    {
+      "label": "createPedido",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/services/api.ts",
+      "source_location": "L57",
+      "id": "services_api_createpedido",
+      "community": 33,
+      "norm_label": "createpedido"
+    },
+    {
+      "label": "Accordion",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/accordion.tsx",
+      "source_location": null,
+      "id": "accordion_Accordion",
+      "community": 4,
+      "norm_label": "accordion"
+    },
+    {
+      "label": "AccordionItem",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/accordion.tsx",
+      "source_location": null,
+      "id": "accordion_AccordionItem",
+      "community": 4,
+      "norm_label": "accordionitem"
+    },
+    {
+      "label": "AccordionTrigger",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/accordion.tsx",
+      "source_location": null,
+      "id": "accordion_AccordionTrigger",
+      "community": 4,
+      "norm_label": "accordiontrigger"
+    },
+    {
+      "label": "AccordionContent",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/accordion.tsx",
+      "source_location": null,
+      "id": "accordion_AccordionContent",
+      "community": 4,
+      "norm_label": "accordioncontent"
+    },
+    {
+      "label": "AlertDialog",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/alert-dialog.tsx",
+      "source_location": null,
+      "id": "alertdialog_AlertDialog",
+      "community": 2,
+      "norm_label": "alertdialog"
+    },
+    {
+      "label": "AlertDialogTrigger",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/alert-dialog.tsx",
+      "source_location": null,
+      "id": "alertdialog_AlertDialogTrigger",
+      "community": 34,
+      "norm_label": "alertdialogtrigger"
+    },
+    {
+      "label": "AlertDialogContent",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/alert-dialog.tsx",
+      "source_location": null,
+      "id": "alertdialog_AlertDialogContent",
+      "community": 35,
+      "norm_label": "alertdialogcontent"
+    },
+    {
+      "label": "AlertDialogAction",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/alert-dialog.tsx",
+      "source_location": null,
+      "id": "alertdialog_AlertDialogAction",
+      "community": 5,
+      "norm_label": "alertdialogaction"
+    },
+    {
+      "label": "AlertDialogCancel",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/alert-dialog.tsx",
+      "source_location": null,
+      "id": "alertdialog_AlertDialogCancel",
+      "community": 5,
+      "norm_label": "alertdialogcancel"
+    },
+    {
+      "label": "AlertDialogHeader",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/alert-dialog.tsx",
+      "source_location": null,
+      "id": "alertdialog_AlertDialogHeader",
+      "community": 36,
+      "norm_label": "alertdialogheader"
+    },
+    {
+      "label": "AlertDialogFooter",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/alert-dialog.tsx",
+      "source_location": null,
+      "id": "alertdialog_AlertDialogFooter",
+      "community": 37,
+      "norm_label": "alertdialogfooter"
+    },
+    {
+      "label": "AlertDialogTitle",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/alert-dialog.tsx",
+      "source_location": null,
+      "id": "alertdialog_AlertDialogTitle",
+      "community": 38,
+      "norm_label": "alertdialogtitle"
+    },
+    {
+      "label": "AlertDialogDescription",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/alert-dialog.tsx",
+      "source_location": null,
+      "id": "alertdialog_AlertDialogDescription",
+      "community": 39,
+      "norm_label": "alertdialogdescription"
+    },
+    {
+      "label": "AlertDialogOverlay",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/alert-dialog.tsx",
+      "source_location": null,
+      "id": "alertdialog_AlertDialogOverlay",
+      "community": 40,
+      "norm_label": "alertdialogoverlay"
+    },
+    {
+      "label": "AlertDialogPortal",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/alert-dialog.tsx",
+      "source_location": null,
+      "id": "alertdialog_AlertDialogPortal",
+      "community": 41,
+      "norm_label": "alertdialogportal"
+    },
+    {
+      "label": "Alert",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/alert.tsx",
+      "source_location": null,
+      "id": "alert_Alert",
+      "community": 0,
+      "norm_label": "alert"
+    },
+    {
+      "label": "AlertTitle",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/alert.tsx",
+      "source_location": null,
+      "id": "alert_AlertTitle",
+      "community": 42,
+      "norm_label": "alerttitle"
+    },
+    {
+      "label": "AlertDescription",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/alert.tsx",
+      "source_location": null,
+      "id": "alert_AlertDescription",
+      "community": 43,
+      "norm_label": "alertdescription"
+    },
+    {
+      "label": "AspectRatio",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/aspect-ratio.tsx",
+      "source_location": null,
+      "id": "aspectratio_AspectRatio",
+      "community": 12,
+      "norm_label": "aspectratio"
+    },
+    {
+      "label": "Avatar",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/avatar.tsx",
+      "source_location": null,
+      "id": "avatar_Avatar",
+      "community": 7,
+      "norm_label": "avatar"
+    },
+    {
+      "label": "AvatarImage",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/avatar.tsx",
+      "source_location": null,
+      "id": "avatar_AvatarImage",
+      "community": 7,
+      "norm_label": "avatarimage"
+    },
+    {
+      "label": "AvatarFallback",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/avatar.tsx",
+      "source_location": null,
+      "id": "avatar_AvatarFallback",
+      "community": 7,
+      "norm_label": "avatarfallback"
+    },
+    {
+      "label": "Badge",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/badge.tsx",
+      "source_location": null,
+      "id": "badge_Badge",
+      "community": 0,
+      "norm_label": "badge"
+    },
+    {
+      "label": "badgeVariants",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/badge.tsx",
+      "source_location": null,
+      "id": "badge_badgeVariants",
+      "community": 44,
+      "norm_label": "badgevariants"
+    },
+    {
+      "label": "Breadcrumb",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/breadcrumb.tsx",
+      "source_location": null,
+      "id": "breadcrumb_Breadcrumb",
+      "community": 1,
+      "norm_label": "breadcrumb"
+    },
+    {
+      "label": "BreadcrumbList",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/breadcrumb.tsx",
+      "source_location": null,
+      "id": "breadcrumb_BreadcrumbList",
+      "community": 45,
+      "norm_label": "breadcrumblist"
+    },
+    {
+      "label": "BreadcrumbItem",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/breadcrumb.tsx",
+      "source_location": null,
+      "id": "breadcrumb_BreadcrumbItem",
+      "community": 46,
+      "norm_label": "breadcrumbitem"
+    },
+    {
+      "label": "BreadcrumbLink",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/breadcrumb.tsx",
+      "source_location": null,
+      "id": "breadcrumb_BreadcrumbLink",
+      "community": 3,
+      "norm_label": "breadcrumblink"
+    },
+    {
+      "label": "BreadcrumbPage",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/breadcrumb.tsx",
+      "source_location": null,
+      "id": "breadcrumb_BreadcrumbPage",
+      "community": 47,
+      "norm_label": "breadcrumbpage"
+    },
+    {
+      "label": "BreadcrumbSeparator",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/breadcrumb.tsx",
+      "source_location": null,
+      "id": "breadcrumb_BreadcrumbSeparator",
+      "community": 48,
+      "norm_label": "breadcrumbseparator"
+    },
+    {
+      "label": "BreadcrumbEllipsis",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/breadcrumb.tsx",
+      "source_location": null,
+      "id": "breadcrumb_BreadcrumbEllipsis",
+      "community": 49,
+      "norm_label": "breadcrumbellipsis"
+    },
+    {
+      "label": "ButtonGroup",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/button-group.tsx",
+      "source_location": null,
+      "id": "buttongroup_ButtonGroup",
+      "community": 0,
+      "norm_label": "buttongroup"
+    },
+    {
+      "label": "ButtonGroupSeparator",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/button-group.tsx",
+      "source_location": null,
+      "id": "buttongroup_ButtonGroupSeparator",
+      "community": 10,
+      "norm_label": "buttongroupseparator"
+    },
+    {
+      "label": "ButtonGroupText",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/button-group.tsx",
+      "source_location": null,
+      "id": "buttongroup_ButtonGroupText",
+      "community": 50,
+      "norm_label": "buttongrouptext"
+    },
+    {
+      "label": "buttonGroupVariants",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/button-group.tsx",
+      "source_location": null,
+      "id": "buttongroup_buttonGroupVariants",
+      "community": 51,
+      "norm_label": "buttongroupvariants"
+    },
+    {
+      "label": "Button",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/button.tsx",
+      "source_location": null,
+      "id": "button_Button",
+      "community": 3,
+      "norm_label": "button"
+    },
+    {
+      "label": "buttonVariants",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/button.tsx",
+      "source_location": null,
+      "id": "button_buttonVariants",
+      "community": 5,
+      "norm_label": "buttonvariants"
+    },
+    {
+      "label": "Calendar",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/calendar.tsx",
+      "source_location": null,
+      "id": "calendar_Calendar",
+      "community": 5,
+      "norm_label": "calendar"
+    },
+    {
+      "label": "CalendarDayButton",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/calendar.tsx",
+      "source_location": null,
+      "id": "calendar_CalendarDayButton",
+      "community": 3,
+      "norm_label": "calendardaybutton"
+    },
+    {
+      "label": "Card",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/card.tsx",
+      "source_location": null,
+      "id": "card_Card",
+      "community": 0,
+      "norm_label": "card"
+    },
+    {
+      "label": "CardHeader",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/card.tsx",
+      "source_location": null,
+      "id": "card_CardHeader",
+      "community": 52,
+      "norm_label": "cardheader"
+    },
+    {
+      "label": "CardTitle",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/card.tsx",
+      "source_location": null,
+      "id": "card_CardTitle",
+      "community": 53,
+      "norm_label": "cardtitle"
+    },
+    {
+      "label": "CardDescription",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/card.tsx",
+      "source_location": null,
+      "id": "card_CardDescription",
+      "community": 54,
+      "norm_label": "carddescription"
+    },
+    {
+      "label": "CardAction",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/card.tsx",
+      "source_location": null,
+      "id": "card_CardAction",
+      "community": 55,
+      "norm_label": "cardaction"
+    },
+    {
+      "label": "CardContent",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/card.tsx",
+      "source_location": null,
+      "id": "card_CardContent",
+      "community": 56,
+      "norm_label": "cardcontent"
+    },
+    {
+      "label": "CardFooter",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/card.tsx",
+      "source_location": null,
+      "id": "card_CardFooter",
+      "community": 57,
+      "norm_label": "cardfooter"
+    },
+    {
+      "label": "Carousel",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/carousel.tsx",
+      "source_location": null,
+      "id": "carousel_Carousel",
+      "community": 1,
+      "norm_label": "carousel"
+    },
+    {
+      "label": "CarouselContent",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/carousel.tsx",
+      "source_location": null,
+      "id": "carousel_CarouselContent",
+      "community": 58,
+      "norm_label": "carouselcontent"
+    },
+    {
+      "label": "CarouselItem",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/carousel.tsx",
+      "source_location": null,
+      "id": "carousel_CarouselItem",
+      "community": 59,
+      "norm_label": "carouselitem"
+    },
+    {
+      "label": "CarouselPrevious",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/carousel.tsx",
+      "source_location": null,
+      "id": "carousel_CarouselPrevious",
+      "community": 3,
+      "norm_label": "carouselprevious"
+    },
+    {
+      "label": "CarouselNext",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/carousel.tsx",
+      "source_location": null,
+      "id": "carousel_CarouselNext",
+      "community": 3,
+      "norm_label": "carouselnext"
+    },
+    {
+      "label": "CarouselApi",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/carousel.tsx",
+      "source_location": null,
+      "id": "carousel_CarouselApi",
+      "community": 60,
+      "norm_label": "carouselapi"
+    },
+    {
+      "label": "useCarousel",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/carousel.tsx",
+      "source_location": null,
+      "id": "carousel_useCarousel",
+      "community": 61,
+      "norm_label": "usecarousel"
+    },
+    {
+      "label": "ChartContainer",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/chart.tsx",
+      "source_location": null,
+      "id": "chart_ChartContainer",
+      "community": 6,
+      "norm_label": "chartcontainer"
+    },
+    {
+      "label": "ChartTooltip",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/chart.tsx",
+      "source_location": null,
+      "id": "chart_ChartTooltip",
+      "community": 6,
+      "norm_label": "charttooltip"
+    },
+    {
+      "label": "ChartTooltipContent",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/chart.tsx",
+      "source_location": null,
+      "id": "chart_ChartTooltipContent",
+      "community": 62,
+      "norm_label": "charttooltipcontent"
+    },
+    {
+      "label": "ChartLegend",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/chart.tsx",
+      "source_location": null,
+      "id": "chart_ChartLegend",
+      "community": 6,
+      "norm_label": "chartlegend"
+    },
+    {
+      "label": "ChartLegendContent",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/chart.tsx",
+      "source_location": null,
+      "id": "chart_ChartLegendContent",
+      "community": 63,
+      "norm_label": "chartlegendcontent"
+    },
+    {
+      "label": "ChartStyle",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/chart.tsx",
+      "source_location": null,
+      "id": "chart_ChartStyle",
+      "community": 64,
+      "norm_label": "chartstyle"
+    },
+    {
+      "label": "ChartConfig",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/chart.tsx",
+      "source_location": null,
+      "id": "chart_ChartConfig",
+      "community": 65,
+      "norm_label": "chartconfig"
+    },
+    {
+      "label": "useChart",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/chart.tsx",
+      "source_location": null,
+      "id": "chart_useChart",
+      "community": 66,
+      "norm_label": "usechart"
+    },
+    {
+      "label": "Checkbox",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/checkbox.tsx",
+      "source_location": null,
+      "id": "checkbox_Checkbox",
+      "community": 1,
+      "norm_label": "checkbox"
+    },
+    {
+      "label": "Collapsible",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/collapsible.tsx",
+      "source_location": null,
+      "id": "collapsible_Collapsible",
+      "community": 8,
+      "norm_label": "collapsible"
+    },
+    {
+      "label": "CollapsibleTrigger",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/collapsible.tsx",
+      "source_location": null,
+      "id": "collapsible_CollapsibleTrigger",
+      "community": 8,
+      "norm_label": "collapsibletrigger"
+    },
+    {
+      "label": "CollapsibleContent",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/collapsible.tsx",
+      "source_location": null,
+      "id": "collapsible_CollapsibleContent",
+      "community": 8,
+      "norm_label": "collapsiblecontent"
+    },
+    {
+      "label": "Command",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/command.tsx",
+      "source_location": null,
+      "id": "command_Command",
+      "community": 1,
+      "norm_label": "command"
+    },
+    {
+      "label": "CommandDialog",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/command.tsx",
+      "source_location": null,
+      "id": "command_CommandDialog",
+      "community": 2,
+      "norm_label": "commanddialog"
+    },
+    {
+      "label": "CommandInput",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/command.tsx",
+      "source_location": null,
+      "id": "command_CommandInput",
+      "community": 67,
+      "norm_label": "commandinput"
+    },
+    {
+      "label": "CommandList",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/command.tsx",
+      "source_location": null,
+      "id": "command_CommandList",
+      "community": 68,
+      "norm_label": "commandlist"
+    },
+    {
+      "label": "CommandEmpty",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/command.tsx",
+      "source_location": null,
+      "id": "command_CommandEmpty",
+      "community": 69,
+      "norm_label": "commandempty"
+    },
+    {
+      "label": "CommandGroup",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/command.tsx",
+      "source_location": null,
+      "id": "command_CommandGroup",
+      "community": 70,
+      "norm_label": "commandgroup"
+    },
+    {
+      "label": "CommandItem",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/command.tsx",
+      "source_location": null,
+      "id": "command_CommandItem",
+      "community": 71,
+      "norm_label": "commanditem"
+    },
+    {
+      "label": "CommandShortcut",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/command.tsx",
+      "source_location": null,
+      "id": "command_CommandShortcut",
+      "community": 72,
+      "norm_label": "commandshortcut"
+    },
+    {
+      "label": "CommandSeparator",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/command.tsx",
+      "source_location": null,
+      "id": "command_CommandSeparator",
+      "community": 73,
+      "norm_label": "commandseparator"
+    },
+    {
+      "label": "ContextMenu",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/context-menu.tsx",
+      "source_location": null,
+      "id": "contextmenu_ContextMenu",
+      "community": 1,
+      "norm_label": "contextmenu"
+    },
+    {
+      "label": "ContextMenuTrigger",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/context-menu.tsx",
+      "source_location": null,
+      "id": "contextmenu_ContextMenuTrigger",
+      "community": 74,
+      "norm_label": "contextmenutrigger"
+    },
+    {
+      "label": "ContextMenuContent",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/context-menu.tsx",
+      "source_location": null,
+      "id": "contextmenu_ContextMenuContent",
+      "community": 75,
+      "norm_label": "contextmenucontent"
+    },
+    {
+      "label": "ContextMenuItem",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/context-menu.tsx",
+      "source_location": null,
+      "id": "contextmenu_ContextMenuItem",
+      "community": 76,
+      "norm_label": "contextmenuitem"
+    },
+    {
+      "label": "ContextMenuCheckboxItem",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/context-menu.tsx",
+      "source_location": null,
+      "id": "contextmenu_ContextMenuCheckboxItem",
+      "community": 77,
+      "norm_label": "contextmenucheckboxitem"
+    },
+    {
+      "label": "ContextMenuRadioItem",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/context-menu.tsx",
+      "source_location": null,
+      "id": "contextmenu_ContextMenuRadioItem",
+      "community": 78,
+      "norm_label": "contextmenuradioitem"
+    },
+    {
+      "label": "ContextMenuLabel",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/context-menu.tsx",
+      "source_location": null,
+      "id": "contextmenu_ContextMenuLabel",
+      "community": 79,
+      "norm_label": "contextmenulabel"
+    },
+    {
+      "label": "ContextMenuSeparator",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/context-menu.tsx",
+      "source_location": null,
+      "id": "contextmenu_ContextMenuSeparator",
+      "community": 80,
+      "norm_label": "contextmenuseparator"
+    },
+    {
+      "label": "ContextMenuShortcut",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/context-menu.tsx",
+      "source_location": null,
+      "id": "contextmenu_ContextMenuShortcut",
+      "community": 81,
+      "norm_label": "contextmenushortcut"
+    },
+    {
+      "label": "ContextMenuGroup",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/context-menu.tsx",
+      "source_location": null,
+      "id": "contextmenu_ContextMenuGroup",
+      "community": 82,
+      "norm_label": "contextmenugroup"
+    },
+    {
+      "label": "ContextMenuPortal",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/context-menu.tsx",
+      "source_location": null,
+      "id": "contextmenu_ContextMenuPortal",
+      "community": 83,
+      "norm_label": "contextmenuportal"
+    },
+    {
+      "label": "ContextMenuSub",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/context-menu.tsx",
+      "source_location": null,
+      "id": "contextmenu_ContextMenuSub",
+      "community": 84,
+      "norm_label": "contextmenusub"
+    },
+    {
+      "label": "ContextMenuSubTrigger",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/context-menu.tsx",
+      "source_location": null,
+      "id": "contextmenu_ContextMenuSubTrigger",
+      "community": 85,
+      "norm_label": "contextmenusubtrigger"
+    },
+    {
+      "label": "ContextMenuSubContent",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/context-menu.tsx",
+      "source_location": null,
+      "id": "contextmenu_ContextMenuSubContent",
+      "community": 86,
+      "norm_label": "contextmenusubcontent"
+    },
+    {
+      "label": "ContextMenuRadioGroup",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/context-menu.tsx",
+      "source_location": null,
+      "id": "contextmenu_ContextMenuRadioGroup",
+      "community": 87,
+      "norm_label": "contextmenuradiogroup"
+    },
+    {
+      "label": "Dialog",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dialog.tsx",
+      "source_location": null,
+      "id": "dialog_Dialog",
+      "community": 2,
+      "norm_label": "dialog"
+    },
+    {
+      "label": "DialogTrigger",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dialog.tsx",
+      "source_location": null,
+      "id": "dialog_DialogTrigger",
+      "community": 88,
+      "norm_label": "dialogtrigger"
+    },
+    {
+      "label": "DialogContent",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dialog.tsx",
+      "source_location": null,
+      "id": "dialog_DialogContent",
+      "community": 2,
+      "norm_label": "dialogcontent"
+    },
+    {
+      "label": "DialogClose",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dialog.tsx",
+      "source_location": null,
+      "id": "dialog_DialogClose",
+      "community": 89,
+      "norm_label": "dialogclose"
+    },
+    {
+      "label": "DialogHeader",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dialog.tsx",
+      "source_location": null,
+      "id": "dialog_DialogHeader",
+      "community": 2,
+      "norm_label": "dialogheader"
+    },
+    {
+      "label": "DialogFooter",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dialog.tsx",
+      "source_location": null,
+      "id": "dialog_DialogFooter",
+      "community": 90,
+      "norm_label": "dialogfooter"
+    },
+    {
+      "label": "DialogTitle",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dialog.tsx",
+      "source_location": null,
+      "id": "dialog_DialogTitle",
+      "community": 2,
+      "norm_label": "dialogtitle"
+    },
+    {
+      "label": "DialogDescription",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dialog.tsx",
+      "source_location": null,
+      "id": "dialog_DialogDescription",
+      "community": 2,
+      "norm_label": "dialogdescription"
+    },
+    {
+      "label": "DialogOverlay",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dialog.tsx",
+      "source_location": null,
+      "id": "dialog_DialogOverlay",
+      "community": 91,
+      "norm_label": "dialogoverlay"
+    },
+    {
+      "label": "DialogPortal",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dialog.tsx",
+      "source_location": null,
+      "id": "dialog_DialogPortal",
+      "community": 92,
+      "norm_label": "dialogportal"
+    },
+    {
+      "label": "Drawer",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/drawer.tsx",
+      "source_location": null,
+      "id": "drawer_Drawer",
+      "community": 2,
+      "norm_label": "drawer"
+    },
+    {
+      "label": "DrawerTrigger",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/drawer.tsx",
+      "source_location": null,
+      "id": "drawer_DrawerTrigger",
+      "community": 93,
+      "norm_label": "drawertrigger"
+    },
+    {
+      "label": "DrawerContent",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/drawer.tsx",
+      "source_location": null,
+      "id": "drawer_DrawerContent",
+      "community": 94,
+      "norm_label": "drawercontent"
+    },
+    {
+      "label": "DrawerClose",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/drawer.tsx",
+      "source_location": null,
+      "id": "drawer_DrawerClose",
+      "community": 95,
+      "norm_label": "drawerclose"
+    },
+    {
+      "label": "DrawerHeader",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/drawer.tsx",
+      "source_location": null,
+      "id": "drawer_DrawerHeader",
+      "community": 96,
+      "norm_label": "drawerheader"
+    },
+    {
+      "label": "DrawerFooter",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/drawer.tsx",
+      "source_location": null,
+      "id": "drawer_DrawerFooter",
+      "community": 97,
+      "norm_label": "drawerfooter"
+    },
+    {
+      "label": "DrawerTitle",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/drawer.tsx",
+      "source_location": null,
+      "id": "drawer_DrawerTitle",
+      "community": 98,
+      "norm_label": "drawertitle"
+    },
+    {
+      "label": "DrawerDescription",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/drawer.tsx",
+      "source_location": null,
+      "id": "drawer_DrawerDescription",
+      "community": 99,
+      "norm_label": "drawerdescription"
+    },
+    {
+      "label": "DrawerOverlay",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/drawer.tsx",
+      "source_location": null,
+      "id": "drawer_DrawerOverlay",
+      "community": 100,
+      "norm_label": "draweroverlay"
+    },
+    {
+      "label": "DrawerPortal",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/drawer.tsx",
+      "source_location": null,
+      "id": "drawer_DrawerPortal",
+      "community": 101,
+      "norm_label": "drawerportal"
+    },
+    {
+      "label": "DropdownMenu",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dropdown-menu.tsx",
+      "source_location": null,
+      "id": "dropdownmenu_DropdownMenu",
+      "community": 1,
+      "norm_label": "dropdownmenu"
+    },
+    {
+      "label": "DropdownMenuTrigger",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dropdown-menu.tsx",
+      "source_location": null,
+      "id": "dropdownmenu_DropdownMenuTrigger",
+      "community": 102,
+      "norm_label": "dropdownmenutrigger"
+    },
+    {
+      "label": "DropdownMenuContent",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dropdown-menu.tsx",
+      "source_location": null,
+      "id": "dropdownmenu_DropdownMenuContent",
+      "community": 103,
+      "norm_label": "dropdownmenucontent"
+    },
+    {
+      "label": "DropdownMenuItem",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dropdown-menu.tsx",
+      "source_location": null,
+      "id": "dropdownmenu_DropdownMenuItem",
+      "community": 104,
+      "norm_label": "dropdownmenuitem"
+    },
+    {
+      "label": "DropdownMenuCheckboxItem",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dropdown-menu.tsx",
+      "source_location": null,
+      "id": "dropdownmenu_DropdownMenuCheckboxItem",
+      "community": 105,
+      "norm_label": "dropdownmenucheckboxitem"
+    },
+    {
+      "label": "DropdownMenuRadioItem",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dropdown-menu.tsx",
+      "source_location": null,
+      "id": "dropdownmenu_DropdownMenuRadioItem",
+      "community": 106,
+      "norm_label": "dropdownmenuradioitem"
+    },
+    {
+      "label": "DropdownMenuLabel",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dropdown-menu.tsx",
+      "source_location": null,
+      "id": "dropdownmenu_DropdownMenuLabel",
+      "community": 107,
+      "norm_label": "dropdownmenulabel"
+    },
+    {
+      "label": "DropdownMenuSeparator",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dropdown-menu.tsx",
+      "source_location": null,
+      "id": "dropdownmenu_DropdownMenuSeparator",
+      "community": 108,
+      "norm_label": "dropdownmenuseparator"
+    },
+    {
+      "label": "DropdownMenuShortcut",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dropdown-menu.tsx",
+      "source_location": null,
+      "id": "dropdownmenu_DropdownMenuShortcut",
+      "community": 109,
+      "norm_label": "dropdownmenushortcut"
+    },
+    {
+      "label": "DropdownMenuGroup",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dropdown-menu.tsx",
+      "source_location": null,
+      "id": "dropdownmenu_DropdownMenuGroup",
+      "community": 110,
+      "norm_label": "dropdownmenugroup"
+    },
+    {
+      "label": "DropdownMenuPortal",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dropdown-menu.tsx",
+      "source_location": null,
+      "id": "dropdownmenu_DropdownMenuPortal",
+      "community": 111,
+      "norm_label": "dropdownmenuportal"
+    },
+    {
+      "label": "DropdownMenuSub",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dropdown-menu.tsx",
+      "source_location": null,
+      "id": "dropdownmenu_DropdownMenuSub",
+      "community": 112,
+      "norm_label": "dropdownmenusub"
+    },
+    {
+      "label": "DropdownMenuSubTrigger",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dropdown-menu.tsx",
+      "source_location": null,
+      "id": "dropdownmenu_DropdownMenuSubTrigger",
+      "community": 113,
+      "norm_label": "dropdownmenusubtrigger"
+    },
+    {
+      "label": "DropdownMenuSubContent",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dropdown-menu.tsx",
+      "source_location": null,
+      "id": "dropdownmenu_DropdownMenuSubContent",
+      "community": 114,
+      "norm_label": "dropdownmenusubcontent"
+    },
+    {
+      "label": "DropdownMenuRadioGroup",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/dropdown-menu.tsx",
+      "source_location": null,
+      "id": "dropdownmenu_DropdownMenuRadioGroup",
+      "community": 115,
+      "norm_label": "dropdownmenuradiogroup"
+    },
+    {
+      "label": "Empty",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/empty.tsx",
+      "source_location": null,
+      "id": "empty_Empty",
+      "community": 0,
+      "norm_label": "empty"
+    },
+    {
+      "label": "EmptyHeader",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/empty.tsx",
+      "source_location": null,
+      "id": "empty_EmptyHeader",
+      "community": 116,
+      "norm_label": "emptyheader"
+    },
+    {
+      "label": "EmptyTitle",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/empty.tsx",
+      "source_location": null,
+      "id": "empty_EmptyTitle",
+      "community": 117,
+      "norm_label": "emptytitle"
+    },
+    {
+      "label": "EmptyDescription",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/empty.tsx",
+      "source_location": null,
+      "id": "empty_EmptyDescription",
+      "community": 118,
+      "norm_label": "emptydescription"
+    },
+    {
+      "label": "EmptyContent",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/empty.tsx",
+      "source_location": null,
+      "id": "empty_EmptyContent",
+      "community": 119,
+      "norm_label": "emptycontent"
+    },
+    {
+      "label": "EmptyMedia",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/empty.tsx",
+      "source_location": null,
+      "id": "empty_EmptyMedia",
+      "community": 120,
+      "norm_label": "emptymedia"
+    },
+    {
+      "label": "Field",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/field.tsx",
+      "source_location": null,
+      "id": "field_Field",
+      "community": 0,
+      "norm_label": "field"
+    },
+    {
+      "label": "FieldLabel",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/field.tsx",
+      "source_location": null,
+      "id": "field_FieldLabel",
+      "community": 11,
+      "norm_label": "fieldlabel"
+    },
+    {
+      "label": "FieldDescription",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/field.tsx",
+      "source_location": null,
+      "id": "field_FieldDescription",
+      "community": 121,
+      "norm_label": "fielddescription"
+    },
+    {
+      "label": "FieldError",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/field.tsx",
+      "source_location": null,
+      "id": "field_FieldError",
+      "community": 122,
+      "norm_label": "fielderror"
+    },
+    {
+      "label": "FieldGroup",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/field.tsx",
+      "source_location": null,
+      "id": "field_FieldGroup",
+      "community": 123,
+      "norm_label": "fieldgroup"
+    },
+    {
+      "label": "FieldLegend",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/field.tsx",
+      "source_location": null,
+      "id": "field_FieldLegend",
+      "community": 124,
+      "norm_label": "fieldlegend"
+    },
+    {
+      "label": "FieldSeparator",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/field.tsx",
+      "source_location": null,
+      "id": "field_FieldSeparator",
+      "community": 10,
+      "norm_label": "fieldseparator"
+    },
+    {
+      "label": "FieldSet",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/field.tsx",
+      "source_location": null,
+      "id": "field_FieldSet",
+      "community": 125,
+      "norm_label": "fieldset"
+    },
+    {
+      "label": "FieldContent",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/field.tsx",
+      "source_location": null,
+      "id": "field_FieldContent",
+      "community": 126,
+      "norm_label": "fieldcontent"
+    },
+    {
+      "label": "FieldTitle",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/field.tsx",
+      "source_location": null,
+      "id": "field_FieldTitle",
+      "community": 127,
+      "norm_label": "fieldtitle"
+    },
+    {
+      "label": "Form",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/form.tsx",
+      "source_location": null,
+      "id": "form_Form",
+      "community": 9,
+      "norm_label": "form"
+    },
+    {
+      "label": "FormField",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/form.tsx",
+      "source_location": null,
+      "id": "form_FormField",
+      "community": 9,
+      "norm_label": "formfield"
+    },
+    {
+      "label": "FormItem",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/form.tsx",
+      "source_location": null,
+      "id": "form_FormItem",
+      "community": 128,
+      "norm_label": "formitem"
+    },
+    {
+      "label": "FormLabel",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/form.tsx",
+      "source_location": null,
+      "id": "form_FormLabel",
+      "community": 11,
+      "norm_label": "formlabel"
+    },
+    {
+      "label": "FormControl",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/form.tsx",
+      "source_location": null,
+      "id": "form_FormControl",
+      "community": 3,
+      "norm_label": "formcontrol"
+    },
+    {
+      "label": "FormDescription",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/form.tsx",
+      "source_location": null,
+      "id": "form_FormDescription",
+      "community": 129,
+      "norm_label": "formdescription"
+    },
+    {
+      "label": "FormMessage",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/form.tsx",
+      "source_location": null,
+      "id": "form_FormMessage",
+      "community": 130,
+      "norm_label": "formmessage"
+    },
+    {
+      "label": "useFormField",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/form.tsx",
+      "source_location": null,
+      "id": "form_useFormField",
+      "community": 131,
+      "norm_label": "useformfield"
+    },
+    {
+      "label": "HoverCard",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/hover-card.tsx",
+      "source_location": null,
+      "id": "hovercard_HoverCard",
+      "community": 0,
+      "norm_label": "hovercard"
+    },
+    {
+      "label": "HoverCardTrigger",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/hover-card.tsx",
+      "source_location": null,
+      "id": "hovercard_HoverCardTrigger",
+      "community": 132,
+      "norm_label": "hovercardtrigger"
+    },
+    {
+      "label": "HoverCardContent",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/hover-card.tsx",
+      "source_location": null,
+      "id": "hovercard_HoverCardContent",
+      "community": 133,
+      "norm_label": "hovercardcontent"
+    },
+    {
+      "label": "InputGroup",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/input-group.tsx",
+      "source_location": null,
+      "id": "inputgroup_InputGroup",
+      "community": 0,
+      "norm_label": "inputgroup"
+    },
+    {
+      "label": "InputGroupAddon",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/input-group.tsx",
+      "source_location": null,
+      "id": "inputgroup_InputGroupAddon",
+      "community": 134,
+      "norm_label": "inputgroupaddon"
+    },
+    {
+      "label": "InputGroupButton",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/input-group.tsx",
+      "source_location": null,
+      "id": "inputgroup_InputGroupButton",
+      "community": 3,
+      "norm_label": "inputgroupbutton"
+    },
+    {
+      "label": "InputGroupText",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/input-group.tsx",
+      "source_location": null,
+      "id": "inputgroup_InputGroupText",
+      "community": 135,
+      "norm_label": "inputgrouptext"
+    },
+    {
+      "label": "InputGroupInput",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/input-group.tsx",
+      "source_location": null,
+      "id": "inputgroup_InputGroupInput",
+      "community": 0,
+      "norm_label": "inputgroupinput"
+    },
+    {
+      "label": "InputGroupTextarea",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/input-group.tsx",
+      "source_location": null,
+      "id": "inputgroup_InputGroupTextarea",
+      "community": 13,
+      "norm_label": "inputgrouptextarea"
+    },
+    {
+      "label": "InputOTP",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/input-otp.tsx",
+      "source_location": null,
+      "id": "inputotp_InputOTP",
+      "community": 1,
+      "norm_label": "inputotp"
+    },
+    {
+      "label": "InputOTPGroup",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/input-otp.tsx",
+      "source_location": null,
+      "id": "inputotp_InputOTPGroup",
+      "community": 136,
+      "norm_label": "inputotpgroup"
+    },
+    {
+      "label": "InputOTPSlot",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/input-otp.tsx",
+      "source_location": null,
+      "id": "inputotp_InputOTPSlot",
+      "community": 137,
+      "norm_label": "inputotpslot"
+    },
+    {
+      "label": "InputOTPSeparator",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/input-otp.tsx",
+      "source_location": null,
+      "id": "inputotp_InputOTPSeparator",
+      "community": 138,
+      "norm_label": "inputotpseparator"
+    },
+    {
+      "label": "Input",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/input.tsx",
+      "source_location": null,
+      "id": "input_Input",
+      "community": 0,
+      "norm_label": "input"
+    },
+    {
+      "label": "Radix Slot",
+      "file_type": "code",
+      "source_file": "node_modules/@radix-ui/react-slot",
+      "source_location": null,
+      "id": "lib_radix_slot",
+      "community": 3,
+      "norm_label": "radix slot"
+    },
+    {
+      "label": "Radix Accordion",
+      "file_type": "code",
+      "source_file": "node_modules/@radix-ui/react-accordion",
+      "source_location": null,
+      "id": "lib_radix_accordion",
+      "community": 4,
+      "norm_label": "radix accordion"
+    },
+    {
+      "label": "Radix AlertDialog",
+      "file_type": "code",
+      "source_file": "node_modules/@radix-ui/react-alert-dialog",
+      "source_location": null,
+      "id": "lib_radix_alert_dialog",
+      "community": 2,
+      "norm_label": "radix alertdialog"
+    },
+    {
+      "label": "Radix Avatar",
+      "file_type": "code",
+      "source_file": "node_modules/@radix-ui/react-avatar",
+      "source_location": null,
+      "id": "lib_radix_avatar",
+      "community": 7,
+      "norm_label": "radix avatar"
+    },
+    {
+      "label": "Radix Checkbox",
+      "file_type": "code",
+      "source_file": "node_modules/@radix-ui/react-checkbox",
+      "source_location": null,
+      "id": "lib_radix_checkbox",
+      "community": 1,
+      "norm_label": "radix checkbox"
+    },
+    {
+      "label": "Radix Collapsible",
+      "file_type": "code",
+      "source_file": "node_modules/@radix-ui/react-collapsible",
+      "source_location": null,
+      "id": "lib_radix_collapsible",
+      "community": 8,
+      "norm_label": "radix collapsible"
+    },
+    {
+      "label": "Radix ContextMenu",
+      "file_type": "code",
+      "source_file": "node_modules/@radix-ui/react-context-menu",
+      "source_location": null,
+      "id": "lib_radix_context_menu",
+      "community": 1,
+      "norm_label": "radix contextmenu"
+    },
+    {
+      "label": "Radix Dialog",
+      "file_type": "code",
+      "source_file": "node_modules/@radix-ui/react-dialog",
+      "source_location": null,
+      "id": "lib_radix_dialog",
+      "community": 2,
+      "norm_label": "radix dialog"
+    },
+    {
+      "label": "Radix DropdownMenu",
+      "file_type": "code",
+      "source_file": "node_modules/@radix-ui/react-dropdown-menu",
+      "source_location": null,
+      "id": "lib_radix_dropdown_menu",
+      "community": 1,
+      "norm_label": "radix dropdownmenu"
+    },
+    {
+      "label": "Radix HoverCard",
+      "file_type": "code",
+      "source_file": "node_modules/@radix-ui/react-hover-card",
+      "source_location": null,
+      "id": "lib_radix_hover_card",
+      "community": 0,
+      "norm_label": "radix hovercard"
+    },
+    {
+      "label": "Radix AspectRatio",
+      "file_type": "code",
+      "source_file": "node_modules/@radix-ui/react-aspect-ratio",
+      "source_location": null,
+      "id": "lib_radix_aspect_ratio",
+      "community": 12,
+      "norm_label": "radix aspectratio"
+    },
+    {
+      "label": "Radix Label",
+      "file_type": "code",
+      "source_file": "node_modules/@radix-ui/react-label",
+      "source_location": null,
+      "id": "lib_radix_label",
+      "community": 9,
+      "norm_label": "radix label"
+    },
+    {
+      "label": "class-variance-authority",
+      "file_type": "code",
+      "source_file": "node_modules/class-variance-authority",
+      "source_location": null,
+      "id": "lib_cva",
+      "community": 0,
+      "norm_label": "class-variance-authority"
+    },
+    {
+      "label": "lucide-react icons",
+      "file_type": "code",
+      "source_file": "node_modules/lucide-react",
+      "source_location": null,
+      "id": "lib_lucide_react",
+      "community": 1,
+      "norm_label": "lucide-react icons"
+    },
+    {
+      "label": "react-day-picker",
+      "file_type": "code",
+      "source_file": "node_modules/react-day-picker",
+      "source_location": null,
+      "id": "lib_react_day_picker",
+      "community": 5,
+      "norm_label": "react-day-picker"
+    },
+    {
+      "label": "embla-carousel-react",
+      "file_type": "code",
+      "source_file": "node_modules/embla-carousel-react",
+      "source_location": null,
+      "id": "lib_embla_carousel",
+      "community": 1,
+      "norm_label": "embla-carousel-react"
+    },
+    {
+      "label": "Recharts",
+      "file_type": "code",
+      "source_file": "node_modules/recharts",
+      "source_location": null,
+      "id": "lib_recharts",
+      "community": 6,
+      "norm_label": "recharts"
+    },
+    {
+      "label": "cmdk",
+      "file_type": "code",
+      "source_file": "node_modules/cmdk",
+      "source_location": null,
+      "id": "lib_cmdk",
+      "community": 1,
+      "norm_label": "cmdk"
+    },
+    {
+      "label": "Vaul (Drawer)",
+      "file_type": "code",
+      "source_file": "node_modules/vaul",
+      "source_location": null,
+      "id": "lib_vaul",
+      "community": 2,
+      "norm_label": "vaul (drawer)"
+    },
+    {
+      "label": "react-hook-form",
+      "file_type": "code",
+      "source_file": "node_modules/react-hook-form",
+      "source_location": null,
+      "id": "lib_react_hook_form",
+      "community": 9,
+      "norm_label": "react-hook-form"
+    },
+    {
+      "label": "input-otp",
+      "file_type": "code",
+      "source_file": "node_modules/input-otp",
+      "source_location": null,
+      "id": "lib_input_otp",
+      "community": 1,
+      "norm_label": "input-otp"
+    },
+    {
+      "label": "Separator",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/separator.tsx",
+      "source_location": null,
+      "id": "lib_separator",
+      "community": 10,
+      "norm_label": "separator"
+    },
+    {
+      "label": "Label",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/label.tsx",
+      "source_location": null,
+      "id": "lib_label",
+      "community": 11,
+      "norm_label": "label"
+    },
+    {
+      "label": "Textarea",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui/textarea.tsx",
+      "source_location": null,
+      "id": "lib_textarea",
+      "community": 13,
+      "norm_label": "textarea"
+    },
+    {
+      "label": "Seiva UI Components",
+      "file_type": "code",
+      "source_file": "seivvaweb/app/src/components/ui",
+      "source_location": null,
+      "id": "app_ui_components",
+      "community": 0,
+      "norm_label": "seiva ui components"
+    }
+  ],
+  "links": [
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/accordion.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "accordion_Accordion",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/alert-dialog.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "alertdialog_AlertDialog",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/alert.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "alert_Alert",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/avatar.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "avatar_Avatar",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/badge.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "badge_Badge",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/breadcrumb.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "breadcrumb_Breadcrumb",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/button-group.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "buttongroup_ButtonGroup",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/button.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "button_Button",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/calendar.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "calendar_Calendar",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/card.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "card_Card",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/carousel.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "carousel_Carousel",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/chart.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "chart_ChartContainer",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/checkbox.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "checkbox_Checkbox",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/command.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "command_Command",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/context-menu.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "contextmenu_ContextMenu",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/dialog.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "dialog_Dialog",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/drawer.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "drawer_Drawer",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/dropdown-menu.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "dropdownmenu_DropdownMenu",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/empty.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "empty_Empty",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/field.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "field_Field",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/form.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "form_Form",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/hover-card.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "hovercard_HoverCard",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/input-group.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "inputgroup_InputGroup",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/input-otp.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "inputotp_InputOTP",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/input.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "input_Input",
+      "target": "lib_utils_cn"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/accordion.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "accordion_Accordion",
+      "target": "lib_radix_accordion"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/accordion.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "accordion_Accordion",
+      "target": "lib_lucide_react"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/accordion.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "accordion_Accordion",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/accordion.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "accordion_AccordionItem",
+      "target": "lib_radix_accordion"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/accordion.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "accordion_AccordionTrigger",
+      "target": "lib_radix_accordion"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/accordion.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "accordion_AccordionContent",
+      "target": "lib_radix_accordion"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/alert-dialog.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "alertdialog_AlertDialog",
+      "target": "lib_radix_alert_dialog"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/alert-dialog.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "alertdialog_AlertDialog",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7,
+      "source_file": "seivvaweb/app/src/components/ui/dialog.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "dialog_Dialog",
+      "target": "alertdialog_AlertDialog"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/alert-dialog.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "alertdialog_AlertDialogAction",
+      "target": "button_buttonVariants"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/alert-dialog.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "alertdialog_AlertDialogCancel",
+      "target": "button_buttonVariants"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/alert.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "alert_Alert",
+      "target": "lib_cva"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/alert.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "alert_Alert",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/aspect-ratio.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "aspectratio_AspectRatio",
+      "target": "lib_radix_aspect_ratio"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/aspect-ratio.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "aspectratio_AspectRatio",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/avatar.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "avatar_Avatar",
+      "target": "lib_radix_avatar"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/avatar.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "avatar_Avatar",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/avatar.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "avatar_AvatarImage",
+      "target": "lib_radix_avatar"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/avatar.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "avatar_AvatarFallback",
+      "target": "lib_radix_avatar"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/badge.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "badge_Badge",
+      "target": "lib_cva"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/badge.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "badge_Badge",
+      "target": "lib_radix_slot"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/badge.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "badge_Badge",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/breadcrumb.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "breadcrumb_Breadcrumb",
+      "target": "lib_lucide_react"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/breadcrumb.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "breadcrumb_Breadcrumb",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/breadcrumb.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "breadcrumb_BreadcrumbLink",
+      "target": "lib_radix_slot"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/button-group.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "buttongroup_ButtonGroup",
+      "target": "lib_cva"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/button-group.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "buttongroup_ButtonGroup",
+      "target": "lib_radix_slot"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/button-group.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "buttongroup_ButtonGroup",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/button-group.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "buttongroup_ButtonGroupSeparator",
+      "target": "lib_separator"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/button.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "button_Button",
+      "target": "lib_cva"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/button.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "button_Button",
+      "target": "lib_radix_slot"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/calendar.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "calendar_CalendarDayButton",
+      "target": "button_Button"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/carousel.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "carousel_CarouselPrevious",
+      "target": "button_Button"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/carousel.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "carousel_CarouselNext",
+      "target": "button_Button"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/input-group.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "inputgroup_InputGroupButton",
+      "target": "button_Button"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/button.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "button_Button",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/calendar.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "calendar_Calendar",
+      "target": "button_buttonVariants"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/calendar.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "calendar_Calendar",
+      "target": "lib_react_day_picker"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/calendar.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "calendar_Calendar",
+      "target": "lib_lucide_react"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/calendar.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "calendar_Calendar",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/card.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "card_Card",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/carousel.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "carousel_Carousel",
+      "target": "lib_embla_carousel"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/carousel.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "carousel_Carousel",
+      "target": "lib_lucide_react"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/carousel.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "carousel_Carousel",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/chart.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "chart_ChartContainer",
+      "target": "lib_recharts"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/chart.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "chart_ChartContainer",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/chart.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "chart_ChartTooltip",
+      "target": "lib_recharts"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/chart.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "chart_ChartLegend",
+      "target": "lib_recharts"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/checkbox.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "checkbox_Checkbox",
+      "target": "lib_radix_checkbox"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/checkbox.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "checkbox_Checkbox",
+      "target": "lib_lucide_react"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/checkbox.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "checkbox_Checkbox",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/collapsible.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "collapsible_Collapsible",
+      "target": "lib_radix_collapsible"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/collapsible.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "collapsible_Collapsible",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/collapsible.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "collapsible_CollapsibleTrigger",
+      "target": "lib_radix_collapsible"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/collapsible.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "collapsible_CollapsibleContent",
+      "target": "lib_radix_collapsible"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/command.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "command_Command",
+      "target": "lib_cmdk"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/command.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "command_Command",
+      "target": "lib_lucide_react"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/command.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "command_Command",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/command.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "command_CommandDialog",
+      "target": "dialog_Dialog"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/command.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "command_CommandDialog",
+      "target": "dialog_DialogContent"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/command.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "command_CommandDialog",
+      "target": "dialog_DialogHeader"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/command.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "command_CommandDialog",
+      "target": "dialog_DialogTitle"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/command.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "command_CommandDialog",
+      "target": "dialog_DialogDescription"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/context-menu.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "contextmenu_ContextMenu",
+      "target": "lib_radix_context_menu"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/context-menu.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "contextmenu_ContextMenu",
+      "target": "lib_lucide_react"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/context-menu.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "contextmenu_ContextMenu",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7,
+      "source_file": "seivvaweb/app/src/components/ui/context-menu.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "contextmenu_ContextMenu",
+      "target": "dropdownmenu_DropdownMenu"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/dialog.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "dialog_Dialog",
+      "target": "lib_radix_dialog"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/dialog.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "dialog_Dialog",
+      "target": "lib_lucide_react"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/dialog.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "dialog_Dialog",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.7,
+      "source_file": "seivvaweb/app/src/components/ui/dialog.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "dialog_Dialog",
+      "target": "drawer_Drawer"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/drawer.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "drawer_Drawer",
+      "target": "lib_vaul"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/drawer.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "drawer_Drawer",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/dropdown-menu.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "dropdownmenu_DropdownMenu",
+      "target": "lib_radix_dropdown_menu"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/dropdown-menu.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "dropdownmenu_DropdownMenu",
+      "target": "lib_lucide_react"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/dropdown-menu.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "dropdownmenu_DropdownMenu",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/empty.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "empty_Empty",
+      "target": "lib_cva"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/empty.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "empty_Empty",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/field.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "field_Field",
+      "target": "lib_cva"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/field.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "field_Field",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/field.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "field_FieldLabel",
+      "target": "lib_label"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/field.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "field_FieldSeparator",
+      "target": "lib_separator"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/form.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "form_Form",
+      "target": "lib_react_hook_form"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/form.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "form_Form",
+      "target": "lib_radix_label"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/form.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "form_Form",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/form.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "form_FormField",
+      "target": "lib_react_hook_form"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/form.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "form_FormLabel",
+      "target": "lib_label"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/form.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "form_FormControl",
+      "target": "lib_radix_slot"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/hover-card.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "hovercard_HoverCard",
+      "target": "lib_radix_hover_card"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/hover-card.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "hovercard_HoverCard",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/input-group.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "inputgroup_InputGroup",
+      "target": "lib_cva"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/input-group.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "inputgroup_InputGroup",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/input-group.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "inputgroup_InputGroupInput",
+      "target": "input_Input"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/input-group.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "inputgroup_InputGroupTextarea",
+      "target": "lib_textarea"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/input-otp.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "inputotp_InputOTP",
+      "target": "lib_input_otp"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "seivvaweb/app/src/components/ui/input-otp.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "inputotp_InputOTP",
+      "target": "lib_lucide_react"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/input-otp.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "inputotp_InputOTP",
+      "target": "app_ui_components"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "seivvaweb/app/src/components/ui/input.tsx",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "input_Input",
+      "target": "app_ui_components"
+    }
+  ],
+  "hyperedges": [],
+  "built_at_commit": "def13da52dad91c948c237f4b76130dbb6ba7495"
+}

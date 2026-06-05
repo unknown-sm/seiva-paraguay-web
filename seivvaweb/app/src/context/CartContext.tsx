@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
 import type { Product } from '../services/api'
+import { getDiscountedPrice } from '../services/api'
 
 export interface CartItem {
   product: Product
@@ -17,6 +18,7 @@ interface CartContextValue {
   closeCart: () => void
   totalItems: number
   totalPrice: number
+  totalSavings: number
 }
 
 const CartContext = createContext<CartContextValue | null>(null)
@@ -81,10 +83,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0)
-  const totalPrice = items.reduce((sum, i) => sum + i.product.precio * i.quantity, 0)
+  const totalPrice = items.reduce((sum, i) => {
+    const discountedPrice = getDiscountedPrice(i.product, i.quantity)
+    return sum + discountedPrice * i.quantity
+  }, 0)
+  const totalSavings = items.reduce((sum, i) => {
+    const discountedPrice = getDiscountedPrice(i.product, i.quantity)
+    const saving = (i.product.precio - discountedPrice) * i.quantity
+    return sum + saving
+  }, 0)
 
   return (
-    <CartContext.Provider value={{ items, isOpen, addItem, removeItem, updateQuantity, clearCart, openCart, closeCart, totalItems, totalPrice }}>
+    <CartContext.Provider value={{ items, isOpen, addItem, removeItem, updateQuantity, clearCart, openCart, closeCart, totalItems, totalPrice, totalSavings }}>
       {children}
     </CartContext.Provider>
   )

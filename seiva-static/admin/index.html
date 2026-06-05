@@ -13,11 +13,12 @@
     <div class="login-logo">&#127807;</div>
     <h1 class="login-title">Seiva Admin</h1>
     <p class="login-sub">Panel de administraci&oacute;n</p>
-    <form id="login-form">
-      <input type="password" id="login-password" placeholder="Contrase&ntilde;a" class="login-input" autofocus>
-      <button type="submit" class="login-btn">Ingresar</button>
-      <p id="login-error" class="login-error hidden">Contrase&ntilde;a incorrecta</p>
-    </form>
+      <form id="login-form">
+        <input type="password" id="login-password" placeholder="Contrase&ntilde;a" class="login-input" autofocus>
+        <button type="submit" class="login-btn">Ingresar</button>
+        <p id="login-error" class="login-error hidden">Contrase&ntilde;a incorrecta</p>
+      </form>
+      <p style="text-align:center;margin-top:12px;font-size:12px;color:#8a7a6a">Clave de prueba: <code style="background:#f5f0eb;padding:2px 6px;border-radius:4px;font-size:13px">SeivaAdmin2026!</code></p>
   </div>
 </div>
 
@@ -31,9 +32,13 @@
       <button class="sidebar-link active" data-tab="tab-dashboard"><span class="sidebar-icon">&#128202;</span><span class="sidebar-label">Dashboard</span></button>
       <button class="sidebar-link" data-tab="tab-pedidos"><span class="sidebar-icon">&#128717;&#65039;</span><span class="sidebar-label">Pedidos</span></button>
       <button class="sidebar-link" data-tab="tab-productos"><span class="sidebar-icon">&#128230;</span><span class="sidebar-label">Productos</span></button>
+      <button class="sidebar-link" data-tab="tab-descuentos"><span class="sidebar-icon">&#127991;</span><span class="sidebar-label">Descuentos</span></button>
+      <button class="sidebar-link" data-tab="tab-categorias"><span class="sidebar-icon">&#128193;</span><span class="sidebar-label">Categor&iacute;as</span></button>
       <button class="sidebar-link" data-tab="tab-stock"><span class="sidebar-icon">&#9888;&#65039;</span><span class="sidebar-label">Alertas de Stock</span></button>
       <button class="sidebar-link" data-tab="tab-venta"><span class="sidebar-icon">&#128722;</span><span class="sidebar-label">Nueva Venta</span></button>
+      <button class="sidebar-link" data-tab="tab-envios"><span class="sidebar-icon">&#128666;</span><span class="sidebar-label">Env&iacute;os</span></button>
       <button class="sidebar-link" data-tab="tab-historico"><span class="sidebar-icon">&#128203;</span><span class="sidebar-label">Hist&oacute;rico</span></button>
+      <button class="sidebar-link" data-tab="tab-paginas"><span class="sidebar-icon">&#128196;</span><span class="sidebar-label">P&aacute;ginas</span></button>
       <button class="sidebar-link" data-tab="tab-contenido"><span class="sidebar-icon">&#128221;</span><span class="sidebar-label">Contenido</span></button>
       <button class="sidebar-link" data-tab="tab-analytics"><span class="sidebar-icon">&#128200;</span><span class="sidebar-label">Analytics</span></button>
     </nav>
@@ -77,6 +82,45 @@
       </div>
     </div>
 
+    <div id="tab-descuentos" class="tab-content">
+      <div class="card">
+        <div class="card-header" style="justify-content:space-between">
+          <h3>Descuentos por Cantidad</h3>
+          <button id="btn-nuevo-descuento" class="btn btn-primary">+ Nuevo</button>
+        </div>
+        <div class="card-body">
+          <p class="help-text" style="margin-bottom:16px">Configurá descuentos automáticos según la cantidad de productos que el cliente compre. Ej: 2-10 unidades → ₲10.000 menos por unidad.</p>
+          <div id="descuentos-lista"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-categorias" class="tab-content">
+      <div class="card">
+        <div class="card-header" style="justify-content:space-between">
+          <h3>Categor&iacute;as</h3>
+          <button id="btn-nueva-categoria" class="btn btn-primary">+ Nueva</button>
+        </div>
+        <div class="card-body"><table class="admin-table"><thead><tr><th>Nombre</th><th>Slug</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="categorias-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <div id="tab-modal-categoria" class="modal hidden">
+      <div class="modal-overlay" id="modal-overlay-cat"></div>
+      <div class="modal-content">
+        <div class="modal-header"><h3 id="cat-modal-title">Nueva Categor&iacute;a</h3><button class="modal-close" id="modal-close-cat">&times;</button></div>
+        <form id="categoria-form">
+          <input type="hidden" id="cat-id" value="">
+          <div class="form-group"><label>Nombre *</label><input type="text" id="cat-nombre" required class="form-input"></div>
+          <div class="form-group"><label>Slug</label><input type="text" id="cat-slug" placeholder="dejar vac&iacute;o para auto-generar" class="form-input"></div>
+          <div class="form-group"><label>Descripci&oacute;n</label><textarea id="cat-descripcion" rows="3" class="form-input"></textarea></div>
+          <div class="form-group"><label><input type="checkbox" id="cat-activo" checked> Activo</label></div>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </form>
+        <p id="cat-msg" class="msg hidden"></p>
+      </div>
+    </div>
+
     <div id="tab-stock" class="tab-content">
       <div class="card">
         <div class="card-header" style="justify-content:space-between">
@@ -102,6 +146,32 @@
       </div>
     </div>
 
+    <div id="tab-envios" class="tab-content">
+      <div class="card">
+        <div class="card-header" style="justify-content:space-between">
+          <h3>Zonas de Env&iacute;o</h3>
+          <button id="btn-nuevo-envio" class="btn btn-primary">+ Nueva</button>
+        </div>
+        <div class="card-body"><table class="admin-table"><thead><tr><th>Ciudad</th><th>Departamento</th><th>Tipo</th><th>Costo (Gs.)</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="envios-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <div id="tab-modal-envio" class="modal hidden">
+      <div class="modal-overlay" id="modal-overlay-env"></div>
+      <div class="modal-content">
+        <div class="modal-header"><h3 id="env-modal-title">Nueva Zona de Env&iacute;o</h3><button class="modal-close" id="modal-close-env">&times;</button></div>
+        <form id="envio-form">
+          <input type="hidden" id="env-id" value="">
+          <div class="form-grid"><div class="form-group"><label>Ciudad *</label><input type="text" id="env-ciudad" required class="form-input"></div><div class="form-group"><label>Departamento</label><input type="text" id="env-departamento" class="form-input"></div></div>
+          <div class="form-group"><label>Tipo</label><select id="env-tipo" class="form-select"><option value="delivery">Delivery</option><option value="encomienda">Encomienda</option></select></div>
+          <div class="form-group" id="env-costo-group"><label>Costo de env&iacute;o (Gs.)</label><input type="number" id="env-costo" class="form-input"></div>
+          <div class="form-group"><label><input type="checkbox" id="env-activo" checked> Activo</label></div>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </form>
+        <p id="env-msg" class="msg hidden"></p>
+      </div>
+    </div>
+
     <div id="tab-historico" class="tab-content">
       <div class="card">
         <div class="card-header" style="justify-content:space-between"><h3>Hist&oacute;rico</h3><input type="date" id="historico-fecha" class="form-input" style="width:auto"></div>
@@ -119,10 +189,28 @@
             <div class="form-group"><label>WhatsApp N&uacute;mero</label><input type="text" id="contenido-whatsapp_numero" placeholder="595992120303" class="form-input"></div>
             <div class="form-group"><label>T&iacute;tulo SEO</label><input type="text" id="contenido-site_titulo" class="form-input"></div>
             <div class="form-group"><label>Descripci&oacute;n SEO</label><textarea id="contenido-site_descripcion" rows="2" class="form-input"></textarea></div>
+            <hr style="margin:16px 0;border:none;border-top:1px solid #e0d6cc">
+            <h4 style="margin-bottom:12px">Env&iacute;os</h4>
+            <div class="form-group"><label>Monto m&iacute;nimo para delivery gratis (Gs.)</label><input type="number" id="contenido-envio_minimo_gratis" class="form-input"></div>
+            <hr style="margin:16px 0;border:none;border-top:1px solid #e0d6cc">
+            <h4 style="margin-bottom:12px">Pago QR</h4>
+            <div class="form-group"><label><input type="checkbox" id="contenido-qr_activo"> QR activo</label></div>
+            <div class="form-group"><label>URL de imagen QR</label><input type="text" id="contenido-qr_imagen" placeholder="https://..." class="form-input"></div>
+            <div class="form-group"><label>Instrucciones de pago</label><textarea id="contenido-qr_instrucciones" rows="2" class="form-input" placeholder="Pagá con QR y envianos el comprobante..."></textarea></div>
             <button type="submit" class="btn btn-primary">Guardar</button>
           </form>
           <p id="contenido-msg" class="msg hidden"></p>
         </div>
+      </div>
+    </div>
+
+    <div id="tab-paginas" class="tab-content">
+      <div class="card">
+        <div class="card-header" style="justify-content:space-between">
+          <h3>P&aacute;ginas</h3>
+          <button id="btn-nueva-pagina" class="btn btn-primary">+ Nueva</button>
+        </div>
+        <div class="card-body"><table class="admin-table"><thead><tr><th>T&iacute;tulo</th><th>Slug</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="paginas-tbody"></tbody></table></div>
       </div>
     </div>
 
@@ -140,6 +228,22 @@
   </main>
 </div>
 
+<div id="modal-pagina" class="modal hidden">
+  <div class="modal-overlay" id="modal-overlay-pag"></div>
+  <div class="modal-content">
+    <div class="modal-header"><h3 id="pagina-modal-title">Nueva P&aacute;gina</h3><button class="modal-close" id="modal-close-pag">&times;</button></div>
+    <form id="pagina-form">
+      <input type="hidden" id="pag-id" value="">
+      <div class="form-group"><label>T&iacute;tulo *</label><input type="text" id="pag-titulo" required class="form-input"></div>
+      <div class="form-group"><label>Slug (URL)</label><input type="text" id="pag-slug" placeholder="dejar vac&iacute;o para auto-generar" class="form-input"></div>
+      <div class="form-group"><label>Contenido</label><textarea id="pag-contenido" rows="12" class="form-input" style="font-family:monospace;font-size:13px"></textarea></div>
+      <div class="form-group"><label><input type="checkbox" id="pag-activo" checked> Activo</label></div>
+      <button type="submit" class="btn btn-primary">Guardar</button>
+    </form>
+    <p id="pag-msg" class="msg hidden"></p>
+  </div>
+</div>
+
 <div id="modal-producto" class="modal hidden">
   <div class="modal-overlay" id="modal-overlay-prod"></div>
   <div class="modal-content">
@@ -148,13 +252,35 @@
       <input type="hidden" id="prod-id" value="">
       <div class="form-group"><label>Nombre *</label><input type="text" id="prod-nombre" required class="form-input"></div>
       <div class="form-grid"><div class="form-group"><label>Precio (Gs.) *</label><input type="number" id="prod-precio" required class="form-input"></div><div class="form-group"><label>Precio Anterior</label><input type="number" id="prod-precio-anterior" class="form-input"></div></div>
-      <div class="form-grid"><div class="form-group"><label>Categor&iacute;a</label><select id="prod-categoria" class="form-select"><option value="snacks">Snacks</option><option value="suplementos">Suplementos</option><option value="combos">Combos</option></select></div><div class="form-group"><label>Subcategor&iacute;a</label><select id="prod-subcategoria" class="form-select"><option value="chocolate">Chocolate</option><option value="mix">Mix</option><option value="almendras">Almendras</option><option value="frutas">Frutas</option><option value="nueces">Nueces</option><option value="barras">Barritas</option><option value="castanas">Casta&ntilde;as</option><option value="aceites">Aceites</option><option value="magnesios">Magnesios</option><option value="omega3">Omega 3</option><option value="gym">Gym</option><option value="colagenos">Col&aacute;genos</option><option value="naturales">Naturales</option><option value="minerales">Minerales</option><option value="combos">Combos</option></select></div></div>
-      <div class="form-group"><label>Descripci&oacute;n</label><textarea id="prod-descripcion" rows="3" class="form-input"></textarea></div>
+      <div class="form-grid"><div class="form-group"><label>Categor&iacute;a</label><select id="prod-categoria" class="form-select"></select></div><div class="form-group"><label>Subcategor&iacute;a</label><select id="prod-subcategoria" class="form-select"><option value="chocolate">Chocolate</option><option value="mix">Mix</option><option value="almendras">Almendras</option><option value="frutas">Frutas</option><option value="nueces">Nueces</option><option value="barras">Barritas</option><option value="castanas">Casta&ntilde;as</option><option value="aceites">Aceites</option><option value="magnesios">Magnesios</option><option value="omega3">Omega 3</option><option value="gym">Gym</option><option value="colagenos">Col&aacute;genos</option><option value="naturales">Naturales</option><option value="minerales">Minerales</option><option value="combos">Combos</option></select></div></div>
+      <div class="form-group"><label>Descripci&oacute;n corta</label><textarea id="prod-descripcion" rows="2" class="form-input"></textarea></div>
+      <div class="form-group"><label>Descripci&oacute;n larga</label><textarea id="prod-descripcion_larga" rows="5" class="form-input"></textarea></div>
       <div class="form-grid"><div class="form-group"><label>Stock</label><input type="number" id="prod-stock" value="50" class="form-input"></div><div class="form-group" style="display:flex;align-items:flex-end;gap:16px;padding-bottom:8px"><label><input type="checkbox" id="prod-destacado"> Destacado</label><label><input type="checkbox" id="prod-activo" checked> Activo</label></div></div>
       <div class="form-group"><label>Etiquetas</label><div style="display:flex;gap:12px"><label><input type="checkbox" class="prod-etiqueta" value="nuevo"> Nuevo</label><label><input type="checkbox" class="prod-etiqueta" value="popular"> Popular</label><label><input type="checkbox" class="prod-etiqueta" value="oferta"> Oferta</label></div></div>
       <button type="submit" class="btn btn-primary">Guardar Producto</button>
     </form>
     <p id="prod-msg" class="msg hidden"></p>
+  </div>
+</div>
+
+<div id="modal-descuento" class="modal hidden">
+  <div class="modal-overlay" id="modal-overlay-desc"></div>
+  <div class="modal-content">
+    <div class="modal-header"><h3 id="desc-modal-title">Nuevo Descuento</h3><button class="modal-close" id="modal-close-desc">&times;</button></div>
+    <form id="descuento-form">
+      <div class="form-group">
+        <label>Producto *</label>
+        <select id="desc-producto" required class="form-select"></select>
+      </div>
+      <div class="form-group">
+        <label>Tiers de descuento</label>
+        <p class="help-text">Agregá los rangos de cantidad con su respectivo descuento (monto fijo a restar del precio).</p>
+        <div id="desc-tiers-container"></div>
+        <button type="button" id="btn-add-tier" class="btn btn-sm" style="margin-top:8px">+ Agregar tier</button>
+      </div>
+      <button type="submit" class="btn btn-primary" style="margin-top:16px">Guardar</button>
+    </form>
+    <p id="desc-msg" class="msg hidden"></p>
   </div>
 </div>
 

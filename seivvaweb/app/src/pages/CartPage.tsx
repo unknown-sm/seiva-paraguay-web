@@ -11,7 +11,7 @@ export default function CartPage() {
     return (
       <main className="pt-24 pb-20" style={{ backgroundColor: 'var(--theme-bg, #FAF3E8)', minHeight: '100vh' }}>
         <div className="container-main text-center py-20">
-          <ShoppingBag className="w-16 h-16 mx-auto mb-6" style={{ color: 'var(--theme-primary, #2D6A4F)' }} />
+          <ShoppingBag className="w-16 h-16 mx-auto mb-6" style={{ color: 'var(--theme-primary, #1B4332)' }} />
           <h1 className="font-display font-bold text-2xl mb-3" style={{ color: 'var(--theme-text, #3D2817)' }}>
             Tu carrito está vacío
           </h1>
@@ -46,7 +46,7 @@ export default function CartPage() {
                 className="flex gap-3 sm:gap-4 p-3 sm:p-4 rounded-2xl"
                 style={{ backgroundColor: 'var(--theme-surface, #FFFFFF)', boxShadow: '0 2px 12px rgba(27,67,50,0.06)' }}
               >
-                <Link to={`/producto/${product.id}`} className="shrink-0">
+                <Link to={`/producto/${product.slug || product.id}`} className="shrink-0">
                   <img
                     src={product.imagen}
                     alt={product.nombre}
@@ -56,12 +56,12 @@ export default function CartPage() {
                 </Link>
 
                 <div className="flex-1 min-w-0">
-                  <Link to={`/producto/${product.id}`} className="block">
+                  <Link to={`/producto/${product.slug || product.id}`} className="block">
                     <h3 className="font-display font-semibold text-base leading-snug truncate" style={{ color: 'var(--theme-text, #3D2817)' }}>
                       {product.nombre}
                     </h3>
                   </Link>
-                  <p className="font-body font-bold mt-1" style={{ color: 'var(--theme-primary, #2D6A4F)' }}>
+                  <p className="font-body font-bold mt-1" style={{ color: 'var(--theme-primary, #1B4332)' }}>
                     {formatPrice(product.precio)}
                   </p>
 
@@ -94,7 +94,7 @@ export default function CartPage() {
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
-                  <span className="font-body font-bold" style={{ color: 'var(--theme-primary, #2D6A4F)' }}>
+                  <span className="font-body font-bold" style={{ color: 'var(--theme-primary, #1B4332)' }}>
                     {formatPrice(product.precio * quantity)}
                   </span>
                 </div>
@@ -126,7 +126,7 @@ export default function CartPage() {
               </div>
               <div className="flex justify-between font-body" style={{ color: 'var(--theme-muted, #5C4033)' }}>
                 <span>Envío</span>
-                <span style={{ color: 'var(--theme-primary, #2D6A4F)' }}>A coordinar</span>
+                <span style={{ color: 'var(--theme-primary, #1B4332)' }}>A coordinar</span>
               </div>
             </div>
 
@@ -135,7 +135,7 @@ export default function CartPage() {
               style={{ borderTop: '1px solid rgba(61,40,23,0.1)' }}
             >
               <span className="font-display font-bold text-lg" style={{ color: 'var(--theme-text, #3D2817)' }}>Total</span>
-              <span className="font-body font-bold text-2xl" style={{ color: 'var(--theme-primary, #2D6A4F)' }}>
+              <span className="font-body font-bold text-2xl" style={{ color: 'var(--theme-primary, #1B4332)' }}>
                 {formatPrice(totalPrice)}
               </span>
             </div>
@@ -156,7 +156,7 @@ export default function CartPage() {
             <Link
               to="/tienda"
               className="block text-center mt-4 font-body font-medium text-sm"
-              style={{ color: 'var(--theme-primary, #2D6A4F)' }}
+              style={{ color: 'var(--theme-primary, #1B4332)' }}
             >
               Seguir comprando
             </Link>

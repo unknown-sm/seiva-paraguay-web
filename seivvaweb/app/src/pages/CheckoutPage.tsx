@@ -31,6 +31,35 @@ export default function CheckoutPage() {
   const [sending, setSending] = useState(false)
   const [pedidoId, setPedidoId] = useState<number | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [envioCosto, setEnvioCosto] = useState(0)
+  const [envioCiudad, setEnvioCiudad] = useState('')
+  const [envioTipo, setEnvioTipo] = useState<'delivery' | 'encomienda'>('delivery')
+  const [envioMinimoGratis, setEnvioMinimoGratis] = useState(0)
+  const [qrInfo, setQrInfo] = useState<{ activo: boolean; imagen: string; instrucciones: string }>({ activo: false, imagen: '', instrucciones: '' })
+
+  useEffect(() => {
+    if (!ciudadSeleccionada) { setEnvioCosto(0); setEnvioCiudad(''); setEnvioTipo('delivery'); return }
+    fetch('/api/envios').then(r => r.json()).then((data) => {
+      const match = data.find((e: any) =>
+        e.ciudad.toLowerCase() === ciudadSeleccionada.toLowerCase() ||
+        e.ciudad === 'Otra ciudad'
+      )
+      if (match) {
+        setEnvioCosto(match.costo)
+        setEnvioCiudad(match.ciudad)
+        setEnvioTipo(match.tipo || 'delivery')
+      }
+    }).catch(() => {})
+  }, [ciudadSeleccionada])
+
+  useEffect(() => {
+    fetch('/api/contenido').then(r => r.json()).then((data) => {
+      if (data.qr_activo === '1' || data.qr_activo === 'true') {
+        setQrInfo({ activo: true, imagen: data.qr_imagen || '', instrucciones: data.qr_instrucciones || '' })
+      }
+      setEnvioMinimoGratis(parseInt(data.envio_minimo_gratis) || 0)
+    }).catch(() => {})
+  }, [])
 
   const ciudadRef = useRef<HTMLDivElement>(null)
 
@@ -83,6 +112,10 @@ export default function CheckoutPage() {
     return Object.keys(newErrors).length === 0
   }
 
+  const envioGratis = envioTipo === 'delivery' && envioMinimoGratis > 0 && totalPrice >= envioMinimoGratis
+  const envioTotal = envioTipo === 'delivery' ? (envioGratis ? 0 : envioCosto) : 0
+  const totalConEnvio = totalPrice + envioTotal
+
   const handleSubmitPedido = async () => {
     if (!validate()) return
     setSending(true)
@@ -99,7 +132,7 @@ export default function CheckoutPage() {
         whatsapp: telefono,
         direccion: `${direccion}, ${ciudad}, ${departamento}${codigoPostal ? `, CP: ${codigoPostal}` : ''}${ruc ? `, RUC: ${ruc}` : ''}`,
         productos,
-        total: totalPrice,
+        total: totalConEnvio,
         metodo_pago: metodoPago,
         notas
       })
@@ -108,8 +141,14 @@ export default function CheckoutPage() {
 
       setTimeout(() => {
         const lines = items.map(i => `• ${i.product.nombre} x${i.quantity} = ${formatPrice(i.product.precio * i.quantity)}`)
+        let envioLine = ''
+        if (envioTipo === 'delivery') {
+          envioLine = envioGratis ? '\n*Delivery:* Gratis' : `\n*Delivery:* ${formatPrice(envioCosto)}`
+        } else {
+          envioLine = '\n*Envío:* Encomienda (a consultar)'
+        }
         const msg = encodeURIComponent(
-          `Hola Seiva! Acabo de hacer el pedido #${result.id}:\n\n${lines.join('\n')}\n\n*Total: ${formatPrice(totalPrice)}*\n\nNombre: ${nombre} ${apellido}\nDirección: ${direccion}, ${ciudad}, ${departamento}`
+          `Hola Seiva! Acabo de hacer el pedido #${result.id}:\n\n${lines.join('\n')}${envioLine}\n\n*Total: ${formatPrice(totalConEnvio)}*\n\nNombre: ${nombre} ${apellido}\nDirección: ${direccion}, ${ciudad}, ${departamento}`
         )
         window.open(`https://wa.me/595992120303?text=${msg}`, '_blank')
       }, 1500)
@@ -360,6 +399,7 @@ export default function CheckoutPage() {
                     { value: 'whatsapp', label: 'WhatsApp (pago a coordinar)', icon: MessageCircle, desc: 'Te contactaremos por WhatsApp para coordinar el pago' },
                     { value: 'efectivo', label: 'Efectivo al recibir', icon: CreditCard, desc: 'Pagás cuando recibís el producto' },
                     { value: 'transferencia', label: 'Transferencia bancaria', icon: Package, desc: 'Te enviamos los datos para transferir' },
+                    ...(qrInfo.activo ? [{ value: 'qr', label: 'Pago QR', icon: CreditCard, desc: qrInfo.instrucciones }] : []),
                   ].map(option => (
                     <button
                       key={option.value}
@@ -385,6 +425,16 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
+              {metodoPago === 'qr' && qrInfo.imagen && (
+                <div className="rounded-xl p-6 text-center" style={{ backgroundColor: 'var(--theme-surface, #FFFFFF)', boxShadow: '0 2px 12px rgba(27,67,50,0.06)' }}>
+                  <h3 className="font-body font-semibold text-sm mb-3" style={{ color: 'var(--theme-text, #3D2817)' }}>Escaneá el QR para pagar</h3>
+                  <img src={qrInfo.imagen} alt="QR de pago" className="mx-auto rounded-lg" style={{ maxWidth: 200, maxHeight: 200 }} />
+                  {qrInfo.instrucciones && (
+                    <p className="font-body text-xs mt-3" style={{ color: 'var(--theme-muted, #5C4033)' }}>{qrInfo.instrucciones}</p>
+                  )}
+                </div>
+              )}
+
               {/* Submit */}
               <button
                 onClick={handleSubmitPedido}
@@ -392,7 +442,7 @@ export default function CheckoutPage() {
                 className="w-full font-body font-semibold text-sm py-4 rounded-lg transition-all duration-300 hover:scale-[1.02] disabled:opacity-50"
                 style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: '#FFFFFF' }}
               >
-                {sending ? 'Procesando...' : `Completar pedido — ${formatPrice(totalPrice)}`}
+                {sending ? 'Procesando...' : `Completar pedido — ${formatPrice(totalConEnvio)}`}
               </button>
 
               <div className="flex items-center justify-center gap-1 text-xs font-body" style={{ color: 'var(--theme-muted, #5C4033)' }}>
@@ -448,17 +498,24 @@ export default function CheckoutPage() {
                   <span>Subtotal</span>
                   <span>{formatPrice(totalPrice)}</span>
                 </div>
-                <div className="flex justify-between font-body text-sm" style={{ color: 'var(--theme-muted, #5C4033)' }}>
-                  <span>Envío</span>
-                  <span style={{ color: 'var(--theme-primary, #1B4332)' }}>A coordinar</span>
-                </div>
+                {envioTipo === 'delivery' ? (
+                  <div className="flex justify-between font-body text-sm" style={{ color: 'var(--theme-muted, #5C4033)' }}>
+                    <span>Delivery ({envioCiudad})</span>
+                    <span style={{ color: 'var(--theme-primary, #1B4332)' }}>{envioGratis ? 'Gratis' : formatPrice(envioCosto)}</span>
+                  </div>
+                ) : envioTipo === 'encomienda' ? (
+                  <div className="flex justify-between font-body text-sm" style={{ color: 'var(--theme-muted, #5C4033)' }}>
+                    <span>Encomienda</span>
+                    <span style={{ color: 'var(--theme-muted, #5C4033)' }}>A consultar</span>
+                  </div>
+                ) : null}
                 <div
                   className="flex justify-between items-center pt-3"
                   style={{ borderTop: '1px solid rgba(61,40,23,0.1)' }}
                 >
                   <span className="font-body font-bold text-base" style={{ color: 'var(--theme-text, #3D2817)' }}>Total</span>
                   <span className="font-body font-bold text-xl" style={{ color: 'var(--theme-primary, #1B4332)' }}>
-                    {formatPrice(totalPrice)}
+                    {formatPrice(totalConEnvio)}
                   </span>
                 </div>
               </div>

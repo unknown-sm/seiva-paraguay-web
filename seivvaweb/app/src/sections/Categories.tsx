@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { fetchProducts, formatPrice, generateWhatsAppLink, type Product } from '../services/api'
+import { fetchProducts, formatPrice, generateWhatsAppLink, stripHtml, type Product } from '../services/api'
 import ProductSkeleton from '../components/ProductSkeleton'
 
 export default function Categories() {
@@ -70,14 +70,14 @@ export default function Categories() {
     <section
       id="categories"
       ref={sectionRef}
-      className="py-10 lg:py-14"
-      style={{ backgroundColor: 'var(--theme-bg, #FAF3E8)' }}
+      className="py-12 lg:py-16"
+      style={{ backgroundColor: 'var(--theme-bg, #F2EDE6)' }}
     >
       <div className="container-main">
         <div ref={headerRef} className="text-center mb-12">
           <div
             className="animate-in font-body font-semibold text-xs tracking-[0.1em] mb-3"
-            style={{ color: 'var(--theme-primary, #2D6A4F)' }}
+            style={{ color: 'var(--theme-primary, #1B4332)' }}
           >
             NUESTROS PRODUCTOS
           </div>
@@ -98,67 +98,69 @@ export default function Categories() {
         {loading ? (
           <ProductSkeleton count={6} className="lg:grid-cols-3" />
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {products.map((product, i) => (
               <div
                 key={product.id}
                 ref={(el) => { cardsRef.current[i] = el }}
-                className="group rounded-[20px] p-3 sm:p-5 transition-all duration-300 hover:-translate-y-2 cursor-pointer"
+                className="group rounded-2xl p-4 sm:p-6 transition-all duration-300 hover:-translate-y-1.5 cursor-pointer"
                 style={{
-                  backgroundColor: 'var(--theme-surface, #FDF8F0)',
-                  boxShadow: '0 8px 32px rgba(27, 67, 50, 0.12)',
-                  border: '1px solid rgba(27, 67, 50, 0.06)',
+                  backgroundColor: 'var(--theme-surface, #FFFFFF)',
+                  boxShadow: '0 2px 12px rgba(45, 106, 79, 0.10), 0 0 0 1px var(--theme-border, rgba(45, 106, 79, 0.08))',
                 }}
-                onClick={() => navigate(`/producto/${product.id}`)}
+                onClick={() => navigate(`/producto/${product.slug || product.id}`)}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLDivElement).style.boxShadow = '0 16px 48px rgba(27, 67, 50, 0.18)'
+                  (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 32px rgba(45, 106, 79, 0.18), 0 0 0 1px rgba(45, 106, 79, 0.12)'
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 32px rgba(27, 67, 50, 0.12)'
-                  ;(e.currentTarget as HTMLDivElement).style.backgroundColor = 'var(--theme-surface, #FDF8F0)'
+                  (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 12px rgba(45, 106, 79, 0.10), 0 0 0 1px rgba(45, 106, 79, 0.08)'
                 }}
               >
                 <div
-                  className="relative rounded-2xl h-[200px] sm:h-[240px] flex items-center justify-center overflow-hidden"
-                  style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}
+                  className="relative rounded-xl overflow-hidden"
+                  style={{ backgroundColor: 'var(--theme-surface, #FFFFFF)', border: '1px solid var(--theme-border, #F0EDE8)', height: '220px' }}
                 >
+                  <img
+                    src={product.imagen}
+                    alt={product.nombre}
+                    className="absolute inset-0 w-full h-full object-contain p-4 transition-transform duration-300 group-hover:scale-105"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none'
+                    }}
+                  />
                   <span
-                    className="absolute top-2 left-2 font-body font-semibold text-[9px] px-2 py-0.5 rounded-full tracking-wider z-10"
+                    className="absolute top-3 left-3 font-body font-semibold text-[10px] px-2.5 py-1 rounded-full tracking-wider"
                     style={{
-                      backgroundColor: 'rgba(27, 67, 50, 0.8)',
+                      backgroundColor: 'var(--theme-primary, #1B4332)',
                       color: '#FFFFFF',
+                      zIndex: 10,
                     }}
                   >
                     {product.categoria.toUpperCase()}
                   </span>
                   {product.precio_anterior && (
                     <span
-                      className="absolute bottom-2 right-2 font-body font-semibold text-[9px] px-2 py-0.5 rounded-full z-10"
-                      style={{ backgroundColor: '#E63946', color: '#FFFFFF' }}
+                      className="absolute top-3 right-3 font-body font-semibold text-[10px] px-2.5 py-1 rounded-full"
+                      style={{ backgroundColor: '#E63946', color: '#FFFFFF', zIndex: 10 }}
                     >
                       OFERTA
                     </span>
                   )}
-                  <img
-                    src={product.imagen}
-                    alt={product.nombre}
-                    className="h-full w-full object-contain p-2 transition-transform duration-300 group-hover:scale-105"
-                  />
                 </div>
 
                 <h3
-                  className="font-body font-semibold text-sm sm:text-base mt-2 sm:mt-3 leading-snug"
-                  style={{ color: 'var(--theme-text, #3D2817)' }}
+                  className="font-body font-semibold text-sm sm:text-base mt-4 leading-snug"
+                  style={{ color: 'var(--theme-text, #1A1A1A)' }}
                 >
                   {product.nombre}
                 </h3>
-                <p className="font-body text-xs sm:text-sm mt-1 sm:mt-2 leading-relaxed line-clamp-1" style={{ color: 'var(--theme-muted, #5C4033)' }}>
-                  {product.descripcion}
+                <p className="font-body text-xs sm:text-sm mt-1.5 leading-relaxed line-clamp-1" style={{ color: 'var(--theme-muted, #6B6B6B)' }}>
+                  {stripHtml(product.descripcion)}
                 </p>
 
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4 gap-2">
-                  <div className="flex flex-wrap items-baseline gap-x-1">
-                    <span className="font-body font-bold text-sm sm:text-xl" style={{ color: 'var(--theme-primary, #2D6A4F)' }}>
+                  <div className="flex flex-wrap items-baseline gap-x-2">
+                    <span className="font-body font-bold text-sm sm:text-xl" style={{ color: 'var(--theme-primary, #1B4332)' }}>
                       {formatPrice(product.precio)}
                     </span>
                     {product.precio_anterior && (
@@ -172,7 +174,7 @@ export default function Categories() {
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="font-body font-semibold text-xs px-4 py-2 rounded-full transition-all duration-300 hover:scale-105 inline-flex items-center justify-center gap-1.5 w-full sm:w-auto"
+                    className="font-body font-semibold text-xs px-5 py-2.5 rounded-full transition-all duration-300 hover:scale-105 inline-flex items-center justify-center gap-1.5 w-full sm:w-auto"
                     style={{
                       backgroundColor: '#25D366',
                       color: '#FFFFFF',

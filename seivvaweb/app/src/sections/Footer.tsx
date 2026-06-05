@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Leaf, Instagram, Facebook, Twitter } from 'lucide-react'
@@ -7,7 +8,11 @@ gsap.registerPlugin(ScrollTrigger)
 
 const productLinks = ['Espirulina', 'Ashwagandha', 'Matcha', 'Cúrcuma', 'Maca']
 const companyLinks = ['Sobre Nosotros', 'Nuestro Proceso', 'Certificaciones', 'Blog']
-const supportLinks = ['Contacto', 'Preguntas Frecuentes', 'Envíos', 'Devoluciones']
+const supportLinks = [
+  { label: 'Contacto', to: '/contacto' },
+  { label: 'Preguntas Frecuentes', to: '/faq' },
+  { label: 'Políticas', to: '/politicas' },
+]
 
 export default function Footer() {
   const footerRef = useRef<HTMLElement>(null)
@@ -166,16 +171,16 @@ export default function Footer() {
               </h4>
               <ul className="space-y-2.5">
                 {supportLinks.map((link) => (
-                  <li key={link}>
-                    <a
-                      href="#"
+                  <li key={link.to}>
+                    <Link
+                      to={link.to}
                       className="font-body text-sm transition-colors duration-300"
                       style={{ color: 'rgba(255,255,255,0.7)' }}
                       onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#FFFFFF' }}
                       onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.7)' }}
                     >
-                      {link}
-                    </a>
+                      {link.label}
+                    </Link>
                   </li>
                 ))}
               </ul>

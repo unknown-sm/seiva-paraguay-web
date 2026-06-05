@@ -62,7 +62,7 @@ export default function StatsBar() {
           <div key={i} className="stat-item flex items-center gap-3">
             <stat.icon
               className="w-5 h-5 flex-shrink-0"
-              style={{ color: stat.fill ? 'var(--theme-accent, #D4A843)' : 'var(--theme-primary, #2D6A4F)' }}
+              style={{ color: stat.fill ? 'var(--theme-accent, #D4A843)' : 'var(--theme-primary, #1B4332)' }}
               fill={stat.fill ? '#D4A843' : 'none'}
             />
             <div>

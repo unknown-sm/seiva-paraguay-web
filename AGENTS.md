@@ -86,13 +86,13 @@ Ver `CONTEXT-SAVE.md` para detalle completo.
 @C:/Users/salaz/.config/opencode/skills/superpowers/skills/receiving-code-review/SKILL.md
 @C:/Users/salaz/.config/opencode/skills/superpowers/skills/requesting-code-review/SKILL.md
 @C:/Users/salaz/.config/opencode/skills/superpowers/skills/subagent-driven-development/SKILL.md
-@C:/Users/salaz/.config/opencode/skills/superpowers/skills/systematic-debugging/SKILL.md
-@C:/Users/salaz/.config/opencode/skills/superpowers/skills/test-driven-development/SKILL.md
+@C:/Users/salaz/.config/opencode/skills/mattpocock-skills/skills/engineering/diagnose/SKILL.md
+@C:/Users/salaz/.config/opencode/skills/mattpocock-skills/skills/engineering/tdd/SKILL.md
 @C:/Users/salaz/.config/opencode/skills/superpowers/skills/using-git-worktrees/SKILL.md
 @C:/Users/salaz/.config/opencode/skills/superpowers/skills/using-superpowers/SKILL.md
 @C:/Users/salaz/.config/opencode/skills/superpowers/skills/verification-before-completion/SKILL.md
 @C:/Users/salaz/.config/opencode/skills/superpowers/skills/writing-plans/SKILL.md
-@C:/Users/salaz/.config/opencode/skills/superpowers/skills/writing-skills/SKILL.md
+@C:/Users/salaz/.config/opencode/skills/mattpocock-skills/skills/productivity/write-a-skill/SKILL.md
 
 @C:/Users/salaz/.config/opencode/skills/frontend-design/skills/frontend-design/SKILL.md
 
@@ -104,3 +104,16 @@ Ver `CONTEXT-SAVE.md` para detalle completo.
 @C:/Users/salaz/.config/opencode/skills/mcp-builder/SKILL.md
 @C:/Users/salaz/.config/opencode/skills/file-organizer/SKILL.md
 @C:/Users/salaz/.config/opencode/skills/senior-prompt-engineer/SKILL.md
+
+@C:/Users/salaz/.config/opencode/skills/mattpocock-skills/skills/engineering/grill-with-docs/SKILL.md
+@C:/Users/salaz/.config/opencode/skills/mattpocock-skills/skills/engineering/improve-codebase-architecture/SKILL.md
+@C:/Users/salaz/.config/opencode/skills/mattpocock-skills/skills/engineering/prototype/SKILL.md
+@C:/Users/salaz/.config/opencode/skills/mattpocock-skills/skills/engineering/setup-matt-pocock-skills/SKILL.md
+@C:/Users/salaz/.config/opencode/skills/mattpocock-skills/skills/engineering/to-issues/SKILL.md
+@C:/Users/salaz/.config/opencode/skills/mattpocock-skills/skills/engineering/to-prd/SKILL.md
+@C:/Users/salaz/.config/opencode/skills/mattpocock-skills/skills/engineering/triage/SKILL.md
+@C:/Users/salaz/.config/opencode/skills/mattpocock-skills/skills/engineering/zoom-out/SKILL.md
+
+@C:/Users/salaz/.config/opencode/skills/mattpocock-skills/skills/productivity/grill-me/SKILL.md
+@C:/Users/salaz/.config/opencode/skills/mattpocock-skills/skills/productivity/handoff/SKILL.md
+

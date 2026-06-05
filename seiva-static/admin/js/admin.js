@@ -1,6 +1,6 @@
 var API = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
-  ? "http://localhost:3001/api"
-  : "http://85.239.246.177:3001/api";
+  ? "http://85.239.246.177:3001/api"
+  : "/api";
 var token = localStorage.getItem("seiva-admin-token");
 
 function api(url, opts) {
@@ -14,6 +14,7 @@ function api(url, opts) {
   });
 }
 
+function xt(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function formatGs(n) { return "Gs." + Number(n).toLocaleString("es-PY"); }
 function formatDate(d) { return new Date(d).toLocaleDateString("es-PY", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }); }
 
@@ -42,7 +43,7 @@ function toast(msg, type) {
 function getTabFromUrl() {
   var params = new URLSearchParams(window.location.search);
   var tab = params.get("tab");
-  var validTabs = ["dashboard", "pedidos", "productos", "stock", "venta", "historico", "contenido", "analytics"];
+  var validTabs = ["dashboard", "pedidos", "productos", "descuentos", "stock", "venta", "historico", "contenido", "analytics"];
   if (tab && validTabs.indexOf(tab) !== -1) return "tab-" + tab;
   return "tab-dashboard";
 }
@@ -65,10 +66,14 @@ function switchTab(tabId, skipUrl) {
     "tab-dashboard": "Dashboard",
     "tab-pedidos": "Pedidos",
     "tab-productos": "Productos",
+    "tab-descuentos": "Descuentos por Cantidad",
+    "tab-categorias": "Categor&iacute;as",
     "tab-stock": "Alertas de Stock",
     "tab-venta": "Nueva Venta",
+    "tab-envios": "Env&iacute;os",
     "tab-historico": "Histórico",
     "tab-contenido": "Contenido",
+    "tab-paginas": "P&aacute;ginas",
     "tab-analytics": "Analytics"
   };
   document.getElementById("page-title").textContent = titles[tabId] || "Dashboard";
@@ -81,10 +86,14 @@ function switchTab(tabId, skipUrl) {
   if (tabId === "tab-dashboard") loadDashboard();
   if (tabId === "tab-pedidos") loadPedidos();
   if (tabId === "tab-productos") loadProductos();
+  if (tabId === "tab-descuentos") loadDescuentos();
+  if (tabId === "tab-categorias") loadCategorias();
   if (tabId === "tab-stock") loadStockAlertas();
+  if (tabId === "tab-envios") loadEnvios();
   if (tabId === "tab-historico") loadHistorico();
   if (tabId === "tab-contenido") loadContenido();
   if (tabId === "tab-analytics") loadAnalytics();
+  if (tabId === "tab-paginas") loadPaginas();
 }
 
 // Handle browser back/forward
@@ -265,18 +274,23 @@ function editarProducto(id) {
   api("/productos/all").then(function(data) {
     var prod = data.find(function(p) { return p.id === id; });
     if (!prod) return;
+    loadCategoriasSelect("prod-categoria");
     document.getElementById("modal-title").textContent = "Editar Producto";
     document.getElementById("prod-id").value = prod.id;
     document.getElementById("prod-nombre").value = prod.nombre;
     document.getElementById("prod-precio").value = prod.precio;
     document.getElementById("prod-precio-anterior").value = prod.precio_anterior || "";
-    document.getElementById("prod-categoria").value = prod.categoria;
     document.getElementById("prod-subcategoria").value = prod.subcategoria;
     document.getElementById("prod-descripcion").value = prod.descripcion || "";
+    document.getElementById("prod-descripcion_larga").value = prod.descripcion_larga || "";
     document.getElementById("prod-stock").value = prod.stock || 0;
     document.getElementById("prod-destacado").checked = prod.destacado;
     document.getElementById("prod-activo").checked = prod.activo;
     document.querySelectorAll(".prod-etiqueta").forEach(function(cb) { cb.checked = (prod.etiquetas || []).indexOf(cb.value) !== -1; });
+    // Set category after it loads
+    setTimeout(function() {
+      document.getElementById("prod-categoria").value = prod.categoria_id || "";
+    }, 100);
     document.getElementById("modal-producto").classList.remove("hidden");
   });
 }
@@ -297,14 +311,15 @@ function eliminarProducto(id) {
 }
 
 function nuevoProducto() {
+  loadCategoriasSelect("prod-categoria");
   document.getElementById("modal-title").textContent = "Nuevo Producto";
   document.getElementById("prod-id").value = "";
   document.getElementById("prod-nombre").value = "";
   document.getElementById("prod-precio").value = "";
   document.getElementById("prod-precio-anterior").value = "";
-  document.getElementById("prod-categoria").value = "snacks";
   document.getElementById("prod-subcategoria").value = "chocolate";
   document.getElementById("prod-descripcion").value = "";
+  document.getElementById("prod-descripcion_larga").value = "";
   document.getElementById("prod-stock").value = "50";
   document.getElementById("prod-destacado").checked = false;
   document.getElementById("prod-activo").checked = true;
@@ -325,13 +340,16 @@ document.getElementById("producto-form").addEventListener("submit", function(e) 
   var id = document.getElementById("prod-id").value;
   var etiquetas = [];
   document.querySelectorAll(".prod-etiqueta:checked").forEach(function(cb) { etiquetas.push(cb.value); });
+  var catId = parseInt(document.getElementById("prod-categoria").value) || null;
   var body = {
     nombre: document.getElementById("prod-nombre").value,
     precio: parseInt(document.getElementById("prod-precio").value) || 0,
     precio_anterior: parseInt(document.getElementById("prod-precio-anterior").value) || null,
-    categoria: document.getElementById("prod-categoria").value,
+    categoria_id: catId,
     subcategoria: document.getElementById("prod-subcategoria").value,
     descripcion: document.getElementById("prod-descripcion").value,
+    descripcion_larga: document.getElementById("prod-descripcion_larga").value,
+    galeria: [],
     stock: parseInt(document.getElementById("prod-stock").value) || 0,
     destacado: document.getElementById("prod-destacado").checked,
     activo: document.getElementById("prod-activo").checked,
@@ -460,7 +478,13 @@ function loadContenido() {
   api("/contenido").then(function(data) {
     for (var key in data) {
       var el = document.getElementById("contenido-" + key);
-      if (el) el.value = data[key];
+      if (el) {
+        if (el.type === "checkbox") {
+          el.checked = data[key] === "1" || data[key] === "true";
+        } else {
+          el.value = data[key];
+        }
+      }
     }
   });
 }
@@ -468,10 +492,11 @@ function loadContenido() {
 document.getElementById("contenido-form").addEventListener("submit", function(e) {
   e.preventDefault();
   var body = {};
-  var keys = ["hero_titulo", "hero_descripcion", "whatsapp_numero", "site_titulo", "site_descripcion"];
+  var keys = ["hero_titulo", "hero_descripcion", "whatsapp_numero", "site_titulo", "site_descripcion", "qr_imagen", "qr_instrucciones", "envio_minimo_gratis"];
   for (var i = 0; i < keys.length; i++) {
     body[keys[i]] = document.getElementById("contenido-" + keys[i]).value;
   }
+  body.qr_activo = document.getElementById("contenido-qr_activo").checked ? "1" : "0";
   api("/contenido", { method: "PUT", body: JSON.stringify(body) }).then(function() {
     toast("Contenido guardado");
   });
@@ -627,4 +652,420 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   renderVentaProductos();
+});
+
+// ---------- CATEGORIAS ----------
+function loadCategorias() {
+  api("/categorias").then(function(cats) {
+    var tbody = document.getElementById("categorias-tbody");
+    tbody.innerHTML = "";
+    if (!cats || !cats.length) { tbody.innerHTML = "<tr><td colspan='4' class='empty-row'>Sin categor&iacute;as</td></tr>"; return; }
+    for (var c of cats) {
+      tbody.innerHTML += "<tr><td>" + xt(c.nombre) + "</td><td><code>/" + xt(c.slug) + "</code></td><td>" + (c.activo ? "✅" : "❌") + "</td><td><button class='btn btn-small' onclick='editCategoria(" + c.id + ")'>Editar</button> <button class='btn btn-small btn-danger' onclick='deleteCategoria(" + c.id + ")'>Eliminar</button></td></tr>";
+    }
+  });
+}
+
+function editCategoria(id) {
+  api("/categorias").then(function(cats) {
+    var c = cats.find(function(x) { return x.id === id; });
+    if (!c) return;
+    document.getElementById("cat-id").value = c.id;
+    document.getElementById("cat-nombre").value = c.nombre || "";
+    document.getElementById("cat-slug").value = c.slug || "";
+    document.getElementById("cat-descripcion").value = c.descripcion || "";
+    document.getElementById("cat-activo").checked = !!c.activo;
+    document.getElementById("cat-modal-title").textContent = "Editar Categor&iacute;a";
+    document.getElementById("tab-modal-categoria").classList.remove("hidden");
+    document.getElementById("cat-msg").classList.add("hidden");
+  });
+}
+
+function deleteCategoria(id) {
+  if (!confirm("Eliminar categor&iacute;a? Los productos se desvincular&aacute;n.")) return;
+  api("/categorias/" + id, { method: "DELETE" }).then(function() {
+    toast("Categor&iacute;a eliminada");
+    loadCategorias();
+  });
+}
+
+function loadCategoriasSelect(selectId) {
+  api("/categorias").then(function(cats) {
+    var sel = document.getElementById(selectId);
+    if (!sel) return;
+    sel.innerHTML = '<option value="">Sin categor&iacute;a</option>';
+    for (var c of cats) {
+      if (!c.activo) continue;
+      sel.innerHTML += '<option value="' + c.id + '">' + xt(c.nombre) + '</option>';
+    }
+  });
+}
+
+// ---------- ENVIOS ----------
+function loadEnvios() {
+  api("/envios/all").then(function(rows) {
+    var tbody = document.getElementById("envios-tbody");
+    tbody.innerHTML = "";
+    if (!rows || !rows.length) { tbody.innerHTML = "<tr><td colspan='5' class='empty-row'>Sin zonas de env&iacute;o</td></tr>"; return; }
+    for (var r of rows) {
+      var tipoLabel = r.tipo === 'delivery' ? '🚚 Delivery' : '📦 Encomienda';
+      tbody.innerHTML += "<tr><td>" + xt(r.ciudad) + "</td><td>" + xt(r.departamento) + "</td><td>" + tipoLabel + "</td><td>" + (r.tipo === 'delivery' ? 'Gs.' + (r.costo || 0).toLocaleString('es-PY') : '-') + "</td><td>" + (r.activo ? "✅" : "❌") + "</td><td><button class='btn btn-small' onclick='editEnvio(" + r.id + ")'>Editar</button> <button class='btn btn-small btn-danger' onclick='deleteEnvio(" + r.id + ")'>Eliminar</button></td></tr>";
+    }
+  });
+}
+
+function editEnvio(id) {
+  api("/envios/all").then(function(rows) {
+    var r = rows.find(function(x) { return x.id === id; });
+    if (!r) return;
+    document.getElementById("env-id").value = r.id;
+    document.getElementById("env-ciudad").value = r.ciudad || "";
+    document.getElementById("env-departamento").value = r.departamento || "";
+    document.getElementById("env-tipo").value = r.tipo || 'delivery';
+    document.getElementById("env-costo").value = r.costo || 0;
+    document.getElementById("env-activo").checked = !!r.activo;
+    toggleEnvioCosto();
+    document.getElementById("env-modal-title").textContent = "Editar Zona de Env&iacute;o";
+    document.getElementById("tab-modal-envio").classList.remove("hidden");
+    document.getElementById("env-msg").classList.add("hidden");
+  });
+}
+
+function toggleEnvioCosto() {
+  var tipo = document.getElementById("env-tipo").value;
+  document.getElementById("env-costo-group").style.display = tipo === 'delivery' ? '' : 'none';
+}
+
+function deleteEnvio(id) {
+  if (!confirm("Eliminar zona de env&iacute;o?")) return;
+  api("/envios/" + id, { method: "DELETE" }).then(function() { toast("Eliminada"); loadEnvios(); });
+}
+
+// ---------- PAGINAS ----------
+function loadPaginas() {
+  api("/paginas").then(function(pags) {
+    var tbody = document.getElementById("paginas-tbody");
+    tbody.innerHTML = "";
+    if (!pags || !pags.length) { tbody.innerHTML = "<tr><td colspan='4' class='empty-row'>Sin p&aacute;ginas</td></tr>"; return; }
+    for (var p of pags) {
+      tbody.innerHTML += "<tr><td>" + xt(p.titulo) + "</td><td><code>/" + xt(p.slug) + "</code></td><td>" + (p.activo ? "✅" : "❌") + "</td><td><button class='btn btn-small' onclick='editPagina(" + p.id + ")'>Editar</button> <button class='btn btn-small btn-danger' onclick='deletePagina(" + p.id + ")'>Eliminar</button></td></tr>";
+    }
+  }).catch(function() {});
+}
+
+function editPagina(id) {
+  api("/paginas").then(function(pags) {
+    var p = pags.find(function(x) { return x.id === id; });
+    if (!p) return;
+    document.getElementById("pag-id").value = p.id;
+    document.getElementById("pag-titulo").value = p.titulo || "";
+    document.getElementById("pag-slug").value = p.slug || "";
+    document.getElementById("pag-contenido").value = p.contenido || "";
+    document.getElementById("pag-activo").checked = !!p.activo;
+    document.getElementById("pagina-modal-title").textContent = "Editar P&aacute;gina";
+    document.getElementById("modal-pagina").classList.remove("hidden");
+    document.getElementById("pag-msg").classList.add("hidden");
+  });
+}
+
+function deletePagina(id) {
+  if (!confirm("Eliminar p&aacute;gina?")) return;
+  api("/paginas/" + id, { method: "DELETE" }).then(function() {
+    toast("P&aacute;gina eliminada");
+    loadPaginas();
+  });
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("btn-nueva-pagina").addEventListener("click", function() {
+    document.getElementById("pag-id").value = "";
+    document.getElementById("pag-titulo").value = "";
+    document.getElementById("pag-slug").value = "";
+    document.getElementById("pag-contenido").value = "";
+    document.getElementById("pag-activo").checked = true;
+    document.getElementById("pagina-modal-title").textContent = "Nueva P&aacute;gina";
+    document.getElementById("modal-pagina").classList.remove("hidden");
+    document.getElementById("pag-msg").classList.add("hidden");
+  });
+
+  document.getElementById("pagina-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+    var id = document.getElementById("pag-id").value;
+    var data = {
+      titulo: document.getElementById("pag-titulo").value,
+      slug: document.getElementById("pag-slug").value,
+      contenido: document.getElementById("pag-contenido").value,
+      activo: document.getElementById("pag-activo").checked
+    };
+    var method = id ? "PUT" : "POST";
+    var url = id ? "/paginas/" + id : "/paginas";
+    api(url, { method: method, body: JSON.stringify(data) }).then(function(r) {
+      if (r.error) { document.getElementById("pag-msg").textContent = r.error; document.getElementById("pag-msg").classList.remove("hidden"); return; }
+      document.getElementById("modal-pagina").classList.add("hidden");
+      toast("P&aacute;gina guardada");
+      loadPaginas();
+    }).catch(function() {
+      document.getElementById("pag-msg").textContent = "Error al guardar";
+      document.getElementById("pag-msg").classList.remove("hidden");
+    });
+  });
+
+  document.getElementById("modal-close-pag").addEventListener("click", function() {
+    document.getElementById("modal-pagina").classList.add("hidden");
+  });
+  document.getElementById("modal-overlay-pag").addEventListener("click", function() {
+    document.getElementById("modal-pagina").classList.add("hidden");
+  });
+
+  // ---------- CATEGORIAS EVENTS ----------
+  document.getElementById("btn-nueva-categoria").addEventListener("click", function() {
+    document.getElementById("cat-id").value = "";
+    document.getElementById("cat-nombre").value = "";
+    document.getElementById("cat-slug").value = "";
+    document.getElementById("cat-descripcion").value = "";
+    document.getElementById("cat-activo").checked = true;
+    document.getElementById("cat-modal-title").textContent = "Nueva Categor&iacute;a";
+    document.getElementById("tab-modal-categoria").classList.remove("hidden");
+    document.getElementById("cat-msg").classList.add("hidden");
+  });
+
+  document.getElementById("categoria-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+    var id = document.getElementById("cat-id").value;
+    var data = {
+      nombre: document.getElementById("cat-nombre").value,
+      slug: document.getElementById("cat-slug").value,
+      descripcion: document.getElementById("cat-descripcion").value,
+      activo: document.getElementById("cat-activo").checked
+    };
+    var method = id ? "PUT" : "POST";
+    var url = id ? "/categorias/" + id : "/categorias";
+    api(url, { method: method, body: JSON.stringify(data) }).then(function(r) {
+      if (r.error) { document.getElementById("cat-msg").textContent = r.error; document.getElementById("cat-msg").classList.remove("hidden"); return; }
+      document.getElementById("tab-modal-categoria").classList.add("hidden");
+      toast("Categor&iacute;a guardada");
+      loadCategorias();
+    });
+  });
+
+  document.getElementById("modal-close-cat").addEventListener("click", function() {
+    document.getElementById("tab-modal-categoria").classList.add("hidden");
+  });
+  document.getElementById("modal-overlay-cat").addEventListener("click", function() {
+    document.getElementById("tab-modal-categoria").classList.add("hidden");
+  });
+
+  // ---------- ENVIOS EVENTS ----------
+  document.getElementById("btn-nuevo-envio").addEventListener("click", function() {
+    document.getElementById("env-id").value = "";
+    document.getElementById("env-ciudad").value = "";
+    document.getElementById("env-departamento").value = "";
+    document.getElementById("env-tipo").value = "delivery";
+    document.getElementById("env-costo").value = "15000";
+    document.getElementById("env-activo").checked = true;
+    toggleEnvioCosto();
+    document.getElementById("env-modal-title").textContent = "Nueva Zona de Env&iacute;o";
+    document.getElementById("tab-modal-envio").classList.remove("hidden");
+    document.getElementById("env-msg").classList.add("hidden");
+  });
+
+  document.getElementById("env-tipo").addEventListener("change", toggleEnvioCosto);
+
+  document.getElementById("envio-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+    var id = document.getElementById("env-id").value;
+    var data = {
+      ciudad: document.getElementById("env-ciudad").value,
+      departamento: document.getElementById("env-departamento").value,
+      tipo: document.getElementById("env-tipo").value,
+      costo: parseInt(document.getElementById("env-costo").value) || 0,
+      activo: document.getElementById("env-activo").checked
+    };
+    var method = id ? "PUT" : "POST";
+    var url = id ? "/envios/" + id : "/envios";
+    api(url, { method: method, body: JSON.stringify(data) }).then(function(r) {
+      if (r.error) { document.getElementById("env-msg").textContent = r.error; document.getElementById("env-msg").classList.remove("hidden"); return; }
+      document.getElementById("tab-modal-envio").classList.add("hidden");
+      toast("Zona guardada");
+      loadEnvios();
+    });
+  });
+
+  document.getElementById("modal-close-env").addEventListener("click", function() {
+    document.getElementById("tab-modal-envio").classList.add("hidden");
+  });
+  document.getElementById("modal-overlay-env").addEventListener("click", function() {
+    document.getElementById("tab-modal-envio").classList.add("hidden");
+  });
+
+  // ---------- DESCUENTOS ----------
+  var allProductos = [];
+  var descuentosByProducto = {};
+
+  function loadDescuentos() {
+    Promise.all([
+      api("/productos/all"),
+      api("/descuentos")
+    ]).then(function(results) {
+      allProductos = results[0];
+      var descuentos = results[1];
+
+      // Agrupar por producto
+      descuentosByProducto = {};
+      descuentos.forEach(function(d) {
+        if (!descuentosByProducto[d.producto_id]) {
+          descuentosByProducto[d.producto_id] = [];
+        }
+        descuentosByProducto[d.producto_id].push(d);
+      });
+
+      renderDescuentos();
+    });
+  }
+
+  function renderDescuentos() {
+    var container = document.getElementById("descuentos-lista");
+    var productoIds = Object.keys(descuentosByProducto);
+
+    if (productoIds.length === 0) {
+      container.innerHTML = '<p style="text-align:center;color:var(--muted);padding:40px">No hay descuentos configurados. Hacé clic en "+ Nuevo" para crear uno.</p>';
+      return;
+    }
+
+    var html = '<table class="admin-table"><thead><tr><th>Producto</th><th>Precio Base</th><th>Tiers</th><th>Acciones</th></tr></thead><tbody>';
+
+    productoIds.forEach(function(pid) {
+      var producto = allProductos.find(function(p) { return p.id === parseInt(pid); });
+      if (!producto) return;
+
+      var tiers = descuentosByProducto[pid];
+      var tiersHtml = tiers.map(function(t) {
+        var maxText = t.max_cantidad || '∞';
+        var precioFinal = producto.precio - t.descuento;
+        return '<div style="padding:4px 0;border-bottom:1px solid var(--border)">' +
+          '<strong>' + t.min_cantidad + ' - ' + maxText + ' unid.</strong> → ' +
+          '<span style="color:var(--success);font-weight:600">' + formatGs(precioFinal) + '</span>' +
+          ' <span style="color:var(--muted);font-size:0.85em">(-' + formatGs(t.descuento) + ')</span>' +
+          '</div>';
+      }).join('');
+
+      html += '<tr>' +
+        '<td><strong>' + xt(producto.nombre) + '</strong></td>' +
+        '<td>' + formatGs(producto.precio) + '</td>' +
+        '<td>' + tiersHtml + '</td>' +
+        '<td><button class="btn btn-sm" onclick="editDescuento(' + pid + ')">Editar</button> ' +
+        '<button class="btn btn-sm btn-danger" onclick="deleteDescuento(' + pid + ')">Eliminar</button></td>' +
+        '</tr>';
+    });
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+  }
+
+  window.editDescuento = function(productoId) {
+    var select = document.getElementById("desc-producto");
+    select.value = productoId;
+
+    var tiers = descuentosByProducto[productoId] || [];
+    var container = document.getElementById("desc-tiers-container");
+    container.innerHTML = '';
+
+    tiers.forEach(function(t) {
+      addTierRow(t.min_cantidad, t.max_cantidad, t.descuento);
+    });
+
+    if (tiers.length === 0) addTierRow(2, 10, 10000);
+
+    document.getElementById("desc-modal-title").textContent = "Editar Descuento";
+    document.getElementById("modal-descuento").classList.remove("hidden");
+    document.getElementById("desc-msg").classList.add("hidden");
+  };
+
+  window.deleteDescuento = function(productoId) {
+    if (!confirm("¿Eliminar todos los descuentos de este producto?")) return;
+    api("/descuentos/producto/" + productoId, { method: "DELETE" }).then(function() {
+      toast("Descuentos eliminados");
+      loadDescuentos();
+    });
+  };
+
+  function addTierRow(min, max, desc) {
+    var container = document.getElementById("desc-tiers-container");
+    var row = document.createElement("div");
+    row.className = "tier-row";
+    row.style.cssText = "display:flex;gap:8px;align-items:center;margin-top:8px;padding:8px;background:var(--bg);border-radius:8px";
+    row.innerHTML = '<input type="number" class="tier-min form-input" style="width:80px" placeholder="Min" value="' + (min || '') + '">' +
+      '<span>-</span>' +
+      '<input type="number" class="tier-max form-input" style="width:80px" placeholder="Max (vacío=∞)" value="' + (max || '') + '">' +
+      '<span>unid. →</span>' +
+      '<input type="number" class="tier-desc form-input" style="width:100px" placeholder="Descuento" value="' + (desc || '') + '">' +
+      '<span>Gs. menos</span>' +
+      '<button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()" style="padding:4px 8px">×</button>';
+    container.appendChild(row);
+  }
+
+  window.addTierRow = addTierRow;
+
+  document.getElementById("btn-nuevo-descuento").addEventListener("click", function() {
+    var select = document.getElementById("desc-producto");
+    select.innerHTML = allProductos.map(function(p) {
+      return '<option value="' + p.id + '">' + xt(p.nombre) + ' (' + formatGs(p.precio) + ')</option>';
+    }).join('');
+
+    document.getElementById("desc-tiers-container").innerHTML = '';
+    addTierRow(2, 10, 10000);
+
+    document.getElementById("desc-modal-title").textContent = "Nuevo Descuento";
+    document.getElementById("modal-descuento").classList.remove("hidden");
+    document.getElementById("desc-msg").classList.add("hidden");
+  });
+
+  document.getElementById("btn-add-tier").addEventListener("click", function() {
+    addTierRow('', '', '');
+  });
+
+  document.getElementById("descuento-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+    var productoId = parseInt(document.getElementById("desc-producto").value);
+
+    var tierRows = document.querySelectorAll("#desc-tiers-container .tier-row");
+    var tiers = [];
+    tierRows.forEach(function(row) {
+      var min = parseInt(row.querySelector(".tier-min").value);
+      var max = parseInt(row.querySelector(".tier-max").value) || null;
+      var desc = parseInt(row.querySelector(".tier-desc").value);
+      if (min && desc) {
+        tiers.push({ min_cantidad: min, max_cantidad: max, descuento: desc });
+      }
+    });
+
+    if (tiers.length === 0) {
+      document.getElementById("desc-msg").textContent = "Agregá al menos un tier válido";
+      document.getElementById("desc-msg").classList.remove("hidden");
+      return;
+    }
+
+    tiers.sort(function(a, b) { return a.min_cantidad - b.min_cantidad; });
+
+    api("/descuentos/lote", {
+      method: "POST",
+      body: JSON.stringify({ producto_id: productoId, tiers: tiers })
+    }).then(function(r) {
+      if (r.error) {
+        document.getElementById("desc-msg").textContent = r.error;
+        document.getElementById("desc-msg").classList.remove("hidden");
+        return;
+      }
+      document.getElementById("modal-descuento").classList.add("hidden");
+      toast("Descuentos guardados");
+      loadDescuentos();
+    });
+  });
+
+  document.getElementById("modal-close-desc").addEventListener("click", function() {
+    document.getElementById("modal-descuento").classList.add("hidden");
+  });
+  document.getElementById("modal-overlay-desc").addEventListener("click", function() {
+    document.getElementById("modal-descuento").classList.add("hidden");
+  });
 });

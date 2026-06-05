@@ -2,17 +2,35 @@ const API_BASE = window.location.hostname === 'localhost' || window.location.hos
   ? 'http://85.239.246.177:3001/api'
   : '/api';
 
+export interface PriceTier {
+  min_cantidad: number;
+  max_cantidad: number | null;
+  descuento: number;
+}
+
 export interface Product {
   id: number;
   nombre: string;
+  slug?: string;
   precio: number;
   precio_anterior: number | null;
   categoria: string;
   subcategoria: string;
   descripcion: string;
+  descripcion_larga?: string;
   imagen: string;
+  galeria?: string[];
   etiquetas: string[];
   destacado: boolean;
+  activo: boolean;
+  stock: number;
+  sku?: string;
+  marca?: string;
+  seo_descripcion?: string;
+  crosssell?: number[];
+  upsell?: number[];
+  categoria_id?: number;
+  price_tiers?: PriceTier[];
 }
 
 const IMAGE_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
@@ -62,4 +80,26 @@ export async function createPedido(payload: PedidoPayload): Promise<{ id: number
   });
   if (!res.ok) throw new Error('Failed to create pedido');
   return res.json();
+}
+
+export function stripHtml(html: string): string {
+  const doc = new DOMParser().parseFromString(html, 'text/html')
+  return doc.body.textContent || ''
+}
+
+export function getDiscountedPrice(product: Product, quantity: number): number {
+  if (!product.price_tiers?.length) return product.precio
+  const tier = product.price_tiers.find(t =>
+    quantity >= t.min_cantidad &&
+    (t.max_cantidad === null || quantity <= t.max_cantidad)
+  )
+  return tier ? product.precio - tier.descuento : product.precio
+}
+
+export function getActiveTier(product: Product, quantity: number): PriceTier | undefined {
+  if (!product.price_tiers?.length) return undefined
+  return product.price_tiers.find(t =>
+    quantity >= t.min_cantidad &&
+    (t.max_cantidad === null || quantity <= t.max_cantidad)
+  )
 }

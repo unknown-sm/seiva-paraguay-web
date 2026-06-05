@@ -8,7 +8,7 @@
 
 /* ---------- CSS Custom Properties (Default: Natural Fresco) ---------- */
 :root {
-  --bg: #FAF7F2;
+  --bg: #F2EDE6;
   --surface: #FFFFFF;
   --primary: #5B8C5A;
   --accent: #D4956A;
@@ -398,6 +398,7 @@ h4 { font-size: 1rem; }
   border-radius: var(--radius);
   overflow: hidden;
   border: 1px solid var(--border);
+  box-shadow: 0 2px 8px var(--shadow);
   transition: all var(--transition);
   text-decoration: none;
   color: var(--text);
@@ -412,7 +413,7 @@ h4 { font-size: 1rem; }
 .product-card-img {
   position: relative;
   aspect-ratio: 1;
-  background: linear-gradient(135deg, var(--bg), var(--border));
+  background: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;

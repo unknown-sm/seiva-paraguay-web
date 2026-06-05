@@ -14,6 +14,10 @@ import TiendaPage from './pages/TiendaPage'
 import ProductoPage from './pages/ProductoPage'
 import CartPage from './pages/CartPage'
 import CheckoutPage from './pages/CheckoutPage'
+import FaqPage from './pages/FaqPage'
+import ContactoPage from './pages/ContactoPage'
+import PoliticasPage from './pages/PoliticasPage'
+import DynamicPage from './pages/DynamicPage'
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -39,9 +43,13 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Layout><HomePage /></Layout>} />
             <Route path="/tienda" element={<Layout><TiendaPage /></Layout>} />
-            <Route path="/producto/:id" element={<Layout><ProductoPage /></Layout>} />
+            <Route path="/producto/:slug" element={<Layout><ProductoPage /></Layout>} />
             <Route path="/carrito" element={<Layout><CartPage /></Layout>} />
             <Route path="/checkout" element={<Layout><CheckoutPage /></Layout>} />
+            <Route path="/faq" element={<Layout><FaqPage /></Layout>} />
+            <Route path="/contacto" element={<Layout><ContactoPage /></Layout>} />
+            <Route path="/politicas" element={<Layout><PoliticasPage /></Layout>} />
+            <Route path="/pagina/:slug" element={<Layout><DynamicPage /></Layout>} />
           </Routes>
         </BrowserRouter>
       </CartProvider>

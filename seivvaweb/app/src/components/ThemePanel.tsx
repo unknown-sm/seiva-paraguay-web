@@ -25,7 +25,7 @@ export function ThemeToggle() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="hidden md:flex fixed bottom-6 right-6 z-[90] w-12 h-12 rounded-full items-center justify-center shadow-lg transition-all duration-300 hover:scale-110"
+        className="flex fixed bottom-6 right-6 z-[90] w-12 h-12 rounded-full items-center justify-center shadow-lg transition-all duration-300 hover:scale-110"
         style={{
           backgroundColor: 'var(--theme-accent, #D4A843)',
           color: '#1B4332',

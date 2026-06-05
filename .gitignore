@@ -9,3 +9,9 @@ build/
 .DS_Store
 Thumbs.db
 *.log
+.gstack/
+.claude/
+.claude-flow/
+.swarm/
+ruvector.db
+.mcp.json

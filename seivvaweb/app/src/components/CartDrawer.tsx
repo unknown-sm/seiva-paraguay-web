@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom'
 import { X, Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react'
 import { useCart } from '../context/CartContext'
-import { formatPrice } from '../services/api'
+import { formatPrice, getDiscountedPrice } from '../services/api'
 
 export default function CartDrawer() {
-  const { items, isOpen, removeItem, updateQuantity, closeCart, totalItems, totalPrice } = useCart()
+  const { items, isOpen, removeItem, updateQuantity, closeCart, totalItems, totalPrice, totalSavings } = useCart()
 
   return (
     <>
@@ -61,13 +61,16 @@ export default function CartDrawer() {
             </div>
           ) : (
             <div className="flex flex-col gap-4">
-              {items.map(({ product, quantity }) => (
+              {items.map(({ product, quantity }) => {
+                const discountedPrice = getDiscountedPrice(product, quantity)
+                const hasDiscount = discountedPrice < product.precio
+                return (
                 <div
                   key={product.id}
                   className="flex gap-3 p-3 rounded-xl"
                   style={{ backgroundColor: 'var(--theme-bg, #FAF3E8)' }}
                 >
-                  <Link to={`/producto/${product.id}`} onClick={closeCart} className="shrink-0">
+                  <Link to={`/producto/${product.slug || product.id}`} onClick={closeCart} className="shrink-0">
                     <img
                       src={product.imagen}
                       alt={product.nombre}
@@ -77,14 +80,21 @@ export default function CartDrawer() {
                   </Link>
 
                   <div className="flex-1 min-w-0">
-                    <Link to={`/producto/${product.id}`} onClick={closeCart}>
+                    <Link to={`/producto/${product.slug || product.id}`} onClick={closeCart}>
                       <h4 className="font-display font-semibold text-sm leading-snug truncate" style={{ color: 'var(--theme-text, #3D2817)' }}>
                         {product.nombre}
                       </h4>
                     </Link>
-                    <p className="font-body font-bold text-sm mt-1" style={{ color: 'var(--theme-primary, #2D6A4F)' }}>
-                      {formatPrice(product.precio)}
-                    </p>
+                    <div className="mt-1">
+                      <p className="font-body font-bold text-sm" style={{ color: 'var(--theme-primary, #1B4332)' }}>
+                        {formatPrice(discountedPrice)}
+                      </p>
+                      {hasDiscount && (
+                        <p className="font-body text-xs line-through" style={{ color: '#999' }}>
+                          {formatPrice(product.precio)}
+                        </p>
+                      )}
+                    </div>
 
                     <div className="flex items-center gap-2 mt-2">
                       <button
@@ -115,12 +125,13 @@ export default function CartDrawer() {
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
-                    <span className="font-body font-bold text-sm" style={{ color: 'var(--theme-primary, #2D6A4F)' }}>
-                      {formatPrice(product.precio * quantity)}
+                    <span className="font-body font-bold text-sm" style={{ color: 'var(--theme-primary, #1B4332)' }}>
+                      {formatPrice(discountedPrice * quantity)}
                     </span>
                   </div>
                 </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
@@ -128,11 +139,21 @@ export default function CartDrawer() {
         {/* Footer */}
         {items.length > 0 && (
           <div className="p-5 shrink-0" style={{ borderTop: '1px solid var(--theme-border, #E8E0D5)' }}>
+            {totalSavings > 0 && (
+              <div className="flex justify-between items-center mb-3 p-2 rounded-lg" style={{ backgroundColor: 'rgba(45,106,79,0.08)' }}>
+                <span className="font-body text-sm font-medium" style={{ color: '#2D6A4F' }}>
+                  Ahorrás con descuento por cantidad
+                </span>
+                <span className="font-body font-bold text-sm" style={{ color: '#2D6A4F' }}>
+                  -{formatPrice(totalSavings)}
+                </span>
+              </div>
+            )}
             <div className="flex justify-between items-center mb-4">
               <span className="font-body font-medium" style={{ color: 'var(--theme-muted, #5C4033)' }}>
                 Total ({totalItems} items)
               </span>
-              <span className="font-display font-bold text-xl" style={{ color: 'var(--theme-primary, #2D6A4F)' }}>
+              <span className="font-display font-bold text-xl" style={{ color: 'var(--theme-primary, #1B4332)' }}>
                 {formatPrice(totalPrice)}
               </span>
             </div>
@@ -154,7 +175,7 @@ export default function CartDrawer() {
               to="/carrito"
               onClick={closeCart}
               className="flex items-center justify-center gap-2 w-full mt-3 font-body font-medium text-sm"
-              style={{ color: 'var(--theme-primary, #2D6A4F)' }}
+              style={{ color: 'var(--theme-primary, #1B4332)' }}
             >
               Ver carrito completo <ArrowRight className="w-4 h-4" />
             </Link>

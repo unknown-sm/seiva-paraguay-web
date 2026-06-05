@@ -73,6 +73,35 @@ db.exec(`
     notas TEXT DEFAULT '',
     creado TEXT DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS paginas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    titulo TEXT NOT NULL,
+    slug TEXT NOT NULL UNIQUE,
+    contenido TEXT DEFAULT '',
+    activo INTEGER DEFAULT 1,
+    creado TEXT DEFAULT (datetime('now')),
+    actualizado TEXT DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS categorias (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    slug TEXT NOT NULL UNIQUE,
+    descripcion TEXT DEFAULT '',
+    activo INTEGER DEFAULT 1,
+    creado TEXT DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS envios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ciudad TEXT NOT NULL,
+    departamento TEXT DEFAULT '',
+    costo INTEGER NOT NULL DEFAULT 0,
+    activo INTEGER DEFAULT 1,
+    tipo TEXT DEFAULT 'delivery',
+    creado TEXT DEFAULT (datetime('now'))
+  );
 `);
 
 const contenidoDefault = {
@@ -80,7 +109,11 @@ const contenidoDefault = {
   hero_descripcion: "Almendras con chocolate, frutos secos premium, snacks saludables y suplementos. Directo a tu puerta. Sin vueltas.",
   whatsapp_numero: "595992120303",
   site_titulo: "Seiva Paraguay — Snacks Saludables y Suplementos Naturales",
-  site_descripcion: "Almendras con chocolate, frutos secos, snacks saludables y suplementos naturales. Envios a todo Paraguay. Pedi por WhatsApp."
+  site_descripcion: "Almendras con chocolate, frutos secos, snacks saludables y suplementos naturales. Envios a todo Paraguay. Pedi por WhatsApp.",
+  qr_activo: "",
+  qr_imagen: "",
+  qr_instrucciones: "Pagá con QR y envianos el comprobante por WhatsApp",
+  envio_minimo_gratis: "150000"
 };
 
 const insertContenido = db.prepare("INSERT OR IGNORE INTO contenido (key, value) VALUES (?, ?)");
@@ -88,27 +121,87 @@ for (const [key, value] of Object.entries(contenidoDefault)) {
   insertContenido.run(key, value);
 }
 
+try { db.exec("ALTER TABLE productos ADD COLUMN categoria_id INTEGER DEFAULT NULL REFERENCES categorias(id)"); } catch (e) {}
+try { db.exec("ALTER TABLE productos ADD COLUMN descripcion_larga TEXT DEFAULT ''"); } catch (e) {}
+try { db.exec("ALTER TABLE productos ADD COLUMN galeria TEXT DEFAULT '[]'"); } catch (e) {}
+try { db.exec("ALTER TABLE productos ADD COLUMN sku TEXT DEFAULT ''"); } catch (e) {}
+try { db.exec("ALTER TABLE productos ADD COLUMN marca TEXT DEFAULT ''"); } catch (e) {}
+try { db.exec("ALTER TABLE productos ADD COLUMN seo_descripcion TEXT DEFAULT ''"); } catch (e) {}
+try { db.exec("ALTER TABLE productos ADD COLUMN crosssell TEXT DEFAULT '[]'"); } catch (e) {}
+try { db.exec("ALTER TABLE productos ADD COLUMN upsell TEXT DEFAULT '[]'"); } catch (e) {}
+
+try { db.exec("ALTER TABLE pedidos ADD COLUMN envio_costo INTEGER DEFAULT 0"); } catch (e) {}
+try { db.exec("ALTER TABLE pedidos ADD COLUMN envio_ciudad TEXT DEFAULT ''"); } catch (e) {}
+try { db.exec("ALTER TABLE envios ADD COLUMN tipo TEXT DEFAULT 'delivery'"); } catch (e) {}
+
+const envCount = db.prepare("SELECT COUNT(*) as c FROM envios").get();
+if (envCount.c === 0) {
+  const deliveryCiudades = [
+    ["Asunción", "Capital", 15000],
+    ["San Lorenzo", "Central", 15000],
+    ["Fernando de la Mora", "Central", 15000],
+    ["Lambaré", "Central", 15000],
+    ["Luque", "Central", 15000],
+    ["Mariano Roque Alonso", "Central", 15000],
+    ["Ñemby", "Central", 15000],
+    ["Capiatá", "Central", 15000],
+    ["Itauguá", "Central", 20000],
+    ["Villa Elisa", "Central", 15000],
+    ["Limpio", "Central", 15000],
+  ];
+  const encomiendaCiudades = [
+    ["Ciudad del Este", "Alto Paraná", 0],
+    ["Encarnación", "Itapúa", 0],
+    ["Coronel Oviedo", "Caaguazú", 0],
+    ["Caaguazú", "Caaguazú", 0],
+    ["Villarrica", "Guairá", 0],
+    ["Pedro Juan Caballero", "Amambay", 0],
+    ["Concepción", "Concepción", 0],
+    ["Salto del Guairá", "Canindeyú", 0],
+    ["Otra ciudad", "", 0],
+  ];
+  const insDelivery = db.prepare("INSERT INTO envios (ciudad, departamento, costo, tipo) VALUES (?, ?, ?, 'delivery')");
+  for (const e of deliveryCiudades) insDelivery.run(e[0], e[1], e[2]);
+  const insEncomienda = db.prepare("INSERT INTO envios (ciudad, departamento, costo, tipo) VALUES (?, ?, ?, 'encomienda')");
+  for (const e of encomiendaCiudades) insEncomienda.run(e[0], e[1], e[2]);
+}
+
+const catCount = db.prepare("SELECT COUNT(*) as c FROM categorias").get();
+if (catCount.c === 0) {
+  const defCats = [["snacks","snacks","Snacks saludables"],["suplementos","suplementos","Suplementos"],["combos","combos","Combos"]];
+  const ins = db.prepare("INSERT INTO categorias (nombre, slug, descripcion) VALUES (?, ?, ?)");
+  for (const c of defCats) ins.run(c[0], c[1], c[2]);
+  // Map existing category text to ID
+  const prods = db.prepare("SELECT id, categoria FROM productos WHERE categoria_id IS NULL").all();
+  const catMap = { snacks: 1, suplementos: 2, combos: 3 };
+  const upd = db.prepare("UPDATE productos SET categoria_id = ? WHERE id = ?");
+  for (const p of prods) {
+    const cid = catMap[p.categoria];
+    if (cid) upd.run(cid, p.id);
+  }
+}
+
 function seedProductos() {
   const row = db.prepare("SELECT COUNT(*) as c FROM productos").get();
   if (row.c > 0) return;
 
   const seed = [
-    ["Almendras con Chocolate Negro", 45000, null, "snacks", "chocolate", "Almendras seleccionadas cubiertas con chocolate negro 70% cacao.", '["nuevo","popular"]', 1, "product-4073.jpg"],
-    ["Mix de Frutos Secos Premium", 55000, 65000, "snacks", "mix", "Combinacion de almendras, nueces, castanas, arandanos y pasas.", '["oferta"]', 1, "product-4079.jpg"],
-    ["Almendras Naturales 500g", 58000, null, "snacks", "almendras", "Almendras crudas sin sal, empacadas al vacio.", '[]', 1, "product-2564.jpg"],
-    ["Datiles Medjool 400g", 42000, null, "snacks", "frutas", "Datiles Medjool premium, naturalmente dulces.", '["nuevo"]', 0, "product-2505.jpg"],
-    ["Nueces Pecanas 300g", 62000, null, "snacks", "nueces", "Nueces pecanas frescas, ricas en antioxidantes.", '[]', 0, "product-3116.jpg"],
-    ["Barritas de Granola Artesanal", 12000, null, "snacks", "barras", "Barritas de granola caseras. Pack x3.", '["popular"]', 1, "product-2468.png"],
-    ["Aceite de Oregano 120 Capsulas", 75000, 90000, "suplementos", "aceites", "Aceite de oregano 500mg. Refuerzo inmune.", '["oferta"]', 0, "aceite-de-ajo-mix-nutri-3.webp"],
-    ["Magnesio Quelato 120 Capsulas", 85000, null, "suplementos", "magnesios", "Magnesio quelato de alta absorcion.", '["popular"]', 1, "magnesio-quelato-bio-120-paraguay.jpg"],
-    ["Omega 3 Puro 1000mg", 95000, 120000, "suplementos", "omega3", "Omega 3 puro con EPA y DHA. 120 capsulas.", '["oferta"]', 1, "product-3995.jpg"],
-    ["Creatina Monohidratada 300g", 78000, null, "suplementos", "gym", "Creatina monohidratada micronizada. 300g.", '[]', 0, "creatina-unilife-paraguay1.jpg"],
-    ["Colageno Hidrolizado 500g", 120000, 145000, "suplementos", "colagenos", "Colageno tipo I y III para piel y articulaciones.", '["oferta"]', 0, "colageno-hidrolisado-rei-terra-120-500mg.webp"],
-    ["Curcuma con Pimienta Negra", 65000, null, "suplementos", "naturales", "Curcuma organica con pimienta negra.", '[]', 0, "curcuma.png"],
-    ["Combo Omega 3 + Magnesio Citrato", 150000, 205000, "combos", "combos", "Omega 3 Puro + Magnesio Citrato. Combo bienestar.", '["oferta","popular"]', 1, "combo-ome.jpeg"]
+    ["Almendras con Chocolate Negro", 45000, null, "snacks", "chocolate", "Almendras seleccionadas cubiertas con chocolate negro 70% cacao.", '["nuevo","popular"]', 1, "product-4073.jpg", 1],
+    ["Mix de Frutos Secos Premium", 55000, 65000, "snacks", "mix", "Combinacion de almendras, nueces, castanas, arandanos y pasas.", '["oferta"]', 1, "product-4079.jpg", 1],
+    ["Almendras Naturales 500g", 58000, null, "snacks", "almendras", "Almendras crudas sin sal, empacadas al vacio.", '[]', 1, "product-2564.jpg", 1],
+    ["Datiles Medjool 400g", 42000, null, "snacks", "frutas", "Datiles Medjool premium, naturalmente dulces.", '["nuevo"]', 0, "product-2505.jpg", 1],
+    ["Nueces Pecanas 300g", 62000, null, "snacks", "nueces", "Nueces pecanas frescas, ricas en antioxidantes.", '[]', 0, "product-3116.jpg", 1],
+    ["Barritas de Granola Artesanal", 12000, null, "snacks", "barras", "Barritas de granola caseras. Pack x3.", '["popular"]', 1, "product-2468.png", 1],
+    ["Aceite de Oregano 120 Capsulas", 75000, 90000, "suplementos", "aceites", "Aceite de oregano 500mg. Refuerzo inmune.", '["oferta"]', 0, "aceite-de-ajo-mix-nutri-3.webp", 2],
+    ["Magnesio Quelato 120 Capsulas", 85000, null, "suplementos", "magnesios", "Magnesio quelato de alta absorcion.", '["popular"]', 1, "magnesio-quelato-bio-120-paraguay.jpg", 2],
+    ["Omega 3 Puro 1000mg", 95000, 120000, "suplementos", "omega3", "Omega 3 puro con EPA y DHA. 120 capsulas.", '["oferta"]', 1, "product-3995.jpg", 2],
+    ["Creatina Monohidratada 300g", 78000, null, "suplementos", "gym", "Creatina monohidratada micronizada. 300g.", '[]', 0, "creatina-unilife-paraguay1.jpg", 2],
+    ["Colageno Hidrolizado 500g", 120000, 145000, "suplementos", "colagenos", "Colageno tipo I y III para piel y articulaciones.", '["oferta"]', 0, "colageno-hidrolisado-rei-terra-120-500mg.webp", 2],
+    ["Curcuma con Pimienta Negra", 65000, null, "suplementos", "naturales", "Curcuma organica con pimienta negra.", '[]', 0, "curcuma.png", 2],
+    ["Combo Omega 3 + Magnesio Citrato", 150000, 205000, "combos", "combos", "Omega 3 Puro + Magnesio Citrato. Combo bienestar.", '["oferta","popular"]', 1, "combo-ome.jpeg", 3]
   ];
 
-  const insert = db.prepare("INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, etiquetas, destacado, imagen, stock, activo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 50, 1)");
+  const insert = db.prepare("INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, etiquetas, destacado, imagen, stock, activo, categoria_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 50, 1, ?)");
   for (const p of seed) insert.run(...p);
 }
 
@@ -139,12 +232,17 @@ function auth(req, res, next) {
 }
 
 function parseProducto(row) {
+  const price_tiers = db.prepare("SELECT min_cantidad, max_cantidad, descuento FROM descuentos_cantidad WHERE producto_id = ? ORDER BY min_cantidad").all(row.id);
   return {
     ...row,
     etiquetas: JSON.parse(row.etiquetas || "[]"),
+    galeria: JSON.parse(row.galeria || "[]"),
+    crosssell: JSON.parse(row.crosssell || "[]"),
+    upsell: JSON.parse(row.upsell || "[]"),
     destacado: !!row.destacado,
     activo: !!row.activo,
-    precio_anterior: row.precio_anterior || null
+    precio_anterior: row.precio_anterior || null,
+    price_tiers: price_tiers.length > 0 ? price_tiers : undefined
   };
 }
 
@@ -160,18 +258,22 @@ app.get("/api/productos/all", auth, (req, res) => {
 });
 
 app.post("/api/productos", auth, (req, res) => {
-  const { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, etiquetas, destacado, imagen, stock, activo } = req.body;
+  const { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell } = req.body;
   if (!nombre || !precio) return res.status(400).json({ error: "Nombre y precio requeridos" });
-  const result = db.prepare("INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, etiquetas, destacado, imagen, stock, activo) VALUES (?,?,?,?,?,?,?,?,?,?,?)").run(
-    nombre, precio, precio_anterior || null, categoria || "snacks", subcategoria || "", descripcion || "", JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0
+  const cid = categoria_id || null;
+  const catName = categoria || (cid ? db.prepare("SELECT nombre FROM categorias WHERE id=?").get(cid)?.nombre : "snacks") || "snacks";
+  const result = db.prepare("INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").run(
+    nombre, precio, precio_anterior || null, catName, subcategoria || "", descripcion || "", descripcion_larga || "", JSON.stringify(galeria || []), JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, cid, sku || "", marca || "", seo_descripcion || "", JSON.stringify(crosssell || []), JSON.stringify(upsell || [])
   );
   res.json({ id: result.lastInsertRowid });
 });
 
 app.put("/api/productos/:id", auth, (req, res) => {
-  const { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, etiquetas, destacado, imagen, stock, activo } = req.body;
-  db.prepare("UPDATE productos SET nombre=?, precio=?, precio_anterior=?, categoria=?, subcategoria=?, descripcion=?, etiquetas=?, destacado=?, imagen=?, stock=?, activo=? WHERE id=?").run(
-    nombre, precio, precio_anterior || null, categoria, subcategoria, descripcion || "", JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, req.params.id
+  const { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell } = req.body;
+  const cid = categoria_id !== undefined ? categoria_id : null;
+  const catName = categoria || (cid ? db.prepare("SELECT nombre FROM categorias WHERE id=?").get(cid)?.nombre : "snacks") || "snacks";
+  db.prepare("UPDATE productos SET nombre=?, precio=?, precio_anterior=?, categoria=?, subcategoria=?, descripcion=?, descripcion_larga=?, galeria=?, etiquetas=?, destacado=?, imagen=?, stock=?, activo=?, categoria_id=?, sku=?, marca=?, seo_descripcion=?, crosssell=?, upsell=? WHERE id=?").run(
+    nombre, precio, precio_anterior || null, catName, subcategoria, descripcion || "", descripcion_larga || "", JSON.stringify(galeria || []), JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, cid, sku || "", marca || "", seo_descripcion || "", JSON.stringify(crosssell || []), JSON.stringify(upsell || []), req.params.id
   );
   res.json({ ok: true });
 });
@@ -201,6 +303,69 @@ app.patch("/api/productos/stock-batch", auth, (req, res) => {
 
 app.delete("/api/productos/:id", auth, (req, res) => {
   db.prepare("DELETE FROM productos WHERE id = ?").run(req.params.id);
+  res.json({ ok: true });
+});
+
+// ---------- DESCUENTOS POR CANTIDAD ----------
+app.get("/api/descuentos", auth, (req, res) => {
+  const rows = db.prepare(`
+    SELECT d.*, p.nombre as producto_nombre, p.precio as producto_precio, p.imagen as producto_imagen
+    FROM descuentos_cantidad d
+    JOIN productos p ON d.producto_id = p.id
+    ORDER BY p.nombre, d.min_cantidad
+  `).all();
+  res.json(rows);
+});
+
+app.get("/api/descuentos/producto/:producto_id", (req, res) => {
+  const rows = db.prepare("SELECT * FROM descuentos_cantidad WHERE producto_id = ? ORDER BY min_cantidad").all(req.params.producto_id);
+  res.json(rows);
+});
+
+app.post("/api/descuentos", auth, (req, res) => {
+  const { producto_id, min_cantidad, max_cantidad, descuento } = req.body;
+  if (!producto_id || !min_cantidad || !descuento) {
+    return res.status(400).json({ error: "producto_id, min_cantidad y descuento son requeridos" });
+  }
+  const result = db.prepare(
+    "INSERT INTO descuentos_cantidad (producto_id, min_cantidad, max_cantidad, descuento) VALUES (?, ?, ?, ?)"
+  ).run(producto_id, min_cantidad, max_cantidad || null, descuento);
+  res.json({ id: result.lastInsertRowid });
+});
+
+app.post("/api/descuentos/lote", auth, (req, res) => {
+  const { producto_id, tiers } = req.body;
+  if (!producto_id || !tiers || !tiers.length) {
+    return res.status(400).json({ error: "producto_id y tiers son requeridos" });
+  }
+  const deleteStmt = db.prepare("DELETE FROM descuentos_cantidad WHERE producto_id = ?");
+  const insertStmt = db.prepare("INSERT INTO descuentos_cantidad (producto_id, min_cantidad, max_cantidad, descuento) VALUES (?, ?, ?, ?)");
+  
+  const transaction = db.transaction(() => {
+    deleteStmt.run(producto_id);
+    for (const tier of tiers) {
+      insertStmt.run(producto_id, tier.min_cantidad, tier.max_cantidad || null, tier.descuento);
+    }
+  });
+  transaction();
+  res.json({ ok: true, producto_id, tiers_count: tiers.length });
+});
+
+app.put("/api/descuentos/:id", auth, (req, res) => {
+  const { min_cantidad, max_cantidad, descuento } = req.body;
+  db.prepare(
+    "UPDATE descuentos_cantidad SET min_cantidad = ?, max_cantidad = ?, descuento = ? WHERE id = ?"
+  ).run(min_cantidad, max_cantidad || null, descuento, req.params.id);
+  res.json({ ok: true });
+});
+
+app.delete("/api/descuentos/:id", auth, (req, res) => {
+  db.prepare("DELETE FROM descuentos_cantidad WHERE id = ?").run(req.params.id);
+  res.json({ ok: true });
+});
+
+app.delete("/api/descuentos/producto/:producto_id", auth, (req, res) => {
+  db.prepare("DELETE FROM descuentos_cantidad WHERE producto_id = ?").run(req.params.producto_id);
   res.json({ ok: true });
 });
 
@@ -269,6 +434,96 @@ app.put("/api/contenido", auth, (req, res) => {
   for (const [key, value] of Object.entries(req.body)) {
     update.run(key, String(value));
   }
+  res.json({ ok: true });
+});
+
+// ---------- PAGINAS (publico: obtener por slug) ----------
+app.get("/api/paginas", auth, (req, res) => {
+  const rows = db.prepare("SELECT * FROM paginas ORDER BY titulo").all();
+  res.json(rows);
+});
+
+app.get("/api/paginas/:slug", (req, res) => {
+  const row = db.prepare("SELECT * FROM paginas WHERE slug = ? AND activo = 1").get(req.params.slug);
+  if (!row) return res.status(404).json({ error: "Pagina no encontrada" });
+  res.json(row);
+});
+
+app.post("/api/paginas", auth, (req, res) => {
+  const { titulo, slug, contenido } = req.body;
+  if (!titulo) return res.status(400).json({ error: "Titulo requerido" });
+  const genSlug = slug || titulo.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const result = db.prepare("INSERT INTO paginas (titulo, slug, contenido) VALUES (?, ?, ?)").run(titulo, genSlug, contenido || "");
+  res.json({ id: result.lastInsertRowid, slug: genSlug });
+});
+
+app.put("/api/paginas/:id", auth, (req, res) => {
+  const { titulo, slug, contenido, activo } = req.body;
+  const genSlug = slug || titulo.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  db.prepare("UPDATE paginas SET titulo=?, slug=?, contenido=?, activo=?, actualizado=datetime('now') WHERE id=?").run(
+    titulo, genSlug, contenido || "", activo !== undefined ? (activo ? 1 : 0) : 1, req.params.id
+  );
+  res.json({ ok: true });
+});
+
+app.delete("/api/paginas/:id", auth, (req, res) => {
+  db.prepare("DELETE FROM paginas WHERE id = ?").run(req.params.id);
+  res.json({ ok: true });
+});
+
+// ---------- CATEGORIAS (admin) ----------
+app.get("/api/categorias", (req, res) => {
+  const rows = db.prepare("SELECT * FROM categorias ORDER BY nombre").all();
+  res.json(rows);
+});
+
+app.post("/api/categorias", auth, (req, res) => {
+  const { nombre, slug, descripcion } = req.body;
+  if (!nombre) return res.status(400).json({ error: "Nombre requerido" });
+  const genSlug = slug || nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const result = db.prepare("INSERT INTO categorias (nombre, slug, descripcion) VALUES (?, ?, ?)").run(nombre, genSlug, descripcion || "");
+  res.json({ id: result.lastInsertRowid });
+});
+
+app.put("/api/categorias/:id", auth, (req, res) => {
+  const { nombre, slug, descripcion, activo } = req.body;
+  const genSlug = slug || nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  db.prepare("UPDATE categorias SET nombre=?, slug=?, descripcion=?, activo=? WHERE id=?").run(nombre, genSlug, descripcion || "", activo !== undefined ? (activo ? 1 : 0) : 1, req.params.id);
+  res.json({ ok: true });
+});
+
+app.delete("/api/categorias/:id", auth, (req, res) => {
+  db.prepare("UPDATE productos SET categoria_id = NULL WHERE categoria_id = ?").run(req.params.id);
+  db.prepare("DELETE FROM categorias WHERE id = ?").run(req.params.id);
+  res.json({ ok: true });
+});
+
+// ---------- ENVIOS ----------
+app.get("/api/envios", (req, res) => {
+  const rows = db.prepare("SELECT * FROM envios WHERE activo = 1 ORDER BY tipo, ciudad").all();
+  res.json(rows);
+});
+
+app.get("/api/envios/all", auth, (req, res) => {
+  const rows = db.prepare("SELECT * FROM envios ORDER BY tipo, ciudad").all();
+  res.json(rows);
+});
+
+app.post("/api/envios", auth, (req, res) => {
+  const { ciudad, departamento, costo, tipo } = req.body;
+  if (!ciudad) return res.status(400).json({ error: "Ciudad requerida" });
+  const result = db.prepare("INSERT INTO envios (ciudad, departamento, costo, tipo) VALUES (?, ?, ?, ?)").run(ciudad, departamento || "", parseInt(costo) || 0, tipo || (departamento === 'Central' ? 'delivery' : 'encomienda'));
+  res.json({ id: result.lastInsertRowid });
+});
+
+app.put("/api/envios/:id", auth, (req, res) => {
+  const { ciudad, departamento, costo, activo, tipo } = req.body;
+  db.prepare("UPDATE envios SET ciudad=?, departamento=?, costo=?, activo=?, tipo=? WHERE id=?").run(ciudad, departamento || "", parseInt(costo) || 0, activo !== undefined ? (activo ? 1 : 0) : 1, tipo || 'delivery', req.params.id);
+  res.json({ ok: true });
+});
+
+app.delete("/api/envios/:id", auth, (req, res) => {
+  db.prepare("DELETE FROM envios WHERE id = ?").run(req.params.id);
   res.json({ ok: true });
 });
 

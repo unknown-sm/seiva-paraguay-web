@@ -20,6 +20,9 @@ export default function TiendaPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [search, setSearch] = useState(searchParams.get('search') || '')
   const [activeCat, setActiveCat] = useState('all')
+  const [filterSubcat, setFilterSubcat] = useState(searchParams.get('subcategoria') || '')
+  const [filterEtiqueta, setFilterEtiqueta] = useState(searchParams.get('etiqueta') || '')
+  const [filterMarca, setFilterMarca] = useState(searchParams.get('marca') || '')
   const [page, setPage] = useState(1)
   const [productsPerPage, setProductsPerPage] = useState(10)
   const { addItem } = useCart()
@@ -37,10 +40,29 @@ export default function TiendaPage() {
       })
   }, [])
 
+  // Read URL params for filters
+  useEffect(() => {
+    const cat = searchParams.get('categoria')
+    if (cat) setActiveCat(cat.toLowerCase())
+    setFilterSubcat(searchParams.get('subcategoria') || '')
+    setFilterEtiqueta(searchParams.get('etiqueta') || '')
+    setFilterMarca(searchParams.get('marca') || '')
+    setPage(1)
+  }, [searchParams])
+
   const filtered = useMemo(() => {
     let result = products
     if (activeCat !== 'all') {
-      result = result.filter(p => p.categoria === activeCat)
+      result = result.filter(p => p.categoria.toLowerCase() === activeCat)
+    }
+    if (filterSubcat) {
+      result = result.filter(p => p.subcategoria?.toLowerCase() === filterSubcat.toLowerCase())
+    }
+    if (filterEtiqueta) {
+      result = result.filter(p => p.etiquetas?.some(e => e.toLowerCase() === filterEtiqueta.toLowerCase()))
+    }
+    if (filterMarca) {
+      result = result.filter(p => p.marca?.toLowerCase() === filterMarca.toLowerCase())
     }
     if (search.trim()) {
       const q = search.toLowerCase()
@@ -50,7 +72,7 @@ export default function TiendaPage() {
       )
     }
     return result
-  }, [products, activeCat, search])
+  }, [products, activeCat, filterSubcat, filterEtiqueta, filterMarca, search])
 
   const totalPages = Math.ceil(filtered.length / productsPerPage)
   const paginated = useMemo(() => {
@@ -61,7 +83,7 @@ export default function TiendaPage() {
   // Reset page when filters change
   useEffect(() => {
     setPage(1)
-  }, [activeCat, search])
+  }, [activeCat, filterSubcat, filterEtiqueta, filterMarca, search])
 
   // Sync search with URL params
   useEffect(() => {
@@ -131,6 +153,38 @@ export default function TiendaPage() {
           />
         </div>
 
+        {/* Active filters indicator */}
+        {(filterSubcat || filterEtiqueta || filterMarca) && (
+          <div className="flex flex-wrap justify-center items-center gap-2 mb-6">
+            <span className="font-body text-sm" style={{ color: 'var(--theme-muted, #5C4033)' }}>Filtros activos:</span>
+            {filterSubcat && (
+              <span className="inline-flex items-center gap-1 font-body text-xs px-3 py-1 rounded-full" style={{ backgroundColor: 'rgba(27,67,50,0.1)', color: 'var(--theme-primary, #1B4332)' }}>
+                {filterSubcat}
+                <button onClick={() => { setFilterSubcat(''); setSearchParams({}) }} className="ml-1 hover:opacity-70">×</button>
+              </span>
+            )}
+            {filterEtiqueta && (
+              <span className="inline-flex items-center gap-1 font-body text-xs px-3 py-1 rounded-full" style={{ backgroundColor: 'rgba(230,57,70,0.1)', color: '#E63946' }}>
+                #{filterEtiqueta}
+                <button onClick={() => { setFilterEtiqueta(''); setSearchParams({}) }} className="ml-1 hover:opacity-70">×</button>
+              </span>
+            )}
+            {filterMarca && (
+              <span className="inline-flex items-center gap-1 font-body text-xs px-3 py-1 rounded-full" style={{ backgroundColor: 'rgba(27,67,50,0.1)', color: 'var(--theme-primary, #1B4332)' }}>
+                {filterMarca}
+                <button onClick={() => { setFilterMarca(''); setSearchParams({}) }} className="ml-1 hover:opacity-70">×</button>
+              </span>
+            )}
+            <button 
+              onClick={() => { setActiveCat('all'); setFilterSubcat(''); setFilterEtiqueta(''); setFilterMarca(''); setSearchParams({}) }}
+              className="font-body text-xs underline" 
+              style={{ color: 'var(--theme-muted, #5C4033)' }}
+            >
+              Limpiar todo
+            </button>
+          </div>
+        )}
+
         {/* Filter tabs */}
         <div className="flex flex-wrap justify-center gap-2 mb-10">
           {CATEGORIAS.map(cat => (
@@ -174,7 +228,7 @@ export default function TiendaPage() {
                     <div
                     className="relative aspect-[4/3] overflow-hidden cursor-pointer"
                     style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}
-                    onClick={() => navigate(`/producto/${product.id}`)}
+                    onClick={() => navigate(`/producto/${product.slug || product.id}`)}
                   >
                     <img
                       src={product.imagen}
@@ -203,12 +257,12 @@ export default function TiendaPage() {
                     <h3
                       className="font-body font-semibold text-base leading-snug cursor-pointer"
                       style={{ color: 'var(--theme-text, #3D2817)' }}
-                      onClick={() => navigate(`/producto/${product.id}`)}
+                      onClick={() => navigate(`/producto/${product.slug || product.id}`)}
                     >
                       {product.nombre}
                     </h3>
                     <div className="flex flex-wrap items-baseline gap-x-2 mt-3">
-                      <span className="font-body font-bold text-base sm:text-lg" style={{ color: 'var(--theme-primary, #2D6A4F)' }}>
+                      <span className="font-body font-bold text-base sm:text-lg" style={{ color: 'var(--theme-primary, #1B4332)' }}>
                         {formatPrice(product.precio)}
                       </span>
                       {product.precio_anterior && (

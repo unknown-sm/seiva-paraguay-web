@@ -69,6 +69,8 @@ export default function ProductFeatured() {
       imagen: '/images/product-spirulina.jpg',
       etiquetas: ['popular'],
       destacado: true,
+      activo: true,
+      stock: 50,
     }, quantity)
   }
 
