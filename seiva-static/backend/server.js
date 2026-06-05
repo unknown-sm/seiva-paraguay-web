@@ -102,6 +102,15 @@ db.exec(`
     tipo TEXT DEFAULT 'delivery',
     creado TEXT DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS descuentos_cantidad (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    producto_id INTEGER NOT NULL REFERENCES productos(id),
+    min_cantidad INTEGER NOT NULL,
+    max_cantidad INTEGER,
+    descuento INTEGER NOT NULL DEFAULT 0,
+    UNIQUE(producto_id, min_cantidad)
+  );
 `);
 
 const contenidoDefault = {
@@ -133,6 +142,52 @@ try { db.exec("ALTER TABLE productos ADD COLUMN upsell TEXT DEFAULT '[]'"); } ca
 try { db.exec("ALTER TABLE pedidos ADD COLUMN envio_costo INTEGER DEFAULT 0"); } catch (e) {}
 try { db.exec("ALTER TABLE pedidos ADD COLUMN envio_ciudad TEXT DEFAULT ''"); } catch (e) {}
 try { db.exec("ALTER TABLE envios ADD COLUMN tipo TEXT DEFAULT 'delivery'"); } catch (e) {}
+
+// Seed descuentos_cantidad if empty
+const dcCount = db.prepare("SELECT COUNT(*) as c FROM descuentos_cantidad").get();
+if (dcCount.c === 0) {
+  const descuentosSeed = [
+    [2, 2, 10, 10000],
+    [5, 2, 10, 10000],
+    [9, 2, 10, 10000],
+    [10, 2, 2, 10000],
+    [10, 3, 4, 15000],
+    [10, 5, null, 20000],
+    [12, 2, 4, 10000],
+    [12, 5, 12, 15000],
+    [12, 12, 0, 20000],
+    [14, 2, 10, 10000],
+    [17, 2, 10, 10000],
+    [22, 2, 10, 10000],
+    [27, 2, 10, 10000],
+    [36, 2, 10, 10000],
+    [46, 2, 10, 10000],
+    [60, 2, 10, 10000],
+    [66, 2, 10, 10000],
+    [79, 2, 10, 10000],
+    [95, 2, 3, 2500],
+    [95, 4, 10, 5000],
+    [96, 2, 3, 2500],
+    [96, 4, 10, 5000],
+    [97, 2, 3, 2500],
+    [97, 4, 10, 5000],
+    [98, 2, 3, 2500],
+    [98, 4, 10, 5000],
+    [108, 2, 10, 10000],
+    [111, 2, 10, 10000],
+    [121, 2, 10, 10000],
+    [125, 2, 10, 10000],
+    [138, 2, 10, 10000],
+    [139, 2, 10, 10000],
+    [162, 2, 10, 10000],
+    [165, 2, 10, 10000],
+    [175, 2, 10, 10000],
+  ];
+  const insertDC = db.prepare("INSERT OR IGNORE INTO descuentos_cantidad (producto_id, min_cantidad, max_cantidad, descuento) VALUES (?, ?, ?, ?)");
+  for (const d of descuentosSeed) {
+    insertDC.run(d[0], d[1], d[2], d[3]);
+  }
+}
 
 const envCount = db.prepare("SELECT COUNT(*) as c FROM envios").get();
 if (envCount.c === 0) {
