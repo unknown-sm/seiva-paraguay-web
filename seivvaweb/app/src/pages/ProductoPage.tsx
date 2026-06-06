@@ -6,18 +6,19 @@ import { ShoppingCart, Minus, Plus, ChevronLeft, ChevronRight, Tag, Box, Info, P
 import GlobalSections from '../components/GlobalSections'
 
 function extractFirstParagraph(html: string): string {
-  const match = html.match(/<p\b[^>]*>[\s\S]*?<\/p>/i)
-  return match ? match[0] : html.split('\n\n')[0] || html
+  const blocks = html.split('\n\n').filter(b => b.trim())
+  if (blocks.length <= 3) return html
+  return blocks.slice(0, 3).join('\n\n')
 }
 
 function hasMoreParagraphs(html: string): boolean {
-  const first = extractFirstParagraph(html)
-  return first.length < html.trim().length
+  const blocks = html.split('\n\n').filter(b => b.trim())
+  return blocks.length > 3
 }
 
 function extractRestParagraphs(html: string): string {
-  const first = extractFirstParagraph(html)
-  return html.replace(first, '').trim()
+  const blocks = html.split('\n\n').filter(b => b.trim())
+  return blocks.slice(3).join('\n\n')
 }
 
 export default function ProductoPage() {
