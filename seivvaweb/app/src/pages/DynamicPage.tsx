@@ -46,7 +46,7 @@ export default function DynamicPage() {
       <div className="min-h-screen bg-[var(--theme-bg)]">
         <Navbar />
         <main className="pt-24 pb-16 px-4 max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl font-serif text-[var(--theme-forest)] mb-4">P&aacute;gina no encontrada</h1>
+          <h1 className="text-3xl font-serif text-[var(--theme-primary)] mb-4">P&aacute;gina no encontrada</h1>
           <p className="text-[var(--theme-muted)] mb-8">La p&aacute;gina que buscas no existe.</p>
           <Link to="/" className="text-[var(--theme-gold)] hover:underline">Volver al inicio</Link>
         </main>
@@ -60,8 +60,8 @@ export default function DynamicPage() {
       <Navbar />
       <main className="pt-24 pb-16 px-4">
         <article className="max-w-3xl mx-auto">
-          <h1 className="text-3xl md:text-4xl font-serif text-[var(--theme-forest)] mb-8">{page.titulo}</h1>
-          <div className="prose prose-lg max-w-none text-[var(--theme-espresso)] leading-relaxed" style={{whiteSpace: "pre-wrap"}}>
+          <h1 className="text-3xl md:text-4xl font-serif text-[var(--theme-primary)] mb-8">{page.titulo}</h1>
+          <div className="prose prose-lg max-w-none text-[var(--theme-text)] leading-relaxed" style={{whiteSpace: "pre-wrap"}}>
             {page.contenido}
           </div>
         </article>

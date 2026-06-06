@@ -263,7 +263,7 @@ export default function ProductoPage() {
             <div className="relative">
               <div 
                 className={`font-body text-base leading-relaxed mt-4 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:my-1 [&_p]:mb-2 ${!showShort ? 'line-clamp-4' : ''}`} 
-                style={{ color: 'var(--theme-espresso, #3D2817)' }}
+                style={{ color: 'var(--theme-text, #3D2817)' }}
                 dangerouslySetInnerHTML={{ __html: product.descripcion || 'Producto natural de alta calidad.' }}
               />
               <button
@@ -398,12 +398,12 @@ export default function ProductoPage() {
             <div className="lg:col-span-2">
               {product.descripcion_larga ? (
                 <div className="rounded-2xl p-8" style={{ backgroundColor: 'var(--theme-surface, #FFF)', boxShadow: '0 2px 16px rgba(27,67,50,0.06)' }}>
-                  <h2 className="font-serif text-2xl mb-6 flex items-center gap-2" style={{ color: 'var(--theme-forest, #1B4332)' }}>
+                  <h2 className="font-serif text-2xl mb-6 flex items-center gap-2" style={{ color: 'var(--theme-primary, #1B4332)' }}>
                     <Info className="w-5 h-5" /> Descripción
                   </h2>
                   <div
                     className="font-body text-sm leading-relaxed whitespace-pre-line [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mb-1"
-                    style={{ color: 'var(--theme-espresso, #3D2817)' }}
+                    style={{ color: 'var(--theme-text, #3D2817)' }}
                     dangerouslySetInnerHTML={{ __html: extractFirstParagraph(product.descripcion_larga) }}
                   />
                   {hasMoreParagraphs(product.descripcion_larga) && (
@@ -413,7 +413,7 @@ export default function ProductoPage() {
                       >
                         <div
                           className="font-body text-sm leading-relaxed whitespace-pre-line [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mb-1"
-                          style={{ color: 'var(--theme-espresso, #3D2817)' }}
+                          style={{ color: 'var(--theme-text, #3D2817)' }}
                           dangerouslySetInnerHTML={{ __html: extractRestParagraphs(product.descripcion_larga) }}
                         />
                       </div>
@@ -430,7 +430,7 @@ export default function ProductoPage() {
                 </div>
               ) : (
                 <div className="rounded-2xl p-8" style={{ backgroundColor: 'var(--theme-surface, #FFF)', boxShadow: '0 2px 16px rgba(27,67,50,0.06)' }}>
-                  <h2 className="font-serif text-2xl mb-6 flex items-center gap-2" style={{ color: 'var(--theme-forest, #1B4332)' }}>
+                  <h2 className="font-serif text-2xl mb-6 flex items-center gap-2" style={{ color: 'var(--theme-primary, #1B4332)' }}>
                     <Info className="w-5 h-5" /> Descripción
                   </h2>
                   <p className="font-body text-sm" style={{ color: 'var(--theme-muted, #5C4033)' }}>
@@ -450,7 +450,7 @@ export default function ProductoPage() {
         {/* Crosssell */}
         {crosssell.length > 0 && (
           <section className="mt-16">
-            <h2 className="font-serif text-2xl mb-8 text-center" style={{ color: 'var(--theme-forest, #1B4332)' }}>
+            <h2 className="font-serif text-2xl mb-8 text-center" style={{ color: 'var(--theme-primary, #1B4332)' }}>
               También te puede interesar
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">

@@ -55,7 +55,7 @@ export default function GlobalSections() {
 
   return (
     <div className="space-y-3">
-      <h3 className="font-serif text-lg mb-4" style={{ color: 'var(--theme-forest, #1B4332)' }}>
+      <h3 className="font-serif text-lg mb-4" style={{ color: 'var(--theme-primary, #1B4332)' }}>
         Información útil
       </h3>
       {SECTIONS.map(section => {
