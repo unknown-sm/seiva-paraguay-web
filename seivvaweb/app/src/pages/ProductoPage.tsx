@@ -2,7 +2,23 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { fetchProducts, type Product, formatPrice, getDiscountedPrice, getActiveTier } from '../services/api'
 import { useCart } from '../context/CartContext'
-import { ShoppingCart, Minus, Plus, ChevronLeft, ChevronRight, Tag, Box, Info, Package } from 'lucide-react'
+import { ShoppingCart, Minus, Plus, ChevronLeft, ChevronRight, Tag, Box, Info, Package, ChevronDown } from 'lucide-react'
+import GlobalSections from '../components/GlobalSections'
+
+function extractFirstParagraph(html: string): string {
+  const match = html.match(/<p\b[^>]*>[\s\S]*?<\/p>/i)
+  return match ? match[0] : html.split('\n\n')[0] || html
+}
+
+function hasMoreParagraphs(html: string): boolean {
+  const first = extractFirstParagraph(html)
+  return first.length < html.trim().length
+}
+
+function extractRestParagraphs(html: string): string {
+  const first = extractFirstParagraph(html)
+  return html.replace(first, '').trim()
+}
 
 export default function ProductoPage() {
   const { slug } = useParams()
@@ -13,6 +29,8 @@ export default function ProductoPage() {
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showShort, setShowShort] = useState(false)
+  const [showLong, setShowLong] = useState(false)
   const { addItem } = useCart()
 
   useEffect(() => {
@@ -246,11 +264,21 @@ export default function ProductoPage() {
               )}
             </div>
 
-            <div 
-              className="font-body text-base leading-relaxed mt-4 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:my-1 [&_p]:mb-2" 
-              style={{ color: 'var(--theme-espresso, #3D2817)' }}
-              dangerouslySetInnerHTML={{ __html: product.descripcion || 'Producto natural de alta calidad.' }}
-            />
+            <div className="relative">
+              <div 
+                className={`font-body text-base leading-relaxed mt-4 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:my-1 [&_p]:mb-2 ${!showShort ? 'line-clamp-4' : ''}`} 
+                style={{ color: 'var(--theme-espresso, #3D2817)' }}
+                dangerouslySetInnerHTML={{ __html: product.descripcion || 'Producto natural de alta calidad.' }}
+              />
+              <button
+                onClick={() => setShowShort(!showShort)}
+                className="inline-flex items-center gap-1 mt-2 font-body text-sm hover:opacity-80 transition-opacity"
+                style={{ color: 'var(--theme-primary, #1B4332)' }}
+              >
+                {showShort ? 'Ver menos' : 'Ver más'}
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showShort ? 'rotate-180' : ''}`} />
+              </button>
+            </div>
 
             {/* Price */}
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mt-6">
@@ -411,21 +439,61 @@ export default function ProductoPage() {
           </div>
         </div>
 
-        {/* Descripcion larga */}
-        {product.descripcion_larga && (
-          <section className="mt-16 max-w-3xl mx-auto">
-            <div className="rounded-2xl p-8" style={{ backgroundColor: 'var(--theme-surface, #FFF)', boxShadow: '0 2px 16px rgba(27,67,50,0.06)' }}>
-              <h2 className="font-serif text-2xl mb-6 flex items-center gap-2" style={{ color: 'var(--theme-forest, #1B4332)' }}>
-                <Info className="w-5 h-5" /> Descripción
-              </h2>
-              <div
-                className="font-body text-sm leading-relaxed whitespace-pre-line [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mb-1"
-                style={{ color: 'var(--theme-espresso, #3D2817)' }}
-                dangerouslySetInnerHTML={{ __html: product.descripcion_larga }}
-              />
+        {/* Descripcion larga + Secciones globales */}
+        <section className="mt-16 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Columna izquierda: Descripción larga */}
+            <div className="lg:col-span-2">
+              {product.descripcion_larga ? (
+                <div className="rounded-2xl p-8" style={{ backgroundColor: 'var(--theme-surface, #FFF)', boxShadow: '0 2px 16px rgba(27,67,50,0.06)' }}>
+                  <h2 className="font-serif text-2xl mb-6 flex items-center gap-2" style={{ color: 'var(--theme-forest, #1B4332)' }}>
+                    <Info className="w-5 h-5" /> Descripción
+                  </h2>
+                  <div
+                    className="font-body text-sm leading-relaxed whitespace-pre-line [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mb-1"
+                    style={{ color: 'var(--theme-espresso, #3D2817)' }}
+                    dangerouslySetInnerHTML={{ __html: extractFirstParagraph(product.descripcion_larga) }}
+                  />
+                  {hasMoreParagraphs(product.descripcion_larga) && (
+                    <>
+                      <div
+                        className={`overflow-hidden transition-all duration-400 ${showLong ? 'max-h-[5000px] opacity-100 mt-4' : 'max-h-0 opacity-0'}`}
+                      >
+                        <div
+                          className="font-body text-sm leading-relaxed whitespace-pre-line [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mb-1"
+                          style={{ color: 'var(--theme-espresso, #3D2817)' }}
+                          dangerouslySetInnerHTML={{ __html: extractRestParagraphs(product.descripcion_larga) }}
+                        />
+                      </div>
+                      <button
+                        onClick={() => setShowLong(!showLong)}
+                        className="inline-flex items-center gap-1 mt-3 font-body text-sm hover:opacity-80 transition-opacity"
+                        style={{ color: 'var(--theme-primary, #1B4332)' }}
+                      >
+                        {showLong ? 'Leer menos' : 'Leer más'}
+                        <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showLong ? 'rotate-180' : ''}`} />
+                      </button>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <div className="rounded-2xl p-8" style={{ backgroundColor: 'var(--theme-surface, #FFF)', boxShadow: '0 2px 16px rgba(27,67,50,0.06)' }}>
+                  <h2 className="font-serif text-2xl mb-6 flex items-center gap-2" style={{ color: 'var(--theme-forest, #1B4332)' }}>
+                    <Info className="w-5 h-5" /> Descripción
+                  </h2>
+                  <p className="font-body text-sm" style={{ color: 'var(--theme-muted, #5C4033)' }}>
+                    {product.descripcion?.replace(/<[^>]*>/g, '') || 'Producto natural de alta calidad.'}
+                  </p>
+                </div>
+              )}
             </div>
-          </section>
-        )}
+
+            {/* Columna derecha: Secciones globales */}
+            <div className="lg:col-span-1">
+              <GlobalSections />
+            </div>
+          </div>
+        </section>
 
         {/* Crosssell */}
         {crosssell.length > 0 && (
