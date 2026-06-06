@@ -21,7 +21,7 @@ export default function CartPage() {
           <Link
             to="/tienda"
             className="inline-flex items-center gap-2 font-body font-semibold text-sm px-8 py-3 rounded-full"
-            style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: '#FFF' }}
+            style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: 'var(--theme-text-on-primary, #FFFFFF)' }}
           >
             <ArrowLeft className="w-4 h-4" /> Ir a la tienda
           </Link>
@@ -104,7 +104,7 @@ export default function CartPage() {
             <button
               onClick={clearCart}
               className="font-body text-sm underline"
-              style={{ color: '#999' }}
+              style={{ color: 'var(--theme-muted, #999)' }}
             >
               Vaciar carrito
             </button>
@@ -145,7 +145,7 @@ export default function CartPage() {
               className="w-full flex items-center justify-center gap-3 font-body font-semibold text-sm sm:text-base px-4 py-3 sm:px-6 sm:py-4 rounded-full transition-all duration-300 hover:scale-105"
               style={{
                 backgroundColor: 'var(--theme-primary, #1B4332)',
-                color: '#FFFFFF',
+                color: 'var(--theme-text-on-primary, #FFFFFF)',
                 boxShadow: '0 4px 24px rgba(27,67,50,0.25)',
               }}
             >

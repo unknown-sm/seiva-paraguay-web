@@ -25,7 +25,7 @@ const contacts = [
     value: 'contacto@seiva.com.py',
     sub: 'Respondemos en 24h',
     href: 'mailto:contacto@seiva.com.py',
-    color: '#D4A843',
+    color: 'var(--theme-accent, #D4A843)',
   },
   {
     icon: MapPin,
@@ -33,7 +33,7 @@ const contacts = [
     value: 'Capiatá, Departamento Central, Paraguay',
     sub: null,
     href: null,
-    color: '#1B4332',
+    color: 'var(--theme-primary, #1B4332)',
   },
   {
     icon: Clock,
@@ -41,7 +41,7 @@ const contacts = [
     value: 'Lunes a Viernes: 8:00 - 18:00',
     sub: 'Sábados: 8:00 - 13:00',
     href: null,
-    color: '#1B4332',
+    color: 'var(--theme-primary, #1B4332)',
   },
   {
     icon: Truck,
@@ -49,7 +49,7 @@ const contacts = [
     value: 'Asunción y alrededores: entrega el mismo día',
     sub: 'Interior: por encomienda',
     href: null,
-    color: '#1B4332',
+    color: 'var(--theme-primary, #1B4332)',
   },
 ]
 
@@ -128,7 +128,7 @@ export default function ContactoPage() {
             className="inline-flex items-center gap-3 rounded-xl px-6 py-4"
             style={{ backgroundColor: 'var(--theme-primary, #1B4332)' }}
           >
-            <Leaf className="w-5 h-5" style={{ color: '#D4A843' }} />
+            <Leaf className="w-5 h-5" style={{ color: 'var(--theme-accent, #D4A843)' }} />
             <span className="font-body text-sm text-white">
               También podés escribirnos por WhatsApp haciendo clic en el botón verde
             </span>

@@ -84,8 +84,8 @@ export default function Footer() {
               type="submit"
               className="h-11 px-6 rounded-full font-body font-semibold text-sm transition-all duration-300 hover:scale-105 whitespace-nowrap"
               style={{
-                backgroundColor: '#D4A843',
-                color: '#1B4332',
+                backgroundColor: 'var(--theme-accent, #D4A843)',
+                color: 'var(--theme-primary, #1B4332)',
                 letterSpacing: '0.08em',
               }}
             >

@@ -122,7 +122,27 @@ const contenidoDefault = {
   qr_activo: "",
   qr_imagen: "",
   qr_instrucciones: "Pagá con QR y envianos el comprobante por WhatsApp",
-  envio_minimo_gratis: "150000"
+  envio_minimo_gratis: "150000",
+  global_envios: `<p>Realizamos envíos a <strong>todo Paraguay</strong>.</p>
+<ul>
+  <li><strong>Asunción y Central:</strong> Delivery en 24-48h hábiles. Costo: Gs. 15.000</li>
+  <li><strong>Interior:</strong> Encomienda por transportadora. Tiempo: 2-5 días hábiles según destino.</li>
+  <li><strong>Envío gratis:</strong> Compras superiores a Gs. 150.000 en Asunción y Central.</li>
+</ul>
+<p>Coordinamos la entrega por WhatsApp para asegurar que recibas tu pedido sin demoras.</p>`,
+  global_pagos: `<ul>
+  <li><strong>Transferencia bancaria:</strong> Aceptamos transferencias de todos los bancos.</li>
+  <li><strong>Pago QR:</strong> Escaneá y pagá desde cualquier app bancaria.</li>
+  <li><strong>Efectivo contra entrega:</strong> Disponible en Asunción y Central.</li>
+  <li><strong>Giros Tigo/Money:</strong> Rápido y sin costo adicional.</li>
+</ul>
+<p>Todos los pagos se coordinan por WhatsApp al <strong>0992 120 303</strong>.</p>`,
+  global_garantia: `<ul>
+  <li><strong>Productos sellados:</strong> Si el producto no fue abierto, aceptamos devolución dentro de 7 días.</li>
+  <li><strong>Productos dañados:</strong> Si recibís un producto en mal estado, lo reemplazamos sin costo.</li>
+  <li><strong>Calidad garantizada:</strong> Trabajamos con marcas premium. Todos nuestros productos tienen control de calidad.</li>
+</ul>
+<p>Tu satisfacción es nuestra prioridad. Cualquier inconveniente, escribinos por WhatsApp.</p>`,
 };
 
 const insertContenido = db.prepare("INSERT OR IGNORE INTO contenido (key, value) VALUES (?, ?)");

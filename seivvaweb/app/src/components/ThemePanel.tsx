@@ -3,9 +3,10 @@ import { X, Palette } from 'lucide-react'
 import { useTheme } from '../context/ThemeContext'
 
 const PRESET_LIST = [
-  { key: 'natural', label: 'Natural Fresco', swatches: ['#5B8C5A', '#D4956A', '#FAF7F2'] },
-  { key: 'oscuro', label: 'Noche Oscura', swatches: ['#7CB87B', '#E8B88A', '#1A1814'] },
-  { key: 'tropical', label: 'Tropical Vibrante', swatches: ['#E8784A', '#3E9B6D', '#FFFDF5'] },
+  { key: 'natural', label: 'Natural Fresco', desc: 'Tema claro — fondo crema, verde oscuro, acentos dorados', swatches: ['#F2EDE6', '#1B4332', '#D4A843'] },
+  { key: 'bosque', label: 'Verde Bosque', desc: 'Tema oscuro — fondo verde, texto claro, acentos dorados (estilo Producto Destacado)', swatches: ['#1B4332', '#52B788', '#D4A843'] },
+  { key: 'oscuro', label: 'Noche Oscura', desc: 'Tema oscuro clásico — negro profundo, texto claro', swatches: ['#1A1814', '#52B788', '#D4A843'] },
+  { key: 'tropical', label: 'Tropical Vibrante', desc: 'Tema claro — naranja intenso, verde menta', swatches: ['#F2EDE6', '#E8784A', '#3E9B6D'] },
 ]
 
 const COLOR_KEYS = [
@@ -28,7 +29,7 @@ export function ThemeToggle() {
         className="flex fixed bottom-6 right-6 z-[90] w-12 h-12 rounded-full items-center justify-center shadow-lg transition-all duration-300 hover:scale-110"
         style={{
           backgroundColor: 'var(--theme-accent, #D4A843)',
-          color: '#1B4332',
+          color: 'var(--theme-primary, #1B4332)',
           boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
         }}
         aria-label="Cambiar paleta de colores"
@@ -93,19 +94,24 @@ function ThemePanel({ open, onClose }: { open: boolean; onClose: () => void }) {
             <button
               key={preset.key}
               onClick={() => applyPreset(preset.key)}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-left"
+              className="flex flex-col gap-1 px-4 py-3 rounded-xl transition-all duration-300 text-left w-full"
               style={{
                 border: `1.5px solid ${activePreset === preset.key ? 'var(--theme-primary, #1B4332)' : 'var(--theme-border, #E8E0D5)'}`,
-                backgroundColor: activePreset === preset.key ? 'rgba(27,67,50,0.05)' : 'transparent',
+                backgroundColor: activePreset === preset.key ? 'var(--theme-primary-bg-05, rgba(27,67,50,0.05))' : 'transparent',
               }}
             >
-              <div className="flex gap-0.5">
-                {preset.swatches.map((c, i) => (
-                  <span key={i} className="w-4 h-4 rounded-sm block" style={{ backgroundColor: c }} />
-                ))}
+              <div className="flex items-center gap-3">
+                <div className="flex gap-0.5">
+                  {preset.swatches.map((c, i) => (
+                    <span key={i} className="w-4 h-4 rounded-sm block" style={{ backgroundColor: c }} />
+                  ))}
+                </div>
+                <span className="font-body text-sm font-medium" style={{ color: 'var(--theme-text, #3D2817)' }}>
+                  {preset.label}
+                </span>
               </div>
-              <span className="font-body text-sm font-medium" style={{ color: 'var(--theme-text, #3D2817)' }}>
-                {preset.label}
+              <span className="font-body text-[11px] pl-8" style={{ color: 'var(--theme-muted, #5C4033)' }}>
+                {preset.desc}
               </span>
             </button>
           ))}

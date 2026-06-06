@@ -179,7 +179,7 @@ export default function CheckoutPage() {
             <Link
               to="/tienda"
               className="inline-flex items-center gap-2 font-body font-semibold text-sm px-8 py-3 rounded-full"
-              style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: '#FFF' }}
+              style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: 'var(--theme-text-on-primary, #FFFFFF)' }}
             >
               Seguir comprando
             </Link>
@@ -226,7 +226,7 @@ export default function CheckoutPage() {
                     onChange={e => { setTelefono(e.target.value); setErrors(prev => ({ ...prev, telefono: '' })) }}
                     placeholder="0991234567"
                     className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
-                    style={{ borderColor: errors.telefono ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#fff', color: 'var(--theme-text, #3D2817)' }}
+                    style={{ borderColor: errors.telefono ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: 'var(--theme-surface, #FFFFFF)', color: 'var(--theme-text, #3D2817)' }}
                   />
                   {errors.telefono && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.telefono}</p>}
                 </div>
@@ -249,7 +249,7 @@ export default function CheckoutPage() {
                         onChange={e => { setNombre(e.target.value); setErrors(prev => ({ ...prev, nombre: '' })) }}
                         placeholder="Juan"
                         className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
-                        style={{ borderColor: errors.nombre ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#fff', color: 'var(--theme-text, #3D2817)' }}
+                        style={{ borderColor: errors.nombre ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: 'var(--theme-surface, #FFFFFF)', color: 'var(--theme-text, #3D2817)' }}
                       />
                       {errors.nombre && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.nombre}</p>}
                     </div>
@@ -263,7 +263,7 @@ export default function CheckoutPage() {
                         onChange={e => { setApellido(e.target.value); setErrors(prev => ({ ...prev, apellido: '' })) }}
                         placeholder="Pérez"
                         className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
-                        style={{ borderColor: errors.apellido ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#fff', color: 'var(--theme-text, #3D2817)' }}
+                        style={{ borderColor: errors.apellido ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: 'var(--theme-surface, #FFFFFF)', color: 'var(--theme-text, #3D2817)' }}
                       />
                       {errors.apellido && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.apellido}</p>}
                     </div>
@@ -279,7 +279,7 @@ export default function CheckoutPage() {
                       onChange={e => { setDireccion(e.target.value); setErrors(prev => ({ ...prev, direccion: '' })) }}
                       placeholder="Calle Principal 123, cerca de..."
                       className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
-                      style={{ borderColor: errors.direccion ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#fff', color: 'var(--theme-text, #3D2817)' }}
+                      style={{ borderColor: errors.direccion ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: 'var(--theme-surface, #FFFFFF)', color: 'var(--theme-text, #3D2817)' }}
                     />
                     {errors.direccion && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.direccion}</p>}
                   </div>
@@ -299,14 +299,14 @@ export default function CheckoutPage() {
                       onFocus={() => setShowCiudadDropdown(true)}
                       placeholder="Escribí para buscar... (ej: Asunción, Capiatá)"
                       className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
-                      style={{ borderColor: errors.ciudad ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#fff', color: 'var(--theme-text, #3D2817)' }}
+                      style={{ borderColor: errors.ciudad ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: 'var(--theme-surface, #FFFFFF)', color: 'var(--theme-text, #3D2817)' }}
                     />
                     {errors.ciudad && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.ciudad}</p>}
 
                     {showCiudadDropdown && (
                       <div
                         className="absolute z-50 w-full mt-1 max-h-64 overflow-y-auto rounded-lg border shadow-lg"
-                        style={{ backgroundColor: '#fff', borderColor: 'var(--theme-border, #E8E0D5)' }}
+                        style={{ backgroundColor: 'var(--theme-surface, #FFFFFF)', borderColor: 'var(--theme-border, #E8E0D5)' }}
                       >
                         {Object.keys(groupedCiudades).length === 0 ? (
                           <div className="px-4 py-3 text-sm font-body" style={{ color: 'var(--theme-muted, #5C4033)' }}>
@@ -355,7 +355,7 @@ export default function CheckoutPage() {
                         onChange={e => setRuc(e.target.value)}
                         placeholder="Ej: 1234567-8"
                         className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
-                        style={{ borderColor: 'var(--theme-border, #E8E0D5)', backgroundColor: '#fff', color: 'var(--theme-text, #3D2817)' }}
+                        style={{ borderColor: 'var(--theme-border, #E8E0D5)', backgroundColor: 'var(--theme-surface, #FFFFFF)', color: 'var(--theme-text, #3D2817)' }}
                       />
                     </div>
                     <div>
@@ -368,7 +368,7 @@ export default function CheckoutPage() {
                         onChange={e => setCodigoPostal(e.target.value)}
                         placeholder="Ej: 001"
                         className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
-                        style={{ borderColor: 'var(--theme-border, #E8E0D5)', backgroundColor: '#fff', color: 'var(--theme-text, #3D2817)' }}
+                        style={{ borderColor: 'var(--theme-border, #E8E0D5)', backgroundColor: 'var(--theme-surface, #FFFFFF)', color: 'var(--theme-text, #3D2817)' }}
                       />
                     </div>
                   </div>
@@ -383,7 +383,7 @@ export default function CheckoutPage() {
                       placeholder="Indicaciones especiales para la entrega..."
                       rows={3}
                       className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2 resize-none"
-                      style={{ borderColor: 'var(--theme-border, #E8E0D5)', backgroundColor: '#fff', color: 'var(--theme-text, #3D2817)' }}
+                      style={{ borderColor: 'var(--theme-border, #E8E0D5)', backgroundColor: 'var(--theme-surface, #FFFFFF)', color: 'var(--theme-text, #3D2817)' }}
                     />
                   </div>
                 </div>
@@ -440,7 +440,7 @@ export default function CheckoutPage() {
                 onClick={handleSubmitPedido}
                 disabled={sending}
                 className="w-full font-body font-semibold text-sm py-4 rounded-lg transition-all duration-300 hover:scale-[1.02] disabled:opacity-50"
-                style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: '#FFFFFF' }}
+                style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: 'var(--theme-text-on-primary, #FFFFFF)' }}
               >
                 {sending ? 'Procesando...' : `Completar pedido — ${formatPrice(totalConEnvio)}`}
               </button>
@@ -473,7 +473,7 @@ export default function CheckoutPage() {
                         className="w-16 h-16 object-contain rounded-lg"
                         style={{ backgroundColor: 'var(--theme-bg, #FAF3E8)' }}
                       />
-                      <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: '#fff' }}>
+                      <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: 'var(--theme-text-on-primary, #FFFFFF)' }}>
                         {quantity}
                       </span>
                     </div>

@@ -90,7 +90,7 @@ export default function CartDrawer() {
                         {formatPrice(discountedPrice)}
                       </p>
                       {hasDiscount && (
-                        <p className="font-body text-xs line-through" style={{ color: '#999' }}>
+                        <p className="font-body text-xs line-through" style={{ color: 'var(--theme-muted, #999)' }}>
                           {formatPrice(product.precio)}
                         </p>
                       )}
@@ -164,7 +164,7 @@ export default function CartDrawer() {
               className="w-full flex items-center justify-center gap-2 font-body font-semibold text-sm px-5 py-3.5 rounded-full transition-all duration-300 hover:scale-105"
               style={{
                 backgroundColor: 'var(--theme-primary, #1B4332)',
-                color: '#FFFFFF',
+                color: 'var(--theme-text-on-primary, #FFFFFF)',
                 boxShadow: '0 4px 16px rgba(27,67,50,0.25)',
               }}
             >

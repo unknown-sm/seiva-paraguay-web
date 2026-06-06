@@ -22,6 +22,16 @@ const PRESETS: Record<string, ThemeColors> = {
     border: '#F0EDE8',
     navBg: '#1B4332',
   },
+  bosque: {
+    bg: '#1B4332',
+    surface: '#2A3D2F',
+    primary: '#52B788',
+    accent: '#D4A843',
+    text: '#F0EDE4',
+    muted: '#A0B8A8',
+    border: '#2D4A36',
+    navBg: '#0F261C',
+  },
   oscuro: {
     bg: '#1A1814',
     surface: '#2A2620',
@@ -73,6 +83,14 @@ function applyColors(colors: ThemeColors) {
   root.style.setProperty('--theme-border', colors.border)
   root.style.setProperty('--theme-nav-bg', colors.navBg)
   root.style.setProperty('--theme-shadow', hexToRgba(colors.text, 0.08))
+  root.style.setProperty('--theme-shadow-sm', hexToRgba(colors.text, 0.04))
+  root.style.setProperty('--theme-shadow-md', hexToRgba(colors.text, 0.06))
+  root.style.setProperty('--theme-shadow-lg', hexToRgba(colors.text, 0.12))
+  root.style.setProperty('--theme-primary-shadow', hexToRgba(colors.primary, 0.35))
+  root.style.setProperty('--theme-primary-bg-05', hexToRgba(colors.primary, 0.05))
+  root.style.setProperty('--theme-primary-bg-10', hexToRgba(colors.primary, 0.1))
+  root.style.setProperty('--theme-primary-overlay', hexToRgba(colors.primary, 0.85))
+  root.style.setProperty('--theme-text-on-primary', '#FFFFFF')
 }
 
 interface ThemeContextValue {

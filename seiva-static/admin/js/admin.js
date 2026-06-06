@@ -492,7 +492,7 @@ function loadContenido() {
 document.getElementById("contenido-form").addEventListener("submit", function(e) {
   e.preventDefault();
   var body = {};
-  var keys = ["hero_titulo", "hero_descripcion", "whatsapp_numero", "site_titulo", "site_descripcion", "qr_imagen", "qr_instrucciones", "envio_minimo_gratis"];
+  var keys = ["hero_titulo", "hero_descripcion", "whatsapp_numero", "site_titulo", "site_descripcion", "qr_imagen", "qr_instrucciones", "envio_minimo_gratis", "global_envios", "global_pagos", "global_garantia"];
   for (var i = 0; i < keys.length; i++) {
     body[keys[i]] = document.getElementById("contenido-" + keys[i]).value;
   }

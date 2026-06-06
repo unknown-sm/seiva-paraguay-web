@@ -87,7 +87,7 @@ export default function StatsBar() {
           className="stat-item font-body font-semibold text-sm px-7 py-3 rounded-full transition-all duration-300 hover:scale-105 whitespace-nowrap"
           style={{
             backgroundColor: 'var(--theme-primary, #1B4332)',
-            color: '#FFFFFF',
+            color: 'var(--theme-text-on-primary, #FFFFFF)',
             letterSpacing: '0.08em',
           }}
         >

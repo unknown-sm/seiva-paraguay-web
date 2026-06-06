@@ -168,8 +168,8 @@ export default function ProductFeatured() {
                   onClick={() => setSelectedOption(i)}
                   className="font-body font-semibold text-xs px-5 py-2.5 rounded-full transition-all duration-300"
                   style={{
-                    backgroundColor: selectedOption === i ? '#D4A843' : 'rgba(255,255,255,0.1)',
-                    color: selectedOption === i ? '#1B4332' : '#FFFFFF',
+                    backgroundColor: selectedOption === i ? 'var(--theme-accent, #D4A843)' : 'rgba(255,255,255,0.1)',
+                    color: selectedOption === i ? 'var(--theme-primary, #1B4332)' : 'var(--theme-text-on-primary, #FFFFFF)',
                     border: selectedOption === i ? 'none' : '1px solid rgba(255,255,255,0.15)',
                     letterSpacing: '0.08em',
                   }}
@@ -226,8 +226,8 @@ export default function ProductFeatured() {
               onClick={addToCart}
               className="font-body font-semibold text-sm px-9 py-3.5 rounded-full transition-all duration-300 hover:scale-[1.03]"
               style={{
-                backgroundColor: '#D4A843',
-                color: '#1B4332',
+                backgroundColor: 'var(--theme-accent, #D4A843)',
+                color: 'var(--theme-primary, #1B4332)',
                 letterSpacing: '0.08em',
                 boxShadow: '0 4px 16px rgba(212, 168, 67, 0.35)',
               }}

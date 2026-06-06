@@ -40,7 +40,7 @@ export default function MobileTabBar() {
       <div
         className="mx-auto max-w-lg rounded-t-3xl px-2 pb-safe"
         style={{
-          backgroundColor: '#FDF8F0',
+          backgroundColor: 'var(--theme-bg, #F2EDE6)',
           boxShadow: '0 -8px 32px rgba(0,0,0,0.12)',
         }}
       >
@@ -61,7 +61,7 @@ export default function MobileTabBar() {
                     style={{
                       background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)',
                       boxShadow: '0 8px 24px rgba(37,211,102,0.45)',
-                      border: '4px solid #FDF8F0',
+                      border: '4px solid var(--theme-bg, #F2EDE6)',
                     }}
                   >
                     <Icon className="w-6 h-6 text-white" strokeWidth={2.5} />
@@ -78,7 +78,7 @@ export default function MobileTabBar() {
                 <div className="relative">
                   <Icon
                     className="w-5 h-5 transition-colors duration-300"
-                    style={{ color: active ? '#1B4332' : '#8B8B8B' }}
+                    style={{ color: active ? 'var(--theme-primary, #1B4332)' : 'var(--theme-muted, #8B8B8B)' }}
                     strokeWidth={active ? 2.5 : 2}
                   />
                   {tab.badge ? (
@@ -92,14 +92,14 @@ export default function MobileTabBar() {
                 </div>
                 <span
                   className="text-[10px] font-medium transition-colors duration-300"
-                  style={{ color: active ? '#1B4332' : '#8B8B8B' }}
+                  style={{ color: active ? 'var(--theme-primary, #1B4332)' : 'var(--theme-muted, #8B8B8B)' }}
                 >
                   {tab.label}
                 </span>
                 {active && (
                   <div
                     className="absolute bottom-1 w-1 h-1 rounded-full"
-                    style={{ backgroundColor: '#D4A843' }}
+                    style={{ backgroundColor: 'var(--theme-accent, #D4A843)' }}
                   />
                 )}
               </div>

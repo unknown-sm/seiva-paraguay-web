@@ -132,7 +132,7 @@ export default function Categories() {
                     className="absolute top-3 left-3 font-body font-semibold text-[10px] px-2.5 py-1 rounded-full tracking-wider"
                     style={{
                       backgroundColor: 'var(--theme-primary, #1B4332)',
-                      color: '#FFFFFF',
+                      color: 'var(--theme-text-on-primary, #FFFFFF)',
                       zIndex: 10,
                     }}
                   >
@@ -164,7 +164,7 @@ export default function Categories() {
                       {formatPrice(product.precio)}
                     </span>
                     {product.precio_anterior && (
-                      <span className="font-body text-xs sm:text-sm line-through" style={{ color: '#999' }}>
+                      <span className="font-body text-xs sm:text-sm line-through" style={{ color: 'var(--theme-muted, #999)' }}>
                         {formatPrice(product.precio_anterior)}
                       </span>
                     )}

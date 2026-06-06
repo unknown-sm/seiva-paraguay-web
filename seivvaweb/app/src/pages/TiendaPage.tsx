@@ -135,7 +135,7 @@ export default function TiendaPage() {
 
         {/* Search */}
         <div className="relative max-w-md mx-auto mb-8">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: '#999' }} />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: 'var(--theme-muted, #999)' }} />
           <input
             type="text"
             placeholder="Buscar productos..."
@@ -149,7 +149,7 @@ export default function TiendaPage() {
               }
             }}
             className="w-full pl-12 pr-4 py-3.5 rounded-full font-body text-sm border-0 outline-none"
-            style={{ backgroundColor: 'var(--theme-surface, #FFFFFF)', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+            style={{ backgroundColor: 'var(--theme-surface, #FFFFFF)', boxShadow: '0 2px 12px var(--theme-shadow-md, rgba(0,0,0,0.06))' }}
           />
         </div>
 
@@ -158,7 +158,7 @@ export default function TiendaPage() {
           <div className="flex flex-wrap justify-center items-center gap-2 mb-6">
             <span className="font-body text-sm" style={{ color: 'var(--theme-muted, #5C4033)' }}>Filtros activos:</span>
             {filterSubcat && (
-              <span className="inline-flex items-center gap-1 font-body text-xs px-3 py-1 rounded-full" style={{ backgroundColor: 'rgba(27,67,50,0.1)', color: 'var(--theme-primary, #1B4332)' }}>
+              <span className="inline-flex items-center gap-1 font-body text-xs px-3 py-1 rounded-full" style={{ backgroundColor: 'var(--theme-primary-bg-10, rgba(27,67,50,0.1))', color: 'var(--theme-primary, #1B4332)' }}>
                 {filterSubcat}
                 <button onClick={() => { setFilterSubcat(''); setSearchParams({}) }} className="ml-1 hover:opacity-70">×</button>
               </span>
@@ -170,7 +170,7 @@ export default function TiendaPage() {
               </span>
             )}
             {filterMarca && (
-              <span className="inline-flex items-center gap-1 font-body text-xs px-3 py-1 rounded-full" style={{ backgroundColor: 'rgba(27,67,50,0.1)', color: 'var(--theme-primary, #1B4332)' }}>
+              <span className="inline-flex items-center gap-1 font-body text-xs px-3 py-1 rounded-full" style={{ backgroundColor: 'var(--theme-primary-bg-10, rgba(27,67,50,0.1))', color: 'var(--theme-primary, #1B4332)' }}>
                 {filterMarca}
                 <button onClick={() => { setFilterMarca(''); setSearchParams({}) }} className="ml-1 hover:opacity-70">×</button>
               </span>
@@ -194,7 +194,7 @@ export default function TiendaPage() {
               className="font-body font-semibold text-sm px-6 py-2.5 rounded-full transition-all duration-300"
               style={{
                 backgroundColor: activeCat === cat.id ? 'var(--theme-primary, #1B4332)' : 'var(--theme-surface, #FFFFFF)',
-                color: activeCat === cat.id ? '#FFFFFF' : 'var(--theme-text, #3D2817)',
+                color: activeCat === cat.id ? 'var(--theme-text-on-primary, #FFFFFF)' : 'var(--theme-text, #3D2817)',
                 border: activeCat === cat.id ? 'none' : '1px solid rgba(61,40,23,0.15)',
                 letterSpacing: '0.04em',
               }}
@@ -238,7 +238,7 @@ export default function TiendaPage() {
                     />
                     <span
                       className="absolute top-2 left-2 font-body font-semibold text-[9px] px-2 py-0.5 rounded-full tracking-wider z-10"
-                      style={{ backgroundColor: 'rgba(27,67,50,0.85)', color: '#FFF' }}
+                      style={{ backgroundColor: 'var(--theme-primary-overlay, rgba(27,67,50,0.85))', color: 'var(--theme-text-on-primary, #FFFFFF)' }}
                     >
                       {product.categoria.toUpperCase()}
                     </span>
@@ -266,7 +266,7 @@ export default function TiendaPage() {
                         {formatPrice(product.precio)}
                       </span>
                       {product.precio_anterior && (
-                        <span className="font-body text-[11px] sm:text-xs line-through" style={{ color: '#999' }}>
+                        <span className="font-body text-[11px] sm:text-xs line-through" style={{ color: 'var(--theme-muted, #999)' }}>
                           {formatPrice(product.precio_anterior)}
                         </span>
                       )}
@@ -279,8 +279,8 @@ export default function TiendaPage() {
                       }}
                       className="mt-3 w-full inline-flex items-center justify-center gap-2 font-body font-semibold text-xs px-4 py-2.5 rounded-full transition-all duration-300 hover:scale-105 cursor-pointer"
                       style={{
-                        backgroundColor: '#D4A843',
-                        color: '#1B4332',
+                        backgroundColor: 'var(--theme-accent, #D4A843)',
+                        color: 'var(--theme-primary, #1B4332)',
                         letterSpacing: '0.04em',
                       }}
                     >
@@ -331,7 +331,7 @@ export default function TiendaPage() {
                       className="flex items-center justify-center w-9 h-9 rounded-full font-body text-sm font-semibold transition-all duration-200 cursor-pointer"
                       style={{
                         backgroundColor: page === p ? 'var(--theme-primary, #1B4332)' : 'var(--theme-surface, #FFFFFF)',
-                        color: page === p ? '#FFFFFF' : 'var(--theme-text, #3D2817)',
+                        color: page === p ? 'var(--theme-text-on-primary, #FFFFFF)' : 'var(--theme-text, #3D2817)',
                         boxShadow: page === p ? '0 4px 12px rgba(27,67,50,0.25)' : '0 2px 8px rgba(0,0,0,0.08)',
                       }}
                     >

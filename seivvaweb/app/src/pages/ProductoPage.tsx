@@ -156,7 +156,7 @@ export default function ProductoPage() {
       <main className="pt-24 pb-20" style={{ backgroundColor: 'var(--theme-bg, #FAF3E8)', minHeight: '100vh' }}>
         <div className="container-main text-center">
           <h1 className="font-body font-bold text-3xl mb-4" style={{ color: 'var(--theme-text, #3D2817)' }}>Producto no encontrado</h1>
-          <Link to="/tienda" className="font-body font-semibold text-sm px-8 py-3 rounded-full inline-block" style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: '#FFF' }}>
+          <Link to="/tienda" className="font-body font-semibold text-sm px-8 py-3 rounded-full inline-block" style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: 'var(--theme-text-on-primary, #FFFFFF)' }}>
             Ver Tienda
           </Link>
         </div>
@@ -251,19 +251,14 @@ export default function ProductoPage() {
               {product.nombre}
             </h1>
 
-            {/* SKU + Marca */}
-            <div className="flex flex-wrap items-center gap-3 mt-3">
-              {product.marca && (
+            {/* Marca */}
+            {product.marca && (
+              <div className="flex flex-wrap items-center gap-3 mt-3">
                 <span className="inline-flex items-center gap-1 font-body text-xs" style={{ color: 'var(--theme-muted, #5C4033)' }}>
                   <Box className="w-3 h-3" /> {product.marca}
                 </span>
-              )}
-              {product.sku && (
-                <span className="font-body text-xs" style={{ color: '#999' }}>
-                  SKU: {product.sku}
-                </span>
-              )}
-            </div>
+              </div>
+            )}
 
             <div className="relative">
               <div 
@@ -287,12 +282,12 @@ export default function ProductoPage() {
                 {formatPrice(currentPrice)}
               </span>
               {currentPrice < product.precio && (
-                <span className="font-body text-sm sm:text-lg line-through" style={{ color: '#999' }}>
+                <span className="font-body text-sm sm:text-lg line-through" style={{ color: 'var(--theme-muted, #999)' }}>
                   {formatPrice(product.precio)}
                 </span>
               )}
               {product.precio_anterior && currentPrice >= product.precio && (
-                <span className="font-body text-sm sm:text-lg line-through" style={{ color: '#999' }}>
+                <span className="font-body text-sm sm:text-lg line-through" style={{ color: 'var(--theme-muted, #999)' }}>
                   {formatPrice(product.precio_anterior)}
                 </span>
               )}
@@ -305,7 +300,7 @@ export default function ProductoPage() {
 
             {/* Quantity Discount Table */}
             {product.price_tiers && product.price_tiers.length > 0 && (
-              <div className="mt-4 p-4 rounded-xl" style={{ backgroundColor: 'rgba(27,67,50,0.05)', border: '1px solid rgba(27,67,50,0.1)' }}>
+              <div className="mt-4 p-4 rounded-xl" style={{ backgroundColor: 'var(--theme-primary-bg-05, rgba(27,67,50,0.05))', border: '1px solid var(--theme-primary-bg-10, rgba(27,67,50,0.1))' }}>
                 <h3 className="font-body font-semibold text-sm mb-3 flex items-center gap-2" style={{ color: 'var(--theme-primary, #1B4332)' }}>
                   <Tag className="w-4 h-4" /> Descuento por cantidad
                 </h3>
@@ -319,7 +314,7 @@ export default function ProductoPage() {
                         className="flex items-center justify-between px-3 py-2 rounded-lg transition-all text-sm"
                         style={{ 
                           backgroundColor: isActive ? 'var(--theme-primary, #1B4332)' : 'transparent',
-                          color: isActive ? '#FFF' : 'var(--theme-text, #3D2817)',
+                          color: isActive ? 'var(--theme-text-on-primary, #FFFFFF)' : 'var(--theme-text, #3D2817)',
                           fontWeight: isActive ? 600 : 400
                         }}
                       >
@@ -376,7 +371,7 @@ export default function ProductoPage() {
               </div>
               <button onClick={() => { addItem(product, quantity); setAdded(true); setTimeout(() => setAdded(false), 2000) }}
                 className="inline-flex items-center justify-center gap-2 font-body font-semibold text-sm px-8 py-4 rounded-full transition-all duration-300 hover:scale-105 hover:opacity-90"
-                style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: '#FFF', boxShadow: '0 4px 16px rgba(27,67,50,0.35)' }}>
+                style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: 'var(--theme-text-on-primary, #FFFFFF)', boxShadow: '0 4px 16px var(--theme-primary-shadow, rgba(27,67,50,0.35))' }}>
                 <ShoppingCart className="w-4 h-4" />
                 {added ? 'Agregado!' : 'Agregar al carrito'}
               </button>
@@ -388,50 +383,6 @@ export default function ProductoPage() {
                 <Package className="w-4 h-4" />
                 {product.stock > 0 ? `${product.stock} disponibles` : 'Agotado'}
               </span>
-            </div>
-
-            {/* Product Meta (like WordPress) */}
-            <div className="mt-6 pt-4 space-y-2" style={{ borderTop: '1px solid var(--theme-border, #E8E0D5)' }}>
-              {product.sku && (
-                <p className="font-body text-sm" style={{ color: 'var(--theme-muted, #5C4033)' }}>
-                  <span className="font-semibold">SKU:</span> {product.sku}
-                </p>
-              )}
-              <p className="font-body text-sm" style={{ color: 'var(--theme-muted, #5C4033)' }}>
-                <span className="font-semibold">Categoría:</span>{' '}
-                <Link to={`/tienda?categoria=${encodeURIComponent(product.categoria)}`} className="hover:underline" style={{ color: 'var(--theme-primary, #1B4332)' }}>
-                  {product.categoria}
-                </Link>
-                {product.subcategoria && (
-                  <>
-                    ,{' '}
-                    <Link to={`/tienda?categoria=${encodeURIComponent(product.categoria)}&subcategoria=${encodeURIComponent(product.subcategoria)}`} className="hover:underline" style={{ color: 'var(--theme-primary, #1B4332)' }}>
-                      {product.subcategoria}
-                    </Link>
-                  </>
-                )}
-              </p>
-              {product.etiquetas && product.etiquetas.length > 0 && (
-                <p className="font-body text-sm" style={{ color: 'var(--theme-muted, #5C4033)' }}>
-                  <span className="font-semibold">Etiqueta:</span>{' '}
-                  {product.etiquetas.map((tag, i) => (
-                    <span key={tag}>
-                      <Link to={`/tienda?etiqueta=${encodeURIComponent(tag)}`} className="hover:underline" style={{ color: 'var(--theme-primary, #1B4332)' }}>
-                        {tag}
-                      </Link>
-                      {i < product.etiquetas!.length - 1 && ', '}
-                    </span>
-                  ))}
-                </p>
-              )}
-              {product.marca && (
-                <p className="font-body text-sm" style={{ color: 'var(--theme-muted, #5C4033)' }}>
-                  <span className="font-semibold">Marca:</span>{' '}
-                  <Link to={`/tienda?marca=${encodeURIComponent(product.marca)}`} className="hover:underline" style={{ color: 'var(--theme-primary, #1B4332)' }}>
-                    {product.marca}
-                  </Link>
-                </p>
-              )}
             </div>
 
             <Link to="/carrito" className="inline-block mt-4 font-body text-sm underline" style={{ color: 'var(--theme-primary, #1B4332)' }}>
@@ -515,7 +466,7 @@ export default function ProductoPage() {
                     <h3 className="font-body font-semibold text-sm leading-tight line-clamp-2 mb-2" style={{ color: 'var(--theme-text, #3D2817)' }}>{p.nombre}</h3>
                     <div className="flex items-baseline gap-2">
                       <span className="font-body font-bold text-sm" style={{ color: 'var(--theme-primary, #1B4332)' }}>{formatPrice(p.precio)}</span>
-                      {p.precio_anterior && <span className="font-body text-xs line-through" style={{ color: '#999' }}>{formatPrice(p.precio_anterior)}</span>}
+                      {p.precio_anterior && <span className="font-body text-xs line-through" style={{ color: 'var(--theme-muted, #999)' }}>{formatPrice(p.precio_anterior)}</span>}
                     </div>
                   </div>
                 </Link>
