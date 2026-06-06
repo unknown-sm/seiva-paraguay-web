@@ -375,8 +375,8 @@ export default function ProductoPage() {
                 </button>
               </div>
               <button onClick={() => { addItem(product, quantity); setAdded(true); setTimeout(() => setAdded(false), 2000) }}
-                className="inline-flex items-center justify-center gap-2 font-body font-semibold text-sm px-8 py-4 rounded-full transition-all duration-300 hover:scale-105"
-                style={{ backgroundColor: added ? '#1B4332' : 'var(--theme-gold, #D4A843)', color: '#FFF', boxShadow: '0 4px 16px rgba(212,168,67,0.35)' }}>
+                className="inline-flex items-center justify-center gap-2 font-body font-semibold text-sm px-8 py-4 rounded-full transition-all duration-300 hover:scale-105 hover:opacity-90"
+                style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: '#FFF', boxShadow: '0 4px 16px rgba(27,67,50,0.35)' }}>
                 <ShoppingCart className="w-4 h-4" />
                 {added ? 'Agregado!' : 'Agregar al carrito'}
               </button>
