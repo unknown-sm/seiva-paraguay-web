@@ -299,7 +299,7 @@ export default function ProductoPage() {
             )}
 
             {/* Quantity Discount Table */}
-            {product.price_tiers && product.price_tiers.length > 0 && (
+            {product.stock > 0 && product.price_tiers && product.price_tiers.length > 0 && (
               <div className="mt-4 p-4 rounded-xl" style={{ backgroundColor: 'var(--theme-primary-bg-05, rgba(27,67,50,0.05))', border: '1px solid var(--theme-primary-bg-10, rgba(27,67,50,0.1))' }}>
                 <h3 className="font-body font-semibold text-sm mb-3 flex items-center gap-2" style={{ color: 'var(--theme-primary, #1B4332)' }}>
                   <Tag className="w-4 h-4" /> Descuento por cantidad
@@ -355,27 +355,38 @@ export default function ProductoPage() {
             )}
 
             {/* Quantity + Add to Cart */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mt-8">
-              <div className="flex items-center gap-3">
-                <button onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                  className="w-10 h-10 rounded-full flex items-center justify-center border"
-                  style={{ borderColor: 'var(--theme-border, #E8E0D5)', color: 'var(--theme-text, #3D2817)' }}>
-                  <Minus className="w-4 h-4" />
-                </button>
-                <span className="font-body font-bold w-8 text-center text-lg" style={{ color: 'var(--theme-text, #3D2817)' }}>{quantity}</span>
-                <button onClick={() => setQuantity(q => q + 1)}
-                  className="w-10 h-10 rounded-full flex items-center justify-center border"
-                  style={{ borderColor: 'var(--theme-border, #E8E0D5)', color: 'var(--theme-text, #3D2817)' }}>
-                  <Plus className="w-4 h-4" />
+            {product.stock > 0 ? (
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mt-8">
+                <div className="flex items-center gap-3">
+                  <button onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                    className="w-10 h-10 rounded-full flex items-center justify-center border"
+                    style={{ borderColor: 'var(--theme-border, #E8E0D5)', color: 'var(--theme-text, #3D2817)' }}>
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="font-body font-bold w-8 text-center text-lg" style={{ color: 'var(--theme-text, #3D2817)' }}>{quantity}</span>
+                  <button onClick={() => setQuantity(q => q + 1)}
+                    className="w-10 h-10 rounded-full flex items-center justify-center border"
+                    style={{ borderColor: 'var(--theme-border, #E8E0D5)', color: 'var(--theme-text, #3D2817)' }}>
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+                <button onClick={() => { addItem(product, quantity); setAdded(true); setTimeout(() => setAdded(false), 2000) }}
+                  className="inline-flex items-center justify-center gap-2 font-body font-semibold text-sm px-8 py-4 rounded-full transition-all duration-300 hover:scale-105 hover:opacity-90"
+                  style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: 'var(--theme-text-on-primary, #FFFFFF)', boxShadow: '0 4px 16px var(--theme-primary-shadow, rgba(27,67,50,0.35))' }}>
+                  <ShoppingCart className="w-4 h-4" />
+                  {added ? 'Agregado!' : 'Agregar al carrito'}
                 </button>
               </div>
-              <button onClick={() => { addItem(product, quantity); setAdded(true); setTimeout(() => setAdded(false), 2000) }}
-                className="inline-flex items-center justify-center gap-2 font-body font-semibold text-sm px-8 py-4 rounded-full transition-all duration-300 hover:scale-105 hover:opacity-90"
-                style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: 'var(--theme-text-on-primary, #FFFFFF)', boxShadow: '0 4px 16px var(--theme-primary-shadow, rgba(27,67,50,0.35))' }}>
-                <ShoppingCart className="w-4 h-4" />
-                {added ? 'Agregado!' : 'Agregar al carrito'}
-              </button>
-            </div>
+            ) : (
+              <div className="mt-8">
+                <button disabled
+                  className="inline-flex items-center justify-center gap-2 font-body font-semibold text-sm px-8 py-4 rounded-full opacity-50"
+                  style={{ backgroundColor: 'var(--theme-border, #E8E0D5)', color: 'var(--theme-muted, #999)', cursor: 'not-allowed' }}>
+                  <ShoppingCart className="w-4 h-4" />
+                  Producto agotado
+                </button>
+              </div>
+            )}
 
             {/* Stock */}
             <div className="flex flex-wrap items-center gap-4 mt-4">

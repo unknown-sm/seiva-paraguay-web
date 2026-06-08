@@ -250,6 +250,14 @@ export default function TiendaPage() {
                         OFERTA
                       </span>
                     )}
+                    {!product.stock && (
+                      <span
+                        className="absolute bottom-2 left-2 font-body font-bold text-[9px] px-2 py-0.5 rounded-full z-10"
+                        style={{ backgroundColor: '#E63946', color: '#FFF' }}
+                      >
+                        AGOTADO
+                      </span>
+                    )}
                   </div>
 
                   {/* Content */}
@@ -273,19 +281,22 @@ export default function TiendaPage() {
                     </div>
                     <button
                       onClick={(e) => {
+                        if (!product.stock) return
                         e.preventDefault()
                         e.stopPropagation()
                         addItem(product)
                       }}
-                      className="mt-3 w-full inline-flex items-center justify-center gap-2 font-body font-semibold text-xs px-4 py-2.5 rounded-full transition-all duration-300 hover:scale-105 cursor-pointer"
+                      disabled={!product.stock}
+                      className="mt-3 w-full inline-flex items-center justify-center gap-2 font-body font-semibold text-xs px-4 py-2.5 rounded-full transition-all duration-300"
                       style={{
-                        backgroundColor: 'var(--theme-accent, #D4A843)',
-                        color: 'var(--theme-primary, #1B4332)',
+                        backgroundColor: product.stock ? 'var(--theme-accent, #D4A843)' : 'var(--theme-border, #E8E0D5)',
+                        color: product.stock ? 'var(--theme-primary, #1B4332)' : 'var(--theme-muted, #999)',
                         letterSpacing: '0.04em',
+                        cursor: product.stock ? 'pointer' : 'not-allowed',
                       }}
                     >
                       <ShoppingCart className="w-4 h-4" />
-                      Agregar
+                      {product.stock ? 'Agregar' : 'Agotado'}
                     </button>
                   </div>
                 </div>

@@ -323,7 +323,7 @@ function parseProducto(row) {
 
 // ---------- PRODUCTOS ----------
 app.get("/api/productos", (req, res) => {
-  const rows = db.prepare("SELECT * FROM productos WHERE activo = 1 ORDER BY destacado DESC, id DESC").all();
+  const rows = db.prepare("SELECT * FROM productos ORDER BY CASE WHEN stock > 0 THEN 0 ELSE 1 END, destacado DESC, id DESC").all();
   res.json(rows.map(parseProducto));
 });
 
