@@ -283,11 +283,16 @@ function editarProducto(id) {
     document.getElementById("prod-precio-anterior").value = prod.precio_anterior || "";
     document.getElementById("prod-subcategoria").value = prod.subcategoria;
     document.getElementById("prod-marca").value = prod.marca || "";
+    document.getElementById("prod-sku").value = prod.sku || "";
+    document.getElementById("prod-slug").value = prod.slug || "";
+    document.getElementById("prod-seo_descripcion").value = prod.seo_descripcion || "";
     document.getElementById("prod-descripcion").value = prod.descripcion || "";
     document.getElementById("prod-descripcion_larga").value = prod.descripcion_larga || "";
     document.getElementById("prod-stock").value = prod.stock || 0;
     document.getElementById("prod-destacado").checked = prod.destacado;
     document.getElementById("prod-activo").checked = prod.activo;
+    document.getElementById("prod-crosssell").value = (prod.crosssell || []).join(', ');
+    document.getElementById("prod-upsell").value = (prod.upsell || []).join(', ');
     document.querySelectorAll(".prod-etiqueta").forEach(function(cb) { cb.checked = (prod.etiquetas || []).indexOf(cb.value) !== -1; });
     // Preservar imagen actual para que no se pierda al guardar sin scrape
     window._scrapedImage = prod.imagen || "";
@@ -322,11 +327,16 @@ function nuevoProducto() {
   document.getElementById("prod-precio-anterior").value = "";
   document.getElementById("prod-subcategoria").value = "chocolate";
   document.getElementById("prod-marca").value = "";
+  document.getElementById("prod-sku").value = "";
+  document.getElementById("prod-slug").value = "";
+  document.getElementById("prod-seo_descripcion").value = "";
   document.getElementById("prod-descripcion").value = "";
   document.getElementById("prod-descripcion_larga").value = "";
   document.getElementById("prod-stock").value = "50";
   document.getElementById("prod-destacado").checked = false;
   document.getElementById("prod-activo").checked = true;
+  document.getElementById("prod-crosssell").value = "";
+  document.getElementById("prod-upsell").value = "";
   document.querySelectorAll(".prod-etiqueta").forEach(function(cb) { cb.checked = false; });
   document.getElementById("scrape-url").value = "";
   document.getElementById("scrape-progress").style.display = "none";
@@ -371,6 +381,8 @@ document.getElementById("btn-scrape-url").addEventListener("click", async functi
       previewEl.style.display = "block";
       document.getElementById("prod-nombre").value = res.nombre || "";
       document.getElementById("prod-marca").value = res.marca || "";
+      document.getElementById("prod-sku").value = res.sku || "";
+      document.getElementById("prod-seo_descripcion").value = res.seo_descripcion || "";
       document.getElementById("prod-descripcion").value = res.descripcion || "";
       document.getElementById("prod-descripcion_larga").value = res.descripcion_larga || res.descripcion || "";
       if (res.precio) document.getElementById("prod-precio").value = res.precio;
@@ -413,6 +425,9 @@ document.getElementById("producto-form").addEventListener("submit", async functi
     categoria_id: catId,
     subcategoria: document.getElementById("prod-subcategoria").value,
     marca: document.getElementById("prod-marca").value,
+    sku: document.getElementById("prod-sku").value,
+    slug: document.getElementById("prod-slug").value,
+    seo_descripcion: document.getElementById("prod-seo_descripcion").value,
     descripcion: document.getElementById("prod-descripcion").value,
     descripcion_larga: document.getElementById("prod-descripcion_larga").value,
     galeria: scrapedImg ? [scrapedImg] : [],
@@ -420,7 +435,9 @@ document.getElementById("producto-form").addEventListener("submit", async functi
     stock: parseInt(document.getElementById("prod-stock").value) || 0,
     destacado: document.getElementById("prod-destacado").checked,
     activo: document.getElementById("prod-activo").checked,
-    etiquetas: etiquetas
+    etiquetas: etiquetas,
+    crosssell: document.getElementById("prod-crosssell").value.split(',').map(s => s.trim()).filter(s => s),
+    upsell: document.getElementById("prod-upsell").value.split(',').map(s => s.trim()).filter(s => s)
   };
 
   var method = id ? "PUT" : "POST";

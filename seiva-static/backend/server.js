@@ -159,6 +159,7 @@ try { db.exec("ALTER TABLE productos ADD COLUMN marca TEXT DEFAULT ''"); } catch
 try { db.exec("ALTER TABLE productos ADD COLUMN seo_descripcion TEXT DEFAULT ''"); } catch (e) {}
 try { db.exec("ALTER TABLE productos ADD COLUMN crosssell TEXT DEFAULT '[]'"); } catch (e) {}
 try { db.exec("ALTER TABLE productos ADD COLUMN upsell TEXT DEFAULT '[]'"); } catch (e) {}
+try { db.exec("ALTER TABLE productos ADD COLUMN slug TEXT DEFAULT ''"); } catch (e) {}
 
 try { db.exec("ALTER TABLE pedidos ADD COLUMN envio_costo INTEGER DEFAULT 0"); } catch (e) {}
 try { db.exec("ALTER TABLE pedidos ADD COLUMN envio_ciudad TEXT DEFAULT ''"); } catch (e) {}
@@ -330,6 +331,40 @@ function parseProducto(row) {
   };
 }
 
+// Generar slug único desde nombre
+function generateSlug(nombre, excludeId = null) {
+  let base = nombre
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quitar tildes
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .substring(0, 100);
+  
+  if (!base) base = 'producto';
+  
+  let slug = base;
+  let counter = 1;
+  while (true) {
+    const existing = db.prepare("SELECT id FROM productos WHERE slug = ? AND id != ?").get(slug, excludeId || 0);
+    if (!existing) break;
+    counter++;
+    slug = base + '-' + counter;
+  }
+  return slug;
+}
+
+// Backfill slugs para productos existentes
+function backfillSlugs() {
+  const productos = db.prepare("SELECT id, nombre FROM productos WHERE slug = '' OR slug IS NULL").all();
+  for (const p of productos) {
+    const slug = generateSlug(p.nombre, p.id);
+    db.prepare("UPDATE productos SET slug = ? WHERE id = ?").run(slug, p.id);
+  }
+  if (productos.length > 0) {
+    console.log(`[Backfill] ${productos.length} slugs generados`);
+  }
+}
+
 // ---------- PRODUCTOS ----------
 app.get("/api/productos", (req, res) => {
   const rows = db.prepare("SELECT * FROM productos ORDER BY CASE WHEN stock > 0 THEN 0 ELSE 1 END, destacado DESC, id DESC").all();
@@ -342,24 +377,33 @@ app.get("/api/productos/all", auth, (req, res) => {
 });
 
 app.post("/api/productos", auth, (req, res) => {
-  const { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell } = req.body;
+  const { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell, slug } = req.body;
   if (!nombre || !precio) return res.status(400).json({ error: "Nombre y precio requeridos" });
   const cid = categoria_id || null;
   const catName = categoria || (cid ? db.prepare("SELECT nombre FROM categorias WHERE id=?").get(cid)?.nombre : "snacks") || "snacks";
-  const result = db.prepare("INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").run(
-    nombre, precio, precio_anterior || null, catName, subcategoria || "", descripcion || "", descripcion_larga || "", JSON.stringify(galeria || []), JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, cid, sku || "", marca || "", seo_descripcion || "", JSON.stringify(crosssell || []), JSON.stringify(upsell || [])
+  const finalSlug = slug || generateSlug(nombre);
+  const result = db.prepare("INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell, slug) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").run(
+    nombre, precio, precio_anterior || null, catName, subcategoria || "", descripcion || "", descripcion_larga || "", JSON.stringify(galeria || []), JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, cid, sku || "", marca || "", seo_descripcion || "", JSON.stringify(crosssell || []), JSON.stringify(upsell || []), finalSlug
   );
-  res.json({ id: result.lastInsertRowid });
+  res.json({ id: result.lastInsertRowid, slug: finalSlug });
 });
 
 app.put("/api/productos/:id", auth, (req, res) => {
-  const { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell } = req.body;
+  const { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell, slug } = req.body;
   const cid = categoria_id !== undefined ? categoria_id : null;
   const catName = categoria || (cid ? db.prepare("SELECT nombre FROM categorias WHERE id=?").get(cid)?.nombre : "snacks") || "snacks";
-  db.prepare("UPDATE productos SET nombre=?, precio=?, precio_anterior=?, categoria=?, subcategoria=?, descripcion=?, descripcion_larga=?, galeria=?, etiquetas=?, destacado=?, imagen=?, stock=?, activo=?, categoria_id=?, sku=?, marca=?, seo_descripcion=?, crosssell=?, upsell=? WHERE id=?").run(
-    nombre, precio, precio_anterior || null, catName, subcategoria, descripcion || "", descripcion_larga || "", JSON.stringify(galeria || []), JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, cid, sku || "", marca || "", seo_descripcion || "", JSON.stringify(crosssell || []), JSON.stringify(upsell || []), req.params.id
-  );
-  res.json({ ok: true });
+  const finalSlug = slug || (nombre ? generateSlug(nombre, req.params.id) : undefined);
+  
+  if (finalSlug) {
+    db.prepare("UPDATE productos SET nombre=?, precio=?, precio_anterior=?, categoria=?, subcategoria=?, descripcion=?, descripcion_larga=?, galeria=?, etiquetas=?, destacado=?, imagen=?, stock=?, activo=?, categoria_id=?, sku=?, marca=?, seo_descripcion=?, crosssell=?, upsell=?, slug=? WHERE id=?").run(
+      nombre, precio, precio_anterior || null, catName, subcategoria, descripcion || "", descripcion_larga || "", JSON.stringify(galeria || []), JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, cid, sku || "", marca || "", seo_descripcion || "", JSON.stringify(crosssell || []), JSON.stringify(upsell || []), finalSlug, req.params.id
+    );
+  } else {
+    db.prepare("UPDATE productos SET nombre=?, precio=?, precio_anterior=?, categoria=?, subcategoria=?, descripcion=?, descripcion_larga=?, galeria=?, etiquetas=?, destacado=?, imagen=?, stock=?, activo=?, categoria_id=?, sku=?, marca=?, seo_descripcion=?, crosssell=?, upsell=? WHERE id=?").run(
+      nombre, precio, precio_anterior || null, catName, subcategoria, descripcion || "", descripcion_larga || "", JSON.stringify(galeria || []), JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, cid, sku || "", marca || "", seo_descripcion || "", JSON.stringify(crosssell || []), JSON.stringify(upsell || []), req.params.id
+    );
+  }
+  res.json({ ok: true, slug: finalSlug });
 });
 
 app.patch("/api/productos/:id/toggle", auth, (req, res) => {
@@ -522,6 +566,23 @@ async function scrapeProductData(url) {
     // Limpiar marca si es muy larga (probablemente basura)
     if (marca.length > 50) marca = '';
 
+    // Extraer SKU
+    let sku = $('meta[property="product:sku"]').attr('content') ||
+              $('meta[itemprop="sku"]').attr('content') ||
+              $('[itemprop="sku"]').text().trim() ||
+              $('.sku, .referencia, [class*="sku"], [class*="referencia"]').first().text().trim() ||
+              '';
+    // Limpiar SKU
+    if (sku.length > 50) sku = '';
+
+    // Extraer SEO descripción
+    let seo_descripcion = $('meta[name="description"]').attr('content') ||
+                          $('meta[property="og:description"]').attr('content') ||
+                          $('meta[name="twitter:description"]').attr('content') ||
+                          '';
+    // Limitar a 160 chars
+    if (seo_descripcion.length > 160) seo_descripcion = seo_descripcion.substring(0, 157) + '...';
+
     // === DESCRIPCION CORTA ===
     let descCorta = '';
     
@@ -673,6 +734,8 @@ async function scrapeProductData(url) {
     return {
       nombre: nombre.substring(0, 200),
       marca: marca,
+      sku: sku,
+      seo_descripcion: seo_descripcion,
       descripcion: descCorta,
       descripcion_larga: descLarga,
       precio: precio,
@@ -1062,6 +1125,9 @@ if (fs.existsSync(distPath)) {
   app.use(express.static(sitePath));
   console.log("Serving static files from " + sitePath);
 }
+
+// Backfill slugs al iniciar
+backfillSlugs();
 
 app.listen(PORT, () => {
   console.log("Seiva backend running on http://localhost:" + PORT);
