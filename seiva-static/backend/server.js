@@ -386,6 +386,11 @@ app.delete("/api/productos/:id", auth, (req, res) => {
 function formatDescription(rawText) {
   if (!rawText) return '';
   
+  // Si ya es HTML con estructura válida, preservar
+  if (/<(ul|li|strong|b|em|h[1-6])[\s>]/i.test(rawText) && /<\/(ul|li|strong|b|em|h[1-6])>/i.test(rawText)) {
+    return rawText;
+  }
+  
   // Limpiar HTML tags pero preservar saltos de linea
   let clean = rawText.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n').replace(/<\/li>/gi, '\n');
   clean = clean.replace(/<[^>]*>/g, '').trim();
@@ -395,14 +400,9 @@ function formatDescription(rawText) {
   let lines = clean.split('\n').map(l => l.trim()).filter(l => l.length > 0);
   if (lines.length === 0) return '';
   
-  // Si es texto plano, formatear como HTML
+  // Formatear como HTML
   let html = '';
   for (let line of lines) {
-    // Si ya es HTML con negritas, mantener
-    if (/<strong|<b|<em|<i/.test(rawText)) {
-      return rawText; // Devolver HTML original si tiene formato
-    }
-    // Lineas que parecen items de lista
     if (/^[-•●◦▪]\s/.test(line) || /^\d+[.)]\s/.test(line)) {
       let itemText = line.replace(/^[-•●◦▪]\s*/, '').replace(/^\d+[.)]\s*/, '');
       html += '<li>' + itemText + '</li>';
@@ -419,11 +419,17 @@ function formatDescription(rawText) {
 function formatDescriptionLarga(rawText) {
   if (!rawText) return '';
   let clean = rawText.trim();
+  
+  // Si tiene tags HTML, limpiar basura pero preservar estructura
   if (/<[a-z][\s\S]*>/i.test(clean)) {
     const $ = cheerio.load(clean);
+    
+    // Remover basura
     $('script, style, noscript, meta, link, nav, svg, button, iframe, form, input, select, textarea').remove();
-    $('ol, [itemscope]').remove();
-    $('[hidden]').remove();
+    $('ol, [itemscope], [hidden]').remove();
+    $('.breadcrumb, [class*="breadcrumb"], [class*="nav-"], [class*="schema"]').remove();
+    
+    // Remover atributos innecesarios pero preservar href, src, alt
     $('*').each(function() {
       const el = $(this);
       const attrs = el.attr();
@@ -431,36 +437,34 @@ function formatDescriptionLarga(rawText) {
         if (key !== 'href' && key !== 'src' && key !== 'alt') el.removeAttr(key);
       }
     });
+    
+    // Obtener HTML limpio
     clean = $.html().replace(/<!--[\s\S]*?-->/g, '');
-    clean = clean.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n').replace(/<\/li>/gi, '\n').replace(/<[^>]*>/g, '');
-    let lines = clean.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    if (lines.length === 0) return '';
-    let html = '';
-    for (const line of lines) {
-      if (line.length < 60 && /:\s*$/.test(line)) {
-        html += '<strong>' + line.replace(/:\s*$/, '') + '</strong><br>';
-      } else if (/^[-*]\s/.test(line)) {
-        html += '<li>' + line.replace(/^[-*]\s*/, '') + '</li>';
-      } else {
-        html += '<p>' + line + '</p>';
-      }
+    
+    // Si el HTML limpio tiene estructura válida (p, strong, ul, li, h3, h4), devolverlo
+    if (/<(p|strong|ul|li|h[1-6])[\s>]/i.test(clean) && clean.length > 50) {
+      return clean;
     }
-    html = html.replace(/(<li>.*?<\/li>)+/gs, m => '<ul>' + m + '</ul>');
-    return html;
+    
+    // Si no, convertir a texto y re-formatear
+    clean = clean.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n').replace(/<\/li>/gi, '\n').replace(/<[^>]*>/g, '');
   }
+  
+  // Texto plano: formatear bonito
   let lines = clean.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  if (lines.length === 0) return '';
+  
   let html = '';
   for (const line of lines) {
     if (line.length < 60 && /:\s*$/.test(line)) {
-      html += '<h4>' + line.replace(/:\s*$/, '') + '</h4>';
-    } else if (/^[-•●◦▪]\s/.test(line) || /^\d+[.)]\s/.test(line)) {
-      let itemText = line.replace(/^[-•●◦▪]\s*/, '').replace(/^\d+[.)]\s*/, '');
-      html += '<li>' + itemText + '</li>';
+      html += '<strong>' + line.replace(/:\s*$/, '') + '</strong><br>';
+    } else if (/^[-*]\s/.test(line)) {
+      html += '<li>' + line.replace(/^[-*]\s*/, '') + '</li>';
     } else {
       html += '<p>' + line + '</p>';
     }
   }
-  html = html.replace(/(<li>.*?<\/li>)+/gs, (match) => '<ul>' + match + '</ul>');
+  html = html.replace(/(<li>.*?<\/li>)+/gs, m => '<ul>' + m + '</ul>');
   return html;
 }
 
