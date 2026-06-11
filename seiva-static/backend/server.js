@@ -420,17 +420,16 @@ function formatDescriptionLarga(rawText) {
   if (!rawText) return '';
   let clean = rawText.trim();
   
-  // Si tiene tags HTML, limpiar basura pero preservar estructura
+  // Si tiene tags HTML, limpiar pero preservar estructura
   if (/<[a-z][\s\S]*>/i.test(clean)) {
-    const $ = cheerio.load(clean);
+    const $ = cheerio.load('<div id="__sw__">' + clean + '</div>');
+    const wrapper = $('#__sw__');
     
-    // Remover basura
-    $('script, style, noscript, meta, link, nav, svg, button, iframe, form, input, select, textarea').remove();
-    $('ol, [itemscope], [hidden]').remove();
-    $('.breadcrumb, [class*="breadcrumb"], [class*="nav-"], [class*="schema"]').remove();
+    wrapper.find('script, style, noscript, meta, link, nav, svg, button, iframe, form, input, select, textarea').remove();
+    wrapper.find('ol, [itemscope], [hidden]').remove();
+    wrapper.find('.breadcrumb, [class*="breadcrumb"], [class*="nav-"], [class*="schema"]').remove();
     
-    // Remover atributos innecesarios pero preservar href, src, alt
-    $('*').each(function() {
+    wrapper.find('*').each(function() {
       const el = $(this);
       const attrs = el.attr();
       for (const key of Object.keys(attrs)) {
@@ -438,19 +437,15 @@ function formatDescriptionLarga(rawText) {
       }
     });
     
-    // Obtener HTML limpio
-    clean = $.html().replace(/<!--[\s\S]*?-->/g, '');
+    clean = wrapper.html() || '';
     
-    // Si el HTML limpio tiene estructura válida (p, strong, ul, li, h3, h4), devolverlo
     if (/<(p|strong|ul|li|h[1-6])[\s>]/i.test(clean) && clean.length > 50) {
       return clean;
     }
     
-    // Si no, convertir a texto y re-formatear
     clean = clean.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n').replace(/<\/li>/gi, '\n').replace(/<[^>]*>/g, '');
   }
   
-  // Texto plano: formatear bonito
   let lines = clean.split('\n').map(l => l.trim()).filter(l => l.length > 0);
   if (lines.length === 0) return '';
   
@@ -513,22 +508,31 @@ async function scrapeProductData(url) {
     // === DESCRIPCION CORTA ===
     let descCorta = '';
     
-    // 1. Buscar todos los <li> del body (specs, beneficios, features)
+    // Excluir nav, footer, header, menu
+    const excludeSelectors = 'nav, footer, header, [class*="nav"], [class*="menu"], [class*="footer"], [class*="header"], [class*="sidebar"], [class*="widget"], [id*="nav"], [id*="menu"], [id*="footer"], [id*="header"]';
+    
+    // 1. Buscar <li> DENTRO del area del producto
+    const productArea = $('[class*="product"], [class*="detail"], [class*="info"], article, .main-content, main, [role="main"]').first();
+    const searchArea = productArea.length ? productArea : $('body');
+    
     const allItems = [];
-    $('li').each(function() {
+    searchArea.find('li').each(function() {
+      const parent = $(this).parent(excludeSelectors);
+      if (parent.length) return; // saltar si esta dentro de nav/footer
       const text = $(this).text().trim();
-      if (text.length > 3 && text.length < 300) {
+      if (text.length > 5 && text.length < 300) {
         allItems.push(text);
       }
     });
     
     if (allItems.length > 0) {
-      // Tomar hasta 10 items
       descCorta = '<ul>' + allItems.slice(0, 10).map(item => '<li>' + item + '</li>').join('') + '</ul>';
     } else {
-      // 2. Buscar <strong> o <b> que parezcan specs
+      // 2. Buscar <strong> con ":" (specs)
       const strongItems = [];
-      $('strong, b').each(function() {
+      searchArea.find('strong, b').each(function() {
+        const parent = $(this).closest(excludeSelectors);
+        if (parent.length) return;
         const text = $(this).text().trim();
         if (text.length > 3 && text.length < 100 && /:/.test(text)) {
           strongItems.push(text);
