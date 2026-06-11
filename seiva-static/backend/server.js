@@ -383,6 +383,108 @@ app.delete("/api/productos/:id", auth, (req, res) => {
 });
 
 // ---------- SCRAPE PRODUCTO ----------
+function formatDescription(rawText) {
+  if (!rawText) return '';
+  
+  // Limpiar HTML tags pero preservar saltos de linea
+  let clean = rawText.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n').replace(/<\/li>/gi, '\n');
+  clean = clean.replace(/<[^>]*>/g, '').trim();
+  if (!clean) return '';
+  
+  // Dividir en lineas y limpiar
+  let lines = clean.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  if (lines.length === 0) return '';
+  
+  // Si es texto plano, formatear como HTML
+  let html = '';
+  for (let line of lines) {
+    // Si ya es HTML con negritas, mantener
+    if (/<strong|<b|<em|<i/.test(rawText)) {
+      return rawText; // Devolver HTML original si tiene formato
+    }
+    // Lineas que parecen items de lista
+    if (/^[-•●◦▪]\s/.test(line) || /^\d+[.)]\s/.test(line)) {
+      let itemText = line.replace(/^[-•●◦▪]\s*/, '').replace(/^\d+[.)]\s*/, '');
+      html += '<li>' + itemText + '</li>';
+    } else {
+      html += '<p>' + line + '</p>';
+    }
+  }
+  
+  // Envolver items de lista en <ul>
+  html = html.replace(/(<li>.*?<\/li>)+/gs, (match) => '<ul>' + match + '</ul>');
+  return html;
+}
+
+function formatDescriptionLarga(rawText) {
+  if (!rawText) return '';
+  
+  // Si ya tiene HTML con estructura, intentar limpiar
+  let clean = rawText.trim();
+  
+  // Si tiene tags HTML, limpiar basura pero mantener estructura
+  if (/<[a-z][\s\S]*>/i.test(clean)) {
+    // Remover tags de tracking, scripts, estilos
+    clean = clean.replace(/<script[\s\S]*?<\/script>/gi, '');
+    clean = clean.replace(/<style[\s\S]*?<\/style>/gi, '');
+    clean = clean.replace(/<noscript[\s\S]*?<\/noscript>/gi, '');
+    // Remover atributos innecesarios
+    clean = clean.replace(/\s+class="[^"]*"/g, '');
+    clean = clean.replace(/\s+style="[^"]*"/g, '');
+    clean = clean.replace(/\s+data-[a-z-]+="[^"]*"/g, '');
+    return clean;
+  }
+  
+  // Texto plano: formatear bonito
+  let lines = clean.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  let html = '';
+  
+  for (let line of lines) {
+    // Detectar si es titulo (termina en : y es corto)
+    if (line.length < 60 && /:\s*$/.test(line)) {
+      html += '<h4>' + line.replace(/:\s*$/, '') + '</h4>';
+    }
+    // Detectar items de lista
+    else if (/^[-•●◦▪]\s/.test(line) || /^\d+[.)]\s/.test(line)) {
+      let itemText = line.replace(/^[-•●◦▪]\s*/, '').replace(/^\d+[.)]\s*/, '');
+      html += '<li>' + itemText + '</li>';
+    }
+    // Parrafo normal
+    else {
+      html += '<p>' + line + '</p>';
+    }
+  }
+  
+  // Envolver listas
+  html = html.replace(/(<li>.*?<\/li>)+/gs, (match) => '<ul>' + match + '</ul>');
+  return html;
+}
+
+async function downloadImage(imgUrl, nombre) {
+  try {
+    const response = await fetch(imgUrl);
+    if (!response.ok) throw new Error('No se pudo descargar imagen');
+    
+    const contentType = response.headers.get('content-type') || 'image/jpeg';
+    let ext = 'jpg';
+    if (contentType.includes('png')) ext = 'png';
+    else if (contentType.includes('webp')) ext = 'webp';
+    else if (contentType.includes('gif')) ext = 'gif';
+    
+    // Nombre unico: producto-TIMESTAMP.ext
+    const fileName = 'producto-' + Date.now() + '.' + ext;
+    
+    // Guardar en el directorio de imagenes
+    const buffer = Buffer.from(await response.arrayBuffer());
+    fs.writeFileSync(path.join(imgPath, fileName), buffer);
+    
+    return fileName;
+  } catch (error) {
+    console.error('Error descargando imagen:', error);
+    return null;
+  }
+}
+
 async function scrapeProductData(url) {
   try {
     const response = await fetch(url, {
@@ -393,64 +495,102 @@ async function scrapeProductData(url) {
     const html = await response.text();
     const $ = cheerio.load(html);
 
-    // Extraer título
+    // Extraer titulo
     let nombre = $('meta[property="og:title"]').attr('content') || 
                  $('meta[name="twitter:title"]').attr('content') || 
                  $('h1').first().text().trim() || 
                  $('title').text().trim() || 
                  'Producto sin nombre';
 
-    // Extraer descripción
-    let descripcion = $('meta[property="og:description"]').attr('content') || 
-                      $('meta[name="description"]').attr('content') || 
-                      $('meta[name="twitter:description"]').attr('content') || 
-                      '';
+    // Extraer descripcion corta
+    let descCorta = $('meta[property="og:description"]').attr('content') || 
+                    $('meta[name="description"]').attr('content') || 
+                    $('meta[name="twitter:description"]').attr('content') || 
+                    '';
 
-    // Extraer precio - buscar patrones comunes en Paraguay
-    let precio = null;
-    const precioText = $('[class*="price"], [class*="precio"], [class*="costo"], [class*="monto"]').first().text() || 
-                       $('.price, .precio, .costo, .monto').first().text() ||
-                       $('*:contains("Gs.")').first().text() ||
-                       $('*:contains("PYG")').first().text();
-    
-    if (precioText) {
-      // Patrones: Gs. 45.000, PYG 45000, 45000 Gs., etc.
-      const match = precioText.match(/(?:Gs\.?\s*|PYG\s*)?[\d.,]+/i);
-      if (match) {
-        precio = parseInt(match[0].replace(/[^\d]/g, ''));
+    // Extraer descripcion larga (del body, primeros parrafos del producto)
+    let descLarga = '';
+    const productSelectors = [
+      '[class*="description"], [class*="descripcion"]',
+      '[class*="detail"], [class*="detalle"]',
+      '[class*="content"], [class*="contenido"]',
+      'article', '.product-info', '.product-details'
+    ];
+    for (const sel of productSelectors) {
+      const el = $(sel).first();
+      if (el.length && el.text().trim().length > 50) {
+        descLarga = el.html() || el.text();
+        break;
       }
     }
+    // Fallback: tomar primeros parrafos del body
+    if (!descLarga) {
+      $('p').each(function(i) {
+        if (i < 5 && $(this).text().trim().length > 30) {
+          descLarga += '<p>' + $(this).text().trim() + '</p>';
+        }
+      });
+    }
 
-    // Si no encontró precio, buscar en el texto completo
+    // Extraer precio
+    let precio = null;
+    const precioSelectors = [
+      '[class*="price"] [class*="current"], [class*="precio"] [class*="actual"]',
+      '[class*="price"], [class*="precio"], [class*="costo"], [class*="monto"]',
+      '.price, .precio, .costo, .monto',
+      '[data-price]', '[itemprop="price"]'
+    ];
+    for (const sel of precioSelectors) {
+      const el = $(sel).first();
+      if (el.length) {
+        const precioText = el.text() || el.attr('content') || '';
+        const match = precioText.match(/[\d.,]+/);
+        if (match) {
+          precio = parseInt(match[0].replace(/[^\d]/g, ''));
+          if (precio > 0) break;
+        }
+      }
+    }
+    // Fallback: buscar en todo el body
     if (!precio) {
       const bodyText = $('body').text();
-      const precioMatch = bodyText.match(/Gs\.?\s*([\d.,]+)/i) || bodyText.match(/PYG\s*([\d.,]+)/i);
+      const precioMatch = bodyText.match(/Gs\.?\s*([\d.,]+)/i) || 
+                         bodyText.match(/PYG\s*([\d.,]+)/i) ||
+                         bodyText.match(/\$\s*([\d.,]+)/i);
       if (precioMatch) {
         precio = parseInt(precioMatch[1].replace(/[^\d]/g, ''));
       }
     }
 
     // Extraer imagen principal
-    let imagen = $('meta[property="og:image"]').attr('content') || 
-                 $('meta[name="twitter:image"]').attr('content') || 
-                 $('img[class*="product"], img[class*="main"]').first().attr('src') ||
-                 $('img').first().attr('src') ||
-                 '';
+    let imagenUrl = $('meta[property="og:image"]').attr('content') || 
+                    $('meta[name="twitter:image"]').attr('content') || 
+                    $('img[class*="product"], img[class*="main"], img[class*="hero"]').first().attr('src') ||
+                    $('img').first().attr('src') ||
+                    '';
 
     // Si la imagen es relativa, hacerla absoluta
-    if (imagen && imagen.startsWith('/')) {
+    if (imagenUrl && imagenUrl.startsWith('/')) {
       const urlObj = new URL(url);
-      imagen = urlObj.origin + imagen;
+      imagenUrl = urlObj.origin + imagenUrl;
     }
 
-    // Limpiar descripción
-    descripcion = descripcion.replace(/<[^>]*>/g, '').substring(0, 500);
+    // Descargar imagen al servidor
+    let imagenLocal = '';
+    if (imagenUrl && imagenUrl.startsWith('http')) {
+      imagenLocal = await downloadImage(imagenUrl, nombre);
+    }
+
+    // Formatear descripciones
+    descCorta = formatDescription(descCorta);
+    descLarga = formatDescriptionLarga(descLarga);
 
     return {
       nombre: nombre.substring(0, 200),
-      descripcion: descripcion,
+      descripcion: descCorta,
+      descripcion_larga: descLarga,
       precio: precio,
-      imagen: imagen,
+      imagen: imagenLocal || imagenUrl,
       url_origen: url
     };
   } catch (error) {
