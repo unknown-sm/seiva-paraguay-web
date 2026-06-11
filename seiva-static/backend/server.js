@@ -164,6 +164,14 @@ try { db.exec("ALTER TABLE pedidos ADD COLUMN envio_costo INTEGER DEFAULT 0"); }
 try { db.exec("ALTER TABLE pedidos ADD COLUMN envio_ciudad TEXT DEFAULT ''"); } catch (e) {}
 try { db.exec("ALTER TABLE envios ADD COLUMN tipo TEXT DEFAULT 'delivery'"); } catch (e) {}
 
+// Migraciones descuentos_cantidad v2 — campos opcionales (Mavis)
+try { db.exec("ALTER TABLE descuentos_cantidad ADD COLUMN audiencia TEXT DEFAULT 'todos'"); } catch (e) {}
+try { db.exec("ALTER TABLE descuentos_cantidad ADD COLUMN tipo_descuento TEXT DEFAULT 'monto_fijo'"); } catch (e) {}
+try { db.exec("ALTER TABLE descuentos_cantidad ADD COLUMN fecha_inicio TEXT DEFAULT NULL"); } catch (e) {}
+try { db.exec("ALTER TABLE descuentos_cantidad ADD COLUMN fecha_fin TEXT DEFAULT NULL"); } catch (e) {}
+try { db.exec("ALTER TABLE descuentos_cantidad ADD COLUMN etiqueta TEXT DEFAULT ''"); } catch (e) {}
+try { db.exec("ALTER TABLE descuentos_cantidad ADD COLUMN descripcion TEXT DEFAULT ''"); } catch (e) {}
+
 // Seed descuentos_cantidad if empty
 const dcCount = db.prepare("SELECT COUNT(*) as c FROM descuentos_cantidad").get();
 if (dcCount.c === 0) {
@@ -505,6 +513,15 @@ async function scrapeProductData(url) {
                  $('title').text().trim() || 
                  'Producto sin nombre';
 
+    // Extraer marca
+    let marca = $('meta[property="product:brand"]').attr('content') ||
+                $('meta[itemprop="brand"]').attr('content') ||
+                $('[itemprop="brand"]').text().trim() ||
+                $('.brand, .marca, [class*="brand"], [class*="marca"]').first().text().trim() ||
+                '';
+    // Limpiar marca si es muy larga (probablemente basura)
+    if (marca.length > 50) marca = '';
+
     // === DESCRIPCION CORTA ===
     let descCorta = '';
     
@@ -655,6 +672,7 @@ async function scrapeProductData(url) {
 
     return {
       nombre: nombre.substring(0, 200),
+      marca: marca,
       descripcion: descCorta,
       descripcion_larga: descLarga,
       precio: precio,
@@ -700,28 +718,50 @@ app.get("/api/descuentos/producto/:producto_id", (req, res) => {
 });
 
 app.post("/api/descuentos", auth, (req, res) => {
-  const { producto_id, min_cantidad, max_cantidad, descuento } = req.body;
+  const { producto_id, min_cantidad, max_cantidad, descuento, audiencia, tipo_descuento, fecha_inicio, fecha_fin, etiqueta, descripcion } = req.body;
   if (!producto_id || !min_cantidad || !descuento) {
     return res.status(400).json({ error: "producto_id, min_cantidad y descuento son requeridos" });
   }
-  const result = db.prepare(
-    "INSERT INTO descuentos_cantidad (producto_id, min_cantidad, max_cantidad, descuento) VALUES (?, ?, ?, ?)"
-  ).run(producto_id, min_cantidad, max_cantidad || null, descuento);
+  const result = db.prepare(`
+    INSERT INTO descuentos_cantidad
+      (producto_id, min_cantidad, max_cantidad, descuento, audiencia, tipo_descuento, fecha_inicio, fecha_fin, etiqueta, descripcion)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    producto_id, min_cantidad, max_cantidad || null, descuento,
+    audiencia || 'todos',
+    tipo_descuento || 'monto_fijo',
+    fecha_inicio || null,
+    fecha_fin || null,
+    etiqueta || '',
+    descripcion || ''
+  );
   res.json({ id: result.lastInsertRowid });
 });
 
 app.post("/api/descuentos/lote", auth, (req, res) => {
-  const { producto_id, tiers } = req.body;
+  const { producto_id, tiers, audiencia, tipo_descuento, fecha_inicio, fecha_fin, etiqueta, descripcion } = req.body;
   if (!producto_id || !tiers || !tiers.length) {
     return res.status(400).json({ error: "producto_id y tiers son requeridos" });
   }
   const deleteStmt = db.prepare("DELETE FROM descuentos_cantidad WHERE producto_id = ?");
-  const insertStmt = db.prepare("INSERT INTO descuentos_cantidad (producto_id, min_cantidad, max_cantidad, descuento) VALUES (?, ?, ?, ?)");
-  
+  const insertStmt = db.prepare(`
+    INSERT INTO descuentos_cantidad
+      (producto_id, min_cantidad, max_cantidad, descuento, audiencia, tipo_descuento, fecha_inicio, fecha_fin, etiqueta, descripcion)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
   const transaction = db.transaction(() => {
     deleteStmt.run(producto_id);
     for (const tier of tiers) {
-      insertStmt.run(producto_id, tier.min_cantidad, tier.max_cantidad || null, tier.descuento);
+      insertStmt.run(
+        producto_id, tier.min_cantidad, tier.max_cantidad || null, tier.descuento,
+        audiencia || 'todos',
+        tipo_descuento || 'monto_fijo',
+        fecha_inicio || null,
+        fecha_fin || null,
+        etiqueta || '',
+        descripcion || ''
+      );
     }
   });
   transaction();
@@ -729,10 +769,20 @@ app.post("/api/descuentos/lote", auth, (req, res) => {
 });
 
 app.put("/api/descuentos/:id", auth, (req, res) => {
-  const { min_cantidad, max_cantidad, descuento } = req.body;
-  db.prepare(
-    "UPDATE descuentos_cantidad SET min_cantidad = ?, max_cantidad = ?, descuento = ? WHERE id = ?"
-  ).run(min_cantidad, max_cantidad || null, descuento, req.params.id);
+  const { min_cantidad, max_cantidad, descuento, audiencia, tipo_descuento, fecha_inicio, fecha_fin, etiqueta, descripcion } = req.body;
+  db.prepare(`
+    UPDATE descuentos_cantidad
+    SET min_cantidad = ?, max_cantidad = ?, descuento = ?,
+        audiencia = ?, tipo_descuento = ?, fecha_inicio = ?, fecha_fin = ?,
+        etiqueta = ?, descripcion = ?
+    WHERE id = ?
+  `).run(
+    min_cantidad, max_cantidad || null, descuento,
+    audiencia || 'todos', tipo_descuento || 'monto_fijo',
+    fecha_inicio || null, fecha_fin || null,
+    etiqueta || '', descripcion || '',
+    req.params.id
+  );
   res.json({ ok: true });
 });
 

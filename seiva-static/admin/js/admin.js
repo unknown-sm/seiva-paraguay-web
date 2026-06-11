@@ -282,6 +282,7 @@ function editarProducto(id) {
     document.getElementById("prod-precio").value = prod.precio;
     document.getElementById("prod-precio-anterior").value = prod.precio_anterior || "";
     document.getElementById("prod-subcategoria").value = prod.subcategoria;
+    document.getElementById("prod-marca").value = prod.marca || "";
     document.getElementById("prod-descripcion").value = prod.descripcion || "";
     document.getElementById("prod-descripcion_larga").value = prod.descripcion_larga || "";
     document.getElementById("prod-stock").value = prod.stock || 0;
@@ -320,6 +321,7 @@ function nuevoProducto() {
   document.getElementById("prod-precio").value = "";
   document.getElementById("prod-precio-anterior").value = "";
   document.getElementById("prod-subcategoria").value = "chocolate";
+  document.getElementById("prod-marca").value = "";
   document.getElementById("prod-descripcion").value = "";
   document.getElementById("prod-descripcion_larga").value = "";
   document.getElementById("prod-stock").value = "50";
@@ -368,6 +370,7 @@ document.getElementById("btn-scrape-url").addEventListener("click", async functi
       document.getElementById("scrape-preview-link").href = url;
       previewEl.style.display = "block";
       document.getElementById("prod-nombre").value = res.nombre || "";
+      document.getElementById("prod-marca").value = res.marca || "";
       document.getElementById("prod-descripcion").value = res.descripcion || "";
       document.getElementById("prod-descripcion_larga").value = res.descripcion_larga || res.descripcion || "";
       if (res.precio) document.getElementById("prod-precio").value = res.precio;
@@ -409,6 +412,7 @@ document.getElementById("producto-form").addEventListener("submit", async functi
     precio_anterior: parseInt(document.getElementById("prod-precio-anterior").value) || null,
     categoria_id: catId,
     subcategoria: document.getElementById("prod-subcategoria").value,
+    marca: document.getElementById("prod-marca").value,
     descripcion: document.getElementById("prod-descripcion").value,
     descripcion_larga: document.getElementById("prod-descripcion_larga").value,
     galeria: scrapedImg ? [scrapedImg] : [],

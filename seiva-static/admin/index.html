@@ -287,6 +287,7 @@
       <div class="form-group"><label>Nombre *</label><input type="text" id="prod-nombre" required class="form-input"></div>
       <div class="form-grid"><div class="form-group"><label>Precio (Gs.) *</label><input type="number" id="prod-precio" required class="form-input"></div><div class="form-group"><label>Precio Anterior</label><input type="number" id="prod-precio-anterior" class="form-input"></div></div>
       <div class="form-grid"><div class="form-group"><label>Categor&iacute;a</label><select id="prod-categoria" class="form-select"></select></div><div class="form-group"><label>Subcategor&iacute;a</label><select id="prod-subcategoria" class="form-select"><option value="chocolate">Chocolate</option><option value="mix">Mix</option><option value="almendras">Almendras</option><option value="frutas">Frutas</option><option value="nueces">Nueces</option><option value="barras">Barritas</option><option value="castanas">Casta&ntilde;as</option><option value="aceites">Aceites</option><option value="magnesios">Magnesios</option><option value="omega3">Omega 3</option><option value="gym">Gym</option><option value="colagenos">Col&aacute;genos</option><option value="naturales">Naturales</option><option value="minerales">Minerales</option><option value="combos">Combos</option></select></div></div>
+      <div class="form-group"><label>Marca</label><input type="text" id="prod-marca" class="form-input" placeholder="Ej: NutriMix, Seiva, Gen&eacute;rico"></div>
       <div class="form-group"><label>Descripci&oacute;n corta</label><textarea id="prod-descripcion" rows="2" class="form-input"></textarea></div>
       <div class="form-group"><label>Descripci&oacute;n larga</label><textarea id="prod-descripcion_larga" rows="5" class="form-input"></textarea></div>
       <div class="form-grid"><div class="form-group"><label>Stock</label><input type="number" id="prod-stock" value="50" class="form-input"></div><div class="form-group" style="display:flex;align-items:flex-end;gap:16px;padding-bottom:8px"><label><input type="checkbox" id="prod-destacado"> Destacado</label><label><input type="checkbox" id="prod-activo" checked> Activo</label></div></div>
@@ -299,24 +300,140 @@
 
 <div id="modal-descuento" class="modal hidden">
   <div class="modal-overlay" id="modal-overlay-desc"></div>
-  <div class="modal-content">
+  <div class="modal-content" style="max-width:680px">
     <div class="modal-header"><h3 id="desc-modal-title">Nuevo Descuento</h3><button class="modal-close" id="modal-close-desc">&times;</button></div>
     <form id="descuento-form">
+      <!-- Producto con autocomplete -->
       <div class="form-group">
         <label>Producto *</label>
-        <select id="desc-producto" required class="form-select"></select>
+        <div style="position:relative">
+          <input type="text" id="desc-producto-search" class="form-input" placeholder="Buscar producto por nombre..." autocomplete="off" required>
+          <input type="hidden" id="desc-producto" required>
+          <div id="desc-producto-dropdown" class="autocomplete-dropdown hidden"></div>
+        </div>
+        <p class="help-text" id="desc-producto-info">Empezá a tipear para buscar entre tus productos.</p>
       </div>
+
+      <!-- Etiqueta visible -->
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Etiqueta (visible al cliente)</label>
+          <input type="text" id="desc-etiqueta" class="form-input" placeholder="Ej: Black Friday, Lanzamiento" maxlength="40">
+        </div>
+        <div class="form-group">
+          <label>Audiencia *</label>
+          <select id="desc-audiencia" class="form-select" required>
+            <option value="todos">Todos los clientes</option>
+            <option value="nuevo">Solo clientes nuevos</option>
+            <option value="vip">Clientes VIP</option>
+            <option value="mayorista">Mayoristas</option>
+            <option value="registrado">Solo registrados</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Tipo de descuento -->
       <div class="form-group">
-        <label>Tiers de descuento</label>
-        <p class="help-text">Agregá los rangos de cantidad con su respectivo descuento (monto fijo a restar del precio).</p>
+        <label>Tipo de descuento *</label>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <label class="radio-card"><input type="radio" name="desc-tipo" value="monto_fijo" checked> <span>Monto fijo (Gs.)</span></label>
+          <label class="radio-card"><input type="radio" name="desc-tipo" value="porcentaje"> <span>Porcentaje (%)</span></label>
+          <label class="radio-card"><input type="radio" name="desc-tipo" value="2x1"> <span>2x1</span></label>
+          <label class="radio-card"><input type="radio" name="desc-tipo" value="3x2"> <span>3x2</span></label>
+        </div>
+      </div>
+
+      <!-- Vigencia -->
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Desde (opcional)</label>
+          <input type="date" id="desc-fecha-inicio" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Hasta (opcional)</label>
+          <input type="date" id="desc-fecha-fin" class="form-input">
+        </div>
+      </div>
+
+      <!-- Tiers de cantidad -->
+      <div class="form-group">
+        <label>Tiers de descuento por cantidad</label>
+        <p class="help-text">Definí los rangos. Si el tipo es %, ingresá 10 para 10%. Si es monto fijo, ingresá el valor en Gs. menos.</p>
         <div id="desc-tiers-container"></div>
         <button type="button" id="btn-add-tier" class="btn btn-sm" style="margin-top:8px">+ Agregar tier</button>
       </div>
-      <button type="submit" class="btn btn-primary" style="margin-top:16px">Guardar</button>
+
+      <!-- Preview en vivo -->
+      <div id="desc-preview" class="desc-preview hidden">
+        <strong>Vista previa:</strong> <span id="desc-preview-text"></span>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="margin-top:16px">Guardar descuento</button>
     </form>
     <p id="desc-msg" class="msg hidden"></p>
   </div>
 </div>
+
+<!-- Estilos inline para los nuevos componentes -->
+<style>
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 240px;
+  overflow-y: auto;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-top: 4px;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.autocomplete-dropdown.hidden { display: none; }
+.autocomplete-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.autocomplete-item:hover, .autocomplete-item.active {
+  background: var(--bg);
+}
+.autocomplete-item .ac-name { font-weight: 500; }
+.autocomplete-item .ac-price { color: var(--muted); font-size: 0.85em; white-space: nowrap; }
+.autocomplete-item .ac-empty {
+  padding: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+.radio-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  background: var(--card);
+  transition: all 0.15s;
+}
+.radio-card:hover { border-color: var(--primary); }
+.radio-card input { margin: 0; }
+.radio-card input:checked + span { color: var(--primary); font-weight: 600; }
+.desc-preview {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: var(--bg);
+  border-left: 3px solid var(--primary);
+  border-radius: 6px;
+  font-size: 0.9em;
+}
+.desc-preview.hidden { display: none; }
+</style>
 
 <div id="toast" class="toast hidden"></div>
 
