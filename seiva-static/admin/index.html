@@ -253,6 +253,14 @@
   <div class="modal-overlay" id="modal-overlay-prod"></div>
   <div class="modal-content">
     <div class="modal-header"><h3 id="modal-title">Nuevo Producto</h3><button class="modal-close" id="modal-close-prod">&times;</button></div>
+    <div class="form-group" style="background:var(--surface);padding:12px;border-radius:8px;margin-bottom:16px;border:1px solid var(--border)">
+      <label style="font-weight:600;margin-bottom:8px;display:block">🔗 Importar desde URL</label>
+      <div style="display:flex;gap:8px">
+        <input type="url" id="scrape-url" placeholder="https://ejemplo.com/producto-xyz" class="form-input" style="flex:1">
+        <button type="button" id="btn-scrape-url" class="btn btn-secondary" style="height:38px">Importar</button>
+      </div>
+      <p id="scrape-status" class="help-text" style="margin-top:8px;display:none"></p>
+    </div>
     <form id="producto-form">
       <input type="hidden" id="prod-id" value="">
       <div class="form-group"><label>Nombre *</label><input type="text" id="prod-nombre" required class="form-input"></div>

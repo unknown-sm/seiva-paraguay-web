@@ -324,16 +324,62 @@ function nuevoProducto() {
   document.getElementById("prod-destacado").checked = false;
   document.getElementById("prod-activo").checked = true;
   document.querySelectorAll(".prod-etiqueta").forEach(function(cb) { cb.checked = false; });
+  document.getElementById("scrape-url").value = "";
+  document.getElementById("scrape-status").style.display = "none";
+  window._scrapedImage = null;
   document.getElementById("modal-producto").classList.remove("hidden");
 }
 
+// ---------- SCRAPE URL ----------
+document.getElementById("btn-scrape-url").addEventListener("click", async function() {
+  const url = document.getElementById("scrape-url").value.trim();
+  const statusEl = document.getElementById("scrape-status");
+  
+  if (!url) {
+    statusEl.textContent = "❌ Ingresá una URL válida";
+    statusEl.style.color = "var(--danger)";
+    statusEl.style.display = "block";
+    return;
+  }
+
+  statusEl.textContent = "⏳ Scrapeando...";
+  statusEl.style.color = "var(--muted)";
+  statusEl.style.display = "block";
+
+  try {
+    const res = await api("/scrape-product", { 
+      method: "POST", 
+      body: JSON.stringify({ url }) 
+    });
+    
+    if (res.error) throw new Error(res.error);
+
+    // Auto-poblar formulario
+    document.getElementById("prod-nombre").value = res.nombre || "";
+    document.getElementById("prod-descripcion").value = res.descripcion || "";
+    document.getElementById("prod-descripcion_larga").value = res.descripcion || "";
+    if (res.precio) document.getElementById("prod-precio").value = res.precio;
+    // Imagen: se guarda en variable global para usar al guardar
+    window._scrapedImage = res.imagen; 
+    
+    statusEl.textContent = "✅ Datos importados — revisá y completá lo que falte";
+    statusEl.style.color = "var(--success)";
+  } catch (err) {
+    statusEl.textContent = "❌ Error: " + err.message;
+    statusEl.style.color = "var(--danger)";
+  }
+});
+
 // ---------- MODAL ----------
-document.getElementById("modal-overlay-prod").addEventListener("click", function() {
+function cerrarModalProducto() {
   document.getElementById("modal-producto").classList.add("hidden");
-});
-document.getElementById("modal-close-prod").addEventListener("click", function() {
-  document.getElementById("modal-producto").classList.add("hidden");
-});
+  document.getElementById("scrape-url").value = "";
+  document.getElementById("scrape-status").style.display = "none";
+  window._scrapedImage = null;
+}
+
+document.getElementById("modal-overlay-prod").addEventListener("click", cerrarModalProducto);
+document.getElementById("modal-close-prod").addEventListener("click", cerrarModalProducto);
 
 document.getElementById("producto-form").addEventListener("submit", function(e) {
   e.preventDefault();
@@ -341,6 +387,7 @@ document.getElementById("producto-form").addEventListener("submit", function(e) 
   var etiquetas = [];
   document.querySelectorAll(".prod-etiqueta:checked").forEach(function(cb) { etiquetas.push(cb.value); });
   var catId = parseInt(document.getElementById("prod-categoria").value) || null;
+  var scrapedImg = window._scrapedImage || "";
   var body = {
     nombre: document.getElementById("prod-nombre").value,
     precio: parseInt(document.getElementById("prod-precio").value) || 0,
@@ -349,7 +396,8 @@ document.getElementById("producto-form").addEventListener("submit", function(e) 
     subcategoria: document.getElementById("prod-subcategoria").value,
     descripcion: document.getElementById("prod-descripcion").value,
     descripcion_larga: document.getElementById("prod-descripcion_larga").value,
-    galeria: [],
+    galeria: scrapedImg ? [scrapedImg] : [],
+    imagen: scrapedImg,
     stock: parseInt(document.getElementById("prod-stock").value) || 0,
     destacado: document.getElementById("prod-destacado").checked,
     activo: document.getElementById("prod-activo").checked,
@@ -365,6 +413,7 @@ document.getElementById("producto-form").addEventListener("submit", function(e) 
     loadProductos();
     toast(id ? "Producto actualizado" : "Producto creado");
     document.getElementById("version-label").textContent = "v." + Date.now().toString(36);
+    window._scrapedImage = null;
   });
 });
 

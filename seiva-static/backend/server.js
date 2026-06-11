@@ -5,6 +5,7 @@ const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
 const { DatabaseSync } = require("node:sqlite");
+const cheerio = require("cheerio");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -379,6 +380,99 @@ app.patch("/api/productos/stock-batch", auth, (req, res) => {
 app.delete("/api/productos/:id", auth, (req, res) => {
   db.prepare("DELETE FROM productos WHERE id = ?").run(req.params.id);
   res.json({ ok: true });
+});
+
+// ---------- SCRAPE PRODUCTO ----------
+async function scrapeProductData(url) {
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    });
+    const html = await response.text();
+    const $ = cheerio.load(html);
+
+    // Extraer título
+    let nombre = $('meta[property="og:title"]').attr('content') || 
+                 $('meta[name="twitter:title"]').attr('content') || 
+                 $('h1').first().text().trim() || 
+                 $('title').text().trim() || 
+                 'Producto sin nombre';
+
+    // Extraer descripción
+    let descripcion = $('meta[property="og:description"]').attr('content') || 
+                      $('meta[name="description"]').attr('content') || 
+                      $('meta[name="twitter:description"]').attr('content') || 
+                      '';
+
+    // Extraer precio - buscar patrones comunes en Paraguay
+    let precio = null;
+    const precioText = $('[class*="price"], [class*="precio"], [class*="costo"], [class*="monto"]').first().text() || 
+                       $('.price, .precio, .costo, .monto').first().text() ||
+                       $('*:contains("Gs.")').first().text() ||
+                       $('*:contains("PYG")').first().text();
+    
+    if (precioText) {
+      // Patrones: Gs. 45.000, PYG 45000, 45000 Gs., etc.
+      const match = precioText.match(/(?:Gs\.?\s*|PYG\s*)?[\d.,]+/i);
+      if (match) {
+        precio = parseInt(match[0].replace(/[^\d]/g, ''));
+      }
+    }
+
+    // Si no encontró precio, buscar en el texto completo
+    if (!precio) {
+      const bodyText = $('body').text();
+      const precioMatch = bodyText.match(/Gs\.?\s*([\d.,]+)/i) || bodyText.match(/PYG\s*([\d.,]+)/i);
+      if (precioMatch) {
+        precio = parseInt(precioMatch[1].replace(/[^\d]/g, ''));
+      }
+    }
+
+    // Extraer imagen principal
+    let imagen = $('meta[property="og:image"]').attr('content') || 
+                 $('meta[name="twitter:image"]').attr('content') || 
+                 $('img[class*="product"], img[class*="main"]').first().attr('src') ||
+                 $('img').first().attr('src') ||
+                 '';
+
+    // Si la imagen es relativa, hacerla absoluta
+    if (imagen && imagen.startsWith('/')) {
+      const urlObj = new URL(url);
+      imagen = urlObj.origin + imagen;
+    }
+
+    // Limpiar descripción
+    descripcion = descripcion.replace(/<[^>]*>/g, '').substring(0, 500);
+
+    return {
+      nombre: nombre.substring(0, 200),
+      descripcion: descripcion,
+      precio: precio,
+      imagen: imagen,
+      url_origen: url
+    };
+  } catch (error) {
+    console.error('Error scraping:', error);
+    throw error;
+  }
+}
+
+app.post("/api/scrape-product", auth, async (req, res) => {
+  const { url } = req.body;
+  
+  if (!url) {
+    return res.status(400).json({ error: "URL requerida" });
+  }
+
+  try {
+    const data = await scrapeProductData(url);
+    res.json(data);
+  } catch (error) {
+    console.error('Error en scrape-product:', error);
+    res.status(500).json({ error: "Error al scrapear la URL", details: error.message });
+  }
 });
 
 // ---------- DESCUENTOS POR CANTIDAD ----------
