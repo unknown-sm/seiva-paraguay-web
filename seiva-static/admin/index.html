@@ -259,7 +259,28 @@
         <input type="url" id="scrape-url" placeholder="https://ejemplo.com/producto-xyz" class="form-input" style="flex:1">
         <button type="button" id="btn-scrape-url" class="btn btn-secondary" style="height:38px">Importar</button>
       </div>
-      <p id="scrape-status" class="help-text" style="margin-top:8px;display:none"></p>
+      <div id="scrape-progress" style="display:none;margin-top:12px">
+        <div style="background:var(--border);border-radius:4px;height:6px;overflow:hidden">
+          <div id="scrape-progress-bar" style="background:var(--primary);height:100%;width:0%;transition:width 0.3s"></div>
+        </div>
+        <p id="scrape-status" style="margin-top:6px;font-size:0.85rem;color:var(--muted)"></p>
+      </div>
+      <div id="scrape-preview" style="display:none;margin-top:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden">
+        <div style="display:flex;gap:12px;padding:12px">
+          <div style="width:120px;height:120px;border-radius:6px;overflow:hidden;background:var(--surface);flex-shrink:0">
+            <img id="scrape-preview-img" src="" style="width:100%;height:100%;object-fit:cover" alt="">
+          </div>
+          <div style="flex:1;min-width:0">
+            <h4 id="scrape-preview-nombre" style="margin:0 0 4px;font-size:0.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></h4>
+            <p id="scrape-preview-precio" style="margin:0 0 8px;color:var(--primary);font-weight:600;font-size:1.1rem"></p>
+            <p id="scrape-preview-desc" style="margin:0;font-size:0.8rem;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden"></p>
+          </div>
+        </div>
+        <div style="padding:8px 12px;background:var(--surface);border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+          <a id="scrape-preview-link" href="#" target="_blank" style="font-size:0.8rem;color:var(--primary);text-decoration:none">↗ Ver producto original</a>
+          <span style="font-size:0.75rem;color:var(--muted)">Datos extraídos — editá antes de guardar</span>
+        </div>
+      </div>
     </div>
     <form id="producto-form">
       <input type="hidden" id="prod-id" value="">
@@ -270,7 +291,7 @@
       <div class="form-group"><label>Descripci&oacute;n larga</label><textarea id="prod-descripcion_larga" rows="5" class="form-input"></textarea></div>
       <div class="form-grid"><div class="form-group"><label>Stock</label><input type="number" id="prod-stock" value="50" class="form-input"></div><div class="form-group" style="display:flex;align-items:flex-end;gap:16px;padding-bottom:8px"><label><input type="checkbox" id="prod-destacado"> Destacado</label><label><input type="checkbox" id="prod-activo" checked> Activo</label></div></div>
       <div class="form-group"><label>Etiquetas</label><div style="display:flex;gap:12px"><label><input type="checkbox" class="prod-etiqueta" value="nuevo"> Nuevo</label><label><input type="checkbox" class="prod-etiqueta" value="popular"> Popular</label><label><input type="checkbox" class="prod-etiqueta" value="oferta"> Oferta</label></div></div>
-      <button type="submit" class="btn btn-primary">Guardar Producto</button>
+      <button type="submit" id="btn-guardar-producto" class="btn btn-primary" style="width:100%"><span id="btn-guardar-text">Guardar Producto</span><span id="btn-guardar-loading" style="display:none">⏳ Guardando...</span></button>
     </form>
     <p id="prod-msg" class="msg hidden"></p>
   </div>
