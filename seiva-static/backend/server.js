@@ -510,52 +510,88 @@ async function scrapeProductData(url) {
                  $('title').text().trim() || 
                  'Producto sin nombre';
 
-    // Extraer descripcion corta: priorizar specs/beneficios del body
+    // === DESCRIPCION CORTA ===
     let descCorta = '';
-    const specKeywords = /especificaci|beneficio|contenido|ingrediente|dosis|uso|marca|cápsula|capsula|composici|presentaci|formulaci|principio|activa|virginidad|certificaci|garant|procedencia|origen|tipo|peso|volumen|tamaño|medida/i;
-    const specItems = [];
     
-    // Buscar items de lista que contengan keywords relevantes
+    // 1. Buscar todos los <li> del body (specs, beneficios, features)
+    const allItems = [];
     $('li').each(function() {
       const text = $(this).text().trim();
-      if (text.length > 5 && text.length < 200 && specKeywords.test(text)) {
-        specItems.push(text);
+      if (text.length > 3 && text.length < 300) {
+        allItems.push(text);
       }
     });
     
-    // Si hay items de specs, formatear como lista
-    if (specItems.length > 0) {
-      descCorta = '<ul>' + specItems.slice(0, 8).map(item => '<li>' + item + '</li>').join('') + '</ul>';
+    if (allItems.length > 0) {
+      // Tomar hasta 10 items
+      descCorta = '<ul>' + allItems.slice(0, 10).map(item => '<li>' + item + '</li>').join('') + '</ul>';
     } else {
-      // Fallback: meta description
-      descCorta = $('meta[property="og:description"]').attr('content') || 
-                  $('meta[name="description"]').attr('content') || 
-                  $('meta[name="twitter:description"]').attr('content') || 
-                  '';
-    }
-
-    // Extraer descripcion larga (del body, primeros parrafos del producto)
-    let descLarga = '';
-    const productSelectors = [
-      '[class*="description"], [class*="descripcion"]',
-      '[class*="detail"], [class*="detalle"]',
-      '[class*="content"], [class*="contenido"]',
-      'article', '.product-info', '.product-details'
-    ];
-    for (const sel of productSelectors) {
-      const el = $(sel).first();
-      if (el.length && el.text().trim().length > 50) {
-        descLarga = el.html() || el.text();
-        break;
-      }
-    }
-    // Fallback: tomar primeros parrafos del body
-    if (!descLarga) {
-      $('p').each(function(i) {
-        if (i < 5 && $(this).text().trim().length > 30) {
-          descLarga += '<p>' + $(this).text().trim() + '</p>';
+      // 2. Buscar <strong> o <b> que parezcan specs
+      const strongItems = [];
+      $('strong, b').each(function() {
+        const text = $(this).text().trim();
+        if (text.length > 3 && text.length < 100 && /:/.test(text)) {
+          strongItems.push(text);
         }
       });
+      if (strongItems.length > 0) {
+        descCorta = '<ul>' + strongItems.slice(0, 8).map(item => '<li>' + item + '</li>').join('') + '</ul>';
+      } else {
+        // 3. Fallback: meta description
+        descCorta = $('meta[property="og:description"]').attr('content') || 
+                    $('meta[name="description"]').attr('content') || 
+                    $('meta[name="twitter:description"]').attr('content') || 
+                    '';
+      }
+    }
+
+    // === DESCRIPCION LARGA ===
+    let descLarga = '';
+    
+    // 1. Buscar contenedores de descripcion
+    const descSelectors = [
+      '[class*="description"]', '[class*="descripcion"]',
+      '[class*="detail"]', '[class*="detalle"]',
+      '[class*="content"]', '[class*="contenido"]',
+      '[class*="product-info"]', '[class*="product-details"]',
+      '[class*="product-desc"]', '[class*="prod-desc"]',
+      'article', '.product-info', '.product-details',
+      '[itemprop="description"]', '[itemprop="description"]'
+    ];
+    
+    for (const sel of descSelectors) {
+      const el = $(sel).first();
+      if (el.length && el.text().trim().length > 30) {
+        const htmlContent = el.html();
+        if (htmlContent && htmlContent.length > 30) {
+          descLarga = htmlContent;
+          break;
+        }
+      }
+    }
+    
+    // 2. Si no encontro nada, tomar todos los parrafos del body
+    if (!descLarga || descLarga.length < 30) {
+      const paragraphs = [];
+      $('p').each(function(i) {
+        if (i < 10) {
+          const text = $(this).text().trim();
+          if (text.length > 15) {
+            paragraphs.push('<p>' + text + '</p>');
+          }
+        }
+      });
+      if (paragraphs.length > 0) {
+        descLarga = paragraphs.join('\n');
+      }
+    }
+    
+    // 3. Fallback final: tomar todo el texto del body (limpiado)
+    if (!descLarga || descLarga.length < 30) {
+      const bodyText = $('body').text().replace(/\s+/g, ' ').trim();
+      if (bodyText.length > 30) {
+        descLarga = '<p>' + bodyText.substring(0, 1000) + '</p>';
+      }
     }
 
     // Extraer precio
