@@ -418,44 +418,48 @@ function formatDescription(rawText) {
 
 function formatDescriptionLarga(rawText) {
   if (!rawText) return '';
-  
-  // Si ya tiene HTML con estructura, intentar limpiar
   let clean = rawText.trim();
-  
-  // Si tiene tags HTML, limpiar basura pero mantener estructura
   if (/<[a-z][\s\S]*>/i.test(clean)) {
-    // Remover tags de tracking, scripts, estilos
-    clean = clean.replace(/<script[\s\S]*?<\/script>/gi, '');
-    clean = clean.replace(/<style[\s\S]*?<\/style>/gi, '');
-    clean = clean.replace(/<noscript[\s\S]*?<\/noscript>/gi, '');
-    // Remover atributos innecesarios
-    clean = clean.replace(/\s+class="[^"]*"/g, '');
-    clean = clean.replace(/\s+style="[^"]*"/g, '');
-    clean = clean.replace(/\s+data-[a-z-]+="[^"]*"/g, '');
-    return clean;
+    const $ = cheerio.load(clean);
+    $('script, style, noscript, meta, link, nav, svg, button, iframe, form, input, select, textarea').remove();
+    $('ol, [itemscope]').remove();
+    $('[hidden]').remove();
+    $('*').each(function() {
+      const el = $(this);
+      const attrs = el.attr();
+      for (const key of Object.keys(attrs)) {
+        if (key !== 'href' && key !== 'src' && key !== 'alt') el.removeAttr(key);
+      }
+    });
+    clean = $.html().replace(/<!--[\s\S]*?-->/g, '');
+    clean = clean.replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n').replace(/<\/li>/gi, '\n').replace(/<[^>]*>/g, '');
+    let lines = clean.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    if (lines.length === 0) return '';
+    let html = '';
+    for (const line of lines) {
+      if (line.length < 60 && /:\s*$/.test(line)) {
+        html += '<strong>' + line.replace(/:\s*$/, '') + '</strong><br>';
+      } else if (/^[-*]\s/.test(line)) {
+        html += '<li>' + line.replace(/^[-*]\s*/, '') + '</li>';
+      } else {
+        html += '<p>' + line + '</p>';
+      }
+    }
+    html = html.replace(/(<li>.*?<\/li>)+/gs, m => '<ul>' + m + '</ul>');
+    return html;
   }
-  
-  // Texto plano: formatear bonito
   let lines = clean.split('\n').map(l => l.trim()).filter(l => l.length > 0);
   let html = '';
-  
-  for (let line of lines) {
-    // Detectar si es titulo (termina en : y es corto)
+  for (const line of lines) {
     if (line.length < 60 && /:\s*$/.test(line)) {
       html += '<h4>' + line.replace(/:\s*$/, '') + '</h4>';
-    }
-    // Detectar items de lista
-    else if (/^[-•●◦▪]\s/.test(line) || /^\d+[.)]\s/.test(line)) {
+    } else if (/^[-•●◦▪]\s/.test(line) || /^\d+[.)]\s/.test(line)) {
       let itemText = line.replace(/^[-•●◦▪]\s*/, '').replace(/^\d+[.)]\s*/, '');
       html += '<li>' + itemText + '</li>';
-    }
-    // Parrafo normal
-    else {
+    } else {
       html += '<p>' + line + '</p>';
     }
   }
-  
-  // Envolver listas
   html = html.replace(/(<li>.*?<\/li>)+/gs, (match) => '<ul>' + match + '</ul>');
   return html;
 }
