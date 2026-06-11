@@ -288,7 +288,8 @@ function editarProducto(id) {
     document.getElementById("prod-destacado").checked = prod.destacado;
     document.getElementById("prod-activo").checked = prod.activo;
     document.querySelectorAll(".prod-etiqueta").forEach(function(cb) { cb.checked = (prod.etiquetas || []).indexOf(cb.value) !== -1; });
-    // Set category after it loads
+    // Preservar imagen actual para que no se pierda al guardar sin scrape
+    window._scrapedImage = prod.imagen || "";
     setTimeout(function() {
       document.getElementById("prod-categoria").value = prod.categoria_id || "";
     }, 100);
