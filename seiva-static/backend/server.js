@@ -506,11 +506,29 @@ async function scrapeProductData(url) {
                  $('title').text().trim() || 
                  'Producto sin nombre';
 
-    // Extraer descripcion corta
-    let descCorta = $('meta[property="og:description"]').attr('content') || 
-                    $('meta[name="description"]').attr('content') || 
-                    $('meta[name="twitter:description"]').attr('content') || 
-                    '';
+    // Extraer descripcion corta: priorizar specs/beneficios del body
+    let descCorta = '';
+    const specKeywords = /especificaci|beneficio|contenido|ingrediente|dosis|uso|marca|cápsula|capsula|composici|presentaci|formulaci|principio|activa|virginidad|certificaci|garant|procedencia|origen|tipo|peso|volumen|tamaño|medida/i;
+    const specItems = [];
+    
+    // Buscar items de lista que contengan keywords relevantes
+    $('li').each(function() {
+      const text = $(this).text().trim();
+      if (text.length > 5 && text.length < 200 && specKeywords.test(text)) {
+        specItems.push(text);
+      }
+    });
+    
+    // Si hay items de specs, formatear como lista
+    if (specItems.length > 0) {
+      descCorta = '<ul>' + specItems.slice(0, 8).map(item => '<li>' + item + '</li>').join('') + '</ul>';
+    } else {
+      // Fallback: meta description
+      descCorta = $('meta[property="og:description"]').attr('content') || 
+                  $('meta[name="description"]').attr('content') || 
+                  $('meta[name="twitter:description"]').attr('content') || 
+                  '';
+    }
 
     // Extraer descripcion larga (del body, primeros parrafos del producto)
     let descLarga = '';
@@ -586,7 +604,9 @@ async function scrapeProductData(url) {
     }
 
     // Formatear descripciones
-    descCorta = formatDescription(descCorta);
+    if (!descCorta.includes('<ul>') && !descCorta.includes('<li>')) {
+      descCorta = formatDescription(descCorta);
+    }
     descLarga = formatDescriptionLarga(descLarga);
 
     return {

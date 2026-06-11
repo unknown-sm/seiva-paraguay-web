@@ -264,6 +264,7 @@ function loadProductos() {
           '<button class="btn-icon" onclick="editarProducto(' + p.id + ')" title="Editar">&#9999;</button>' +
           '<button class="btn-icon" onclick="toggleProducto(' + p.id + ')" title="Activar/Desactivar">' + (p.activo ? '&#128065;' : '&#128065;&#8205;&#128488;') + '</button>' +
           '<button class="btn-icon" onclick="eliminarProducto(' + p.id + ')" title="Eliminar">&#128465;</button>' +
+          (p.activo ? '<a href="/producto/' + p.id + '" target="_blank" class="btn-icon" title="Ver en web">&#128269;</a>' : '') +
         '</td>' +
       '</tr>';
     }).join("");
@@ -325,7 +326,8 @@ function nuevoProducto() {
   document.getElementById("prod-activo").checked = true;
   document.querySelectorAll(".prod-etiqueta").forEach(function(cb) { cb.checked = false; });
   document.getElementById("scrape-url").value = "";
-  document.getElementById("scrape-status").style.display = "none";
+  document.getElementById("scrape-progress").style.display = "none";
+  document.getElementById("scrape-preview").style.display = "none";
   window._scrapedImage = null;
   document.getElementById("modal-producto").classList.remove("hidden");
 }
