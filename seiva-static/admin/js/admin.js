@@ -10,6 +10,9 @@ function api(url, opts) {
   opts.headers["Content-Type"] = "application/json";
   return fetch(API + url, opts).then(function(r) {
     if (r.status === 401) { logout(); throw new Error("Sesion expirada"); }
+    if (!r.ok) {
+      return r.json().then(function(err) { throw new Error(err.error || "Error " + r.status); }).catch(function(e) { throw e; });
+    }
     return r.json();
   });
 }
@@ -74,7 +77,8 @@ function switchTab(tabId, skipUrl) {
     "tab-historico": "Histórico",
     "tab-contenido": "Contenido",
     "tab-paginas": "P&aacute;ginas",
-    "tab-analytics": "Analytics"
+    "tab-analytics": "Analytics",
+    "tab-logs": "Log de Errores"
   };
   document.getElementById("page-title").textContent = titles[tabId] || "Dashboard";
   document.title = (titles[tabId] || "Dashboard") + " — Seiva Admin";
@@ -93,6 +97,7 @@ function switchTab(tabId, skipUrl) {
   if (tabId === "tab-historico") loadHistorico();
   if (tabId === "tab-contenido") loadContenido();
   if (tabId === "tab-analytics") loadAnalytics();
+  if (tabId === "tab-logs") loadErrorLogs();
   if (tabId === "tab-paginas") loadPaginas();
 }
 
@@ -177,6 +182,7 @@ function renderStockAlertas() {
         '</div>' +
         '<div class="stock-card-body">' +
           '<h4 class="stock-card-name">' + a.nombre + '</h4>' +
+          (a.marca ? '<div class="stock-card-marca">' + xt(a.marca) + '</div>' : '') +
           '<div class="stock-card-input-row">' +
             '<label>Nuevo stock:</label>' +
             '<input type="number" class="stock-input" value="' + currentStock + '" min="0" onchange="stockChanges[' + a.id + '] = parseInt(this.value) || 0">' +
@@ -226,12 +232,12 @@ function saveStockChanges() {
   api("/productos/stock-batch", { 
     method: "PATCH", 
     body: JSON.stringify({ updates: updates }) 
-  }).then(function() {
-    toast("Stock actualizado correctamente");
+  }).then(function(r) {
+    toast("Stock actualizado: " + (r.updated || updates.length) + " productos");
     stockChanges = {};
     loadStockAlertas();
-  }).catch(function() {
-    toast("Error al guardar", "error");
+  }).catch(function(e) {
+    toast("Error al guardar stock: " + (e.message || "desconocido"), "error");
   });
 }
 
@@ -1162,4 +1168,42 @@ document.addEventListener("DOMContentLoaded", function() {
   document.getElementById("modal-overlay-desc").addEventListener("click", function() {
     document.getElementById("modal-descuento").classList.add("hidden");
   });
+
+  // Load logs on tab init if needed
 });
+
+// ---------- ERROR LOGS ----------
+function loadErrorLogs() {
+  var el = document.getElementById("error-logs-list");
+  if (!el) return;
+  el.innerHTML = '<p style="color:var(--muted)">Cargando...</p>';
+  api("/error-logs?limit=100").then(function(logs) {
+    if (!logs.length) {
+      el.innerHTML = '<p style="color:var(--muted);text-align:center;padding:20px">No hay errores registrados.</p>';
+      return;
+    }
+    var html = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:0.85em">';
+    html += '<thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Hora</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Nivel</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Mensaje</th></tr></thead><tbody>';
+    logs.forEach(function(log) {
+      var levelColor = log.level === "fatal" ? "#c0392b" : log.level === "error" ? "#e67e22" : "#7f8c8d";
+      var time = new Date(log.ts).toLocaleString("es-PY", { day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit", second:"2-digit" });
+      html += '<tr style="border-bottom:1px solid var(--border)">' +
+        '<td style="padding:8px;white-space:nowrap;color:var(--muted)">' + time + '</td>' +
+        '<td style="padding:8px"><span style="color:' + levelColor + ';font-weight:600;text-transform:uppercase;font-size:0.8em">' + log.level + '</span></td>' +
+        '<td style="padding:8px">' + xt(log.message) + (log.details ? '<br><pre style="margin:4px 0 0;font-size:0.8em;color:var(--muted);white-space:pre-wrap;max-width:600px;overflow:hidden">' + xt(log.details).substring(0, 500) + '</pre>' : '') + '</td>' +
+        '</tr>';
+    });
+    html += '</tbody></table></div>';
+    el.innerHTML = html;
+  }).catch(function(e) {
+    el.innerHTML = '<p style="color:#c0392b">Error al cargar logs: ' + e.message + '</p>';
+  });
+}
+
+function clearErrorLogs() {
+  if (!confirm("¿Limpiar todos los logs de errores?")) return;
+  api("/error-logs", { method: "DELETE" }).then(function() {
+    toast("Logs limpiados");
+    loadErrorLogs();
+  });
+}

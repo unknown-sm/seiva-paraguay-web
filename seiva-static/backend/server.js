@@ -14,6 +14,16 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "SeivaAdmin2026!";
 
 app.use(cors());
 app.use(express.json({ limit: "5mb" }));
+
+// Error log in-memory (last 500 entries)
+const errorLogs = [];
+function logError(level, message, details) {
+  errorLogs.unshift({ ts: new Date().toISOString(), level, message, details: details || null });
+  if (errorLogs.length > 500) errorLogs.length = 500;
+}
+// Capture uncaught errors
+process.on("uncaughtException", (err) => { console.error("[FATAL]", err); logError("fatal", err.message, err.stack); });
+process.on("unhandledRejection", (err) => { console.error("[UNHANDLED]", err); logError("error", String(err)); });
 let imgPath = path.join(__dirname, "public", "productos");
 if (!fs.existsSync(imgPath)) {
   imgPath = path.join(__dirname, "img", "productos");
@@ -313,6 +323,7 @@ function auth(req, res, next) {
     if (decoded.role !== "admin") throw new Error();
     next();
   } catch {
+    logError("warn", "Auth failed: invalid token from " + (req.ip || "unknown"));
     res.status(401).json({ error: "Token invalido" });
   }
 }
@@ -544,6 +555,7 @@ async function downloadImage(imgUrl, nombre) {
     return fileName;
   } catch (error) {
     console.error('Error descargando imagen:', error);
+    logError("warn", "Image download failed: " + imgUrl, error.message);
     return null;
   }
 }
@@ -768,6 +780,7 @@ app.post("/api/scrape-product", auth, async (req, res) => {
     res.json(data);
   } catch (error) {
     console.error('Error en scrape-product:', error);
+    logError("error", "Scrape failed: " + url, error.message);
     res.status(500).json({ error: "Error al scrapear la URL", details: error.message });
   }
 });
@@ -1093,8 +1106,25 @@ app.delete("/api/pedidos/:id", auth, (req, res) => {
 // ---------- STOCK ALERTAS ----------
 app.get("/api/stock-alertas", auth, (req, res) => {
   const limite = parseInt(req.query.limite) || 10;
-  const rows = db.prepare("SELECT id, nombre, stock FROM productos WHERE stock <= ? AND activo = 1 ORDER BY stock ASC").all(limite);
+  const rows = db.prepare("SELECT id, nombre, stock, marca FROM productos WHERE stock <= ? AND activo = 1 ORDER BY stock ASC").all(limite);
   res.json(rows);
+});
+
+// ---------- ERROR LOG ----------
+app.get("/api/error-logs", auth, (req, res) => {
+  const limit = parseInt(req.query.limit) || 100;
+  res.json(errorLogs.slice(0, limit));
+});
+app.delete("/api/error-logs", auth, (req, res) => {
+  errorLogs.length = 0;
+  res.json({ ok: true });
+});
+
+// Request error logger
+app.use(function(err, req, res, next) {
+  console.error("[ERROR]", req.method, req.url, err.message);
+  logError("error", req.method + " " + req.url + " — " + err.message, err.stack);
+  res.status(500).json({ error: "Error interno del servidor" });
 });
 
 // Force UTF-8 charset for HTML files
