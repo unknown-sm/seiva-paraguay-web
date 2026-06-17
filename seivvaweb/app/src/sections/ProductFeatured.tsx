@@ -1,249 +1,206 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Star, Check, Shield, Minus, Plus } from 'lucide-react'
+import { ShoppingCart, Star } from 'lucide-react'
+import { fetchFeatured, formatPrice, stripHtml, type Product } from '../services/api'
 import { useCart } from '../context/CartContext'
-import { formatPrice } from '../services/api'
+import ProductSkeleton from '../components/ProductSkeleton'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const options = ['120 cápsulas', '240 cápsulas', 'Polvo 500g']
-const benefits = [
-  'Aumenta energía natural',
-  'Fortalece sistema inmune',
-  'Detox y alcalinización',
-]
-
 export default function ProductFeatured() {
   const sectionRef = useRef<HTMLDivElement>(null)
-  const imageRef = useRef<HTMLDivElement>(null)
-  const contentRef = useRef<HTMLDivElement>(null)
-  const [selectedOption, setSelectedOption] = useState(0)
-  const [quantity, setQuantity] = useState(1)
+  const headerRef = useRef<HTMLDivElement>(null)
+  const cardsRef = useRef<(HTMLDivElement | null)[]>([])
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
   const { addItem } = useCart()
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      if (imageRef.current) {
-        gsap.fromTo(imageRef.current,
-          { scale: 0.85, opacity: 0 },
-          {
-            scale: 1, opacity: 1, duration: 0.8, ease: 'power2.out',
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: 'top 80%',
-              toggleActions: 'play none none none',
-            }
-          }
-        )
-      }
-
-      if (contentRef.current) {
-        const els = contentRef.current.querySelectorAll('.animate-in')
-        gsap.fromTo(els,
-          { y: 30, opacity: 0 },
-          {
-            y: 0, opacity: 1, stagger: 0.1, duration: 0.6, ease: 'power2.out',
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: 'top 80%',
-              toggleActions: 'play none none none',
-            }
-          }
-        )
-      }
-    }, sectionRef)
-
-    return () => ctx.revert()
+    fetchFeatured()
+      .then(data => {
+        setProducts(data.slice(0, 8))
+        setLoading(false)
+      })
+      .catch(() => {
+        setProducts([])
+        setLoading(false)
+      })
   }, [])
 
-  const addToCart = () => {
-    addItem({
-      id: 0,
-      nombre: 'Espirulina Orgánica Premium',
-      precio: 29990,
-      precio_anterior: 39990,
-      categoria: 'suplementos',
-      subcategoria: 'polvo',
-      descripcion: 'Superalimento verde con 70% proteína vegetal completa.',
-      imagen: '/images/product-spirulina.jpg',
-      etiquetas: ['popular'],
-      destacado: true,
-      activo: true,
-      stock: 50,
-    }, quantity)
-  }
+  useEffect(() => {
+    if (loading || products.length === 0) return
+
+    setTimeout(() => {
+      const ctx = gsap.context(() => {
+        if (headerRef.current) {
+          const els = headerRef.current.querySelectorAll('.animate-in')
+          gsap.fromTo(els,
+            { y: 30, opacity: 0 },
+            {
+              y: 0, opacity: 1, stagger: 0.1, duration: 0.6, ease: 'power2.out',
+              scrollTrigger: {
+                trigger: headerRef.current,
+                start: 'top 85%',
+                toggleActions: 'play none none none',
+              }
+            }
+          )
+        }
+
+        cardsRef.current.forEach((card, i) => {
+          if (card) {
+            gsap.fromTo(card,
+              { y: 50, opacity: 0 },
+              {
+                y: 0, opacity: 1, duration: 0.7, ease: 'power2.out', delay: i * 0.12,
+                scrollTrigger: {
+                  trigger: card,
+                  start: 'top 88%',
+                  toggleActions: 'play none none none',
+                }
+              }
+            )
+          }
+        })
+      }, sectionRef)
+
+      return () => ctx.revert()
+    }, 200)
+
+    return () => {}
+  }, [loading, products])
+
+  if (loading || products.length === 0) return null
 
   return (
     <section
       id="featured"
       ref={sectionRef}
-      className="relative py-20 lg:py-24"
-      style={{ backgroundColor: 'var(--theme-primary, #1B4332)' }}
+      className="py-14 lg:py-20"
+      style={{ backgroundColor: 'var(--theme-bg, #F2EDE6)' }}
     >
-      <div className="container-main grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-        {/* Left - Product Image */}
-        <div ref={imageRef} className="relative flex justify-center">
-          {/* Circular glow */}
+      <div className="container-main">
+        <div ref={headerRef} className="text-center mb-10 lg:mb-14">
           <div
-            className="absolute inset-0 flex items-center justify-center pointer-events-none"
-          >
-            <div
-              className="w-[320px] h-[320px] sm:w-[400px] sm:h-[400px] rounded-full"
-              style={{
-                background: 'radial-gradient(circle, rgba(82,183,136,0.2) 0%, transparent 70%)',
-              }}
-            />
-          </div>
-          <img
-            src="/images/product-spirulina.jpg"
-            alt="Espirulina Orgánica Premium"
-            className="relative z-10 w-[280px] sm:w-[350px] rounded-2xl object-cover"
-            style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}
-          />
-          {/* Decorative floating leaves */}
-          <img
-            src="/images/floating-leaf.png"
-            alt=""
-            className="absolute top-4 left-4 w-12 h-12 opacity-60 float-animation"
-          />
-          <img
-            src="/images/floating-mint.png"
-            alt=""
-            className="absolute bottom-8 right-8 w-14 h-14 opacity-50 float-animation float-animation-delay-2"
-          />
-        </div>
-
-        {/* Right - Product Details */}
-        <div ref={contentRef}>
-          <div
-            className="animate-in font-body font-semibold text-xs tracking-[0.12em] mb-3"
+            className="animate-in font-body font-semibold text-xs tracking-[0.1em] mb-3"
             style={{ color: 'var(--theme-accent, #D4A843)' }}
           >
-            PRODUCTO DESTACADO
+            SELECCIONADOS PARA TI
           </div>
-
           <h2
-            className="animate-in font-display font-bold text-white leading-tight"
-            style={{ fontSize: 'clamp(28px, 3.5vw, 40px)' }}
+            className="animate-in font-display font-bold leading-tight"
+            style={{ color: 'var(--theme-text, #3D2817)', fontSize: 'clamp(28px, 3.5vw, 48px)' }}
           >
-            Espirulina Orgánica Premium
+            Productos Destacados
           </h2>
-
-          <div className="animate-in flex items-center gap-2 mt-3">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className="w-4.5 h-4.5" style={{ color: 'var(--theme-accent, #D4A843)' }} fill="#D4A843" />
-            ))}
-            <span className="font-body text-sm ml-1" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              (2,847 reseñas)
-            </span>
-          </div>
-
           <p
-            className="animate-in font-body text-base leading-relaxed mt-4 max-w-md"
-            style={{ color: 'rgba(255,255,255,0.75)' }}
+            className="animate-in font-body text-base mt-3 max-w-md mx-auto leading-relaxed"
+            style={{ color: 'var(--theme-muted, #5C4033)' }}
           >
-            Superalimento verde con 70% proteína vegetal completa, vitaminas B12, hierro y antioxidantes. Cultivada en aguas puras sin pesticidas ni aditivos.
+            Los favoritos de nuestra comunidad. Calidad garantizada.
           </p>
+        </div>
 
-          {/* Benefits */}
-          <div className="animate-in flex flex-col gap-3 mt-6">
-            {benefits.map((b, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <Check className="w-[18px] h-[18px] flex-shrink-0" style={{ color: '#52B788' }} />
-                <span className="font-body text-sm text-white">{b}</span>
+        {loading ? (
+          <ProductSkeleton count={4} className="lg:grid-cols-4" />
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            {products.map((product, i) => (
+              <div
+                key={product.id}
+                ref={(el) => { cardsRef.current[i] = el }}
+                className="group rounded-2xl p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1.5 cursor-pointer flex flex-col"
+                style={{
+                  backgroundColor: 'var(--theme-surface, #FFFFFF)',
+                  boxShadow: '0 2px 12px rgba(45, 106, 79, 0.10), 0 0 0 1px var(--theme-border, rgba(45, 106, 79, 0.08))',
+                }}
+                onClick={() => navigate(`/producto/${product.slug || product.id}`)}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 32px rgba(45, 106, 79, 0.18), 0 0 0 1px rgba(45, 106, 79, 0.12)'
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 12px rgba(45, 106, 79, 0.10), 0 0 0 1px rgba(45, 106, 79, 0.08)'
+                }}
+              >
+                <div
+                  className="relative rounded-xl overflow-hidden"
+                  style={{ backgroundColor: 'var(--theme-surface, #FFFFFF)', border: '1px solid var(--theme-border, #F0EDE8)', height: '200px' }}
+                >
+                  <img
+                    src={product.imagen}
+                    alt={product.nombre}
+                    className="absolute inset-0 w-full h-full object-contain p-4 transition-transform duration-300 group-hover:scale-105"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none'
+                    }}
+                  />
+                  <span
+                    className="absolute top-2.5 left-2.5 font-body font-semibold text-[10px] px-2.5 py-1 rounded-full tracking-wider"
+                    style={{
+                      backgroundColor: 'var(--theme-primary, #1B4332)',
+                      color: 'var(--theme-text-on-primary, #FFFFFF)',
+                      zIndex: 10,
+                    }}
+                  >
+                    {product.categoria.toUpperCase()}
+                  </span>
+                  {product.precio_anterior && (
+                    <span
+                      className="absolute top-2.5 right-2.5 font-body font-semibold text-[10px] px-2.5 py-1 rounded-full"
+                      style={{ backgroundColor: '#E63946', color: '#FFFFFF', zIndex: 10 }}
+                    >
+                      OFERTA
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex flex-col flex-1 mt-3">
+                  <h3
+                    className="font-body font-semibold text-sm sm:text-[15px] leading-snug line-clamp-2"
+                    style={{ color: 'var(--theme-text, #1A1A1A)' }}
+                  >
+                    {product.nombre}
+                  </h3>
+                  <p className="font-body text-xs mt-1 leading-relaxed line-clamp-1" style={{ color: 'var(--theme-muted, #6B6B6B)' }}>
+                    {stripHtml(product.descripcion)}
+                  </p>
+
+                  <div className="mt-auto pt-3">
+                    <div className="flex flex-wrap items-baseline gap-x-2 mb-3">
+                      <span className="font-body font-bold text-base sm:text-lg" style={{ color: 'var(--theme-primary, #1B4332)' }}>
+                        {formatPrice(product.precio)}
+                      </span>
+                      {product.precio_anterior && (
+                        <span className="font-body text-xs line-through" style={{ color: 'var(--theme-muted, #999)' }}>
+                          {formatPrice(product.precio_anterior)}
+                        </span>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        addItem(product, 1)
+                      }}
+                      className="font-body font-semibold text-xs px-5 py-2.5 rounded-full transition-all duration-300 hover:scale-105 inline-flex items-center justify-center gap-1.5 w-full"
+                      style={{
+                        backgroundColor: 'var(--theme-primary, #1B4332)',
+                        color: 'var(--theme-text-on-primary, #FFFFFF)',
+                        letterSpacing: '0.04em',
+                      }}
+                    >
+                      <ShoppingCart className="w-3.5 h-3.5" />
+                      Agregar
+                    </button>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
-
-          {/* Options */}
-          <div className="animate-in mt-7">
-            <span className="font-body text-sm block mb-3" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              Presentación:
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {options.map((opt, i) => (
-                <button
-                  key={i}
-                  onClick={() => setSelectedOption(i)}
-                  className="font-body font-semibold text-xs px-5 py-2.5 rounded-full transition-all duration-300"
-                  style={{
-                    backgroundColor: selectedOption === i ? 'var(--theme-accent, #D4A843)' : 'rgba(255,255,255,0.1)',
-                    color: selectedOption === i ? 'var(--theme-primary, #1B4332)' : 'var(--theme-text-on-primary, #FFFFFF)',
-                    border: selectedOption === i ? 'none' : '1px solid rgba(255,255,255,0.15)',
-                    letterSpacing: '0.08em',
-                  }}
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Price */}
-          <div className="animate-in flex items-center gap-3 sm:gap-4 mt-7">
-            <span className="font-body font-bold text-3xl sm:text-4xl" style={{ color: 'var(--theme-accent, #D4A843)' }}>
-              {formatPrice(29990)}
-            </span>
-            <span
-              className="font-body font-bold text-lg sm:text-xl line-through"
-              style={{ color: 'rgba(255,255,255,0.4)' }}
-            >
-              {formatPrice(39990)}
-            </span>
-            <span
-              className="font-body font-semibold text-[10px] sm:text-[11px] px-2.5 py-1 rounded-full"
-              style={{ backgroundColor: '#E63946', color: '#FFFFFF', letterSpacing: '0.08em' }}
-            >
-              -25%
-            </span>
-          </div>
-
-          {/* Actions */}
-          <div className="animate-in flex flex-wrap items-center gap-4 mt-7">
-            {/* Quantity */}
-            <div
-              className="flex items-center rounded-full h-12"
-              style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
-            >
-              <button
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="w-10 h-12 flex items-center justify-center text-white hover:text-[#D4A843] transition-colors"
-              >
-                <Minus className="w-4 h-4" />
-              </button>
-              <span className="w-10 text-center font-body font-semibold text-white">{quantity}</span>
-              <button
-                onClick={() => setQuantity(quantity + 1)}
-                className="w-10 h-12 flex items-center justify-center text-white hover:text-[#D4A843] transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Add to Cart */}
-            <button
-              onClick={addToCart}
-              className="font-body font-semibold text-sm px-9 py-3.5 rounded-full transition-all duration-300 hover:scale-[1.03]"
-              style={{
-                backgroundColor: 'var(--theme-accent, #D4A843)',
-                color: 'var(--theme-primary, #1B4332)',
-                letterSpacing: '0.08em',
-                boxShadow: '0 4px 16px rgba(212, 168, 67, 0.35)',
-              }}
-            >
-              Agregar al Carrito
-            </button>
-          </div>
-
-          {/* Trust */}
-          <div className="animate-in flex items-center gap-2 mt-4">
-            <Shield className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.5)' }} />
-            <span className="font-body text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
-              Envío seguro y garantía de satisfacción
-            </span>
-          </div>
-        </div>
+        )}
       </div>
     </section>
   )

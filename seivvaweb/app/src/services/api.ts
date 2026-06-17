@@ -31,6 +31,7 @@ export interface Product {
   upsell?: number[];
   categoria_id?: number;
   price_tiers?: PriceTier[];
+  featured_order?: number;
 }
 
 const IMAGE_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
@@ -47,6 +48,13 @@ function fixImageUrl(imagen: string): string {
 export async function fetchProducts(): Promise<Product[]> {
   const res = await fetch(`${API_BASE}/productos`);
   if (!res.ok) throw new Error('Failed to fetch products');
+  const products: Product[] = await res.json();
+  return products.map(p => ({ ...p, imagen: fixImageUrl(p.imagen) }));
+}
+
+export async function fetchFeatured(): Promise<Product[]> {
+  const res = await fetch(`${API_BASE}/productos/destacados`);
+  if (!res.ok) throw new Error('Failed to fetch featured products');
   const products: Product[] = await res.json();
   return products.map(p => ({ ...p, imagen: fixImageUrl(p.imagen) }));
 }

@@ -255,7 +255,7 @@ function loadProductos() {
     tbody.innerHTML = data.map(function(p) {
       var cls = p.activo ? "" : "inactive";
       return '<tr class="' + cls + '">' +
-        '<td>' + p.nombre + (p.destacado ? ' <span style="font-size:0.7rem;background:var(--accent);color:#fff;padding:1px 6px;border-radius:10px">Destacado</span>' : '') + '</td>' +
+        '<td>' + p.nombre + (p.featured_order > 0 ? ' <span style="font-size:0.7rem;background:var(--accent);color:#fff;padding:1px 6px;border-radius:10px">#' + p.featured_order + '</span>' : '') + (p.destacado && !p.featured_order ? ' <span style="font-size:0.7rem;background:var(--accent);color:#fff;padding:1px 6px;border-radius:10px">Destacado</span>' : '') + '</td>' +
         '<td>' + formatGs(p.precio) + (p.precio_anterior ? ' <del style="font-size:0.7rem;color:var(--muted)">' + formatGs(p.precio_anterior) + '</del>' : '') + '</td>' +
         '<td>' + p.categoria + '</td>' +
         '<td>' + p.stock + '</td>' +
@@ -289,6 +289,7 @@ function editarProducto(id) {
     document.getElementById("prod-descripcion").value = prod.descripcion || "";
     document.getElementById("prod-descripcion_larga").value = prod.descripcion_larga || "";
     document.getElementById("prod-stock").value = prod.stock || 0;
+    document.getElementById("prod-featured_order").value = prod.featured_order || 0;
     document.getElementById("prod-destacado").checked = prod.destacado;
     document.getElementById("prod-activo").checked = prod.activo;
     document.getElementById("prod-crosssell").value = (prod.crosssell || []).join(', ');
@@ -333,6 +334,7 @@ function nuevoProducto() {
   document.getElementById("prod-descripcion").value = "";
   document.getElementById("prod-descripcion_larga").value = "";
   document.getElementById("prod-stock").value = "50";
+  document.getElementById("prod-featured_order").value = "0";
   document.getElementById("prod-destacado").checked = false;
   document.getElementById("prod-activo").checked = true;
   document.getElementById("prod-crosssell").value = "";
@@ -437,7 +439,8 @@ document.getElementById("producto-form").addEventListener("submit", async functi
     activo: document.getElementById("prod-activo").checked,
     etiquetas: etiquetas,
     crosssell: document.getElementById("prod-crosssell").value.split(',').map(s => s.trim()).filter(s => s),
-    upsell: document.getElementById("prod-upsell").value.split(',').map(s => s.trim()).filter(s => s)
+    upsell: document.getElementById("prod-upsell").value.split(',').map(s => s.trim()).filter(s => s),
+    featured_order: parseInt(document.getElementById("prod-featured_order").value) || 0
   };
 
   var method = id ? "PUT" : "POST";
