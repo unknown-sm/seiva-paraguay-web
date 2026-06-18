@@ -439,12 +439,9 @@ app.patch("/api/productos/stock-batch", auth, (req, res) => {
   if (!Array.isArray(updates)) return res.status(400).json({ error: "updates debe ser un array" });
   
   const updateStmt = db.prepare("UPDATE productos SET stock = ? WHERE id = ?");
-  const transaction = db.transaction((items) => {
-    for (const item of items) {
-      updateStmt.run(item.stock, item.id);
-    }
-  });
-  transaction(updates);
+  for (const item of updates) {
+    updateStmt.run(item.stock, item.id);
+  }
   res.json({ ok: true, updated: updates.length });
 });
 
@@ -834,21 +831,18 @@ app.post("/api/descuentos/lote", auth, (req, res) => {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
-  const transaction = db.transaction(() => {
-    deleteStmt.run(producto_id);
-    for (const tier of tiers) {
-      insertStmt.run(
-        producto_id, tier.min_cantidad, tier.max_cantidad || null, tier.descuento,
-        audiencia || 'todos',
-        tipo_descuento || 'monto_fijo',
-        fecha_inicio || null,
-        fecha_fin || null,
-        etiqueta || '',
-        descripcion || ''
-      );
-    }
-  });
-  transaction();
+  deleteStmt.run(producto_id);
+  for (const tier of tiers) {
+    insertStmt.run(
+      producto_id, tier.min_cantidad, tier.max_cantidad || null, tier.descuento,
+      audiencia || 'todos',
+      tipo_descuento || 'monto_fijo',
+      fecha_inicio || null,
+      fecha_fin || null,
+      etiqueta || '',
+      descripcion || ''
+    );
+  }
   res.json({ ok: true, producto_id, tiers_count: tiers.length });
 });
 
