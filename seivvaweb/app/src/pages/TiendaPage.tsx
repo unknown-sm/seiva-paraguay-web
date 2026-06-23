@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { fetchProducts, type Product, formatPrice } from '../services/api'
+import { fetchProducts, type Product, formatPrice, getProductBadges } from '../services/api'
 import { useCart } from '../context/CartContext'
 import { Search, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react'
 import ProductSkeleton from '../components/ProductSkeleton'
@@ -258,6 +258,19 @@ export default function TiendaPage() {
                         AGOTADO
                       </span>
                     )}
+                    {product.stock > 0 && (() => {
+                      const badges = getProductBadges(product)
+                      if (!badges.length) return null
+                      return (
+                        <div className="absolute bottom-2 left-2 flex flex-wrap gap-1 z-10">
+                          {badges.map(b => (
+                            <span key={b.label} className="font-body font-semibold text-[8px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: b.color, color: '#fff' }}>
+                              {b.label}
+                            </span>
+                          ))}
+                        </div>
+                      )
+                    })()}
                   </div>
 
                   {/* Content */}

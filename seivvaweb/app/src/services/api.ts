@@ -97,6 +97,19 @@ export function stripHtml(html: string): string {
   return doc.body.textContent || ''
 }
 
+export function getProductBadges(product: Product): { label: string; color: string }[] {
+  const badgeMap: Record<string, { label: string; color: string }> = {
+    nuevo: { label: 'Nuevo', color: '#3B82F6' },
+    popular: { label: 'Popular', color: '#F59E0B' },
+    oferta: { label: 'Oferta', color: '#E63946' },
+    envio_gratis: { label: 'Envío gratis', color: '#10B981' },
+    mas_vendido: { label: 'Más vendido', color: '#8B5CF6' },
+    '2x1': { label: '2x1', color: '#EC4899' },
+    '3x2': { label: '3x2', color: '#F97316' },
+  }
+  return (product.etiquetas || []).map(t => badgeMap[t]).filter(Boolean)
+}
+
 export function getDiscountedPrice(product: Product, quantity: number): number {
   if (!product.price_tiers?.length) return product.precio
   const tier = product.price_tiers.find(t =>

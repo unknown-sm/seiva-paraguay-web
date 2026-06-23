@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ShoppingCart } from 'lucide-react'
-import { fetchProducts, formatPrice, stripHtml, type Product } from '../services/api'
+import { fetchProducts, formatPrice, stripHtml, getProductBadges, type Product } from '../services/api'
 import { useCart } from '../context/CartContext'
 
 export default function LatestProducts() {
@@ -122,6 +122,19 @@ export default function LatestProducts() {
                     AGOTADO
                   </span>
                 )}
+                {product.stock > 0 && (() => {
+                  const badges = getProductBadges(product)
+                  if (!badges.length) return null
+                  return (
+                    <div className="absolute bottom-2 left-2 flex flex-wrap gap-1" style={{ zIndex: 10 }}>
+                      {badges.map(b => (
+                        <span key={b.label} className="font-body font-semibold text-[9px] px-2 py-0.5 rounded-full" style={{ backgroundColor: b.color, color: '#fff' }}>
+                          {b.label}
+                        </span>
+                      ))}
+                    </div>
+                  )
+                })()}
               </div>
 
               <div className="flex flex-col flex-1 mt-3">

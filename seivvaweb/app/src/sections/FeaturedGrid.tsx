@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ShoppingCart } from 'lucide-react'
-import { fetchFeatured, formatPrice, stripHtml, type Product } from '../services/api'
+import { fetchFeatured, formatPrice, stripHtml, getProductBadges, type Product } from '../services/api'
 import { useCart } from '../context/CartContext'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -150,6 +150,19 @@ export default function FeaturedGrid() {
                     OFERTA
                   </span>
                 )}
+                {(() => {
+                  const badges = getProductBadges(product)
+                  if (!badges.length) return null
+                  return (
+                    <div className="absolute bottom-2 left-2 flex flex-wrap gap-1" style={{ zIndex: 10 }}>
+                      {badges.map(b => (
+                        <span key={b.label} className="font-body font-semibold text-[9px] px-2 py-0.5 rounded-full" style={{ backgroundColor: b.color, color: '#fff' }}>
+                          {b.label}
+                        </span>
+                      ))}
+                    </div>
+                  )
+                })()}
               </div>
 
               <div className="flex flex-col flex-1 mt-3">
