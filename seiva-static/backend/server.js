@@ -6,11 +6,32 @@ const path = require("path");
 const fs = require("fs");
 const { DatabaseSync } = require("node:sqlite");
 const cheerio = require("cheerio");
+const webpush = require("web-push");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || "SeivaAdmin2026!";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "SeivaAdmin2026!";
+
+// VAPID keys for web push
+const VAPID_PUBLIC = process.env.VAPID_PUBLIC_KEY || "BCEF0urp45cEEb9WAGlqsa8afCP-cQ7bB35aNy2p34LCkFWf4RGbVhh8zoovq_qLKTm3Eq0z9AKNWKLgSX_PSSg";
+const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY || "2HC-EXhZwyNJbFU3OV1zM6nMSjk6cVH3m2opOVZFQhQ";
+webpush.setVapidDetails("mailto:admin@seiva.com.py", VAPID_PUBLIC, VAPID_PRIVATE);
+
+// Enviar push a todos los suscriptores
+function sendPushNotification(title, body, url) {
+  const subs = db.prepare("SELECT * FROM push_subs").all();
+  const payload = JSON.stringify({ title, body, url });
+  for (const sub of subs) {
+    const pushSub = { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } };
+    webpush.sendNotification(pushSub, payload).catch(err => {
+      // Limpiar suscripción inválida
+      if (err.statusCode === 410 || err.statusCode === 404) {
+        db.prepare("DELETE FROM push_subs WHERE endpoint = ?").run(sub.endpoint);
+      }
+    });
+  }
+}
 
 app.use(cors());
 app.use(express.json({ limit: "5mb" }));
@@ -155,6 +176,14 @@ db.exec(`
     whatsapp TEXT DEFAULT '',
     creado TEXT DEFAULT (datetime('now')),
     notificado INTEGER DEFAULT 0
+  );
+
+  CREATE TABLE IF NOT EXISTS push_subs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    endpoint TEXT NOT NULL UNIQUE,
+    p256dh TEXT NOT NULL,
+    auth TEXT NOT NULL,
+    creado TEXT DEFAULT (datetime('now'))
   );
 `);
 
@@ -365,6 +394,37 @@ app.post("/api/auth/login", (req, res) => {
   }
   const token = jwt.sign({ role: "admin" }, JWT_SECRET, { expiresIn: "24h" });
   res.json({ token });
+});
+
+// ---------- PUSH NOTIFICATIONS ----------
+app.get("/api/push/vapid-public-key", (req, res) => {
+  res.json({ publicKey: VAPID_PUBLIC });
+});
+
+app.post("/api/push/subscribe", (req, res) => {
+  const { endpoint, keys } = req.body;
+  if (!endpoint || !keys || !keys.p256dh || !keys.auth) {
+    return res.status(400).json({ error: "Datos de suscripción incompletos" });
+  }
+  db.prepare("INSERT OR REPLACE INTO push_subs (endpoint, p256dh, auth) VALUES (?, ?, ?)").run(
+    endpoint, keys.p256dh, keys.auth
+  );
+  res.json({ ok: true });
+});
+
+app.delete("/api/push/unsubscribe", (req, res) => {
+  const { endpoint } = req.body;
+  db.prepare("DELETE FROM push_subs WHERE endpoint = ?").run(endpoint || "");
+  res.json({ ok: true });
+});
+
+app.post("/api/push/test", auth, (req, res) => {
+  sendPushNotification(
+    "Seiva Admin - Prueba",
+    "Si ves esto, las notificaciones funcionan!",
+    "/admin?tab=pedidos"
+  );
+  res.json({ ok: true, subscribers: db.prepare("SELECT COUNT(*) as c FROM push_subs").get().c });
 });
 
 function auth(req, res, next) {
@@ -1100,6 +1160,12 @@ app.post("/api/ventas", auth, (req, res) => {
     fecha || new Date().toISOString(), cliente || "", JSON.stringify(productos), total || 0, metodo_pago || "efectivo", whatsapp || ""
   );
   res.json({ id: result.lastInsertRowid });
+  const noms = productos.map(p => p.cantidad + "x " + p.nombre).join(", ");
+  sendPushNotification(
+    "Venta registrada #" + result.lastInsertRowid,
+    (cliente || "Cliente") + " — Gs." + (total || 0).toLocaleString("es-PY") + " — " + noms,
+    "/admin?tab=historico"
+  );
 });
 
 // ---------- STATS ----------
@@ -1256,6 +1322,13 @@ app.post("/api/pedidos", (req, res) => {
     cliente, whatsapp, direccion || "", JSON.stringify(productos), total || 0, metodo_pago || "whatsapp", notas || ""
   );
   res.json({ id: result.lastInsertRowid, estado: "pendiente" });
+  // Notificación push
+  const prodNames = productos.map(p => p.cantidad + "x " + p.nombre).join(", ");
+  sendPushNotification(
+    "Nuevo pedido #" + result.lastInsertRowid,
+    cliente + " — Gs." + (total || 0).toLocaleString("es-PY") + " — " + prodNames,
+    "/admin?tab=pedidos"
+  );
 });
 
 // ---------- CARRITOS ABANDONADOS ----------
