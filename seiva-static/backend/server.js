@@ -122,6 +122,40 @@ db.exec(`
     descuento INTEGER NOT NULL DEFAULT 0,
     UNIQUE(producto_id, min_cantidad)
   );
+
+  CREATE TABLE IF NOT EXISTS marcas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL UNIQUE,
+    prioridad INTEGER DEFAULT 0,
+    activo INTEGER DEFAULT 1,
+    logo TEXT DEFAULT '',
+    creado TEXT DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS descuentos_marca (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    marca_id INTEGER NOT NULL REFERENCES marcas(id),
+    tipo_descuento TEXT DEFAULT 'monto_fijo',
+    valor INTEGER NOT NULL DEFAULT 0,
+    min_cantidad INTEGER NOT NULL DEFAULT 1,
+    max_cantidad INTEGER,
+    exclusiones TEXT DEFAULT '[]',
+    inclusiones TEXT DEFAULT '[]',
+    fecha_inicio TEXT DEFAULT NULL,
+    fecha_fin TEXT DEFAULT NULL,
+    etiqueta TEXT DEFAULT '',
+    audiencia TEXT DEFAULT 'todos',
+    creado TEXT DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS carritos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_token TEXT NOT NULL,
+    productos TEXT NOT NULL DEFAULT '[]',
+    whatsapp TEXT DEFAULT '',
+    creado TEXT DEFAULT (datetime('now')),
+    notificado INTEGER DEFAULT 0
+  );
 `);
 
 const contenidoDefault = {
@@ -175,6 +209,24 @@ try { db.exec("ALTER TABLE productos ADD COLUMN featured_order INTEGER DEFAULT 0
 try { db.exec("ALTER TABLE pedidos ADD COLUMN envio_costo INTEGER DEFAULT 0"); } catch (e) {}
 try { db.exec("ALTER TABLE pedidos ADD COLUMN envio_ciudad TEXT DEFAULT ''"); } catch (e) {}
 try { db.exec("ALTER TABLE envios ADD COLUMN tipo TEXT DEFAULT 'delivery'"); } catch (e) {}
+
+// Normalizar marcas desde productos.marca
+function normalizarMarcas() {
+  const marcasExistentes = db.prepare("SELECT nombre FROM marcas").all().map(r => r.nombre.toLowerCase());
+  const prods = db.prepare("SELECT DISTINCT marca FROM productos WHERE marca != '' AND marca IS NOT NULL").all();
+  const insertMarca = db.prepare("INSERT OR IGNORE INTO marcas (nombre) VALUES (?)");
+  for (const p of prods) {
+    const nombre = p.marca.trim();
+    if (nombre && marcasExistentes.indexOf(nombre.toLowerCase()) === -1) {
+      insertMarca.run(nombre);
+      marcasExistentes.push(nombre.toLowerCase());
+    }
+  }
+  // Uniervas default prioridad=100 si existe
+  db.prepare("UPDATE marcas SET prioridad = 100 WHERE LOWER(nombre) = 'uniervas' AND prioridad = 0").run();
+}
+try { db.exec("ALTER TABLE marcas ADD COLUMN logo TEXT DEFAULT ''"); } catch (e) {}
+normalizarMarcas();
 
 // Migraciones descuentos_cantidad v2 — campos opcionales (Mavis)
 try { db.exec("ALTER TABLE descuentos_cantidad ADD COLUMN audiencia TEXT DEFAULT 'todos'"); } catch (e) {}
@@ -330,6 +382,56 @@ function auth(req, res, next) {
 
 function parseProducto(row) {
   const price_tiers = db.prepare("SELECT min_cantidad, max_cantidad, descuento FROM descuentos_cantidad WHERE producto_id = ? ORDER BY min_cantidad").all(row.id);
+
+  // Buscar descuentos por marca
+  if (row.marca) {
+    const marca = db.prepare("SELECT id FROM marcas WHERE LOWER(nombre) = LOWER(?) AND activo = 1").get(row.marca);
+    if (marca) {
+      const now = new Date().toISOString();
+      const marcaDescuentos = db.prepare(`
+        SELECT * FROM descuentos_marca
+        WHERE marca_id = ?
+        AND (fecha_inicio IS NULL OR fecha_inicio <= ?)
+        AND (fecha_fin IS NULL OR fecha_fin >= ?)
+        ORDER BY min_cantidad
+      `).all(marca.id, now, now);
+
+      for (const md of marcaDescuentos) {
+        const exclusiones = JSON.parse(md.exclusiones || "[]");
+        const inclusiones = JSON.parse(md.inclusiones || "[]");
+        // Si producto está en exclusiones, saltar
+        if (exclusiones.indexOf(row.id) !== -1) continue;
+        // Si hay inclusiones y producto no está, saltar
+        if (inclusiones.length > 0 && inclusiones.indexOf(row.id) === -1) continue;
+
+        let descuento = md.valor;
+        if (md.tipo_descuento === "porcentaje") {
+          descuento = Math.round(row.precio * md.valor / 100);
+        }
+
+        // Revisar si ya existe un tier para este rango — el mejor descuento gana
+        const existingIdx = price_tiers.findIndex(t => t.min_cantidad === md.min_cantidad);
+        if (existingIdx !== -1) {
+          if (descuento > price_tiers[existingIdx].descuento) {
+            price_tiers[existingIdx] = {
+              min_cantidad: md.min_cantidad,
+              max_cantidad: md.max_cantidad,
+              descuento: descuento
+            };
+          }
+        } else {
+          price_tiers.push({
+            min_cantidad: md.min_cantidad,
+            max_cantidad: md.max_cantidad,
+            descuento: descuento
+          });
+        }
+      }
+      // Re-sort
+      price_tiers.sort((a, b) => a.min_cantidad - b.min_cantidad);
+    }
+  }
+
   return {
     ...row,
     etiquetas: JSON.parse(row.etiquetas || "[]"),
@@ -379,7 +481,17 @@ function backfillSlugs() {
 
 // ---------- PRODUCTOS ----------
 app.get("/api/productos", (req, res) => {
-  const rows = db.prepare("SELECT * FROM productos ORDER BY CASE WHEN stock > 0 THEN 0 ELSE 1 END, destacado DESC, id DESC").all();
+  const rows = db.prepare(`
+    SELECT p.*, COALESCE(m.prioridad, 0) as marca_prioridad
+    FROM productos p
+    LEFT JOIN marcas m ON LOWER(p.marca) = LOWER(m.nombre) AND m.activo = 1
+    WHERE p.activo = 1
+    ORDER BY
+      CASE WHEN p.stock > 0 THEN 0 ELSE 1 END,
+      marca_prioridad ASC,
+      p.destacado DESC,
+      p.id DESC
+  `).all();
   res.json(rows.map(parseProducto));
 });
 
@@ -447,6 +559,48 @@ app.patch("/api/productos/stock-batch", auth, (req, res) => {
 
 app.delete("/api/productos/:id", auth, (req, res) => {
   db.prepare("DELETE FROM productos WHERE id = ?").run(req.params.id);
+  res.json({ ok: true });
+});
+
+// ---------- MARCAS ----------
+app.get("/api/marcas", (req, res) => {
+  const rows = db.prepare(`
+    SELECT m.*, COUNT(p.id) as total_productos
+    FROM marcas m
+    LEFT JOIN productos p ON LOWER(p.marca) = LOWER(m.nombre)
+    WHERE m.activo = 1
+    GROUP BY m.id
+    ORDER BY m.prioridad ASC, m.nombre ASC
+  `).all();
+  res.json(rows);
+});
+
+app.get("/api/marcas/all", auth, (req, res) => {
+  const rows = db.prepare(`
+    SELECT m.*, COUNT(p.id) as total_productos
+    FROM marcas m
+    LEFT JOIN productos p ON LOWER(p.marca) = LOWER(m.nombre)
+    GROUP BY m.id
+    ORDER BY m.nombre ASC
+  `).all();
+  res.json(rows);
+});
+
+app.put("/api/marcas/:id", auth, (req, res) => {
+  const { prioridad, activo, logo } = req.body;
+  const updates = [];
+  const params = [];
+  if (prioridad !== undefined) { updates.push("prioridad = ?"); params.push(prioridad); }
+  if (activo !== undefined) { updates.push("activo = ?"); params.push(activo ? 1 : 0); }
+  if (logo !== undefined) { updates.push("logo = ?"); params.push(logo); }
+  if (updates.length === 0) return res.status(400).json({ error: "Nada que actualizar" });
+  params.push(req.params.id);
+  db.prepare("UPDATE marcas SET " + updates.join(", ") + " WHERE id = ?").run(...params);
+  res.json({ ok: true });
+});
+
+app.post("/api/marcas/normalizar", auth, (req, res) => {
+  normalizarMarcas();
   res.json({ ok: true });
 });
 
@@ -874,6 +1028,64 @@ app.delete("/api/descuentos/producto/:producto_id", auth, (req, res) => {
   res.json({ ok: true });
 });
 
+// ---------- DESCUENTOS POR MARCA ----------
+app.get("/api/descuentos-marca", auth, (req, res) => {
+  const rows = db.prepare(`
+    SELECT dm.*, m.nombre as marca_nombre
+    FROM descuentos_marca dm
+    JOIN marcas m ON dm.marca_id = m.id
+    ORDER BY m.nombre
+  `).all();
+  res.json(rows.map(r => ({
+    ...r,
+    exclusiones: JSON.parse(r.exclusiones || "[]"),
+    inclusiones: JSON.parse(r.inclusiones || "[]")
+  })));
+});
+
+app.post("/api/descuentos-marca", auth, (req, res) => {
+  const { marca_id, tipo_descuento, valor, min_cantidad, max_cantidad, exclusiones, inclusiones, fecha_inicio, fecha_fin, etiqueta, audiencia } = req.body;
+  if (!marca_id) return res.status(400).json({ error: "marca_id requerido" });
+  const result = db.prepare("INSERT INTO descuentos_marca (marca_id, tipo_descuento, valor, min_cantidad, max_cantidad, exclusiones, inclusiones, fecha_inicio, fecha_fin, etiqueta, audiencia) VALUES (?,?,?,?,?,?,?,?,?,?,?)").run(
+    marca_id,
+    tipo_descuento || "monto_fijo",
+    parseInt(valor) || 0,
+    parseInt(min_cantidad) || 1,
+    max_cantidad ? parseInt(max_cantidad) : null,
+    JSON.stringify(exclusiones || []),
+    JSON.stringify(inclusiones || []),
+    fecha_inicio || null,
+    fecha_fin || null,
+    etiqueta || "",
+    audiencia || "todos"
+  );
+  res.json({ id: result.lastInsertRowid });
+});
+
+app.put("/api/descuentos-marca/:id", auth, (req, res) => {
+  const { marca_id, tipo_descuento, valor, min_cantidad, max_cantidad, exclusiones, inclusiones, fecha_inicio, fecha_fin, etiqueta, audiencia } = req.body;
+  db.prepare("UPDATE descuentos_marca SET marca_id=?, tipo_descuento=?, valor=?, min_cantidad=?, max_cantidad=?, exclusiones=?, inclusiones=?, fecha_inicio=?, fecha_fin=?, etiqueta=?, audiencia=? WHERE id=?").run(
+    marca_id,
+    tipo_descuento || "monto_fijo",
+    parseInt(valor) || 0,
+    parseInt(min_cantidad) || 1,
+    max_cantidad ? parseInt(max_cantidad) : null,
+    JSON.stringify(exclusiones || []),
+    JSON.stringify(inclusiones || []),
+    fecha_inicio || null,
+    fecha_fin || null,
+    etiqueta || "",
+    audiencia || "todos",
+    req.params.id
+  );
+  res.json({ ok: true });
+});
+
+app.delete("/api/descuentos-marca/:id", auth, (req, res) => {
+  db.prepare("DELETE FROM descuentos_marca WHERE id = ?").run(req.params.id);
+  res.json({ ok: true });
+});
+
 // ---------- VENTAS ----------
 app.get("/api/ventas", auth, (req, res) => {
   const limit = parseInt(req.query.limit) || 50;
@@ -1044,6 +1256,53 @@ app.post("/api/pedidos", (req, res) => {
     cliente, whatsapp, direccion || "", JSON.stringify(productos), total || 0, metodo_pago || "whatsapp", notas || ""
   );
   res.json({ id: result.lastInsertRowid, estado: "pendiente" });
+});
+
+// ---------- CARRITOS ABANDONADOS ----------
+// Generar token de sesión único
+function generateToken() {
+  return 'cart_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 10);
+}
+
+app.post("/api/carritos", (req, res) => {
+  const { session_token, productos, whatsapp } = req.body;
+  if (!productos || !productos.length) return res.status(400).json({ error: "Productos requeridos" });
+  
+  var token = session_token || generateToken();
+  
+  // Actualizar si ya existe este token
+  var existing = db.prepare("SELECT id FROM carritos WHERE session_token = ?").get(token);
+  if (existing) {
+    db.prepare("UPDATE carritos SET productos = ?, whatsapp = ?, creado = datetime('now'), notificado = 0 WHERE id = ?").run(
+      JSON.stringify(productos),
+      whatsapp || '',
+      existing.id
+    );
+  } else {
+    db.prepare("INSERT INTO carritos (session_token, productos, whatsapp) VALUES (?, ?, ?)").run(
+      token,
+      JSON.stringify(productos),
+      whatsapp || ''
+    );
+  }
+  
+  res.json({ token });
+});
+
+app.get("/api/carritos", auth, (req, res) => {
+  var rows = db.prepare(`
+    SELECT * FROM carritos
+    WHERE creado > datetime('now', '-7 days')
+    ORDER BY creado DESC
+  `).all();
+  res.json(rows.map(function(r) {
+    return { ...r, productos: JSON.parse(r.productos || "[]") };
+  }));
+});
+
+app.delete("/api/carritos/:id", auth, (req, res) => {
+  db.prepare("DELETE FROM carritos WHERE id = ?").run(req.params.id);
+  res.json({ ok: true });
 });
 
 // ---------- PEDIDOS (auth: gestionar) ----------

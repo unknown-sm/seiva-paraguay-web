@@ -64,8 +64,10 @@ export function formatPrice(price: number): string {
 }
 
 export function generateWhatsAppLink(product: Product): string {
+  const baseUrl = window.location.origin;
+  const productUrl = `${baseUrl}/producto/${product.slug || product.id}`;
   const msg = encodeURIComponent(
-    `Hola Seiva! Quiero consultar por: *${product.nombre}* — ${formatPrice(product.precio)}`
+    `Hola Seiva! Me interesa:\n\n*${product.nombre}*\nPrecio: ${formatPrice(product.precio)}\n\n${productUrl}`
   );
   return `https://wa.me/595992120303?text=${msg}`;
 }

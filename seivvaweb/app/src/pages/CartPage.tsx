@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { Trash2, Minus, Plus, ShoppingBag, ArrowLeft, Send } from 'lucide-react'
 import { useCart } from '../context/CartContext'
-import { formatPrice } from '../services/api'
+import { formatPrice, getDiscountedPrice } from '../services/api'
 
 export default function CartPage() {
   const navigate = useNavigate()
@@ -62,7 +62,7 @@ export default function CartPage() {
                     </h3>
                   </Link>
                   <p className="font-body font-bold mt-1" style={{ color: 'var(--theme-primary, #1B4332)' }}>
-                    {formatPrice(product.precio)}
+                    {formatPrice(getDiscountedPrice(product, quantity))}
                   </p>
 
                   <div className="flex items-center gap-3 mt-3">
@@ -95,7 +95,7 @@ export default function CartPage() {
                     <Trash2 className="w-4 h-4" />
                   </button>
                   <span className="font-body font-bold" style={{ color: 'var(--theme-primary, #1B4332)' }}>
-                    {formatPrice(product.precio * quantity)}
+                    {formatPrice(getDiscountedPrice(product, quantity) * quantity)}
                   </span>
                 </div>
               </div>

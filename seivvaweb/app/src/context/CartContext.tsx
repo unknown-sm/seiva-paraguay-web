@@ -24,6 +24,7 @@ interface CartContextValue {
 const CartContext = createContext<CartContextValue | null>(null)
 
 const STORAGE_KEY = 'seiva-cart'
+const SESSION_KEY = 'seiva-cart-session'
 
 function loadCart(): CartItem[] {
   try {
@@ -35,12 +36,43 @@ function loadCart(): CartItem[] {
   return []
 }
 
+function getSessionToken(): string {
+  let token = localStorage.getItem(SESSION_KEY)
+  if (!token) {
+    token = 'cart_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 10)
+    localStorage.setItem(SESSION_KEY, token)
+  }
+  return token
+}
+
+function trackCart(items: CartItem[]) {
+  const token = getSessionToken()
+  const productos = items.map(i => ({
+    id: i.product.id,
+    nombre: i.product.nombre,
+    precio: i.product.precio,
+    cantidad: i.quantity
+  }))
+  const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://85.239.246.177:3001/api'
+    : '/api'
+  fetch(`${API_BASE}/carritos`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_token: token, productos }),
+    keepalive: true
+  }).catch(() => {})
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>(loadCart)
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+    if (items.length > 0) {
+      trackCart(items)
+    }
   }, [items])
 
   const openCart = useCallback(() => setIsOpen(true), [])

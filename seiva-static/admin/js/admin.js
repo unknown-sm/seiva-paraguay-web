@@ -46,7 +46,7 @@ function toast(msg, type) {
 function getTabFromUrl() {
   var params = new URLSearchParams(window.location.search);
   var tab = params.get("tab");
-  var validTabs = ["dashboard", "pedidos", "productos", "descuentos", "stock", "venta", "historico", "contenido", "analytics"];
+  var validTabs = ["dashboard", "pedidos", "productos", "marcas", "carritos", "descuentos", "stock", "venta", "historico", "contenido", "analytics"];
   if (tab && validTabs.indexOf(tab) !== -1) return "tab-" + tab;
   return "tab-dashboard";
 }
@@ -69,6 +69,8 @@ function switchTab(tabId, skipUrl) {
     "tab-dashboard": "Dashboard",
     "tab-pedidos": "Pedidos",
     "tab-productos": "Productos",
+    "tab-marcas": "Marcas",
+    "tab-carritos": "Carritos",
     "tab-descuentos": "Descuentos por Cantidad",
     "tab-categorias": "Categor&iacute;as",
     "tab-stock": "Alertas de Stock",
@@ -90,7 +92,9 @@ function switchTab(tabId, skipUrl) {
   if (tabId === "tab-dashboard") loadDashboard();
   if (tabId === "tab-pedidos") loadPedidos();
   if (tabId === "tab-productos") loadProductos();
-  if (tabId === "tab-descuentos") loadDescuentos();
+  if (tabId === "tab-marcas") loadMarcas();
+  if (tabId === "tab-carritos") loadCarritos();
+  if (tabId === "tab-descuentos") { loadDescuentos(); loadDescuentosMarca(); }
   if (tabId === "tab-categorias") loadCategorias();
   if (tabId === "tab-stock") loadStockAlertas();
   if (tabId === "tab-envios") loadEnvios();
@@ -258,6 +262,7 @@ function loadProductos() {
       data = data.filter(function(p) { return p.nombre.toLowerCase().indexOf(q) !== -1; });
     }
     var tbody = document.getElementById("productos-tbody");
+    if (!tbody) return;
     tbody.innerHTML = data.map(function(p) {
       var cls = p.activo ? "" : "inactive";
       return '<tr class="' + cls + '">' +
@@ -274,6 +279,45 @@ function loadProductos() {
         '</td>' +
       '</tr>';
     }).join("");
+  });
+}
+
+// ---------- MARCAS ----------
+function loadMarcas() {
+  api("/marcas/all").then(function(marcas) {
+    var tbody = document.getElementById("marcas-tbody");
+    if (!tbody) return;
+    if (!marcas.length) {
+      tbody.innerHTML = '<tr><td colspan="5">No hay marcas. Hacé clic en "Normalizar marcas desde productos" para crearlas.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = marcas.map(function(m) {
+      var prioColor = m.prioridad >= 100 ? 'color:var(--danger);font-weight:700' : m.prioridad > 0 ? 'color:var(--accent);font-weight:600' : '';
+      return '<tr>' +
+        '<td><strong>' + xt(m.nombre) + '</strong></td>' +
+        '<td>' + (m.total_productos || 0) + '</td>' +
+        '<td><input type="number" value="' + m.prioridad + '" min="0" max="999" style="width:70px" onchange="updateMarcaPrioridad(' + m.id + ', this.value)" id="marca-prio-' + m.id + '"> <span style="font-size:0.8rem;' + prioColor + '">(' + (m.prioridad >= 100 ? 'BAJA' : m.prioridad > 0 ? 'media-baja' : 'normal') + ')</span></td>' +
+        '<td>' + (m.activo ? '&#9989;' : '&#10060;') + '</td>' +
+        '<td>' +
+          '<button class="btn btn-sm" onclick="updateMarcaPrioridad(' + m.id + ', 100)" title="Mandar al fondo">&#128315; Bajar</button> ' +
+          '<button class="btn btn-sm" onclick="toggleMarca(' + m.id + ', ' + m.activo + ')" title="Activar/Desactivar">' + (m.activo ? '&#128065;' : '&#128065;&#8205;&#128488;') + '</button>' +
+        '</td>' +
+      '</tr>';
+    }).join("");
+  });
+}
+
+function updateMarcaPrioridad(id, valor) {
+  api("/marcas/" + id, { method: "PUT", body: JSON.stringify({ prioridad: parseInt(valor) || 0 }) }).then(function() {
+    toast("Prioridad actualizada");
+    loadMarcas();
+  });
+}
+
+function toggleMarca(id, activo) {
+  api("/marcas/" + id, { method: "PUT", body: JSON.stringify({ activo: activo ? 0 : 1 }) }).then(function() {
+    toast("Marca " + (activo ? "desactivada" : "activada"));
+    loadMarcas();
   });
 }
 
@@ -731,6 +775,16 @@ document.addEventListener("DOMContentLoaded", function() {
 
   document.getElementById("btn-nuevo-producto").addEventListener("click", nuevoProducto);
 
+  var btnNorm = document.getElementById("btn-normalizar-marcas");
+  if (btnNorm) {
+    btnNorm.addEventListener("click", function() {
+      api("/marcas/normalizar", { method: "POST" }).then(function() {
+        toast("Marcas normalizadas");
+        loadMarcas();
+      });
+    });
+  }
+
   var searchInput = document.getElementById("productos-search");
   if (searchInput) {
     searchInput.addEventListener("input", function() { loadProductos(); });
@@ -1124,6 +1178,11 @@ document.addEventListener("DOMContentLoaded", function() {
     addTierRow('', '', '');
   });
 
+  var btnNm = document.getElementById("btn-nuevo-descuento-marca");
+  if (btnNm) {
+    btnNm.addEventListener("click", nuevoDescuentoMarca);
+  }
+
   document.getElementById("descuento-form").addEventListener("submit", function(e) {
     e.preventDefault();
     var productoId = parseInt(document.getElementById("desc-producto").value);
@@ -1147,9 +1206,23 @@ document.addEventListener("DOMContentLoaded", function() {
 
     tiers.sort(function(a, b) { return a.min_cantidad - b.min_cantidad; });
 
+    var tipo = document.querySelector("input[name='desc-tipo']:checked").value;
+    var audiencia = document.getElementById("desc-audiencia").value;
+    var etiqueta = document.getElementById("desc-etiqueta").value;
+    var fechaInicio = document.getElementById("desc-fecha-inicio").value;
+    var fechaFin = document.getElementById("desc-fecha-fin").value;
+
     api("/descuentos/lote", {
       method: "POST",
-      body: JSON.stringify({ producto_id: productoId, tiers: tiers })
+      body: JSON.stringify({
+        producto_id: productoId,
+        tiers: tiers,
+        tipo_descuento: tipo,
+        audiencia: audiencia,
+        etiqueta: etiqueta,
+        fecha_inicio: fechaInicio || null,
+        fecha_fin: fechaFin || null
+      })
     }).then(function(r) {
       if (r.error) {
         document.getElementById("desc-msg").textContent = r.error;
@@ -1171,6 +1244,127 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Load logs on tab init if needed
 });
+
+// ---------- DESCUENTOS POR MARCA ----------
+function loadDescuentosMarca() {
+  api("/marcas/all").then(function(marcas) {
+    api("/descuentos-marca").then(function(descuentos) {
+      var container = document.getElementById("descuentos-marca-lista");
+      if (!container) return;
+      if (!descuentos.length) {
+        container.innerHTML = '<p style="text-align:center;color:var(--muted);padding:40px">No hay descuentos por marca.</p>';
+        return;
+      }
+      var html = '<table class="admin-table"><thead><tr><th>Marca</th><th>Tipo</th><th>Valor</th><th>Desde cant.</th><th>Excluye</th><th>Incluye</th><th>Acciones</th></tr></thead><tbody>';
+      descuentos.forEach(function(d) {
+        html += '<tr>' +
+          '<td><strong>' + xt(d.marca_nombre) + '</strong></td>' +
+          '<td>' + (d.tipo_descuento === 'porcentaje' ? d.valor + '%' : formatGs(d.valor)) + '</td>' +
+          '<td>' + (d.tipo_descuento === 'porcentaje' ? 'Descuento %' : 'Monto fijo') + '</td>' +
+          '<td>' + d.min_cantidad + ' unid.</td>' +
+          '<td>' + (d.exclusiones && d.exclusiones.length ? d.exclusiones.join(', ') : '-') + '</td>' +
+          '<td>' + (d.inclusiones && d.inclusiones.length ? d.inclusiones.join(', ') : 'Todos') + '</td>' +
+          '<td><button class="btn btn-sm btn-danger" onclick="eliminarDescuentoMarca(' + d.id + ')">Eliminar</button></td>' +
+        '</tr>';
+      });
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    });
+  });
+}
+
+function nuevoDescuentoMarca() {
+  api("/marcas/all").then(function(marcas) {
+    if (!marcas.length) {
+      toast("No hay marcas. Normalizá primero desde la pestaña Marcas.", "error");
+      return;
+    }
+    var select = '<option value="">Seleccionar marca...</option>';
+    for (var m of marcas) {
+      select += '<option value="' + m.id + '">' + xt(m.nombre) + ' (' + m.total_productos + ' productos)</option>';
+    }
+    
+    var msg = 'Tipo de descuento:\n1 = Monto fijo (Gs.)\n2 = Porcentaje (%)';
+    var tipoP = prompt(msg, '1');
+    if (!tipoP) return;
+    var tipo = tipoP === '2' ? 'porcentaje' : 'monto_fijo';
+    
+    var valorP = prompt(tipo === 'porcentaje' ? 'Porcentaje (ej: 10 = 10%):' : 'Monto en Gs. a restar:');
+    if (!valorP) return;
+    var valor = parseInt(valorP);
+    if (isNaN(valor)) { toast("Valor inválido", "error"); return; }
+    
+    var marcaId = prompt('ID de la marca:\n' + select.replace(/<[^>]*>/g, ''));
+    if (!marcaId) return;
+    
+    var min = prompt('Cantidad mínima (desde 1):', '1');
+    if (!min) return;
+    
+    var excl = prompt('IDs de productos a excluir (separados por coma, vacío = ninguno):', '');
+    var exclArr = excl ? excl.split(',').map(function(s) { return parseInt(s.trim()); }).filter(function(n) { return !isNaN(n); }) : [];
+    
+    var incl = prompt('IDs de productos a incluir (vacío = todos los de la marca):', '');
+    var inclArr = incl ? incl.split(',').map(function(s) { return parseInt(s.trim()); }).filter(function(n) { return !isNaN(n); }) : [];
+    
+    api("/descuentos-marca", {
+      method: "POST",
+      body: JSON.stringify({
+        marca_id: parseInt(marcaId),
+        tipo_descuento: tipo,
+        valor: valor,
+        min_cantidad: parseInt(min) || 1,
+        exclusiones: exclArr,
+        inclusiones: inclArr,
+        etiqueta: '',
+        audiencia: 'todos'
+      })
+    }).then(function() {
+      toast("Descuento por marca guardado");
+      loadDescuentosMarca();
+    }).catch(function(e) {
+      toast("Error: " + (e.message || "desconocido"), "error");
+    });
+  });
+}
+
+function eliminarDescuentoMarca(id) {
+  if (!confirm("Eliminar este descuento por marca?")) return;
+  api("/descuentos-marca/" + id, { method: "DELETE" }).then(function() {
+    toast("Descuento eliminado");
+    loadDescuentosMarca();
+  });
+}
+
+// ---------- CARRITOS ----------
+function loadCarritos() {
+  api("/carritos").then(function(data) {
+    var tbody = document.getElementById("carritos-tbody");
+    if (!tbody) return;
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="5">No hay carritos abandonados.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map(function(c) {
+      var prods = (c.productos || []).map(function(p) { return p.cantidad + 'x ' + p.nombre; }).join(', ');
+      var wa = c.whatsapp || 'Sin WhatsApp';
+      return '<tr>' +
+        '<td>' + (c.whatsapp ? '<a href="https://wa.me/595' + c.whatsapp.replace(/^0+/, '').replace(/\D/g, '') + '?text=' + encodeURIComponent('Hola! Vimos que dejaste productos en tu carrito: ' + prods) + '" target="_blank" style="color:var(--success)">' + wa + '</a>' : wa) + '</td>' +
+        '<td>' + prods + '</td>' +
+        '<td>' + formatDate(c.creado) + '</td>' +
+        '<td>' + (c.notificado ? '&#9989;' : '&#10060;') + '</td>' +
+        '<td><button class="btn btn-sm btn-danger" onclick="eliminarCarrito(' + c.id + ')">Eliminar</button></td>' +
+      '</tr>';
+    }).join("");
+  });
+}
+
+function eliminarCarrito(id) {
+  if (!confirm("Eliminar este carrito?")) return;
+  api("/carritos/" + id, { method: "DELETE" }).then(function() {
+    toast("Carrito eliminado");
+    loadCarritos();
+  });
+}
 
 // ---------- ERROR LOGS ----------
 function loadErrorLogs() {

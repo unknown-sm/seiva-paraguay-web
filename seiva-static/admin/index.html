@@ -32,6 +32,8 @@
       <button class="sidebar-link active" data-tab="tab-dashboard"><span class="sidebar-icon">&#128202;</span><span class="sidebar-label">Dashboard</span></button>
       <button class="sidebar-link" data-tab="tab-pedidos"><span class="sidebar-icon">&#128717;&#65039;</span><span class="sidebar-label">Pedidos</span></button>
       <button class="sidebar-link" data-tab="tab-productos"><span class="sidebar-icon">&#128230;</span><span class="sidebar-label">Productos</span></button>
+      <button class="sidebar-link" data-tab="tab-marcas"><span class="sidebar-icon">&#127991;</span><span class="sidebar-label">Marcas</span></button>
+      <button class="sidebar-link" data-tab="tab-carritos"><span class="sidebar-icon">&#128722;</span><span class="sidebar-label">Carritos</span></button>
       <button class="sidebar-link" data-tab="tab-descuentos"><span class="sidebar-icon">&#127991;</span><span class="sidebar-label">Descuentos</span></button>
       <button class="sidebar-link" data-tab="tab-categorias"><span class="sidebar-icon">&#128193;</span><span class="sidebar-label">Categor&iacute;as</span></button>
       <button class="sidebar-link" data-tab="tab-stock"><span class="sidebar-icon">&#9888;&#65039;</span><span class="sidebar-label">Alertas de Stock</span></button>
@@ -83,15 +85,49 @@
       </div>
     </div>
 
+    <div id="tab-marcas" class="tab-content">
+      <div class="card">
+        <div class="card-header" style="justify-content:space-between">
+          <h3>Marcas</h3>
+          <button id="btn-normalizar-marcas" class="btn btn-primary">Normalizar marcas desde productos</button>
+        </div>
+        <div class="card-body">
+          <p class="help-text" style="margin-bottom:16px">Prioridad: n&uacute;mero menor = aparece primero. Prioridad alta (ej: 100) = aparece al fondo. Us&aacute; "Bajar prioridad" para mandar una marca al final.</p>
+          <table class="admin-table"><thead><tr><th>Marca</th><th>Productos</th><th>Prioridad</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="marcas-tbody"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-carritos" class="tab-content">
+      <div class="card">
+        <div class="card-header" style="justify-content:space-between">
+          <h3>&#128722; Carritos Abandonados</h3>
+          <span style="color:var(--muted);font-size:0.85rem">&Uacute;ltimos 7 d&iacute;as</span>
+        </div>
+        <div class="card-body"><table class="admin-table"><thead><tr><th>WhatsApp</th><th>Productos</th><th>Fecha</th><th>Notificado</th><th>Acciones</th></tr></thead><tbody id="carritos-tbody"></tbody></table></div>
+      </div>
+    </div>
+
     <div id="tab-descuentos" class="tab-content">
       <div class="card">
         <div class="card-header" style="justify-content:space-between">
-          <h3>Descuentos por Cantidad</h3>
+          <h3>Descuentos por Cantidad (Producto)</h3>
           <button id="btn-nuevo-descuento" class="btn btn-primary">+ Nuevo</button>
         </div>
         <div class="card-body">
           <p class="help-text" style="margin-bottom:16px">Configurá descuentos automáticos según la cantidad de productos que el cliente compre. Ej: 2-10 unidades → ₲10.000 menos por unidad.</p>
           <div id="descuentos-lista"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:24px">
+        <div class="card-header" style="justify-content:space-between">
+          <h3>Descuentos por Marca</h3>
+          <button id="btn-nuevo-descuento-marca" class="btn btn-primary">+ Nuevo</button>
+        </div>
+        <div class="card-body">
+          <p class="help-text" style="margin-bottom:16px">Aplica descuento a todos los productos de una marca. Podés excluir productos específicos o incluir solo algunos.</p>
+          <div id="descuentos-marca-lista"></div>
         </div>
       </div>
     </div>
