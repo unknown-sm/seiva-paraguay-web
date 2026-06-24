@@ -1191,11 +1191,37 @@ app.get("/api/stats", auth, (req, res) => {
   const productosCount = db.prepare("SELECT COUNT(*) as c FROM productos WHERE activo = 1").get();
   const ultimasVentas = db.prepare("SELECT * FROM ventas ORDER BY fecha DESC LIMIT 10").all();
 
+  // Calcular ganancias estimadas 30 días
+  const todasMes = db.prepare("SELECT productos, total FROM ventas WHERE fecha >= ?").all(mesInicio);
+  let gananciasMes = 0;
+  let costoTotalMes = 0;
+  let ventasConCosto = 0;
+  for (const v of todasMes) {
+    const prods = JSON.parse(v.productos || "[]");
+    let costoVenta = 0;
+    for (const p of prods) {
+      if (p.precio_proveedor) {
+        costoVenta += p.precio_proveedor * (p.cantidad || 1);
+      }
+    }
+    costoTotalMes += costoVenta;
+    if (costoVenta > 0) {
+      gananciasMes += (v.total - costoVenta);
+      ventasConCosto++;
+    }
+  }
+  // Valor inventario (productos activos con precio proveedor)
+  const inventario = db.prepare("SELECT COALESCE(SUM(stock * precio_proveedor), 0) as total FROM productos WHERE activo = 1 AND stock > 0 AND precio_proveedor IS NOT NULL AND precio_proveedor > 0").get();
+
   res.json({
     hoy: ventasHoy,
     semana: ventasSemana,
     mes: ventasMes,
     productos_activos: productosCount.c,
+    ganancias_mes: gananciasMes,
+    costo_mes: costoTotalMes,
+    ventas_con_costo: ventasConCosto,
+    valor_inventario: inventario.total,
     ultimas_ventas: ultimasVentas.map(r => ({ ...r, productos: JSON.parse(r.productos || "[]") }))
   });
 });

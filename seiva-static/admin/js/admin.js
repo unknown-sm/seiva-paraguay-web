@@ -138,9 +138,11 @@ function loadDashboard() {
   api("/stats").then(function(stats) {
     var html = "";
     html += '<div class="stat-card"><div class="stat-card-label">Ventas Hoy</div><div class="stat-card-value">' + formatGs(stats.hoy.total) + '</div><div class="stat-card-sub">' + stats.hoy.cantidad + ' pedidos</div></div>';
-    html += '<div class="stat-card"><div class="stat-card-label">Ventas 7 Dias</div><div class="stat-card-value">' + formatGs(stats.semana.total) + '</div><div class="stat-card-sub">' + stats.semana.cantidad + ' pedidos</div></div>';
-    html += '<div class="stat-card"><div class="stat-card-label">Ventas 30 Dias</div><div class="stat-card-value">' + formatGs(stats.mes.total) + '</div><div class="stat-card-sub">' + stats.mes.cantidad + ' pedidos</div></div>';
+    html += '<div class="stat-card"><div class="stat-card-label">Ventas 7 D&iacute;as</div><div class="stat-card-value">' + formatGs(stats.semana.total) + '</div><div class="stat-card-sub">' + stats.semana.cantidad + ' pedidos</div></div>';
+    html += '<div class="stat-card"><div class="stat-card-label">Ventas 30 D&iacute;as</div><div class="stat-card-value">' + formatGs(stats.mes.total) + '</div><div class="stat-card-sub">' + stats.mes.cantidad + ' pedidos</div></div>';
     html += '<div class="stat-card"><div class="stat-card-label">Productos Activos</div><div class="stat-card-value">' + stats.productos_activos + '</div></div>';
+    html += '<div class="stat-card" style="border-left:3px solid var(--success)"><div class="stat-card-label">Ganancias Est. 30d</div><div class="stat-card-value" style="color:var(--success)">' + formatGs(stats.ganancias_mes) + '</div><div class="stat-card-sub">' + stats.ventas_con_costo + ' ventas con costo</div></div>';
+    html += '<div class="stat-card" style="border-left:3px solid var(--accent)"><div class="stat-card-label">Valor Inventario</div><div class="stat-card-value">' + formatGs(stats.valor_inventario) + '</div><div class="stat-card-sub">Costo proveedor</div></div>';
     document.getElementById("stats-cards").innerHTML = html;
 
     var uv = document.getElementById("ultimas-ventas");
@@ -269,6 +271,7 @@ function loadProductos() {
         '<td>' + p.nombre + (p.featured_order > 0 ? ' <span style="font-size:0.7rem;background:var(--accent);color:#fff;padding:1px 6px;border-radius:10px">#' + p.featured_order + '</span>' : '') + (p.destacado && !p.featured_order ? ' <span style="font-size:0.7rem;background:var(--accent);color:#fff;padding:1px 6px;border-radius:10px">Destacado</span>' : '') + '</td>' +
         '<td>' + formatGs(p.precio) + (p.precio_anterior ? ' <del style="font-size:0.7rem;color:var(--muted)">' + formatGs(p.precio_anterior) + '</del>' : '') + '</td>' +
         '<td>' + (p.precio_proveedor ? formatGs(p.precio_proveedor) : '—') + '</td>' +
+        '<td>' + (p.precio_proveedor ? '<span style="color:var(--success);font-weight:600">' + formatGs(p.precio - p.precio_proveedor) + '</span>' : '—') + '</td>' +
         '<td>' + p.categoria + '</td>' +
         '<td>' + p.stock + '</td>' +
         '<td>' + (p.activo ? '&#9989;' : '&#10060;') + '</td>' +
@@ -578,7 +581,7 @@ document.getElementById("venta-form").addEventListener("submit", function(e) {
       var vp = ventaProductos[i];
       if (!vp.productoId) continue;
       var prod = list.find(function(p) { return p.id === parseInt(vp.productoId); });
-      if (prod) productos.push({ id: prod.id, nombre: prod.nombre, precio: prod.precio, cantidad: vp.cantidad || 1 });
+      if (prod) productos.push({ id: prod.id, nombre: prod.nombre, precio: prod.precio, cantidad: vp.cantidad || 1, precio_proveedor: prod.precio_proveedor || null });
     }
     if (!productos.length) { toast("Agrega al menos un producto", "error"); return; }
 
@@ -610,11 +613,17 @@ function loadHistorico() {
     if (fecha) data = data.filter(function(v) { return v.fecha.indexOf(fecha) === 0; });
     document.getElementById("historico-tbody").innerHTML = data.map(function(v) {
       var prods = v.productos.map(function(p) { return p.cantidad + "x " + p.nombre; }).join(", ");
+      var costo = 0;
+      v.productos.forEach(function(p) {
+        if (p.precio_proveedor) costo += p.precio_proveedor * (p.cantidad || 1);
+      });
       return '<tr>' +
         '<td>' + formatDate(v.fecha) + '</td>' +
         '<td>' + (v.cliente || "—") + (v.whatsapp ? ' <span style="font-size:0.7rem;color:var(--muted)">' + v.whatsapp + '</span>' : '') + '</td>' +
         '<td>' + prods + '</td>' +
         '<td><strong>' + formatGs(v.total) + '</strong></td>' +
+        '<td>' + (costo > 0 ? formatGs(costo) : '—') + '</td>' +
+        '<td>' + (costo > 0 ? '<strong style="color:var(--success)">' + formatGs(v.total - costo) + '</strong>' : '—') + '</td>' +
         '<td>' + v.metodo_pago + '</td>' +
       '</tr>';
     }).join("");
