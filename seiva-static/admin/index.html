@@ -83,7 +83,7 @@
           <h3>Productos</h3>
           <div style="display:flex;gap:12px;align-items:center"><input type="text" id="productos-search" placeholder="Buscar..." class="form-input" style="width:200px"><button id="btn-nuevo-producto" class="btn btn-primary">+ Nuevo</button></div>
         </div>
-        <div class="card-body"><table class="admin-table"><thead><tr><th>Nombre</th><th>Precio</th><th>Categor&iacute;a</th><th>Stock</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="productos-tbody"></tbody></table></div>
+        <div class="card-body"><table class="admin-table"><thead><tr><th>Nombre</th><th>Precio</th><th>Prov.</th><th>Categor&iacute;a</th><th>Stock</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="productos-tbody"></tbody></table></div>
       </div>
     </div>
 
@@ -337,7 +337,7 @@
     <form id="producto-form">
       <input type="hidden" id="prod-id" value="">
       <div class="form-group"><label>Nombre *</label><input type="text" id="prod-nombre" required class="form-input"></div>
-      <div class="form-grid"><div class="form-group"><label>Precio (Gs.) *</label><input type="number" id="prod-precio" required class="form-input"></div><div class="form-group"><label>Precio Anterior</label><input type="number" id="prod-precio-anterior" class="form-input"></div></div>
+      <div class="form-grid"><div class="form-group"><label>Precio (Gs.) *</label><input type="number" id="prod-precio" required class="form-input"></div><div class="form-group"><label>Precio Anterior</label><input type="number" id="prod-precio-anterior" class="form-input"></div><div class="form-group"><label>Precio Proveedor (Gs.)</label><input type="number" id="prod-precio-proveedor" class="form-input" placeholder="Interno - no visible al cliente"></div></div>
       <div class="form-grid"><div class="form-group"><label>Categor&iacute;a</label><select id="prod-categoria" class="form-select"></select></div><div class="form-group"><label>Subcategor&iacute;a</label><select id="prod-subcategoria" class="form-select"><option value="chocolate">Chocolate</option><option value="mix">Mix</option><option value="almendras">Almendras</option><option value="frutas">Frutas</option><option value="nueces">Nueces</option><option value="barras">Barritas</option><option value="castanas">Casta&ntilde;as</option><option value="aceites">Aceites</option><option value="magnesios">Magnesios</option><option value="omega3">Omega 3</option><option value="gym">Gym</option><option value="colagenos">Col&aacute;genos</option><option value="naturales">Naturales</option><option value="minerales">Minerales</option><option value="combos">Combos</option></select></div></div>
       <div class="form-group"><label>Marca</label><input type="text" id="prod-marca" class="form-input" placeholder="Ej: NutriMix, Seiva, Gen&eacute;rico"></div>
       <div class="form-grid"><div class="form-group"><label>SKU / Referencia</label><input type="text" id="prod-sku" class="form-input" placeholder="Código interno"></div><div class="form-group"><label>Slug (URL)</label><input type="text" id="prod-slug" class="form-input" placeholder="Auto-generado desde nombre" readonly></div></div>
