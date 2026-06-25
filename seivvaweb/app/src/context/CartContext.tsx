@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
 import type { Product } from '../services/api'
 import { getDiscountedPrice } from '../services/api'
+import { fetchPromos, validateCupon, type Promo } from '../services/api'
 
 export interface CartItem {
   product: Product
@@ -19,6 +20,11 @@ interface CartContextValue {
   totalItems: number
   totalPrice: number
   totalSavings: number
+  activePromos: Promo[]
+  promoDiscount: number
+  appliedCoupon: Promo | null
+  applyCoupon: (codigo: string) => Promise<boolean>
+  removeCoupon: () => void
 }
 
 const CartContext = createContext<CartContextValue | null>(null)
@@ -67,12 +73,16 @@ function trackCart(items: CartItem[]) {
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>(loadCart)
   const [isOpen, setIsOpen] = useState(false)
+  const [activePromos, setActivePromos] = useState<Promo[]>([])
+  const [appliedCoupon, setAppliedCoupon] = useState<Promo | null>(null)
+
+  useEffect(() => {
+    fetchPromos().then(setActivePromos).catch(() => setActivePromos([]))
+  }, [])
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
-    if (items.length > 0) {
-      trackCart(items)
-    }
+    if (items.length > 0) trackCart(items)
   }, [items])
 
   const openCart = useCallback(() => setIsOpen(true), [])
@@ -125,8 +135,60 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return sum + saving
   }, 0)
 
+  // Calcular descuento de promos activas (descuento_carrito + cupón)
+  const promoDiscount = (() => {
+    let discount = 0
+    for (const promo of activePromos) {
+      if (promo.tipo === 'descuento_carrito') {
+        const meetsQty = items.some(i => i.quantity >= promo.compra_min_cantidad) || promo.compra_min_cantidad <= 1
+        const meetsMonto = totalPrice >= (promo.compra_min_monto || 0)
+        if (meetsQty && meetsMonto) {
+          if (promo.descuento_tipo === 'porcentaje') {
+            discount += Math.round(totalPrice * promo.descuento_valor / 100)
+          } else {
+            discount += promo.descuento_valor
+          }
+        }
+      }
+      if (promo === appliedCoupon && promo.tipo === 'cupon') {
+        const meetsMonto = totalPrice >= (promo.compra_min_monto || 0)
+        if (meetsMonto) {
+          if (promo.descuento_tipo === 'porcentaje') {
+            discount += Math.round(totalPrice * promo.descuento_valor / 100)
+          } else {
+            discount += promo.descuento_valor
+          }
+        }
+      }
+    }
+    return discount
+  })()
+
+  const applyCoupon = useCallback(async (codigo: string): Promise<boolean> => {
+    const cupon = await validateCupon(codigo)
+    if (!cupon) return false
+    const fullPromo = activePromos.find(p => p.id === cupon.id)
+    if (fullPromo) {
+      setAppliedCoupon(fullPromo)
+      return true
+    }
+    // Si el cupón fue validado pero no está en activePromos, buscar en API
+    const promos = await fetchPromos()
+    const found = promos.find(p => p.id === cupon.id)
+    if (found) {
+      setActivePromos(prev => [...prev.filter(p => p.id !== found.id), found])
+      setAppliedCoupon(found)
+      return true
+    }
+    return false
+  }, [activePromos])
+
+  const removeCoupon = useCallback(() => {
+    setAppliedCoupon(null)
+  }, [])
+
   return (
-    <CartContext.Provider value={{ items, isOpen, addItem, removeItem, updateQuantity, clearCart, openCart, closeCart, totalItems, totalPrice, totalSavings }}>
+    <CartContext.Provider value={{ items, isOpen, addItem, removeItem, updateQuantity, clearCart, openCart, closeCart, totalItems, totalPrice, totalSavings, activePromos, promoDiscount, appliedCoupon, applyCoupon, removeCoupon }}>
       {children}
     </CartContext.Provider>
   )

@@ -156,3 +156,44 @@ export function getTierSummary(product: Product): string | null {
   const price = product.precio - best.descuento
   return `Desde ${formatPrice(price)}`
 }
+
+export interface Promo {
+  id: number
+  tipo: string
+  nombre: string
+  producto_id: number | null
+  marca_id: number | null
+  compra_min_cantidad: number
+  compra_min_monto: number
+  regala_cantidad: number
+  regala_producto_id: number | null
+  descuento_valor: number
+  descuento_tipo: string
+  cupon_codigo: string | null
+  cupon_usos_max: number | null
+  cupon_usos_actuales: number
+  fecha_inicio: string | null
+  fecha_fin: string | null
+  activo: number
+  prioridad: number
+}
+
+export async function fetchPromos(): Promise<Promo[]> {
+  const res = await fetch(`${API_BASE}/promos`)
+  if (!res.ok) throw new Error('Failed to fetch promos')
+  return res.json()
+}
+
+export async function validateCupon(codigo: string): Promise<{ id: number; descuento_valor: number; descuento_tipo: string; minimo_compra: number } | null> {
+  try {
+    const res = await fetch(`${API_BASE}/cupones/validar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ codigo })
+    })
+    if (!res.ok) return null
+    return res.json()
+  } catch {
+    return null
+  }
+}
