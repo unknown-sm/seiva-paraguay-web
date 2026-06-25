@@ -576,14 +576,14 @@ app.get("/api/productos", (req, res) => {
       p.id DESC
   `).all();
   const result = rows.map(parseProducto);
-  result.forEach(r => delete r.precio_proveedor);
+  result.forEach(r => { delete r.precio_proveedor; delete r.marca_prioridad; });
   res.json(result);
 });
 
 app.get("/api/productos/destacados", (req, res) => {
   const rows = db.prepare("SELECT * FROM productos WHERE featured_order > 0 AND activo = 1 ORDER BY featured_order ASC LIMIT 8").all();
   const result = rows.map(parseProducto);
-  result.forEach(r => delete r.precio_proveedor);
+  result.forEach(r => { delete r.precio_proveedor; delete r.marca_prioridad; });
   res.json(result);
 });
 
