@@ -47,7 +47,7 @@ export default function Navbar() {
   const navLinks = [
     { label: 'Inicio', to: '/' },
     { label: 'Tienda', to: '/tienda' },
-    { label: 'FAQ', to: '/faq' },
+    { label: 'Promos', to: '/promos' },
     { label: 'Contacto', to: '/contacto' },
   ]
 

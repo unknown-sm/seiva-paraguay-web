@@ -17,6 +17,7 @@ import CheckoutPage from './pages/CheckoutPage'
 import FaqPage from './pages/FaqPage'
 import ContactoPage from './pages/ContactoPage'
 import PoliticasPage from './pages/PoliticasPage'
+import PromosPage from './pages/PromosPage'
 import DynamicPage from './pages/DynamicPage'
 
 function Layout({ children }: { children: React.ReactNode }) {
@@ -49,6 +50,7 @@ export default function App() {
             <Route path="/faq" element={<Layout><FaqPage /></Layout>} />
             <Route path="/contacto" element={<Layout><ContactoPage /></Layout>} />
             <Route path="/politicas" element={<Layout><PoliticasPage /></Layout>} />
+            <Route path="/promos" element={<Layout><PromosPage /></Layout>} />
             <Route path="/pagina/:slug" element={<Layout><DynamicPage /></Layout>} />
           </Routes>
         </BrowserRouter>
