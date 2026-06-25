@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { X, Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react'
 import { useCart } from '../context/CartContext'
-import { formatPrice, getDiscountedPrice } from '../services/api'
+import { formatPrice, getDiscountedPrice, getNextTier } from '../services/api'
 
 export default function CartDrawer() {
   const { items, isOpen, removeItem, updateQuantity, closeCart, totalItems, totalPrice, totalSavings } = useCart()
@@ -115,6 +115,17 @@ export default function CartDrawer() {
                         <Plus className="w-3 h-3" />
                       </button>
                     </div>
+
+                    {(() => {
+                      const next = getNextTier(product, quantity)
+                      if (!next) return null
+                      const needed = next.min_cantidad - quantity
+                      return (
+                        <p className="font-body text-xs mt-2" style={{ color: 'var(--theme-primary, #1B4332)' }}>
+                          Comprá {needed} más → {formatPrice(product.precio - next.descuento)} c/u (ahorrás {formatPrice(next.descuento)}/u)
+                        </p>
+                      )
+                    })()}
                   </div>
 
                   <div className="flex flex-col items-end justify-between">

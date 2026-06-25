@@ -357,18 +357,38 @@ export default function ProductoPage() {
             {/* Quantity + Add to Cart */}
             {product.stock > 0 ? (
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mt-8">
-                <div className="flex items-center gap-3">
-                  <button onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                    className="w-10 h-10 rounded-full flex items-center justify-center border"
-                    style={{ borderColor: 'var(--theme-border, #E8E0D5)', color: 'var(--theme-text, #3D2817)' }}>
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <span className="font-body font-bold w-8 text-center text-lg" style={{ color: 'var(--theme-text, #3D2817)' }}>{quantity}</span>
-                  <button onClick={() => setQuantity(q => q + 1)}
-                    className="w-10 h-10 rounded-full flex items-center justify-center border"
-                    style={{ borderColor: 'var(--theme-border, #E8E0D5)', color: 'var(--theme-text, #3D2817)' }}>
-                    <Plus className="w-4 h-4" />
-                  </button>
+                <div>
+                  <div className="flex items-center gap-3">
+                    <button onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                      className="w-10 h-10 rounded-full flex items-center justify-center border"
+                      style={{ borderColor: 'var(--theme-border, #E8E0D5)', color: 'var(--theme-text, #3D2817)' }}>
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <span className="font-body font-bold w-8 text-center text-lg" style={{ color: 'var(--theme-text, #3D2817)' }}>{quantity}</span>
+                    <button onClick={() => setQuantity(q => q + 1)}
+                      className="w-10 h-10 rounded-full flex items-center justify-center border"
+                      style={{ borderColor: 'var(--theme-border, #E8E0D5)', color: 'var(--theme-text, #3D2817)' }}>
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+                  {product.price_tiers && product.price_tiers.length > 0 && (
+                    <div className="flex gap-1.5 mt-2">
+                      {product.price_tiers.map((tier, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setQuantity(tier.min_cantidad)}
+                          className="font-body text-xs px-2.5 py-1 rounded-full border transition-all"
+                          style={{
+                            borderColor: quantity === tier.min_cantidad ? 'var(--theme-primary, #1B4332)' : 'var(--theme-border, #E8E0D5)',
+                            backgroundColor: quantity === tier.min_cantidad ? 'var(--theme-primary, #1B4332)' : 'transparent',
+                            color: quantity === tier.min_cantidad ? 'var(--theme-text-on-primary, #FFFFFF)' : 'var(--theme-muted, #5C4033)',
+                          }}
+                        >
+                          {tier.min_cantidad}u
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <button onClick={() => { addItem(product, quantity); setAdded(true); setTimeout(() => setAdded(false), 2000) }}
                   className="inline-flex items-center justify-center gap-2 font-body font-semibold text-sm px-8 py-4 rounded-full transition-all duration-300 hover:scale-105 hover:opacity-90"

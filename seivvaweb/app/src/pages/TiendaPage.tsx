@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { fetchProducts, type Product, formatPrice, getProductBadges } from '../services/api'
+import { fetchProducts, type Product, formatPrice, getProductBadges, getTierLabel } from '../services/api'
 import { useCart } from '../context/CartContext'
 import { Search, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react'
 import ProductSkeleton from '../components/ProductSkeleton'
@@ -292,6 +292,15 @@ export default function TiendaPage() {
                         </span>
                       )}
                     </div>
+                    {product.price_tiers && product.price_tiers.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {product.price_tiers.slice(0, 2).map((t, i) => (
+                          <span key={i} className="font-body font-medium text-[9px] px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--theme-primary-bg-05, rgba(27,67,50,0.06))', color: 'var(--theme-primary, #1B4332)' }}>
+                            {getTierLabel(t, product)}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     <button
                       onClick={(e) => {
                         if (!product.stock) return

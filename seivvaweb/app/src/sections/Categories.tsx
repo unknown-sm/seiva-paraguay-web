@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ShoppingCart } from 'lucide-react'
-import { fetchProducts, formatPrice, stripHtml, getProductBadges, type Product } from '../services/api'
+import { fetchProducts, formatPrice, stripHtml, getProductBadges, getTierLabel, type Product } from '../services/api'
 import { useCart } from '../context/CartContext'
 import ProductSkeleton from '../components/ProductSkeleton'
 
@@ -175,14 +175,25 @@ export default function Categories() {
                 </p>
 
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4 gap-2">
-                  <div className="flex flex-wrap items-baseline gap-x-2">
-                    <span className="font-body font-bold text-sm sm:text-xl" style={{ color: 'var(--theme-primary, #1B4332)' }}>
-                      {formatPrice(product.precio)}
-                    </span>
-                    {product.precio_anterior && (
-                      <span className="font-body text-xs sm:text-sm line-through" style={{ color: 'var(--theme-muted, #999)' }}>
-                        {formatPrice(product.precio_anterior)}
+                  <div>
+                    <div className="flex flex-wrap items-baseline gap-x-2">
+                      <span className="font-body font-bold text-sm sm:text-xl" style={{ color: 'var(--theme-primary, #1B4332)' }}>
+                        {formatPrice(product.precio)}
                       </span>
+                      {product.precio_anterior && (
+                        <span className="font-body text-xs sm:text-sm line-through" style={{ color: 'var(--theme-muted, #999)' }}>
+                          {formatPrice(product.precio_anterior)}
+                        </span>
+                      )}
+                    </div>
+                    {product.price_tiers && product.price_tiers.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {product.price_tiers.slice(0, 2).map((t, i) => (
+                          <span key={i} className="font-body font-medium text-[10px] px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--theme-primary-bg-05, rgba(27,67,50,0.06))', color: 'var(--theme-primary, #1B4332)' }}>
+                            {getTierLabel(t, product)}
+                          </span>
+                        ))}
+                      </div>
                     )}
                   </div>
                   <button

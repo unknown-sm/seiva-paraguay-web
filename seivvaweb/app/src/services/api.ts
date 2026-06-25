@@ -126,3 +126,33 @@ export function getActiveTier(product: Product, quantity: number): PriceTier | u
     (t.max_cantidad === null || quantity <= t.max_cantidad)
   )
 }
+
+export function getNextTier(product: Product, quantity: number): PriceTier | undefined {
+  if (!product.price_tiers?.length) return undefined
+  return product.price_tiers.find(t =>
+    quantity < t.min_cantidad
+  )
+}
+
+export function getBestTier(product: Product): PriceTier | undefined {
+  if (!product.price_tiers?.length) return undefined
+  let best = product.price_tiers[0]
+  for (const t of product.price_tiers) {
+    if (t.descuento > best.descuento) best = t
+  }
+  return best
+}
+
+export function getTierLabel(tier: PriceTier, product: Product): string {
+  const price = product.precio - tier.descuento
+  const range = tier.max_cantidad ? `${tier.min_cantidad}-${tier.max_cantidad}u` : `${tier.min_cantidad}+u`
+  return `${range} ${formatPrice(price)}`
+}
+
+export function getTierSummary(product: Product): string | null {
+  if (!product.price_tiers?.length) return null
+  const best = getBestTier(product)
+  if (!best) return null
+  const price = product.precio - best.descuento
+  return `Desde ${formatPrice(price)}`
+}

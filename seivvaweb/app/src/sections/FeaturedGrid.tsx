@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ShoppingCart } from 'lucide-react'
-import { fetchFeatured, formatPrice, stripHtml, getProductBadges, type Product } from '../services/api'
+import { fetchFeatured, formatPrice, stripHtml, getProductBadges, getTierLabel, type Product } from '../services/api'
 import { useCart } from '../context/CartContext'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -177,7 +177,7 @@ export default function FeaturedGrid() {
                 </p>
 
                 <div className="mt-auto pt-3">
-                  <div className="flex flex-wrap items-baseline gap-x-2 mb-3">
+                  <div className="flex flex-wrap items-baseline gap-x-2 mb-1">
                     <span className="font-body font-bold text-base sm:text-lg" style={{ color: 'var(--theme-primary, #1B4332)' }}>
                       {formatPrice(product.precio)}
                     </span>
@@ -187,6 +187,15 @@ export default function FeaturedGrid() {
                       </span>
                     )}
                   </div>
+                  {product.price_tiers && product.price_tiers.length > 0 && (
+                    <div className="mb-2 flex flex-wrap gap-1">
+                      {product.price_tiers.slice(0, 2).map((t, i) => (
+                        <span key={i} className="font-body font-medium text-[10px] px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--theme-primary-bg-05, rgba(27,67,50,0.06))', color: 'var(--theme-primary, #1B4332)' }}>
+                          {getTierLabel(t, product)}
+                        </span>
+                      ))}
+                    </div>
+                  )}
 
                   <button
                     onClick={(e) => {
