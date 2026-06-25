@@ -185,6 +185,28 @@ db.exec(`
     auth TEXT NOT NULL,
     creado TEXT DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS promos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tipo TEXT NOT NULL DEFAULT 'bogo',
+    nombre TEXT NOT NULL,
+    producto_id INTEGER,
+    marca_id INTEGER,
+    compra_min_cantidad INTEGER DEFAULT 1,
+    compra_min_monto INTEGER DEFAULT 0,
+    regala_cantidad INTEGER DEFAULT 0,
+    regala_producto_id INTEGER,
+    descuento_valor INTEGER DEFAULT 0,
+    descuento_tipo TEXT DEFAULT 'monto_fijo',
+    cupon_codigo TEXT,
+    cupon_usos_max INTEGER,
+    cupon_usos_actuales INTEGER DEFAULT 0,
+    fecha_inicio TEXT,
+    fecha_fin TEXT,
+    activo INTEGER DEFAULT 1,
+    prioridad INTEGER DEFAULT 0,
+    creado TEXT DEFAULT (datetime('now'))
+  );
 `);
 
 const contenidoDefault = {
@@ -1413,6 +1435,92 @@ app.get("/api/carritos", auth, (req, res) => {
 app.delete("/api/carritos/:id", auth, (req, res) => {
   db.prepare("DELETE FROM carritos WHERE id = ?").run(req.params.id);
   res.json({ ok: true });
+});
+
+// ---------- PROMOS ----------
+app.get("/api/promos", (req, res) => {
+  const now = new Date().toISOString();
+  const rows = db.prepare(`
+    SELECT * FROM promos
+    WHERE activo = 1
+    AND (fecha_inicio IS NULL OR fecha_inicio <= ?)
+    AND (fecha_fin IS NULL OR fecha_fin >= ?)
+    ORDER BY prioridad ASC, id DESC
+  `).all(now, now);
+  res.json(rows);
+});
+
+app.get("/api/promos/all", auth, (req, res) => {
+  const rows = db.prepare("SELECT * FROM promos ORDER BY activo DESC, id DESC").all();
+  res.json(rows);
+});
+
+app.post("/api/promos", auth, (req, res) => {
+  const { tipo, nombre, producto_id, marca_id, compra_min_cantidad, compra_min_monto, regala_cantidad, regala_producto_id, descuento_valor, descuento_tipo, cupon_codigo, cupon_usos_max, fecha_inicio, fecha_fin } = req.body;
+  if (!tipo || !nombre) return res.status(400).json({ error: "Tipo y nombre requeridos" });
+  const result = db.prepare(`
+    INSERT INTO promos (tipo, nombre, producto_id, marca_id, compra_min_cantidad, compra_min_monto, regala_cantidad, regala_producto_id, descuento_valor, descuento_tipo, cupon_codigo, cupon_usos_max, fecha_inicio, fecha_fin)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+  `).run(
+    tipo, nombre,
+    producto_id || null, marca_id || null,
+    compra_min_cantidad || 1, compra_min_monto || 0,
+    regala_cantidad || 0, regala_producto_id || null,
+    descuento_valor || 0, descuento_tipo || 'monto_fijo',
+    cupon_codigo || null, cupon_usos_max || null,
+    fecha_inicio || null, fecha_fin || null
+  );
+  res.json({ id: result.lastInsertRowid });
+});
+
+app.put("/api/promos/:id", auth, (req, res) => {
+  const { tipo, nombre, producto_id, marca_id, compra_min_cantidad, compra_min_monto, regala_cantidad, regala_producto_id, descuento_valor, descuento_tipo, cupon_codigo, cupon_usos_max, fecha_inicio, fecha_fin, activo } = req.body;
+  db.prepare(`
+    UPDATE promos SET tipo=?, nombre=?, producto_id=?, marca_id=?, compra_min_cantidad=?, compra_min_monto=?, regala_cantidad=?, regala_producto_id=?, descuento_valor=?, descuento_tipo=?, cupon_codigo=?, cupon_usos_max=?, fecha_inicio=?, fecha_fin=?, activo=? WHERE id=?
+  `).run(
+    tipo, nombre,
+    producto_id || null, marca_id || null,
+    compra_min_cantidad || 1, compra_min_monto || 0,
+    regala_cantidad || 0, regala_producto_id || null,
+    descuento_valor || 0, descuento_tipo || 'monto_fijo',
+    cupon_codigo || null, cupon_usos_max || null,
+    fecha_inicio || null, fecha_fin || null,
+    activo !== undefined ? (activo ? 1 : 0) : 1,
+    req.params.id
+  );
+  res.json({ ok: true });
+});
+
+app.delete("/api/promos/:id", auth, (req, res) => {
+  db.prepare("DELETE FROM promos WHERE id = ?").run(req.params.id);
+  res.json({ ok: true });
+});
+
+app.patch("/api/promos/:id/toggle", auth, (req, res) => {
+  const row = db.prepare("SELECT activo FROM promos WHERE id = ?").get(req.params.id);
+  if (!row) return res.status(404).json({ error: "No encontrada" });
+  const nuevo = row.activo ? 0 : 1;
+  db.prepare("UPDATE promos SET activo = ? WHERE id = ?").run(nuevo, req.params.id);
+  res.json({ activo: !!nuevo });
+});
+
+app.post("/api/cupones/validar", (req, res) => {
+  const { codigo } = req.body;
+  if (!codigo) return res.status(400).json({ error: "Código requerido" });
+  const now = new Date().toISOString();
+  const cupon = db.prepare(`
+    SELECT * FROM promos WHERE cupon_codigo = ? AND activo = 1
+    AND (fecha_inicio IS NULL OR fecha_inicio <= ?)
+    AND (fecha_fin IS NULL OR fecha_fin >= ?)
+    AND (cupon_usos_max IS NULL OR cupon_usos_actuales < cupon_usos_max)
+  `).get(codigo, now, now);
+  if (!cupon) return res.status(404).json({ error: "Cupón inválido o expirado" });
+  res.json({ 
+    id: cupon.id,
+    descuento_valor: cupon.descuento_valor,
+    descuento_tipo: cupon.descuento_tipo,
+    minimo_compra: cupon.compra_min_monto
+  });
 });
 
 // ---------- PEDIDOS (auth: gestionar) ----------

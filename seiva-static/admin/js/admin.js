@@ -46,7 +46,7 @@ function toast(msg, type) {
 function getTabFromUrl() {
   var params = new URLSearchParams(window.location.search);
   var tab = params.get("tab");
-  var validTabs = ["dashboard", "pedidos", "productos", "marcas", "carritos", "descuentos", "stock", "venta", "historico", "contenido", "analytics"];
+  var validTabs = ["dashboard", "pedidos", "productos", "marcas", "carritos", "promos", "descuentos", "stock", "venta", "historico", "contenido", "analytics"];
   if (tab && validTabs.indexOf(tab) !== -1) return "tab-" + tab;
   return "tab-dashboard";
 }
@@ -71,6 +71,7 @@ function switchTab(tabId, skipUrl) {
     "tab-productos": "Productos",
     "tab-marcas": "Marcas",
     "tab-carritos": "Carritos",
+    "tab-promos": "Promos",
     "tab-descuentos": "Descuentos por Cantidad",
     "tab-categorias": "Categor&iacute;as",
     "tab-stock": "Alertas de Stock",
@@ -94,6 +95,7 @@ function switchTab(tabId, skipUrl) {
   if (tabId === "tab-productos") loadProductos();
   if (tabId === "tab-marcas") loadMarcas();
   if (tabId === "tab-carritos") loadCarritos();
+  if (tabId === "tab-promos") loadPromos();
   if (tabId === "tab-descuentos") { loadDescuentos(); loadDescuentosMarca(); }
   if (tabId === "tab-categorias") loadCategorias();
   if (tabId === "tab-stock") loadStockAlertas();
@@ -1256,6 +1258,47 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   // Load logs on tab init if needed
+
+  // Promos events
+  var btnNp = document.getElementById("btn-nueva-promo");
+  if (btnNp) btnNp.addEventListener("click", nuevoPromo);
+
+  document.getElementById("promo-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+    var id = document.getElementById("promo-id").value;
+    var body = {
+      tipo: document.getElementById("promo-tipo").value,
+      nombre: document.getElementById("promo-nombre").value,
+      producto_id: parseInt(document.getElementById("promo-producto-id").value) || null,
+      marca_id: parseInt(document.getElementById("promo-marca-id").value) || null,
+      compra_min_cantidad: parseInt(document.getElementById("promo-compra-min").value) || 1,
+      compra_min_monto: parseInt(document.getElementById("promo-compra-monto").value) || 0,
+      regala_cantidad: parseInt(document.getElementById("promo-lleva").value) || 0,
+      regala_producto_id: parseInt(document.getElementById("promo-regalo-id").value) || null,
+      descuento_valor: parseInt(document.getElementById("promo-desc-valor").value) || 0,
+      descuento_tipo: document.getElementById("promo-desc-tipo").value,
+      cupon_codigo: document.getElementById("promo-cupon-codigo").value || null,
+      cupon_usos_max: parseInt(document.getElementById("promo-cupon-usos").value) || null,
+      fecha_inicio: document.getElementById("promo-fecha-inicio").value || null,
+      fecha_fin: document.getElementById("promo-fecha-fin").value || null,
+      prioridad: parseInt(document.getElementById("promo-prioridad").value) || 0
+    };
+    var method = id ? "PUT" : "POST";
+    var url = id ? "/promos/" + id : "/promos";
+    api(url, { method: method, body: JSON.stringify(body) }).then(function(r) {
+      if (r.error) { document.getElementById("promo-msg").textContent = r.error; document.getElementById("promo-msg").classList.remove("hidden"); return; }
+      document.getElementById("modal-promo").classList.add("hidden");
+      toast("Promo guardada");
+      loadPromos();
+    });
+  });
+
+  document.getElementById("modal-close-promo").addEventListener("click", function() {
+    document.getElementById("modal-promo").classList.add("hidden");
+  });
+  document.getElementById("modal-overlay-promo").addEventListener("click", function() {
+    document.getElementById("modal-promo").classList.add("hidden");
+  });
 });
 
 // ---------- DESCUENTOS POR MARCA ----------
@@ -1376,6 +1419,143 @@ function eliminarCarrito(id) {
   api("/carritos/" + id, { method: "DELETE" }).then(function() {
     toast("Carrito eliminado");
     loadCarritos();
+  });
+}
+
+// ---------- PROMOS ----------
+var tipoLabels = { bogo: "BOGO", regalo: "Regalo", descuento_carrito: "Desc. carrito", cupon: "Cupón" };
+
+function loadPromos() {
+  api("/promos/all").then(function(promos) {
+    var tbody = document.getElementById("promos-tbody");
+    if (!tbody) return;
+    if (!promos.length) {
+      tbody.innerHTML = '<tr><td colspan="7">No hay promos. Creá una con "+ Nueva Promo".</td></tr>';
+      return;
+    }
+    tbody.innerHTML = promos.map(function(p) {
+      var cond = [];
+      if (p.compra_min_cantidad > 1) cond.push("+" + p.compra_min_cantidad + "u");
+      if (p.compra_min_monto > 0) cond.push("+Gs." + p.compra_min_monto.toLocaleString("es-PY"));
+      if (!cond.length) cond.push("Sin mín.");
+
+      var beneficio = "";
+      if (p.tipo === "bogo") beneficio = p.regala_cantidad + "x" + (p.regala_cantidad || "?");
+      else if (p.tipo === "regalo") beneficio = "Regalo #" + p.regala_producto_id;
+      else if (p.tipo === "descuento_carrito") beneficio = (p.descuento_tipo === "porcentaje" ? p.descuento_valor + "%" : formatGs(p.descuento_valor)) + " off";
+      else if (p.tipo === "cupon") beneficio = p.cupon_codigo + " " + (p.descuento_tipo === "porcentaje" ? p.descuento_valor + "%" : formatGs(p.descuento_valor));
+
+      var vigencia = "Siempre";
+      if (p.fecha_inicio || p.fecha_fin) {
+        vigencia = (p.fecha_inicio || "") + " → " + (p.fecha_fin || "");
+      }
+
+      return '<tr>' +
+        '<td><strong>' + xt(p.nombre) + '</strong></td>' +
+        '<td>' + (tipoLabels[p.tipo] || p.tipo) + '</td>' +
+        '<td>' + cond.join(" ") + '</td>' +
+        '<td>' + beneficio + '</td>' +
+        '<td>' + vigencia + '</td>' +
+        '<td>' + (p.activo ? '✅' : '❌') + '</td>' +
+        '<td>' +
+          '<button class="btn btn-sm" onclick="editarPromo(' + p.id + ')">Editar</button> ' +
+          '<button class="btn btn-sm" onclick="togglePromo(' + p.id + ')">' + (p.activo ? 'Pausar' : 'Activar') + '</button> ' +
+          '<button class="btn btn-sm btn-danger" onclick="eliminarPromo(' + p.id + ')">Eliminar</button>' +
+        '</td>' +
+      '</tr>';
+    }).join("");
+  });
+}
+
+function nuevoPromo() {
+  document.getElementById("promo-id").value = "";
+  document.getElementById("promo-nombre").value = "";
+  document.getElementById("promo-tipo").value = "bogo";
+  document.getElementById("promo-producto-id").value = "";
+  document.getElementById("promo-producto-search").value = "";
+  document.getElementById("promo-marca-id").value = "";
+  document.getElementById("promo-compra-min").value = "1";
+  document.getElementById("promo-compra-monto").value = "0";
+  document.getElementById("promo-lleva").value = "3";
+  document.getElementById("promo-paga").value = "2";
+  document.getElementById("promo-regalo-id").value = "";
+  document.getElementById("promo-regalo-search").value = "";
+  document.getElementById("promo-regalo-cant").value = "1";
+  document.getElementById("promo-desc-tipo").value = "monto_fijo";
+  document.getElementById("promo-desc-valor").value = "10000";
+  document.getElementById("promo-cupon-codigo").value = "";
+  document.getElementById("promo-cupon-usos").value = "";
+  document.getElementById("promo-fecha-inicio").value = "";
+  document.getElementById("promo-fecha-fin").value = "";
+  document.getElementById("promo-prioridad").value = "0";
+  togglePromoFields();
+  document.getElementById("promo-modal-title").textContent = "Nueva Promo";
+  document.getElementById("modal-promo").classList.remove("hidden");
+  loadMarcasSelect();
+}
+
+function editarPromo(id) {
+  api("/promos/all").then(function(promos) {
+    var p = promos.find(function(x) { return x.id === id; });
+    if (!p) return;
+    document.getElementById("promo-id").value = p.id;
+    document.getElementById("promo-nombre").value = p.nombre || "";
+    document.getElementById("promo-tipo").value = p.tipo || "bogo";
+    document.getElementById("promo-producto-id").value = p.producto_id || "";
+    document.getElementById("promo-producto-search").value = "";
+    document.getElementById("promo-marca-id").value = p.marca_id || "";
+    document.getElementById("promo-compra-min").value = p.compra_min_cantidad || 1;
+    document.getElementById("promo-compra-monto").value = p.compra_min_monto || 0;
+    document.getElementById("promo-lleva").value = p.regala_cantidad || 3;
+    document.getElementById("promo-paga").value = p.regala_cantidad ? p.regala_cantidad - 1 : 2;
+    document.getElementById("promo-regalo-id").value = p.regala_producto_id || "";
+    document.getElementById("promo-regalo-search").value = "";
+    document.getElementById("promo-regalo-cant").value = p.regala_cantidad || 1;
+    document.getElementById("promo-desc-tipo").value = p.descuento_tipo || "monto_fijo";
+    document.getElementById("promo-desc-valor").value = p.descuento_valor || 0;
+    document.getElementById("promo-cupon-codigo").value = p.cupon_codigo || "";
+    document.getElementById("promo-cupon-usos").value = p.cupon_usos_max || "";
+    document.getElementById("promo-fecha-inicio").value = p.fecha_inicio || "";
+    document.getElementById("promo-fecha-fin").value = p.fecha_fin || "";
+    document.getElementById("promo-prioridad").value = p.prioridad || 0;
+    togglePromoFields();
+    document.getElementById("promo-modal-title").textContent = "Editar Promo";
+    document.getElementById("modal-promo").classList.remove("hidden");
+    loadMarcasSelect();
+  });
+}
+
+function togglePromoFields() {
+  var tipo = document.getElementById("promo-tipo").value;
+  document.getElementById("promo-bogo-fields").style.display = tipo === "bogo" ? "" : "none";
+  document.getElementById("promo-regalo-fields").style.display = tipo === "regalo" ? "" : "none";
+  document.getElementById("promo-descuento-fields").style.display = tipo === "descuento_carrito" ? "" : "none";
+  document.getElementById("promo-cupon-fields").style.display = tipo === "cupon" ? "" : "none";
+}
+
+function loadMarcasSelect() {
+  api("/marcas/all").then(function(marcas) {
+    var sel = document.getElementById("promo-marca-id");
+    if (!sel) return;
+    sel.innerHTML = '<option value="">Todas las marcas</option>';
+    for (var m of (marcas || [])) {
+      sel.innerHTML += '<option value="' + m.id + '">' + xt(m.nombre) + '</option>';
+    }
+  });
+}
+
+function togglePromo(id) {
+  api("/promos/" + id + "/toggle", { method: "PATCH" }).then(function() {
+    toast("Promo actualizada");
+    loadPromos();
+  });
+}
+
+function eliminarPromo(id) {
+  if (!confirm("Eliminar esta promo?")) return;
+  api("/promos/" + id, { method: "DELETE" }).then(function() {
+    toast("Promo eliminada");
+    loadPromos();
   });
 }
 

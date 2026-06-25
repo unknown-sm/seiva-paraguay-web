@@ -37,6 +37,7 @@
       <button class="sidebar-link" data-tab="tab-marcas"><span class="sidebar-icon">&#127991;</span><span class="sidebar-label">Marcas</span></button>
       <button class="sidebar-link" data-tab="tab-carritos"><span class="sidebar-icon">&#128722;</span><span class="sidebar-label">Carritos</span></button>
       <button class="sidebar-link" data-tab="tab-descuentos"><span class="sidebar-icon">&#127991;</span><span class="sidebar-label">Descuentos</span></button>
+      <button class="sidebar-link" data-tab="tab-promos"><span class="sidebar-icon">&#127881;</span><span class="sidebar-label">Promos</span></button>
       <button class="sidebar-link" data-tab="tab-categorias"><span class="sidebar-icon">&#128193;</span><span class="sidebar-label">Categor&iacute;as</span></button>
       <button class="sidebar-link" data-tab="tab-stock"><span class="sidebar-icon">&#9888;&#65039;</span><span class="sidebar-label">Alertas de Stock</span></button>
       <button class="sidebar-link" data-tab="tab-venta"><span class="sidebar-icon">&#128722;</span><span class="sidebar-label">Nueva Venta</span></button>
@@ -130,6 +131,19 @@
         <div class="card-body">
           <p class="help-text" style="margin-bottom:16px">Aplica descuento a todos los productos de una marca. Podés excluir productos específicos o incluir solo algunos.</p>
           <div id="descuentos-marca-lista"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-promos" class="tab-content">
+      <div class="card">
+        <div class="card-header" style="justify-content:space-between">
+          <h3>Promos y Ofertas</h3>
+          <button id="btn-nueva-promo" class="btn btn-primary">+ Nueva Promo</button>
+        </div>
+        <div class="card-body">
+          <p class="help-text" style="margin-bottom:16px">Configur&aacute; promociones autom&aacute;ticas: BOGO (compr&aacute; X llev&aacute; Y), regalos por compra m&iacute;nima, descuentos en carrito, y cupones.</p>
+          <table class="admin-table"><thead><tr><th>Nombre</th><th>Tipo</th><th>Condici&oacute;n</th><th>Beneficio</th><th>Vigencia</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="promos-tbody"></tbody></table>
         </div>
       </div>
     </div>
@@ -506,6 +520,70 @@
 .stock-dot.active { background: var(--primary); border-color: var(--primary); }
 .stock-info { font-size: 0.8em; color: var(--muted); }
 </style>
+
+<div id="modal-promo" class="modal hidden">
+  <div class="modal-overlay" id="modal-overlay-promo"></div>
+  <div class="modal-content" style="max-width:680px">
+    <div class="modal-header"><h3 id="promo-modal-title">Nueva Promo</h3><button class="modal-close" id="modal-close-promo">&times;</button></div>
+    <form id="promo-form">
+      <input type="hidden" id="promo-id" value="">
+      <div class="form-group"><label>Nombre *</label><input type="text" id="promo-nombre" required class="form-input" placeholder="Ej: 2x1 Omega, Regalo +150k, Black Friday"></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Tipo *</label>
+          <select id="promo-tipo" class="form-select" required onchange="togglePromoFields()">
+            <option value="bogo">BOGO (Compra X llevá Y)</option>
+            <option value="regalo">Regalo gratis</option>
+            <option value="descuento_carrito">Descuento en carrito</option>
+            <option value="cupon">Cupón</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Prioridad</label>
+          <input type="number" id="promo-prioridad" value="0" min="0" class="form-input">
+        </div>
+      </div>
+      <div class="form-grid" id="promo-producto-group">
+        <div class="form-group"><label>Producto (vacío = todos)</label><input type="text" id="promo-producto-search" class="form-input" placeholder="Buscar producto..." autocomplete="off"><input type="hidden" id="promo-producto-id"></div>
+        <div class="form-group"><label>Marca (vacío = todas)</label><select id="promo-marca-id" class="form-select"><option value="">Todas las marcas</option></select></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>Compra mín (unid.)</label><input type="number" id="promo-compra-min" value="1" min="1" class="form-input"></div>
+        <div class="form-group"><label>Compra mín (Gs.)</label><input type="number" id="promo-compra-monto" value="0" class="form-input"></div>
+      </div>
+      <div id="promo-bogo-fields">
+        <div class="form-grid">
+          <div class="form-group"><label>Lleva X</label><input type="number" id="promo-lleva" value="3" min="2" class="form-input"></div>
+          <div class="form-group"><label>Pagá Y</label><input type="number" id="promo-paga" value="2" min="1" class="form-input"></div>
+        </div>
+      </div>
+      <div id="promo-regalo-fields" class="hidden">
+        <div class="form-grid">
+          <div class="form-group"><label>Producto regalo</label><input type="text" id="promo-regalo-search" class="form-input" placeholder="Buscar producto..." autocomplete="off"><input type="hidden" id="promo-regalo-id"></div>
+          <div class="form-group"><label>Cantidad regalo</label><input type="number" id="promo-regalo-cant" value="1" min="1" class="form-input"></div>
+        </div>
+      </div>
+      <div id="promo-descuento-fields" class="hidden">
+        <div class="form-grid">
+          <div class="form-group"><label>Tipo descuento</label><select id="promo-desc-tipo" class="form-select"><option value="monto_fijo">Monto fijo (Gs.)</option><option value="porcentaje">Porcentaje (%)</option></select></div>
+          <div class="form-group"><label>Valor</label><input type="number" id="promo-desc-valor" value="10000" min="0" class="form-input"></div>
+        </div>
+      </div>
+      <div id="promo-cupon-fields" class="hidden">
+        <div class="form-grid">
+          <div class="form-group"><label>Código cupón</label><input type="text" id="promo-cupon-codigo" class="form-input" placeholder="Ej: VERANO2026"></div>
+          <div class="form-group"><label>Usos máximos</label><input type="number" id="promo-cupon-usos" class="form-input" placeholder="Vacío = ilimitado"></div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>Desde (opcional)</label><input type="date" id="promo-fecha-inicio" class="form-input"></div>
+        <div class="form-group"><label>Hasta (opcional)</label><input type="date" id="promo-fecha-fin" class="form-input"></div>
+      </div>
+      <button type="submit" class="btn btn-primary" style="margin-top:16px">Guardar Promo</button>
+    </form>
+    <p id="promo-msg" class="msg hidden"></p>
+  </div>
+</div>
 
 <div id="toast" class="toast hidden"></div>
 
