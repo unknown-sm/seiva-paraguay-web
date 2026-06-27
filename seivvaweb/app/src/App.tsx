@@ -2,7 +2,6 @@ import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { CartProvider } from './context/CartContext'
 import { ThemeProvider } from './context/ThemeContext'
-import { ThemeToggle } from './components/ThemePanel'
 import CartDrawer from './components/CartDrawer'
 import MobileTabBar from './components/MobileTabBar'
 import ScrollToTop from './components/ScrollToTop'
@@ -30,7 +29,6 @@ function Layout({ children }: { children: React.ReactNode }) {
       </Suspense>
       <CartDrawer />
       <MobileTabBar />
-      <ThemeToggle />
     </>
   )
 }
