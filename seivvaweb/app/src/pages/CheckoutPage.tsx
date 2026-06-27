@@ -7,7 +7,7 @@ import { ciudadesParaguay, parseCiudadSeleccionada } from '../data/ciudades'
 
 export default function CheckoutPage() {
   const navigate = useNavigate()
-  const { items, clearCart, totalPrice, applyCoupon, removeCoupon, appliedCoupon, promoDiscount } = useCart()
+  const { items, clearCart, totalPrice } = useCart()
 
   // Redirect if cart is empty
   useEffect(() => {
@@ -25,11 +25,7 @@ export default function CheckoutPage() {
   const [ciudadInput, setCiudadInput] = useState('')
   const [showCiudadDropdown, setShowCiudadDropdown] = useState(false)
   const [ruc, setRuc] = useState('')
-  const [codigoPostal, setCodigoPostal] = useState('')
   const [metodoPago, setMetodoPago] = useState('whatsapp')
-  const [notas, setNotas] = useState('')
-  const [cuponCodigo, setCuponCodigo] = useState('')
-  const [cuponStatus, setCuponStatus] = useState<'idle' | 'loading' | 'applied' | 'error'>('idle')
   const [sending, setSending] = useState(false)
   const [pedidoId, setPedidoId] = useState<number | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -116,8 +112,7 @@ export default function CheckoutPage() {
 
     const envioGratis = envioTipo === 'delivery' && envioMinimoGratis > 0 && totalPrice >= envioMinimoGratis
     const envioTotal = envioTipo === 'delivery' ? (envioGratis ? 0 : envioCosto) : 0
-    const totalPromoDiscount = promoDiscount
-    const totalConEnvio = totalPrice + envioTotal - totalPromoDiscount
+    const totalConEnvio = totalPrice + envioTotal
 
   const handleSubmitPedido = async () => {
     if (!validate()) return
@@ -133,11 +128,10 @@ export default function CheckoutPage() {
       const result = await createPedido({
         cliente: `${nombre} ${apellido}`,
         whatsapp: telefono,
-        direccion: `${direccion}, ${ciudad}, ${departamento}${codigoPostal ? `, CP: ${codigoPostal}` : ''}${ruc ? `, RUC: ${ruc}` : ''}`,
+        direccion: `${direccion}, ${ciudad}, ${departamento}${ruc ? `, RUC: ${ruc}` : ''}`,
         productos,
         total: totalConEnvio,
         metodo_pago: metodoPago,
-        notas
       })
       setPedidoId(result.id)
       clearCart()
@@ -214,33 +208,26 @@ export default function CheckoutPage() {
             </h1>
 
             <div className="space-y-6">
-              {/* Contact */}
               <div className="rounded-xl p-6" style={{ backgroundColor: 'var(--theme-surface, #FFFFFF)', boxShadow: '0 2px 12px rgba(27,67,50,0.06)' }}>
                 <h2 className="font-body font-bold text-base mb-4" style={{ color: 'var(--theme-text, #3D2817)' }}>
-                  Contacto
-                </h2>
-                <div>
-                  <label className="block font-body text-sm font-medium mb-1.5" style={{ color: 'var(--theme-text, #3D2817)' }}>
-                    Teléfono / WhatsApp <span style={{ color: '#ef4444' }}>*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    value={telefono}
-                    onChange={e => { setTelefono(e.target.value); setErrors(prev => ({ ...prev, telefono: '' })) }}
-                    placeholder="0991234567"
-                    className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
-                    style={{ borderColor: errors.telefono ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: 'var(--theme-surface, #FFFFFF)', color: 'var(--theme-text, #3D2817)' }}
-                  />
-                  {errors.telefono && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.telefono}</p>}
-                </div>
-              </div>
-
-              {/* Shipping Address */}
-              <div className="rounded-xl p-6" style={{ backgroundColor: 'var(--theme-surface, #FFFFFF)', boxShadow: '0 2px 12px rgba(27,67,50,0.06)' }}>
-                <h2 className="font-body font-bold text-base mb-4" style={{ color: 'var(--theme-text, #3D2817)' }}>
-                  Dirección de envío
+                  Contacto y dirección de envío
                 </h2>
                 <div className="space-y-4">
+                  <div>
+                    <label className="block font-body text-sm font-medium mb-1.5" style={{ color: 'var(--theme-text, #3D2817)' }}>
+                      Teléfono / WhatsApp <span style={{ color: '#ef4444' }}>*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      value={telefono}
+                      onChange={e => { setTelefono(e.target.value); setErrors(prev => ({ ...prev, telefono: '' })) }}
+                      placeholder="0991234567"
+                      className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
+                      style={{ borderColor: errors.telefono ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: 'var(--theme-surface, #FFFFFF)', color: 'var(--theme-text, #3D2817)' }}
+                    />
+                    {errors.telefono && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.telefono}</p>}
+                  </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block font-body text-sm font-medium mb-1.5" style={{ color: 'var(--theme-text, #3D2817)' }}>
@@ -270,21 +257,6 @@ export default function CheckoutPage() {
                       />
                       {errors.apellido && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.apellido}</p>}
                     </div>
-                  </div>
-
-                  <div>
-                    <label className="block font-body text-sm font-medium mb-1.5" style={{ color: 'var(--theme-text, #3D2817)' }}>
-                      Dirección o referencia <span style={{ color: '#ef4444' }}>*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={direccion}
-                      onChange={e => { setDireccion(e.target.value); setErrors(prev => ({ ...prev, direccion: '' })) }}
-                      placeholder="Calle Principal 123, cerca de..."
-                      className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
-                      style={{ borderColor: errors.direccion ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: 'var(--theme-surface, #FFFFFF)', color: 'var(--theme-text, #3D2817)' }}
-                    />
-                    {errors.direccion && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.direccion}</p>}
                   </div>
 
                   <div ref={ciudadRef} className="relative">
@@ -347,47 +319,33 @@ export default function CheckoutPage() {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block font-body text-sm font-medium mb-1.5" style={{ color: 'var(--theme-text, #3D2817)' }}>
-                        RUC <span className="font-normal" style={{ color: 'var(--theme-muted, #5C4033)' }}>(opcional)</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={ruc}
-                        onChange={e => setRuc(e.target.value)}
-                        placeholder="Ej: 1234567-8"
-                        className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
-                        style={{ borderColor: 'var(--theme-border, #E8E0D5)', backgroundColor: 'var(--theme-surface, #FFFFFF)', color: 'var(--theme-text, #3D2817)' }}
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-body text-sm font-medium mb-1.5" style={{ color: 'var(--theme-text, #3D2817)' }}>
-                        Código postal <span className="font-normal" style={{ color: 'var(--theme-muted, #5C4033)' }}>(opcional)</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={codigoPostal}
-                        onChange={e => setCodigoPostal(e.target.value)}
-                        placeholder="Ej: 001"
-                        className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
-                        style={{ borderColor: 'var(--theme-border, #E8E0D5)', backgroundColor: 'var(--theme-surface, #FFFFFF)', color: 'var(--theme-text, #3D2817)' }}
-                      />
-                    </div>
+                  <div>
+                    <label className="block font-body text-sm font-medium mb-1.5" style={{ color: 'var(--theme-text, #3D2817)' }}>
+                      RUC <span className="font-normal" style={{ color: 'var(--theme-muted, #5C4033)' }}>(opcional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={ruc}
+                      onChange={e => setRuc(e.target.value)}
+                      placeholder="Ej: 1234567-8"
+                      className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
+                      style={{ borderColor: 'var(--theme-border, #E8E0D5)', backgroundColor: 'var(--theme-surface, #FFFFFF)', color: 'var(--theme-text, #3D2817)' }}
+                    />
                   </div>
 
                   <div>
                     <label className="block font-body text-sm font-medium mb-1.5" style={{ color: 'var(--theme-text, #3D2817)' }}>
-                      Notas adicionales <span className="font-normal" style={{ color: 'var(--theme-muted, #5C4033)' }}>(opcional)</span>
+                      Dirección o referencia <span style={{ color: '#ef4444' }}>*</span>
                     </label>
                     <textarea
-                      value={notas}
-                      onChange={e => setNotas(e.target.value)}
-                      placeholder="Indicaciones especiales para la entrega..."
+                      value={direccion}
+                      onChange={e => { setDireccion(e.target.value); setErrors(prev => ({ ...prev, direccion: '' })) }}
+                      placeholder="Calle Principal 123, casa blanca, cerca del supermercado..."
                       rows={3}
                       className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2 resize-none"
-                      style={{ borderColor: 'var(--theme-border, #E8E0D5)', backgroundColor: 'var(--theme-surface, #FFFFFF)', color: 'var(--theme-text, #3D2817)' }}
+                      style={{ borderColor: errors.direccion ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: 'var(--theme-surface, #FFFFFF)', color: 'var(--theme-text, #3D2817)' }}
                     />
+                    {errors.direccion && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.direccion}</p>}
                   </div>
                 </div>
               </div>
@@ -497,68 +455,10 @@ export default function CheckoutPage() {
 
               {/* Totals */}
               <div className="space-y-3 pt-6" style={{ borderTop: '1px solid rgba(61,40,23,0.1)' }}>
-
-                {/* Cupón */}
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={cuponCodigo}
-                    onChange={(e) => { setCuponCodigo(e.target.value); if (cuponStatus === 'error') setCuponStatus('idle') }}
-                    placeholder="Código de cupón"
-                    className="flex-1 h-10 px-3 rounded-lg font-body text-sm border"
-                    style={{ borderColor: 'var(--theme-border, #E8E0D5)', backgroundColor: 'var(--theme-surface, #FFFFFF)', color: 'var(--theme-text, #3D2817)' }}
-                    disabled={!!appliedCoupon}
-                  />
-                  {!appliedCoupon ? (
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        if (!cuponCodigo.trim()) return
-                        setCuponStatus('loading')
-                        const ok = await applyCoupon(cuponCodigo.trim())
-                        if (ok) {
-                          setCuponStatus('applied')
-                        } else {
-                          setCuponStatus('error')
-                        }
-                      }}
-                      disabled={!cuponCodigo.trim() || cuponStatus === 'loading'}
-                      className="h-10 px-4 rounded-lg font-body font-semibold text-sm transition-all"
-                      style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: 'var(--theme-text-on-primary, #FFFFFF)', opacity: cuponStatus === 'loading' ? 0.7 : 1 }}
-                    >
-                      {cuponStatus === 'loading' ? '...' : 'Aplicar'}
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => { removeCoupon(); setCuponCodigo(''); setCuponStatus('idle') }}
-                      className="h-10 px-3 rounded-lg font-body font-semibold text-sm"
-                      style={{ backgroundColor: '#E63946', color: '#FFF' }}
-                    >
-                      Quitar
-                    </button>
-                  )}
-                </div>
-                {cuponStatus === 'error' && (
-                  <p className="font-body text-xs" style={{ color: '#E63946' }}>Cupón inválido o expirado</p>
-                )}
-                {cuponStatus === 'applied' && appliedCoupon && (
-                  <p className="font-body text-xs" style={{ color: '#2D6A4F' }}>
-                    Cupón aplicado: {appliedCoupon.cupon_codigo} (-{formatPrice(totalPromoDiscount)})
-                  </p>
-                )}
-
                 <div className="flex justify-between font-body text-sm" style={{ color: 'var(--theme-muted, #5C4033)' }}>
                   <span>Subtotal</span>
                   <span>{formatPrice(totalPrice)}</span>
                 </div>
-
-                {totalPromoDiscount > 0 && !appliedCoupon && (
-                  <div className="flex justify-between font-body text-sm" style={{ color: '#2D6A4F', fontWeight: 600 }}>
-                    <span>Promo aplicada</span>
-                    <span>-{formatPrice(totalPromoDiscount)}</span>
-                  </div>
-                )}
                 {envioTipo === 'delivery' ? (
                   <div className="flex justify-between font-body text-sm" style={{ color: 'var(--theme-muted, #5C4033)' }}>
                     <span>Delivery ({envioCiudad})</span>
