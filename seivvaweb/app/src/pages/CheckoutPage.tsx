@@ -479,6 +479,9 @@ export default function CheckoutPage() {
                     {formatPrice(totalConEnvio)}
                   </span>
                 </div>
+                <p className="font-body text-xs text-right" style={{ color: 'var(--theme-muted, #999)' }}>
+                  Incluye {formatPrice(Math.round(totalConEnvio * 10 / 110))} IVA
+                </p>
               </div>
 
               {/* Trust badges */}
