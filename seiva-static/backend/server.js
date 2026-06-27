@@ -10,15 +10,18 @@ const webpush = require("web-push");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const JWT_SECRET = process.env.JWT_SECRET;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const crypto = require("crypto");
 
-if (!JWT_SECRET) { console.error("FATAL: JWT_SECRET env var required"); process.exit(1); }
-if (!ADMIN_PASSWORD) { console.error("FATAL: ADMIN_PASSWORD env var required"); process.exit(1); }
+// Secrets: usar env vars si existen, sino generar aleatorio y advertir
+const JWT_SECRET = process.env.JWT_SECRET || "sva-jwt-" + crypto.randomBytes(24).toString("hex");
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "sva-admin-" + crypto.randomBytes(12).toString("hex");
+
+if (!process.env.JWT_SECRET) console.warn("WARN: JWT_SECRET not set. Using auto-generated value. Set it in env vars for production.");
+if (!process.env.ADMIN_PASSWORD) console.warn("WARN: ADMIN_PASSWORD not set. Using auto-generated value: " + ADMIN_PASSWORD);
 
 // VAPID keys for web push
-const VAPID_PUBLIC = process.env.VAPID_PUBLIC_KEY;
-const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY;
+const VAPID_PUBLIC = process.env.VAPID_PUBLIC_KEY || "";
+const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY || "";
 let webpushEnabled = false;
 if (VAPID_PUBLIC && VAPID_PRIVATE) {
   try {
