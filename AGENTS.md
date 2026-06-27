@@ -1,7 +1,7 @@
 # Seiva Paraguay - WordPress WooCommerce
 
 **Sitio:** https://seiva.com.py
-**VPS:** 85.239.246.177:22 | usuario: opencodewordpress | pass: Cascabel321
+**VPS:** 85.239.246.177:22 | usuario: opencodewordpress | pass: ver vault
 
 ## Estado
 Auditoría completada. Pendiente Fase 2 (bugs) y Fase 3 (velocidad).
@@ -11,14 +11,14 @@ Ver `CONTEXT-SAVE.md` para detalle completo.
 1. Conectarse al VPS via SSH
 2. Usar `sudo docker ps -a` para ver contenedores
 3. WordPress container: `server_wordpress.1.idh2vydvjynlv0072uoss9vqm`
-4. DB: MariaDB 11, user: mariadb, pass: ncq2lvto9wsguhxgoj5t, db: server
+4. DB: MariaDB 11, user: mariadb, db: server | pass: ver vault
 5. WP-CLI disponible en contenedor (--allow-root)
 6. Ejecutar `/context-restore` en opencode para cargar contexto guardado
 
 ## Comandos útiles
 - `sudo docker exec server_wordpress.1.idh2vydvjynlv0072uoss9vqm wp plugin list --allow-root`
 - `sudo docker exec server_wordpress.1.idh2vydvjynlv0072uoss9vqm wp theme list --allow-root`
-- `sudo docker exec server_wordpress-db.1.kqn3me32vioa91txmdnhr4awt mariadb -u mariadb -pncq2lvto9wsguhxgoj5t server -e "SHOW TABLES;"`
+- `sudo docker exec server_wordpress-db.1.kqn3me32vioa91txmdnhr4awt mariadb -u mariadb -p server -e "SHOW TABLES;"`
 - `sudo docker logs server_wordpress.1.idh2vydvjynlv0072uoss9vqm 2>&1 | grep -i error`
 
 @C:/Users/salaz/.config/opencode/skills/gstack/SKILL.md

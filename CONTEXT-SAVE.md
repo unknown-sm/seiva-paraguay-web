@@ -35,9 +35,9 @@ Auditoría completa del sitio WooCommerce seiva.com.py (WordPress 7.0, Rehub The
 
 ### Notes
 
-- Conexión SSH: opencodewordpress@85.239.246.177:22 pass: Cascabel321
+- Conexión SSH: opencodewordpress@85.239.246.177:22 pass: ver vault
 - WordPress en Docker: `server_wordpress.1.idh2vydvjynlv0072uoss9vqm`
-- DB: MariaDB 11, user: mariadb, pass: ncq2lvto9wsguhxgoj5t, db: server
+- DB: MariaDB 11, user: mariadb, db: server | pass: ver vault
 - WP-CLI instalado en contenedor (--allow-root)
 - Para comandos PHP en contenedor usar: archivo temporal .php en /tmp/
 - WP admin login deshabilitado, solo usuarios: l0040302 (admin), LuisM (subscriber)

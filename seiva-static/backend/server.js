@@ -10,16 +10,31 @@ const webpush = require("web-push");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const JWT_SECRET = process.env.JWT_SECRET || "SeivaAdmin2026!";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "SeivaAdmin2026!";
+const JWT_SECRET = process.env.JWT_SECRET;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+if (!JWT_SECRET) { console.error("FATAL: JWT_SECRET env var required"); process.exit(1); }
+if (!ADMIN_PASSWORD) { console.error("FATAL: ADMIN_PASSWORD env var required"); process.exit(1); }
 
 // VAPID keys for web push
-const VAPID_PUBLIC = process.env.VAPID_PUBLIC_KEY || "BCEF0urp45cEEb9WAGlqsa8afCP-cQ7bB35aNy2p34LCkFWf4RGbVhh8zoovq_qLKTm3Eq0z9AKNWKLgSX_PSSg";
-const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY || "2HC-EXhZwyNJbFU3OV1zM6nMSjk6cVH3m2opOVZFQhQ";
-webpush.setVapidDetails("mailto:admin@seiva.com.py", VAPID_PUBLIC, VAPID_PRIVATE);
+const VAPID_PUBLIC = process.env.VAPID_PUBLIC_KEY;
+const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY;
+let webpushEnabled = false;
+if (VAPID_PUBLIC && VAPID_PRIVATE) {
+  try {
+    webpush.setVapidDetails("mailto:admin@seiva.com.py", VAPID_PUBLIC, VAPID_PRIVATE);
+    webpushEnabled = true;
+    console.log("Push notifications enabled");
+  } catch (e) {
+    console.warn("WARN: Invalid VAPID keys, push notifications disabled");
+  }
+} else {
+  console.warn("WARN: VAPID keys not set, push notifications disabled");
+}
 
 // Enviar push a todos los suscriptores
 function sendPushNotification(title, body, url) {
+  if (!webpushEnabled) return;
   const subs = db.prepare("SELECT * FROM push_subs").all();
   const payload = JSON.stringify({ title, body, url });
   for (const sub of subs) {
@@ -33,7 +48,12 @@ function sendPushNotification(title, body, url) {
   }
 }
 
-app.use(cors());
+app.use(cors({
+  origin: process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(",")
+    : ["https://seiva.com.py", "https://www.seiva.com.py"],
+  credentials: true
+}));
 app.use(express.json({ limit: "5mb" }));
 
 // Error log in-memory (last 500 entries)
