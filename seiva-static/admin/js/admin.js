@@ -46,7 +46,7 @@ function toast(msg, type) {
 function getTabFromUrl() {
   var params = new URLSearchParams(window.location.search);
   var tab = params.get("tab");
-  var validTabs = ["dashboard", "pedidos", "productos", "marcas", "carritos", "promos", "descuentos", "stock", "venta", "historico", "contenido", "analytics"];
+  var validTabs = ["dashboard", "pedidos", "productos", "marcas", "carritos", "promos", "bundles", "descuentos", "stock", "venta", "historico", "contenido", "analytics"];
   if (tab && validTabs.indexOf(tab) !== -1) return "tab-" + tab;
   return "tab-dashboard";
 }
@@ -72,6 +72,7 @@ function switchTab(tabId, skipUrl) {
     "tab-marcas": "Marcas",
     "tab-carritos": "Carritos",
     "tab-promos": "Promos",
+    "tab-bundles": "Bundles",
     "tab-descuentos": "Descuentos por Cantidad",
     "tab-categorias": "Categor&iacute;as",
     "tab-stock": "Alertas de Stock",
@@ -96,6 +97,7 @@ function switchTab(tabId, skipUrl) {
   if (tabId === "tab-marcas") loadMarcas();
   if (tabId === "tab-carritos") loadCarritos();
   if (tabId === "tab-promos") loadPromos();
+  if (tabId === "tab-bundles") loadBundles();
   if (tabId === "tab-descuentos") { loadDescuentos(); loadDescuentosMarca(); }
   if (tabId === "tab-categorias") loadCategorias();
   if (tabId === "tab-stock") loadStockAlertas();
@@ -1299,6 +1301,48 @@ document.addEventListener("DOMContentLoaded", function() {
   document.getElementById("modal-overlay-promo").addEventListener("click", function() {
     document.getElementById("modal-promo").classList.add("hidden");
   });
+
+  // Bundle events
+  var btnNb = document.getElementById("btn-nuevo-bundle");
+  if (btnNb) btnNb.addEventListener("click", nuevoBundle);
+
+  var btnAbp = document.getElementById("btn-add-bundle-product");
+  if (btnAbp) btnAbp.addEventListener("click", function() { addBundleProductRow(); });
+
+  document.getElementById("bundle-precio").addEventListener("input", calcularPrecioBundle);
+
+  document.getElementById("bundle-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+    var id = document.getElementById("bundle-id").value;
+    var rows = document.querySelectorAll("#bundle-products-container .bundle-product-row");
+    var productos = [];
+    rows.forEach(function(row) {
+      var pid = parseInt(row.querySelector(".bundle-prod-id").value);
+      var cant = parseInt(row.querySelector(".bundle-prod-cant").value) || 1;
+      if (pid) productos.push({ producto_id: pid, cantidad: cant });
+    });
+    if (!productos.length) { document.getElementById("bundle-msg").textContent = "Agregá al menos un producto"; document.getElementById("bundle-msg").classList.remove("hidden"); return; }
+    var body = {
+      nombre: document.getElementById("bundle-nombre").value,
+      productos: productos,
+      precio_bundle: parseInt(document.getElementById("bundle-precio").value) || 0,
+      descuento_porcentaje: parseInt(document.getElementById("bundle-descuento").value) || 0
+    };
+    var method = id ? "PUT" : "POST";
+    var url = id ? "/bundles/" + id : "/bundles";
+    api(url, { method: method, body: JSON.stringify(body) }).then(function(r) {
+      if (r.error) { document.getElementById("bundle-msg").textContent = r.error; document.getElementById("bundle-msg").classList.remove("hidden"); return; }
+      document.getElementById("modal-bundle").classList.add("hidden");
+      toast("Bundle guardado"); loadBundles();
+    });
+  });
+
+  document.getElementById("modal-close-bundle").addEventListener("click", function() {
+    document.getElementById("modal-bundle").classList.add("hidden");
+  });
+  document.getElementById("modal-overlay-bundle").addEventListener("click", function() {
+    document.getElementById("modal-bundle").classList.add("hidden");
+  });
 });
 
 // ---------- DESCUENTOS POR MARCA ----------
@@ -1556,6 +1600,110 @@ function eliminarPromo(id) {
   api("/promos/" + id, { method: "DELETE" }).then(function() {
     toast("Promo eliminada");
     loadPromos();
+  });
+}
+
+// ---------- BUNDLES ----------
+var allProductosCache = [];
+
+function loadBundles() {
+  api("/productos/all").then(function(prods) { allProductosCache = prods; });
+  api("/bundles/all").then(function(bundles) {
+    var tbody = document.getElementById("bundles-tbody");
+    if (!tbody) return;
+    if (!bundles.length) { tbody.innerHTML = '<tr><td colspan="6">No hay bundles.</td></tr>'; return; }
+    tbody.innerHTML = bundles.map(function(b) {
+      var prodNames = (b.productos || []).map(function(p) { return (p.cantidad || 1) + "x #" + p.producto_id; }).join(", ");
+      var precioOriginal = 0;
+      (b.productos || []).forEach(function(p) {
+        var prod = allProductosCache.find(function(x) { return x.id === p.producto_id; });
+        if (prod) precioOriginal += prod.precio * (p.cantidad || 1);
+      });
+      var ahorro = precioOriginal > 0 ? Math.round((1 - b.precio_bundle / precioOriginal) * 100) : 0;
+      return '<tr>' +
+        '<td><strong>' + xt(b.nombre) + '</strong></td>' +
+        '<td>' + prodNames + '</td>' +
+        '<td>' + formatGs(b.precio_bundle) + ' <del style="font-size:0.7rem;color:var(--muted)">' + formatGs(precioOriginal) + '</del></td>' +
+        '<td style="color:var(--success)">-' + ahorro + '%</td>' +
+        '<td>' + (b.activo ? '✅' : '❌') + '</td>' +
+        '<td>' +
+          '<button class="btn btn-sm" onclick="editarBundle(' + b.id + ')">Editar</button> ' +
+          '<button class="btn btn-sm btn-danger" onclick="eliminarBundle(' + b.id + ')">Eliminar</button>' +
+        '</td>' +
+      '</tr>';
+    }).join("");
+  });
+}
+
+function nuevoBundle() {
+  document.getElementById("bundle-id").value = "";
+  document.getElementById("bundle-nombre").value = "";
+  document.getElementById("bundle-precio").value = "";
+  document.getElementById("bundle-descuento").value = "0";
+  document.getElementById("bundle-products-container").innerHTML = "";
+  addBundleProductRow();
+  document.getElementById("bundle-modal-title").textContent = "Nuevo Bundle";
+  document.getElementById("modal-bundle").classList.remove("hidden");
+}
+
+function addBundleProductRow(prodId, cant) {
+  var container = document.getElementById("bundle-products-container");
+  var row = document.createElement("div");
+  row.className = "bundle-product-row";
+  row.style.cssText = "display:flex;gap:8px;align-items:center;margin-top:8px";
+  var opts = '<option value="">Seleccionar...</option>';
+  for (var i = 0; i < allProductosCache.length; i++) {
+    var p = allProductosCache[i];
+    var sel = p.id === parseInt(prodId) ? " selected" : "";
+    opts += '<option value="' + p.id + '"' + sel + '>' + p.nombre + " (" + formatGs(p.precio) + ")</option>";
+  }
+  row.innerHTML = '<select class="bundle-prod-id form-input" style="flex:1">' + opts + '</select>' +
+    '<input type="number" class="bundle-prod-cant form-input" value="' + (cant || 1) + '" min="1" style="width:60px" onchange="calcularPrecioBundle()"> unid.' +
+    '<button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove();calcularPrecioBundle()">×</button>';
+  container.appendChild(row);
+}
+
+function calcularPrecioBundle() {
+  var rows = document.querySelectorAll("#bundle-products-container .bundle-product-row");
+  var total = 0;
+  rows.forEach(function(row) {
+    var prodId = parseInt(row.querySelector(".bundle-prod-id").value);
+    var cant = parseInt(row.querySelector(".bundle-prod-cant").value) || 1;
+    var prod = allProductosCache.find(function(p) { return p.id === prodId; });
+    if (prod) total += prod.precio * cant;
+  });
+  document.getElementById("bundle-precio").placeholder = formatGs(total) + " (precio individual)";
+  if (document.getElementById("bundle-precio").value) {
+    var bundlePrice = parseInt(document.getElementById("bundle-precio").value);
+    if (total > 0) {
+      document.getElementById("bundle-descuento").value = Math.round((1 - bundlePrice / total) * 100);
+    }
+  }
+}
+
+function editarBundle(id) {
+  api("/bundles/all").then(function(bundles) {
+    var b = bundles.find(function(x) { return x.id === id; });
+    if (!b) return;
+    document.getElementById("bundle-id").value = b.id;
+    document.getElementById("bundle-nombre").value = b.nombre;
+    document.getElementById("bundle-precio").value = b.precio_bundle;
+    api("/productos/all").then(function(prods) {
+      allProductosCache = prods;
+      var container = document.getElementById("bundle-products-container");
+      container.innerHTML = "";
+      (b.productos || []).forEach(function(p) { addBundleProductRow(p.producto_id, p.cantidad); });
+      calcularPrecioBundle();
+    });
+    document.getElementById("bundle-modal-title").textContent = "Editar Bundle";
+    document.getElementById("modal-bundle").classList.remove("hidden");
+  });
+}
+
+function eliminarBundle(id) {
+  if (!confirm("Eliminar este bundle?")) return;
+  api("/bundles/" + id, { method: "DELETE" }).then(function() {
+    toast("Bundle eliminado"); loadBundles();
   });
 }
 

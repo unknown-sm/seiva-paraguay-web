@@ -38,6 +38,7 @@
       <button class="sidebar-link" data-tab="tab-carritos"><span class="sidebar-icon">&#128722;</span><span class="sidebar-label">Carritos</span></button>
       <button class="sidebar-link" data-tab="tab-descuentos"><span class="sidebar-icon">&#127991;</span><span class="sidebar-label">Descuentos</span></button>
       <button class="sidebar-link" data-tab="tab-promos"><span class="sidebar-icon">&#127881;</span><span class="sidebar-label">Promos</span></button>
+      <button class="sidebar-link" data-tab="tab-bundles"><span class="sidebar-icon">&#128230;</span><span class="sidebar-label">Bundles</span></button>
       <button class="sidebar-link" data-tab="tab-categorias"><span class="sidebar-icon">&#128193;</span><span class="sidebar-label">Categor&iacute;as</span></button>
       <button class="sidebar-link" data-tab="tab-stock"><span class="sidebar-icon">&#9888;&#65039;</span><span class="sidebar-label">Alertas de Stock</span></button>
       <button class="sidebar-link" data-tab="tab-venta"><span class="sidebar-icon">&#128722;</span><span class="sidebar-label">Nueva Venta</span></button>
@@ -144,6 +145,19 @@
         <div class="card-body">
           <p class="help-text" style="margin-bottom:16px">Configur&aacute; promociones autom&aacute;ticas: BOGO (compr&aacute; X llev&aacute; Y), regalos por compra m&iacute;nima, descuentos en carrito, y cupones.</p>
           <table class="admin-table"><thead><tr><th>Nombre</th><th>Tipo</th><th>Condici&oacute;n</th><th>Beneficio</th><th>Vigencia</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="promos-tbody"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-bundles" class="tab-content">
+      <div class="card">
+        <div class="card-header" style="justify-content:space-between">
+          <h3>Bundles (Packs)</h3>
+          <button id="btn-nuevo-bundle" class="btn btn-primary">+ Nuevo</button>
+        </div>
+        <div class="card-body">
+          <p class="help-text" style="margin-bottom:16px">Cre&aacute; packs de productos con precio especial. El bundle agrega todos los productos juntos al carrito con descuento.</p>
+          <table class="admin-table"><thead><tr><th>Nombre</th><th>Productos</th><th>Precio</th><th>Ahorro</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="bundles-tbody"></tbody></table>
         </div>
       </div>
     </div>
@@ -582,6 +596,28 @@
       <button type="submit" class="btn btn-primary" style="margin-top:16px">Guardar Promo</button>
     </form>
     <p id="promo-msg" class="msg hidden"></p>
+  </div>
+</div>
+
+<div id="modal-bundle" class="modal hidden">
+  <div class="modal-overlay" id="modal-overlay-bundle"></div>
+  <div class="modal-content" style="max-width:600px">
+    <div class="modal-header"><h3 id="bundle-modal-title">Nuevo Bundle</h3><button class="modal-close" id="modal-close-bundle">&times;</button></div>
+    <form id="bundle-form">
+      <input type="hidden" id="bundle-id" value="">
+      <div class="form-group"><label>Nombre *</label><input type="text" id="bundle-nombre" required class="form-input" placeholder="Ej: Pack Bienestar"></div>
+      <div class="form-group">
+        <label>Productos del pack</label>
+        <div id="bundle-products-container"></div>
+        <button type="button" id="btn-add-bundle-product" class="btn btn-sm">+ Agregar producto</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label>Precio del pack (Gs.) *</label><input type="number" id="bundle-precio" required class="form-input"></div>
+        <div class="form-group"><label>Ahorro %</label><input type="number" id="bundle-descuento" value="0" readonly class="form-input"></div>
+      </div>
+      <button type="submit" class="btn btn-primary" style="margin-top:16px">Guardar Bundle</button>
+    </form>
+    <p id="bundle-msg" class="msg hidden"></p>
   </div>
 </div>
 

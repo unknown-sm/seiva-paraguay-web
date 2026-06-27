@@ -230,6 +230,17 @@ db.exec(`
     prioridad INTEGER DEFAULT 0,
     creado TEXT DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS bundles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    productos TEXT NOT NULL DEFAULT '[]',
+    precio_bundle INTEGER NOT NULL DEFAULT 0,
+    descuento_porcentaje INTEGER DEFAULT 0,
+    activo INTEGER DEFAULT 1,
+    imagen TEXT DEFAULT '',
+    creado TEXT DEFAULT (datetime('now'))
+  );
 `);
 
 const contenidoDefault = {
@@ -1544,6 +1555,49 @@ app.post("/api/cupones/validar", (req, res) => {
     descuento_tipo: cupon.descuento_tipo,
     minimo_compra: cupon.compra_min_monto
   });
+});
+
+// ---------- BUNDLES ----------
+app.get("/api/bundles", (req, res) => {
+  const rows = db.prepare("SELECT * FROM bundles WHERE activo = 1 ORDER BY id DESC").all();
+  res.json(rows.map(r => ({ ...r, productos: JSON.parse(r.productos || "[]") })));
+});
+
+app.get("/api/bundles/all", auth, (req, res) => {
+  const rows = db.prepare("SELECT * FROM bundles ORDER BY id DESC").all();
+  res.json(rows.map(r => ({ ...r, productos: JSON.parse(r.productos || "[]") })));
+});
+
+app.post("/api/bundles", auth, (req, res) => {
+  const { nombre, productos, precio_bundle, descuento_porcentaje, imagen } = req.body;
+  if (!nombre) return res.status(400).json({ error: "Nombre requerido" });
+  const result = db.prepare("INSERT INTO bundles (nombre, productos, precio_bundle, descuento_porcentaje, imagen) VALUES (?,?,?,?,?)").run(
+    nombre, JSON.stringify(productos || []), precio_bundle || 0, descuento_porcentaje || 0, imagen || ""
+  );
+  res.json({ id: result.lastInsertRowid });
+});
+
+app.put("/api/bundles/:id", auth, (req, res) => {
+  const { nombre, productos, precio_bundle, descuento_porcentaje, imagen, activo } = req.body;
+  db.prepare("UPDATE bundles SET nombre=?, productos=?, precio_bundle=?, descuento_porcentaje=?, imagen=?, activo=? WHERE id=?").run(
+    nombre, JSON.stringify(productos || []), precio_bundle || 0, descuento_porcentaje || 0, imagen || "",
+    activo !== undefined ? (activo ? 1 : 0) : 1,
+    req.params.id
+  );
+  res.json({ ok: true });
+});
+
+app.delete("/api/bundles/:id", auth, (req, res) => {
+  db.prepare("DELETE FROM bundles WHERE id = ?").run(req.params.id);
+  res.json({ ok: true });
+});
+
+app.patch("/api/bundles/:id/toggle", auth, (req, res) => {
+  const row = db.prepare("SELECT activo FROM bundles WHERE id = ?").get(req.params.id);
+  if (!row) return res.status(404).json({ error: "No encontrado" });
+  const nuevo = row.activo ? 0 : 1;
+  db.prepare("UPDATE bundles SET activo = ? WHERE id = ?").run(nuevo, req.params.id);
+  res.json({ activo: !!nuevo });
 });
 
 // ---------- PEDIDOS (auth: gestionar) ----------

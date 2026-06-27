@@ -160,6 +160,19 @@ export default function CartDrawer() {
                 </span>
               </div>
             )}
+
+            {totalPrice < 150000 && (
+              <div className="mb-3">
+                <div className="flex justify-between font-body text-xs mb-1" style={{ color: 'var(--theme-muted, #5C4033)' }}>
+                  <span>Te faltan {formatPrice(150000 - totalPrice)} para envío gratis</span>
+                  <span>{Math.round(totalPrice / 1500)}%</span>
+                </div>
+                <div className="h-1.5 rounded-full" style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}>
+                  <div className="h-1.5 rounded-full transition-all" style={{ width: Math.min(100, Math.round(totalPrice / 1500)) + '%', backgroundColor: 'var(--theme-primary, #1B4332)' }} />
+                </div>
+              </div>
+            )}
+
             <div className="flex justify-between items-center mb-4">
               <span className="font-body font-medium" style={{ color: 'var(--theme-muted, #5C4033)' }}>
                 Total ({totalItems} items)
