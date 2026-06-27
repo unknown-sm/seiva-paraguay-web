@@ -164,7 +164,7 @@ export default function CartDrawer() {
             {totalPrice < 150000 && (
               <div className="mb-3">
                 <div className="flex justify-between font-body text-xs mb-1" style={{ color: 'var(--theme-muted, #5C4033)' }}>
-                  <span>Te faltan {formatPrice(150000 - totalPrice)} para envío gratis</span>
+                  <span>Te faltan {formatPrice(150000 - totalPrice)} para delivery gratis</span>
                   <span>{Math.round(totalPrice / 1500)}%</span>
                 </div>
                 <div className="h-1.5 rounded-full" style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}>
