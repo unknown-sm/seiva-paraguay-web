@@ -14,12 +14,12 @@ interface ThemeColors {
 const PRESETS: Record<string, ThemeColors> = {
   natural: {
     bg: '#F2EDE6',
-    surface: '#F7F2EB',
+    surface: '#FFFFFF',
     primary: '#1B4332',
     accent: '#D4A843',
     text: '#1A1A1A',
     muted: '#6B6B6B',
-    border: '#EDE4D8',
+    border: '#F0EDE8',
     navBg: '#1B4332',
   },
   bosque: {
@@ -44,24 +44,24 @@ const PRESETS: Record<string, ThemeColors> = {
   },
   tropical: {
     bg: '#F2EDE6',
-    surface: '#F7F2EB',
+    surface: '#FFFFFF',
     primary: '#E8784A',
     accent: '#3E9B6D',
     text: '#1F1A0E',
     muted: '#7A7360',
-    border: '#EDE4D8',
+    border: '#F0E8D8',
     navBg: '#E8784A',
   },
 }
 
 const DEFAULT_COLORS: ThemeColors = {
   bg: '#F2EDE6',
-  surface: '#F7F2EB',
+  surface: '#FFFFFF',
   primary: '#1B4332',
   accent: '#D4A843',
   text: '#1A1A1A',
   muted: '#6B6B6B',
-  border: '#EDE4D8',
+  border: '#F0EDE8',
   navBg: '#1B4332',
 }
 

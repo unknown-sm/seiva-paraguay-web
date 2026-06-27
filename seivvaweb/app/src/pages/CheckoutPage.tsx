@@ -208,7 +208,7 @@ export default function CheckoutPage() {
             </h1>
 
             <div className="space-y-6">
-              <div className="rounded-xl p-6" style={{ backgroundColor: '#EDE4D8', boxShadow: '0 2px 12px rgba(27,67,50,0.06)' }}>
+              <div className="rounded-xl p-6" style={{ backgroundColor: '#FFFFFF', boxShadow: '0 4px 24px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.06)' }}>
                 <h2 className="font-body font-bold text-base mb-4" style={{ color: 'var(--theme-text, #3D2817)' }}>
                   Contacto y dirección de envío
                 </h2>
@@ -223,7 +223,7 @@ export default function CheckoutPage() {
                       onChange={e => { setTelefono(e.target.value); setErrors(prev => ({ ...prev, telefono: '' })) }}
                       placeholder="0991234567"
                       className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
-                      style={{ borderColor: errors.telefono ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#F5EDE3', color: 'var(--theme-text, #3D2817)' }}
+                      style={{ borderColor: errors.telefono ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
                     />
                     {errors.telefono && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.telefono}</p>}
                   </div>
@@ -239,7 +239,7 @@ export default function CheckoutPage() {
                         onChange={e => { setNombre(e.target.value); setErrors(prev => ({ ...prev, nombre: '' })) }}
                         placeholder="Juan"
                         className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
-                        style={{ borderColor: errors.nombre ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#F5EDE3', color: 'var(--theme-text, #3D2817)' }}
+                        style={{ borderColor: errors.nombre ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
                       />
                       {errors.nombre && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.nombre}</p>}
                     </div>
@@ -253,7 +253,7 @@ export default function CheckoutPage() {
                         onChange={e => { setApellido(e.target.value); setErrors(prev => ({ ...prev, apellido: '' })) }}
                         placeholder="Pérez"
                         className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
-                        style={{ borderColor: errors.apellido ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#F5EDE3', color: 'var(--theme-text, #3D2817)' }}
+                        style={{ borderColor: errors.apellido ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
                       />
                       {errors.apellido && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.apellido}</p>}
                     </div>
@@ -274,14 +274,14 @@ export default function CheckoutPage() {
                       onFocus={() => setShowCiudadDropdown(true)}
                       placeholder="Escribí para buscar... (ej: Asunción, Capiatá)"
                       className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
-                      style={{ borderColor: errors.ciudad ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#F5EDE3', color: 'var(--theme-text, #3D2817)' }}
+                      style={{ borderColor: errors.ciudad ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
                     />
                     {errors.ciudad && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.ciudad}</p>}
 
                     {showCiudadDropdown && (
                       <div
                         className="absolute z-50 w-full mt-1 max-h-64 overflow-y-auto rounded-lg border shadow-lg"
-                        style={{ backgroundColor: '#F5EDE3', borderColor: 'var(--theme-border, #E8E0D5)' }}
+                        style={{ backgroundColor: '#FFFFFF', borderColor: 'var(--theme-border, #E8E0D5)' }}
                       >
                         {Object.keys(groupedCiudades).length === 0 ? (
                           <div className="px-4 py-3 text-sm font-body" style={{ color: 'var(--theme-muted, #5C4033)' }}>
@@ -329,7 +329,7 @@ export default function CheckoutPage() {
                       placeholder="Calle Principal 123, casa blanca, cerca del supermercado..."
                       rows={3}
                       className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2 resize-none"
-                      style={{ borderColor: errors.direccion ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#F5EDE3', color: 'var(--theme-text, #3D2817)' }}
+                      style={{ borderColor: errors.direccion ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
                     />
                     {errors.direccion && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.direccion}</p>}
                   </div>
@@ -344,14 +344,14 @@ export default function CheckoutPage() {
                       onChange={e => setRuc(e.target.value)}
                       placeholder="Ej: 1234567-8"
                       className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
-                      style={{ borderColor: 'var(--theme-border, #E8E0D5)', backgroundColor: '#F5EDE3', color: 'var(--theme-text, #3D2817)' }}
+                      style={{ borderColor: 'var(--theme-border, #E8E0D5)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
                     />
                   </div>
                 </div>
               </div>
 
               {/* Payment Method */}
-              <div className="rounded-xl p-6" style={{ backgroundColor: '#EDE4D8', boxShadow: '0 2px 12px rgba(27,67,50,0.06)' }}>
+              <div className="rounded-xl p-6" style={{ backgroundColor: '#FFFFFF', boxShadow: '0 4px 24px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.06)' }}>
                 <h2 className="font-body font-bold text-base mb-4" style={{ color: 'var(--theme-text, #3D2817)' }}>
                   Método de pago
                 </h2>
@@ -368,7 +368,7 @@ export default function CheckoutPage() {
                       className="w-full flex items-start gap-4 p-4 rounded-lg border-2 transition-all text-left"
                       style={{
                         borderColor: metodoPago === option.value ? 'var(--theme-primary, #1B4332)' : 'var(--theme-border, #E8E0D5)',
-                        backgroundColor: metodoPago === option.value ? 'rgba(27,67,50,0.04)' : '#EDE4D8',
+                        backgroundColor: metodoPago === option.value ? 'rgba(27,67,50,0.04)' : '#FFFFFF',
                       }}
                     >
                       <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5" style={{ borderColor: metodoPago === option.value ? 'var(--theme-primary, #1B4332)' : 'var(--theme-border, #E8E0D5)' }}>
@@ -387,7 +387,7 @@ export default function CheckoutPage() {
               </div>
 
               {metodoPago === 'qr' && qrInfo.imagen && (
-                <div className="rounded-xl p-6 text-center" style={{ backgroundColor: '#F5EDE3', boxShadow: '0 2px 12px rgba(27,67,50,0.06)' }}>
+                <div className="rounded-xl p-6 text-center" style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 12px rgba(27,67,50,0.06)' }}>
                   <h3 className="font-body font-semibold text-sm mb-3" style={{ color: 'var(--theme-text, #3D2817)' }}>Escaneá el QR para pagar</h3>
                   <img src={qrInfo.imagen} alt="QR de pago" className="mx-auto rounded-lg" style={{ maxWidth: 200, maxHeight: 200 }} />
                   {qrInfo.instrucciones && (
@@ -417,7 +417,7 @@ export default function CheckoutPage() {
           <div className="order-1 lg:order-2">
             <div
               className="rounded-xl p-6 lg:sticky lg:top-24"
-              style={{ backgroundColor: '#F5EDE3', boxShadow: '0 4px 24px rgba(27,67,50,0.08)' }}
+              style={{ backgroundColor: '#FFFFFF', boxShadow: '0 4px 24px rgba(27,67,50,0.08)' }}
             >
               <h2 className="font-body font-bold text-lg mb-6" style={{ color: 'var(--theme-text, #3D2817)' }}>
                 Resumen del pedido
