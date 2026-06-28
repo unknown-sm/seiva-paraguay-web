@@ -427,14 +427,14 @@ export default function CheckoutPage() {
               <div className="space-y-4 mb-6 max-h-64 overflow-y-auto">
                 {items.map(({ product, quantity }) => (
                   <div key={product.id} className="flex gap-3">
-                    <div className="relative shrink-0">
+                    <div className="relative shrink-0" style={{ overflow: 'visible' }}>
                       <img
                         src={product.imagen}
                         alt={product.nombre}
                         className="w-16 h-16 object-contain rounded-lg"
                         style={{ backgroundColor: 'var(--theme-bg, #FAF3E8)' }}
                       />
-                      <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: 'var(--theme-text-on-primary, #FFFFFF)' }}>
+                      <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: 'var(--theme-text-on-primary, #FFFFFF)', zIndex: 10 }}>
                         {quantity}
                       </span>
                     </div>
