@@ -354,6 +354,7 @@ function editarProducto(id) {
     document.getElementById("prod-activo").checked = prod.activo;
     document.getElementById("prod-crosssell").value = (prod.crosssell || []).join(', ');
     document.getElementById("prod-upsell").value = (prod.upsell || []).join(', ');
+    document.getElementById("prod-presentaciones").value = (prod.presentaciones || []).join(', ');
     document.querySelectorAll(".prod-etiqueta").forEach(function(cb) { cb.checked = (prod.etiquetas || []).indexOf(cb.value) !== -1; });
     // Preservar imagen actual para que no se pierda al guardar sin scrape
     window._scrapedImage = prod.imagen || "";
@@ -401,6 +402,7 @@ function nuevoProducto() {
   document.getElementById("prod-activo").checked = true;
   document.getElementById("prod-crosssell").value = "";
   document.getElementById("prod-upsell").value = "";
+  document.getElementById("prod-presentaciones").value = "";
   document.querySelectorAll(".prod-etiqueta").forEach(function(cb) { cb.checked = false; });
   document.getElementById("scrape-url").value = "";
   document.getElementById("scrape-progress").style.display = "none";
@@ -504,7 +506,8 @@ document.getElementById("producto-form").addEventListener("submit", async functi
     upsell: document.getElementById("prod-upsell").value.split(',').map(s => s.trim()).filter(s => s),
     featured_order: parseInt(document.getElementById("prod-featured_order").value) || 0,
     precio_proveedor: parseInt(document.getElementById("prod-precio_proveedor").value) || null,
-    delivery_gratis: document.getElementById("prod-delivery-gratis").checked
+    delivery_gratis: document.getElementById("prod-delivery-gratis").checked,
+    presentaciones: document.getElementById("prod-presentaciones").value.split(',').map(s => s.trim()).filter(s => s)
   };
 
   var method = id ? "PUT" : "POST";

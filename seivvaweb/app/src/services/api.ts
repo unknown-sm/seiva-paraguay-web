@@ -33,6 +33,7 @@ export interface Product {
   price_tiers?: PriceTier[];
   featured_order?: number;
   delivery_gratis?: boolean;
+  presentaciones?: string[];
 }
 
 const IMAGE_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'

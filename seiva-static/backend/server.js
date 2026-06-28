@@ -292,6 +292,7 @@ try { db.exec("ALTER TABLE productos ADD COLUMN slug TEXT DEFAULT ''"); } catch 
 try { db.exec("ALTER TABLE productos ADD COLUMN featured_order INTEGER DEFAULT 0"); } catch (e) {}
 try { db.exec("ALTER TABLE productos ADD COLUMN precio_proveedor INTEGER DEFAULT NULL"); } catch (e) {}
 try { db.exec("ALTER TABLE productos ADD COLUMN delivery_gratis INTEGER DEFAULT 0"); } catch (e) {}
+try { db.exec("ALTER TABLE productos ADD COLUMN presentaciones TEXT DEFAULT '[]'"); } catch (e) {}
 
 try { db.exec("ALTER TABLE pedidos ADD COLUMN envio_costo INTEGER DEFAULT 0"); } catch (e) {}
 try { db.exec("ALTER TABLE pedidos ADD COLUMN envio_ciudad TEXT DEFAULT ''"); } catch (e) {}
@@ -554,6 +555,7 @@ function parseProducto(row) {
     ...row,
     etiquetas: JSON.parse(row.etiquetas || "[]"),
     galeria: JSON.parse(row.galeria || "[]"),
+    presentaciones: JSON.parse(row.presentaciones || "[]"),
     crosssell: JSON.parse(row.crosssell || "[]"),
     upsell: JSON.parse(row.upsell || "[]"),
     destacado: !!row.destacado,
@@ -628,15 +630,15 @@ app.get("/api/productos/all", auth, (req, res) => {
 });
 
 app.post("/api/productos", auth, (req, res) => {
-  const { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell, slug, featured_order, precio_proveedor, delivery_gratis } = req.body;
+  const { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell, slug, featured_order, precio_proveedor, delivery_gratis, presentaciones } = req.body;
   if (!nombre || !precio) return res.status(400).json({ error: "Nombre y precio requeridos" });
   const cid = categoria_id || null;
   const catName = categoria || (cid ? db.prepare("SELECT nombre FROM categorias WHERE id=?").get(cid)?.nombre : "snacks") || "snacks";
   const finalSlug = slug || generateSlug(nombre);
   const fo = parseInt(featured_order) || 0;
   const pp = precio_proveedor ? parseInt(precio_proveedor) : null;
-  const result = db.prepare("INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell, slug, featured_order, precio_proveedor, delivery_gratis) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").run(
-    nombre, precio, precio_anterior || null, catName, subcategoria || "", descripcion || "", descripcion_larga || "", JSON.stringify(galeria || []), JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, cid, sku || "", marca || "", seo_descripcion || "", JSON.stringify(crosssell || []), JSON.stringify(upsell || []), finalSlug, fo, pp, delivery_gratis ? 1 : 0
+  const result = db.prepare("INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell, slug, featured_order, precio_proveedor, delivery_gratis, presentaciones) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").run(
+    nombre, precio, precio_anterior || null, catName, subcategoria || "", descripcion || "", descripcion_larga || "", JSON.stringify(galeria || []), JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, cid, sku || "", marca || "", seo_descripcion || "", JSON.stringify(crosssell || []), JSON.stringify(upsell || []), finalSlug, fo, pp, delivery_gratis ? 1 : 0, JSON.stringify(presentaciones || [])
   );
   res.json({ id: result.lastInsertRowid, slug: finalSlug });
 });
@@ -664,6 +666,9 @@ app.put("/api/productos/:id", auth, (req, res) => {
   }
   if (delivery_gratis !== undefined) {
     db.prepare("UPDATE productos SET delivery_gratis = ? WHERE id = ?").run(delivery_gratis ? 1 : 0, req.params.id);
+  }
+  if (presentaciones !== undefined) {
+    db.prepare("UPDATE productos SET presentaciones = ? WHERE id = ?").run(JSON.stringify(presentaciones || []), req.params.id);
   }
   res.json({ ok: true, slug: finalSlug });
 });

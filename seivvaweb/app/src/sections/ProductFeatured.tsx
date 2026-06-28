@@ -18,6 +18,7 @@ export default function ProductFeatured() {
   const imageRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
   const [quantity, setQuantity] = useState(1)
+  const [selectedOption, setSelectedOption] = useState(0)
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
   const { addItem } = useCart()
@@ -147,6 +148,26 @@ export default function ProductFeatured() {
                 </>
               )}
             </div>
+
+            {/* Presentaciones */}
+            {product.presentaciones && product.presentaciones.length > 0 && (
+              <div className="animate-in flex flex-wrap gap-2 mb-6">
+                {product.presentaciones.map((opt, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedOption(i)}
+                    className="font-body text-sm px-4 py-2 rounded-full border transition-all"
+                    style={{
+                      borderColor: selectedOption === i ? 'var(--theme-accent, #D4A843)' : 'rgba(255,255,255,0.3)',
+                      backgroundColor: selectedOption === i ? 'var(--theme-accent, #D4A843)' : 'transparent',
+                      color: selectedOption === i ? 'var(--theme-text, #3D2817)' : 'rgba(255,255,255,0.85)',
+                    }}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Beneficios */}
             <div className="animate-in flex flex-wrap gap-x-6 gap-y-2 mb-8">
