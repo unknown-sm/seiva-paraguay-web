@@ -8,6 +8,12 @@ export interface PriceTier {
   descuento: number;
 }
 
+export interface Variante {
+  nombre: string
+  precio?: number
+  stock?: number
+}
+
 export interface Product {
   id: number;
   nombre: string;
@@ -33,7 +39,7 @@ export interface Product {
   price_tiers?: PriceTier[];
   featured_order?: number;
   delivery_gratis?: boolean;
-  presentaciones?: string[];
+  variantes?: Variante[];
 }
 
 const IMAGE_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
@@ -155,12 +161,17 @@ export function getTierLabel(tier: PriceTier, product: Product): string {
   return `${range} ${formatPrice(price)}`
 }
 
-export function getTierSummary(product: Product): string | null {
-  if (!product.price_tiers?.length) return null
-  const best = getBestTier(product)
-  if (!best) return null
-  const price = product.precio - best.descuento
-  return `Desde ${formatPrice(price)}`
+export function getBestDisplayPrice(product: Product): number {
+  if (!product.variantes?.length) return product.precio
+  // Buscar variante con stock disponible y precio más bajo
+  let best = product.precio
+  for (const v of product.variantes) {
+    const stockOk = v.stock === undefined || v.stock > 0
+    if (v.precio && v.precio < best && stockOk) {
+      best = v.precio
+    }
+  }
+  return best
 }
 
 export interface Promo {

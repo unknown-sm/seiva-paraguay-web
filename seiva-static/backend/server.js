@@ -499,6 +499,15 @@ function auth(req, res, next) {
   }
 }
 
+function parseVariantes(raw) {
+  try {
+    const parsed = JSON.parse(raw || "[]");
+    if (!Array.isArray(parsed)) return [];
+    // Si es array de strings viejos, convertir a objetos
+    return parsed.map(v => typeof v === "string" ? { nombre: v } : v);
+  } catch { return []; }
+}
+
 function parseProducto(row) {
   const price_tiers = db.prepare("SELECT min_cantidad, max_cantidad, descuento FROM descuentos_cantidad WHERE producto_id = ? ORDER BY min_cantidad").all(row.id);
 
@@ -555,7 +564,7 @@ function parseProducto(row) {
     ...row,
     etiquetas: JSON.parse(row.etiquetas || "[]"),
     galeria: JSON.parse(row.galeria || "[]"),
-    presentaciones: JSON.parse(row.presentaciones || "[]"),
+    variantes: parseVariantes(row.presentaciones),
     crosssell: JSON.parse(row.crosssell || "[]"),
     upsell: JSON.parse(row.upsell || "[]"),
     destacado: !!row.destacado,
@@ -630,7 +639,8 @@ app.get("/api/productos/all", auth, (req, res) => {
 });
 
 app.post("/api/productos", auth, (req, res) => {
-  const { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell, slug, featured_order, precio_proveedor, delivery_gratis, presentaciones } = req.body;
+  const { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell, slug, featured_order, precio_proveedor, delivery_gratis, variantes, presentaciones } = req.body;
+  const variantesData = variantes || presentaciones || [];
   if (!nombre || !precio) return res.status(400).json({ error: "Nombre y precio requeridos" });
   const cid = categoria_id || null;
   const catName = categoria || (cid ? db.prepare("SELECT nombre FROM categorias WHERE id=?").get(cid)?.nombre : "snacks") || "snacks";
@@ -638,13 +648,13 @@ app.post("/api/productos", auth, (req, res) => {
   const fo = parseInt(featured_order) || 0;
   const pp = precio_proveedor ? parseInt(precio_proveedor) : null;
   const result = db.prepare("INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell, slug, featured_order, precio_proveedor, delivery_gratis, presentaciones) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").run(
-    nombre, precio, precio_anterior || null, catName, subcategoria || "", descripcion || "", descripcion_larga || "", JSON.stringify(galeria || []), JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, cid, sku || "", marca || "", seo_descripcion || "", JSON.stringify(crosssell || []), JSON.stringify(upsell || []), finalSlug, fo, pp, delivery_gratis ? 1 : 0, JSON.stringify(presentaciones || [])
+    nombre, precio, precio_anterior || null, catName, subcategoria || "", descripcion || "", descripcion_larga || "", JSON.stringify(galeria || []), JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, cid, sku || "", marca || "", seo_descripcion || "", JSON.stringify(crosssell || []), JSON.stringify(upsell || []), finalSlug, fo, pp, delivery_gratis ? 1 : 0, JSON.stringify(variantesData)
   );
   res.json({ id: result.lastInsertRowid, slug: finalSlug });
 });
 
 app.put("/api/productos/:id", auth, (req, res) => {
-  const { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell, slug, featured_order, precio_proveedor, delivery_gratis } = req.body;
+  const { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell, slug, featured_order, precio_proveedor, delivery_gratis, variantes } = req.body;
   const cid = categoria_id !== undefined ? categoria_id : null;
   const catName = categoria || (cid ? db.prepare("SELECT nombre FROM categorias WHERE id=?").get(cid)?.nombre : "snacks") || "snacks";
   const finalSlug = slug || (nombre ? generateSlug(nombre, req.params.id) : undefined);
@@ -667,8 +677,8 @@ app.put("/api/productos/:id", auth, (req, res) => {
   if (delivery_gratis !== undefined) {
     db.prepare("UPDATE productos SET delivery_gratis = ? WHERE id = ?").run(delivery_gratis ? 1 : 0, req.params.id);
   }
-  if (presentaciones !== undefined) {
-    db.prepare("UPDATE productos SET presentaciones = ? WHERE id = ?").run(JSON.stringify(presentaciones || []), req.params.id);
+  if (variantes !== undefined) {
+    db.prepare("UPDATE productos SET presentaciones = ? WHERE id = ?").run(JSON.stringify(variantes || []), req.params.id);
   }
   res.json({ ok: true, slug: finalSlug });
 });

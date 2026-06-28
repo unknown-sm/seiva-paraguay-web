@@ -329,6 +329,27 @@ function toggleMarca(id, activo) {
   });
 }
 
+// ---------- VARIANTES ----------
+window.addVarianteRow = function(nombre, precio, stock) {
+  var container = document.getElementById("prod-variantes-container");
+  var row = document.createElement("div");
+  row.className = "variante-row";
+  row.style.cssText = "display:flex;gap:8px;align-items:center;margin-top:8px;padding:8px;background:var(--bg);border-radius:8px";
+  row.innerHTML = '<input type="text" class="variante-nombre form-input" style="flex:1" placeholder="Ej: 60 cápsulas" value="' + (nombre || "") + '">' +
+    '<input type="number" class="variante-precio form-input" style="width:100px" placeholder="Precio" value="' + (precio || "") + '">' +
+    '<input type="number" class="variante-stock form-input" style="width:70px" placeholder="Stock" value="' + (stock || "") + '">' +
+    '<button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">×</button>';
+  container.appendChild(row);
+};
+
+// Handler para el botón de agregar variante
+document.addEventListener("DOMContentLoaded", function() {
+  var btnAddV = document.getElementById("btn-add-variante");
+  if (btnAddV) {
+    btnAddV.addEventListener("click", function() { addVarianteRow(); });
+  }
+});
+
 function editarProducto(id) {
   api("/productos/all").then(function(data) {
     var prod = data.find(function(p) { return p.id === id; });
@@ -354,7 +375,14 @@ function editarProducto(id) {
     document.getElementById("prod-activo").checked = prod.activo;
     document.getElementById("prod-crosssell").value = (prod.crosssell || []).join(', ');
     document.getElementById("prod-upsell").value = (prod.upsell || []).join(', ');
-    document.getElementById("prod-presentaciones").value = (prod.presentaciones || []).join(', ');
+    // Variantes
+    var variantesContainer = document.getElementById("prod-variantes-container");
+    if (variantesContainer) {
+      variantesContainer.innerHTML = "";
+      (prod.variantes || (prod.presentaciones || []).map(function(n) { return { nombre: n }; })).forEach(function(v) {
+        addVarianteRow(v.nombre || v, v.precio || "", v.stock || "");
+      });
+    }
     document.querySelectorAll(".prod-etiqueta").forEach(function(cb) { cb.checked = (prod.etiquetas || []).indexOf(cb.value) !== -1; });
     // Preservar imagen actual para que no se pierda al guardar sin scrape
     window._scrapedImage = prod.imagen || "";
@@ -402,7 +430,8 @@ function nuevoProducto() {
   document.getElementById("prod-activo").checked = true;
   document.getElementById("prod-crosssell").value = "";
   document.getElementById("prod-upsell").value = "";
-  document.getElementById("prod-presentaciones").value = "";
+  var vc = document.getElementById("prod-variantes-container");
+  if (vc) vc.innerHTML = "";
   document.querySelectorAll(".prod-etiqueta").forEach(function(cb) { cb.checked = false; });
   document.getElementById("scrape-url").value = "";
   document.getElementById("scrape-progress").style.display = "none";
@@ -507,7 +536,17 @@ document.getElementById("producto-form").addEventListener("submit", async functi
     featured_order: parseInt(document.getElementById("prod-featured_order").value) || 0,
     precio_proveedor: parseInt(document.getElementById("prod-precio_proveedor").value) || null,
     delivery_gratis: document.getElementById("prod-delivery-gratis").checked,
-    presentaciones: document.getElementById("prod-presentaciones").value.split(',').map(s => s.trim()).filter(s => s)
+    variantes: (function() {
+      var rows = document.querySelectorAll("#prod-variantes-container .variante-row");
+      var arr = [];
+      rows.forEach(function(row) {
+        var nombre = row.querySelector(".variante-nombre").value.trim();
+        var precio = parseInt(row.querySelector(".variante-precio").value) || undefined;
+        var stock = parseInt(row.querySelector(".variante-stock").value);
+        if (nombre) arr.push({ nombre: nombre, precio: precio, stock: isNaN(stock) ? undefined : stock });
+      });
+      return arr;
+    })()
   };
 
   var method = id ? "PUT" : "POST";

@@ -84,6 +84,9 @@ export default function ProductFeatured() {
     ? Math.round((1 - product.precio / product.precio_anterior) * 100)
     : 0
 
+  const varianteActiva = product.variantes?.[selectedOption]
+  const displayPrice = varianteActiva?.precio || product.precio
+
   return (
     <section
       id="featured"
@@ -135,7 +138,7 @@ export default function ProductFeatured() {
             {/* Precio */}
             <div className="animate-in flex items-baseline gap-3 mb-6">
               <span className="font-body font-bold text-4xl text-white">
-                {formatPrice(product.precio)}
+                {formatPrice(displayPrice)}
               </span>
               {product.precio_anterior && product.precio_anterior > product.precio && (
                 <>
@@ -150,9 +153,9 @@ export default function ProductFeatured() {
             </div>
 
             {/* Presentaciones */}
-            {product.presentaciones && product.presentaciones.length > 0 && (
+            {product.variantes && product.variantes.length > 0 && (
               <div className="animate-in flex flex-wrap gap-2 mb-6">
-                {product.presentaciones.map((opt, i) => (
+                {product.variantes.map((v, i) => (
                   <button
                     key={i}
                     onClick={() => setSelectedOption(i)}
@@ -163,7 +166,7 @@ export default function ProductFeatured() {
                       color: selectedOption === i ? 'var(--theme-text, #3D2817)' : 'rgba(255,255,255,0.85)',
                     }}
                   >
-                    {opt}
+                    {v.nombre}{v.precio ? ' ' + formatPrice(v.precio) : ''}
                   </button>
                 ))}
               </div>
