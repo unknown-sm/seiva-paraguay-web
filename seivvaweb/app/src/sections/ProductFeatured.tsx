@@ -3,11 +3,10 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Star, Check, Shield, Minus, Plus } from 'lucide-react'
 import { useCart } from '../context/CartContext'
-import { formatPrice } from '../services/api'
+import { fetchFeatured, formatPrice, type Product } from '../services/api'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const options = ['120 cápsulas', '240 cápsulas', 'Polvo 500g']
 const benefits = [
   'Aumenta energía natural',
   'Fortalece sistema inmune',
@@ -18,11 +17,27 @@ export default function ProductFeatured() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const imageRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
-  const [selectedOption, setSelectedOption] = useState(0)
   const [quantity, setQuantity] = useState(1)
+  const [product, setProduct] = useState<Product | null>(null)
+  const [loading, setLoading] = useState(true)
   const { addItem } = useCart()
 
   useEffect(() => {
+    fetchFeatured()
+      .then(data => {
+        const first = data[0] || null
+        setProduct(first)
+        setLoading(false)
+      })
+      .catch(() => {
+        setProduct(null)
+        setLoading(false)
+      })
+  }, [])
+
+  useEffect(() => {
+    if (loading || !product) return
+
     const ctx = gsap.context(() => {
       if (imageRef.current) {
         gsap.fromTo(imageRef.current,
@@ -55,193 +70,128 @@ export default function ProductFeatured() {
     }, sectionRef)
 
     return () => ctx.revert()
-  }, [])
+  }, [loading, product])
 
   const addToCart = () => {
-    addItem({
-      id: 0,
-      nombre: 'Espirulina Orgánica Premium',
-      precio: 29990,
-      precio_anterior: 39990,
-      categoria: 'suplementos',
-      subcategoria: 'polvo',
-      descripcion: 'Superalimento verde con 70% proteína vegetal completa.',
-      imagen: '/images/product-spirulina.jpg',
-      etiquetas: ['popular'],
-      destacado: true,
-      activo: true,
-      stock: 50,
-    }, quantity)
+    if (!product) return
+    addItem(product, quantity)
   }
+
+  if (loading || !product) return null
+
+  const descuento = product.precio_anterior
+    ? Math.round((1 - product.precio / product.precio_anterior) * 100)
+    : 0
 
   return (
     <section
       id="featured"
       ref={sectionRef}
-      className="relative py-20 lg:py-24"
+      className="py-14 lg:py-20 overflow-hidden"
       style={{ backgroundColor: 'var(--theme-primary, #1B4332)' }}
     >
-      <div className="container-main grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-        {/* Left - Product Image */}
-        <div ref={imageRef} className="relative flex justify-center">
-          {/* Circular glow */}
-          <div
-            className="absolute inset-0 flex items-center justify-center pointer-events-none"
-          >
+      <div className="container-main">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          {/* Imagen */}
+          <div ref={imageRef} className="flex justify-center lg:justify-end">
+            <div className="relative">
+              <div
+                className="w-72 h-72 lg:w-96 lg:h-96 rounded-full opacity-20 absolute -inset-8"
+                style={{ backgroundColor: 'var(--theme-accent, #D4A843)' }}
+              />
+              <img
+                src={product.imagen}
+                alt={product.nombre}
+                className="relative w-72 h-72 lg:w-96 lg:h-96 object-contain drop-shadow-2xl"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+              />
+            </div>
+          </div>
+
+          {/* Contenido */}
+          <div ref={contentRef}>
             <div
-              className="w-[320px] h-[320px] sm:w-[400px] sm:h-[400px] rounded-full"
-              style={{
-                background: 'radial-gradient(circle, rgba(82,183,136,0.2) 0%, transparent 70%)',
-              }}
-            />
-          </div>
-          <img
-            src="/images/product-spirulina.jpg"
-            alt="Espirulina Orgánica Premium"
-            className="relative z-10 w-[280px] sm:w-[350px] rounded-2xl object-cover"
-            style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}
-          />
-          {/* Decorative floating leaves */}
-          <img
-            src="/images/floating-leaf.png"
-            alt=""
-            className="absolute top-4 left-4 w-12 h-12 opacity-60 float-animation"
-          />
-          <img
-            src="/images/floating-mint.png"
-            alt=""
-            className="absolute bottom-8 right-8 w-14 h-14 opacity-50 float-animation float-animation-delay-2"
-          />
-        </div>
+              className="animate-in inline-flex items-center gap-1.5 font-body font-semibold text-xs px-3 py-1 rounded-full mb-6"
+              style={{ backgroundColor: 'rgba(212,168,67,0.2)', color: 'var(--theme-accent, #D4A843)' }}
+            >
+              <Star className="w-3 h-3 fill-current" />
+              PRODUCTO DESTACADO
+            </div>
 
-        {/* Right - Product Details */}
-        <div ref={contentRef}>
-          <div
-            className="animate-in font-body font-semibold text-xs tracking-[0.12em] mb-3"
-            style={{ color: 'var(--theme-accent, #D4A843)' }}
-          >
-            PRODUCTO DESTACADO
-          </div>
+            <h2
+              className="animate-in font-display font-bold text-4xl lg:text-5xl leading-tight mb-4 text-white"
+              style={{ textShadow: '0 2px 16px rgba(0,0,0,0.3)' }}
+            >
+              {product.nombre}
+            </h2>
+            <p
+              className="animate-in font-body text-base lg:text-lg leading-relaxed mb-6"
+              style={{ color: 'rgba(255,255,255,0.8)' }}
+            >
+              {product.descripcion?.replace(/<[^>]*>/g, '') || 'Producto premium de alta calidad.'}
+            </p>
 
-          <h2
-            className="animate-in font-display font-bold text-white leading-tight"
-            style={{ fontSize: 'clamp(28px, 3.5vw, 40px)' }}
-          >
-            Espirulina Orgánica Premium
-          </h2>
+            {/* Precio */}
+            <div className="animate-in flex items-baseline gap-3 mb-6">
+              <span className="font-body font-bold text-4xl text-white">
+                {formatPrice(product.precio)}
+              </span>
+              {product.precio_anterior && product.precio_anterior > product.precio && (
+                <>
+                  <span className="font-body text-xl line-through opacity-60 text-white">
+                    {formatPrice(product.precio_anterior)}
+                  </span>
+                  <span className="font-body font-bold text-sm px-2 py-1 rounded-full" style={{ backgroundColor: '#E63946', color: '#FFF' }}>
+                    -{descuento}%
+                  </span>
+                </>
+              )}
+            </div>
 
-          <div className="animate-in flex items-center gap-2 mt-3">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className="w-4.5 h-4.5" style={{ color: 'var(--theme-accent, #D4A843)' }} fill="#D4A843" />
-            ))}
-            <span className="font-body text-sm ml-1" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              (2,847 reseñas)
-            </span>
-          </div>
-
-          <p
-            className="animate-in font-body text-base leading-relaxed mt-4 max-w-md"
-            style={{ color: 'rgba(255,255,255,0.75)' }}
-          >
-            Superalimento verde con 70% proteína vegetal completa, vitaminas B12, hierro y antioxidantes. Cultivada en aguas puras sin pesticidas ni aditivos.
-          </p>
-
-          {/* Benefits */}
-          <div className="animate-in flex flex-col gap-3 mt-6">
-            {benefits.map((b, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <Check className="w-[18px] h-[18px] flex-shrink-0" style={{ color: '#52B788' }} />
-                <span className="font-body text-sm text-white">{b}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Options */}
-          <div className="animate-in mt-7">
-            <span className="font-body text-sm block mb-3" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              Presentación:
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {options.map((opt, i) => (
-                <button
-                  key={i}
-                  onClick={() => setSelectedOption(i)}
-                  className="font-body font-semibold text-xs px-5 py-2.5 rounded-full transition-all duration-300"
-                  style={{
-                    backgroundColor: selectedOption === i ? 'var(--theme-accent, #D4A843)' : 'rgba(255,255,255,0.1)',
-                    color: selectedOption === i ? 'var(--theme-primary, #1B4332)' : 'var(--theme-text-on-primary, #FFFFFF)',
-                    border: selectedOption === i ? 'none' : '1px solid rgba(255,255,255,0.15)',
-                    letterSpacing: '0.08em',
-                  }}
-                >
-                  {opt}
-                </button>
+            {/* Beneficios */}
+            <div className="animate-in flex flex-wrap gap-x-6 gap-y-2 mb-8">
+              {benefits.map((b, i) => (
+                <div key={i} className="flex items-center gap-2 font-body text-sm" style={{ color: 'rgba(255,255,255,0.85)' }}>
+                  <Check className="w-4 h-4" style={{ color: 'var(--theme-accent, #D4A843)' }} />
+                  {b}
+                </div>
               ))}
             </div>
-          </div>
 
-          {/* Price */}
-          <div className="animate-in flex items-center gap-3 sm:gap-4 mt-7">
-            <span className="font-body font-bold text-3xl sm:text-4xl" style={{ color: 'var(--theme-accent, #D4A843)' }}>
-              {formatPrice(29990)}
-            </span>
-            <span
-              className="font-body font-bold text-lg sm:text-xl line-through"
-              style={{ color: 'rgba(255,255,255,0.4)' }}
-            >
-              {formatPrice(39990)}
-            </span>
-            <span
-              className="font-body font-semibold text-[10px] sm:text-[11px] px-2.5 py-1 rounded-full"
-              style={{ backgroundColor: '#E63946', color: '#FFFFFF', letterSpacing: '0.08em' }}
-            >
-              -25%
-            </span>
-          </div>
-
-          {/* Actions */}
-          <div className="animate-in flex flex-wrap items-center gap-4 mt-7">
-            {/* Quantity */}
-            <div
-              className="flex items-center rounded-full h-12"
-              style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
-            >
+            {/* Cantidad + Agregar */}
+            <div className="animate-in flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+              <div className="flex items-center gap-3">
+                <button onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                  className="w-10 h-10 rounded-full flex items-center justify-center border border-white/30 text-white hover:bg-white/10 transition-colors">
+                  <Minus className="w-4 h-4" />
+                </button>
+                <span className="font-body font-bold w-8 text-center text-lg text-white">{quantity}</span>
+                <button onClick={() => setQuantity(q => q + 1)}
+                  className="w-10 h-10 rounded-full flex items-center justify-center border border-white/30 text-white hover:bg-white/10 transition-colors">
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
               <button
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="w-10 h-12 flex items-center justify-center text-white hover:text-[#D4A843] transition-colors"
+                onClick={addToCart}
+                disabled={product.stock <= 0}
+                className="inline-flex items-center justify-center gap-2 font-body font-semibold text-sm px-8 py-3 rounded-full transition-all duration-300 hover:scale-105"
+                style={{
+                  backgroundColor: product.stock <= 0 ? '#6B7280' : 'var(--theme-accent, #D4A843)',
+                  color: 'var(--theme-text, #3D2817)',
+                  boxShadow: '0 4px 16px rgba(212,168,67,0.35)',
+                }}
               >
-                <Minus className="w-4 h-4" />
-              </button>
-              <span className="w-10 text-center font-body font-semibold text-white">{quantity}</span>
-              <button
-                onClick={() => setQuantity(quantity + 1)}
-                className="w-10 h-12 flex items-center justify-center text-white hover:text-[#D4A843] transition-colors"
-              >
-                <Plus className="w-4 h-4" />
+                {product.stock <= 0 ? 'Agotado' : 'Agregar al carrito'}
               </button>
             </div>
 
-            {/* Add to Cart */}
-            <button
-              onClick={addToCart}
-              className="font-body font-semibold text-sm px-9 py-3.5 rounded-full transition-all duration-300 hover:scale-[1.03]"
-              style={{
-                backgroundColor: 'var(--theme-accent, #D4A843)',
-                color: 'var(--theme-primary, #1B4332)',
-                letterSpacing: '0.08em',
-                boxShadow: '0 4px 16px rgba(212, 168, 67, 0.35)',
-              }}
-            >
-              Agregar al Carrito
-            </button>
-          </div>
-
-          {/* Trust */}
-          <div className="animate-in flex items-center gap-2 mt-4">
-            <Shield className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.5)' }} />
-            <span className="font-body text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
-              Envío seguro y garantía de satisfacción
-            </span>
+            {/* Badge */}
+            <div className="animate-in flex items-center gap-2 mt-6 pt-6 border-t border-white/10">
+              <Shield className="w-4 h-4" style={{ color: 'var(--theme-accent, #D4A843)' }} />
+              <span className="font-body text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                Calidad garantizada · Envíos a todo Paraguay
+              </span>
+            </div>
           </div>
         </div>
       </div>
