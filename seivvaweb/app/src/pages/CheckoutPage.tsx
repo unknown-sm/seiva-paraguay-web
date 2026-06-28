@@ -110,7 +110,10 @@ export default function CheckoutPage() {
     return Object.keys(newErrors).length === 0
   }
 
-    const envioGratis = envioTipo === 'delivery' && envioMinimoGratis > 0 && totalPrice >= envioMinimoGratis
+    const envioGratis = envioTipo === 'delivery' && (
+      (envioMinimoGratis > 0 && totalPrice >= envioMinimoGratis) ||
+      items.some(i => i.product.delivery_gratis)
+    );
     const envioTotal = envioTipo === 'delivery' ? (envioGratis ? 0 : envioCosto) : 0
     const totalConEnvio = totalPrice + envioTotal
 

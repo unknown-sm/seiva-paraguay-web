@@ -32,6 +32,7 @@ export interface Product {
   categoria_id?: number;
   price_tiers?: PriceTier[];
   featured_order?: number;
+  delivery_gratis?: boolean;
 }
 
 const IMAGE_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
@@ -107,7 +108,11 @@ export function getProductBadges(product: Product): { label: string; color: stri
     '2x1': { label: '2x1', color: '#EC4899' },
     '3x2': { label: '3x2', color: '#F97316' },
   }
-  return (product.etiquetas || []).map(t => badgeMap[t]).filter(Boolean)
+  const badges = (product.etiquetas || []).map(t => badgeMap[t]).filter(Boolean)
+  if (product.delivery_gratis) {
+    badges.push({ label: 'Delivery gratis', color: '#10B981' })
+  }
+  return badges
 }
 
 export function getDiscountedPrice(product: Product, quantity: number): number {
