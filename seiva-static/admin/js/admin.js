@@ -46,9 +46,111 @@ function toast(msg, type) {
 function getTabFromUrl() {
   var params = new URLSearchParams(window.location.search);
   var tab = params.get("tab");
-  var validTabs = ["dashboard", "pedidos", "productos", "marcas", "carritos", "promos", "bundles", "descuentos", "stock", "venta", "historico", "contenido", "analytics"];
+  var validTabs = ["dashboard", "pedidos", "productos", "ventas", "ofertas", "carritos", "config"];
   if (tab && validTabs.indexOf(tab) !== -1) return "tab-" + tab;
   return "tab-dashboard";
+}
+
+var subTabGroups = {
+  "tab-productos": [
+    { id: "productos", label: "Productos", loader: loadProductos },
+    { id: "marcas", label: "Marcas", loader: loadMarcas },
+    { id: "categorias", label: "Categorías", loader: loadCategorias },
+    { id: "stock", label: "Stock", loader: loadStockAlertas },
+  ],
+  "tab-ventas": [
+    { id: "venta", label: "Nueva Venta", loader: function() { renderVentaProductos(); } },
+    { id: "historico", label: "Histórico", loader: loadHistorico },
+  ],
+  "tab-config": [
+    { id: "envios", label: "Envíos", loader: loadEnvios },
+    { id: "pagos", label: "Pagos", loader: loadPagos },
+    { id: "contenido", label: "Contenido", loader: loadContenido },
+    { id: "paginas", label: "Páginas", loader: loadPaginas },
+    { id: "analytics", label: "Analytics", loader: loadAnalytics },
+    { id: "logs", label: "Logs", loader: loadErrorLogs },
+  ],
+};
+
+function renderSubTabs(parentId) {
+  var group = subTabGroups[parentId];
+  if (!group) return;
+  var existing = document.querySelector(".subtab-bar");
+  if (existing) existing.remove();
+  var existingContent = document.querySelector(".subtab-content-wrap");
+  if (existingContent) {
+    // Unwrap content
+    var children = existingContent.children;
+    while (children.length) {
+      existingContent.parentNode.insertBefore(children[0], existingContent);
+    }
+    existingContent.remove();
+  }
+
+  // Create sub-tab bar inside the active tab-content
+  var parent = document.getElementById(parentId);
+  if (!parent) return;
+
+  var bar = document.createElement("div");
+  bar.className = "subtab-bar";
+  bar.style.cssText = "display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:0";
+
+  group.forEach(function(item) {
+    var btn = document.createElement("button");
+    btn.textContent = item.label;
+    btn.className = "subtab-btn";
+    btn.setAttribute("data-subtab", item.id);
+    btn.onclick = function() { switchSubTab(parentId, item.id); };
+    btn.style.cssText = "padding:10px 16px;border:none;background:none;font-weight:500;font-size:0.85rem;color:var(--muted);cursor:pointer";
+    bar.appendChild(btn);
+  });
+
+  parent.insertBefore(bar, parent.firstChild);
+
+  // Wrap all existing content divs in a container
+  var wrap = document.createElement("div");
+  wrap.className = "subtab-content-wrap";
+  var next = bar.nextSibling;
+  while (next) {
+    var toMove = next;
+    next = next.nextSibling;
+    // Only wrap tab-content divs (not modals)
+    if (toMove.nodeType === 1 && toMove.classList && (toMove.classList.contains("tab-content") || toMove.id)) {
+      wrap.appendChild(toMove);
+    }
+  }
+  parent.appendChild(wrap);
+
+  // Activate first sub-tab
+  switchSubTab(parentId, group[0].id);
+}
+
+function switchSubTab(parentId, tabId) {
+  var group = subTabGroups[parentId];
+  if (!group) return;
+
+  // Update button styles
+  var bar = document.querySelector("#" + parentId + " .subtab-bar");
+  if (bar) {
+    bar.querySelectorAll(".subtab-btn").forEach(function(btn) {
+      var isActive = btn.getAttribute("data-subtab") === tabId;
+      btn.style.color = isActive ? "var(--primary)" : "var(--muted)";
+      btn.style.fontWeight = isActive ? "600" : "500";
+      btn.style.borderBottom = isActive ? "2px solid var(--primary)" : "none";
+      btn.style.marginBottom = isActive ? "-2px" : "0";
+    });
+  }
+
+  // Show/hide content
+  group.forEach(function(item) {
+    var contentId = "tab-" + item.id;
+    var el = document.getElementById(contentId);
+    if (el) el.style.display = item.id === tabId ? "" : "none";
+  });
+
+  // Call loader
+  var active = group.find(function(i) { return i.id === tabId; });
+  if (active && active.loader) active.loader();
 }
 
 function updateUrl(tabId) {
@@ -64,49 +166,31 @@ function switchTab(tabId, skipUrl) {
   var link = document.querySelector("[data-tab=" + tabId + "]");
   if (link) link.classList.add("active");
 
-  // Update page title
   var titles = {
     "tab-dashboard": "Dashboard",
     "tab-pedidos": "Pedidos",
     "tab-productos": "Productos",
-    "tab-marcas": "Marcas",
+    "tab-ventas": "Ventas",
+    "tab-ofertas": "Ofertas",
     "tab-carritos": "Carritos",
-    "tab-promos": "Promos",
-    "tab-bundles": "Bundles",
-    "tab-descuentos": "Descuentos por Cantidad",
-    "tab-categorias": "Categor&iacute;as",
-    "tab-stock": "Alertas de Stock",
-    "tab-venta": "Nueva Venta",
-    "tab-envios": "Env&iacute;os",
-    "tab-historico": "Histórico",
-    "tab-contenido": "Contenido",
-    "tab-paginas": "P&aacute;ginas",
-    "tab-analytics": "Analytics",
-    "tab-logs": "Log de Errores"
+    "tab-config": "Configuración",
   };
   document.getElementById("page-title").textContent = titles[tabId] || "Dashboard";
   document.title = (titles[tabId] || "Dashboard") + " — Seiva Admin";
 
-  // Update URL
   if (!skipUrl) updateUrl(tabId);
 
-  // Load data
+  // Parent tabs with sub-tabs
+  if (subTabGroups[tabId]) {
+    renderSubTabs(tabId);
+    return;
+  }
+
+  // Standalone tabs
   if (tabId === "tab-dashboard") loadDashboard();
   if (tabId === "tab-pedidos") loadPedidos();
-  if (tabId === "tab-productos") loadProductos();
-  if (tabId === "tab-marcas") loadMarcas();
+  if (tabId === "tab-ofertas") { loadDescuentos(); loadDescuentosMarca(); loadPromos(); loadBundles(); }
   if (tabId === "tab-carritos") loadCarritos();
-  if (tabId === "tab-promos") loadPromos();
-  if (tabId === "tab-bundles") loadBundles();
-  if (tabId === "tab-descuentos") { loadDescuentos(); loadDescuentosMarca(); }
-  if (tabId === "tab-categorias") loadCategorias();
-  if (tabId === "tab-stock") loadStockAlertas();
-  if (tabId === "tab-envios") loadEnvios();
-  if (tabId === "tab-historico") loadHistorico();
-  if (tabId === "tab-contenido") loadContenido();
-  if (tabId === "tab-analytics") loadAnalytics();
-  if (tabId === "tab-logs") loadErrorLogs();
-  if (tabId === "tab-paginas") loadPaginas();
 }
 
 // Handle browser back/forward
@@ -1388,6 +1472,25 @@ document.addEventListener("DOMContentLoaded", function() {
   document.getElementById("modal-overlay-bundle").addEventListener("click", function() {
     document.getElementById("modal-bundle").classList.add("hidden");
   });
+
+  // Pagos form
+  document.getElementById("pagos-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+    var body = {
+      whatsapp_activo: document.getElementById("pagos-whatsapp").checked ? "1" : "0",
+      whatsapp_numero: document.getElementById("pagos-whatsapp-numero").value,
+      efectivo_activo: document.getElementById("pagos-efectivo").checked ? "1" : "0",
+      efectivo_desc: document.getElementById("pagos-efectivo-desc").value,
+      transferencia_activo: document.getElementById("pagos-transferencia").checked ? "1" : "0",
+      transferencia_desc: document.getElementById("pagos-transferencia-desc").value,
+      qr_activo: document.getElementById("pagos-qr").checked ? "1" : "0",
+      qr_imagen: document.getElementById("pagos-qr-imagen").value,
+      qr_instrucciones: document.getElementById("pagos-qr-instrucciones").value
+    };
+    api("/contenido", { method: "PUT", body: JSON.stringify(body) }).then(function() {
+      toast("Pagos guardados");
+    });
+  });
 });
 
 // ---------- DESCUENTOS POR MARCA ----------
@@ -1751,6 +1854,64 @@ function eliminarBundle(id) {
     toast("Bundle eliminado"); loadBundles();
   });
 }
+
+// ---------- OFERTAS SUB-TABS ----------
+window.switchOfferTab = function(tab) {
+  document.querySelectorAll(".offer-tab").forEach(function(t) {
+    t.style.color = "var(--muted)";
+    t.style.fontWeight = "500";
+    t.style.borderBottom = "none";
+  });
+  document.querySelectorAll(".offer-content").forEach(function(c) { c.style.display = "none"; });
+  var activeTab = document.querySelector(".offer-tab[data-offer=" + tab + "]");
+  if (activeTab) {
+    activeTab.style.color = "var(--primary)";
+    activeTab.style.fontWeight = "600";
+    activeTab.style.borderBottom = "2px solid var(--primary)";
+  }
+  var content = document.getElementById("offer-" + tab);
+  if (content) content.style.display = "";
+  if (tab === "promos") loadPromos();
+  if (tab === "bundles") loadBundles();
+};
+
+// ---------- PAGOS ----------
+function togglePagoSection(type) {
+  var cb = document.getElementById("pagos-" + type);
+  var section = document.getElementById("pagos-section-" + type);
+  if (section) section.style.display = cb && cb.checked ? "" : "none";
+}
+
+function loadPagos() {
+  api("/contenido").then(function(data) {
+    var cbWhats = document.getElementById("pagos-whatsapp");
+    var cbEfe = document.getElementById("pagos-efectivo");
+    var cbTrans = document.getElementById("pagos-transferencia");
+    var cbQr = document.getElementById("pagos-qr");
+    if (cbWhats) cbWhats.checked = data.whatsapp_activo !== "0";
+    if (cbEfe) cbEfe.checked = data.efectivo_activo !== "0";
+    if (cbTrans) cbTrans.checked = data.transferencia_activo !== "0";
+    if (cbQr) cbQr.checked = data.qr_activo === "1";
+    if (cbWhats) document.getElementById("pagos-whatsapp-numero").value = data.whatsapp_numero || "595992120303";
+    if (cbEfe) document.getElementById("pagos-efectivo-desc").value = data.efectivo_desc || "Pagás cuando recibís el producto";
+    if (cbTrans) document.getElementById("pagos-transferencia-desc").value = data.transferencia_desc || "Te enviamos los datos para transferir";
+    if (cbQr) {
+      document.getElementById("pagos-qr-imagen").value = data.qr_imagen || "";
+      document.getElementById("pagos-qr-instrucciones").value = data.qr_instrucciones || "";
+      var prev = document.getElementById("pagos-qr-preview");
+      var prevImg = document.getElementById("pagos-qr-preview-img");
+      if (prev && prevImg && data.qr_imagen) {
+        prev.style.display = "";
+        prevImg.src = data.qr_imagen;
+      }
+    }
+    togglePagoSection("whatsapp");
+    togglePagoSection("efectivo");
+    togglePagoSection("transferencia");
+    togglePagoSection("qr");
+  });
+}
+
 
 // ---------- ERROR LOGS ----------
 function loadErrorLogs() {

@@ -34,20 +34,10 @@
       <button class="sidebar-link active" data-tab="tab-dashboard"><span class="sidebar-icon">&#128202;</span><span class="sidebar-label">Dashboard</span></button>
       <button class="sidebar-link" data-tab="tab-pedidos"><span class="sidebar-icon">&#128717;&#65039;</span><span class="sidebar-label">Pedidos</span></button>
       <button class="sidebar-link" data-tab="tab-productos"><span class="sidebar-icon">&#128230;</span><span class="sidebar-label">Productos</span></button>
-      <button class="sidebar-link" data-tab="tab-marcas"><span class="sidebar-icon">&#127991;</span><span class="sidebar-label">Marcas</span></button>
+      <button class="sidebar-link" data-tab="tab-ventas"><span class="sidebar-icon">&#128722;</span><span class="sidebar-label">Ventas</span></button>
+      <button class="sidebar-link" data-tab="tab-ofertas"><span class="sidebar-icon">&#127881;</span><span class="sidebar-label">Ofertas</span></button>
       <button class="sidebar-link" data-tab="tab-carritos"><span class="sidebar-icon">&#128722;</span><span class="sidebar-label">Carritos</span></button>
-      <button class="sidebar-link" data-tab="tab-descuentos"><span class="sidebar-icon">&#127991;</span><span class="sidebar-label">Descuentos</span></button>
-      <button class="sidebar-link" data-tab="tab-promos"><span class="sidebar-icon">&#127881;</span><span class="sidebar-label">Promos</span></button>
-      <button class="sidebar-link" data-tab="tab-bundles"><span class="sidebar-icon">&#128230;</span><span class="sidebar-label">Bundles</span></button>
-      <button class="sidebar-link" data-tab="tab-categorias"><span class="sidebar-icon">&#128193;</span><span class="sidebar-label">Categor&iacute;as</span></button>
-      <button class="sidebar-link" data-tab="tab-stock"><span class="sidebar-icon">&#9888;&#65039;</span><span class="sidebar-label">Alertas de Stock</span></button>
-      <button class="sidebar-link" data-tab="tab-venta"><span class="sidebar-icon">&#128722;</span><span class="sidebar-label">Nueva Venta</span></button>
-      <button class="sidebar-link" data-tab="tab-envios"><span class="sidebar-icon">&#128666;</span><span class="sidebar-label">Env&iacute;os</span></button>
-      <button class="sidebar-link" data-tab="tab-historico"><span class="sidebar-icon">&#128203;</span><span class="sidebar-label">Hist&oacute;rico</span></button>
-      <button class="sidebar-link" data-tab="tab-paginas"><span class="sidebar-icon">&#128196;</span><span class="sidebar-label">P&aacute;ginas</span></button>
-      <button class="sidebar-link" data-tab="tab-contenido"><span class="sidebar-icon">&#128221;</span><span class="sidebar-label">Contenido</span></button>
-      <button class="sidebar-link" data-tab="tab-analytics"><span class="sidebar-icon">&#128200;</span><span class="sidebar-label">Analytics</span></button>
-      <button class="sidebar-link" data-tab="tab-logs"><span class="sidebar-icon">&#128196;</span><span class="sidebar-label">Log de Errores</span></button>
+      <button class="sidebar-link" data-tab="tab-config"><span class="sidebar-icon">&#9881;</span><span class="sidebar-label">Configuración</span></button>
     </nav>
     <div class="sidebar-footer">
       <button id="btn-theme-toggle" class="sidebar-link"><span class="sidebar-icon" id="theme-icon">&#127769;</span><span class="sidebar-label">Modo oscuro</span></button>
@@ -112,52 +102,63 @@
       </div>
     </div>
 
-    <div id="tab-descuentos" class="tab-content">
-      <div class="card">
-        <div class="card-header" style="justify-content:space-between">
-          <h3>Descuentos por Cantidad (Producto)</h3>
-          <button id="btn-nuevo-descuento" class="btn btn-primary">+ Nuevo</button>
-        </div>
-        <div class="card-body">
-          <p class="help-text" style="margin-bottom:16px">Configurá descuentos automáticos según la cantidad de productos que el cliente compre. Ej: 2-10 unidades → ₲10.000 menos por unidad.</p>
-          <div id="descuentos-lista"></div>
+    <div id="tab-ofertas" class="tab-content">
+      <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border)">
+        <button class="offer-tab active" data-offer="descuentos" onclick="switchOfferTab('descuentos')" style="padding:10px 16px;border:none;background:none;font-weight:600;font-size:0.85rem;color:var(--primary);border-bottom:2px solid var(--primary);margin-bottom:-2px;cursor:pointer">Por Cantidad</button>
+        <button class="offer-tab" data-offer="descuentos-marca" onclick="switchOfferTab('descuentos-marca')" style="padding:10px 16px;border:none;background:none;font-weight:500;font-size:0.85rem;color:var(--muted);cursor:pointer">Por Marca</button>
+        <button class="offer-tab" data-offer="promos" onclick="switchOfferTab('promos')" style="padding:10px 16px;border:none;background:none;font-weight:500;font-size:0.85rem;color:var(--muted);cursor:pointer">Promos</button>
+        <button class="offer-tab" data-offer="bundles" onclick="switchOfferTab('bundles')" style="padding:10px 16px;border:none;background:none;font-weight:500;font-size:0.85rem;color:var(--muted);cursor:pointer">Bundles</button>
+      </div>
+
+      <div id="offer-descuentos" class="offer-content">
+        <div class="card">
+          <div class="card-header" style="justify-content:space-between">
+            <h3>Descuentos por Cantidad</h3>
+            <button id="btn-nuevo-descuento" class="btn btn-primary">+ Nuevo</button>
+          </div>
+          <div class="card-body">
+            <p class="help-text" style="margin-bottom:16px">Configurá descuentos automáticos según la cantidad de productos que el cliente compre.</p>
+            <div id="descuentos-lista"></div>
+          </div>
         </div>
       </div>
 
-      <div class="card" style="margin-top:24px">
-        <div class="card-header" style="justify-content:space-between">
-          <h3>Descuentos por Marca</h3>
-          <button id="btn-nuevo-descuento-marca" class="btn btn-primary">+ Nuevo</button>
-        </div>
-        <div class="card-body">
-          <p class="help-text" style="margin-bottom:16px">Aplica descuento a todos los productos de una marca. Podés excluir productos específicos o incluir solo algunos.</p>
-          <div id="descuentos-marca-lista"></div>
-        </div>
-      </div>
-    </div>
-
-    <div id="tab-promos" class="tab-content">
-      <div class="card">
-        <div class="card-header" style="justify-content:space-between">
-          <h3>Promos y Ofertas</h3>
-          <button id="btn-nueva-promo" class="btn btn-primary">+ Nueva Promo</button>
-        </div>
-        <div class="card-body">
-          <p class="help-text" style="margin-bottom:16px">Configur&aacute; promociones autom&aacute;ticas: BOGO (compr&aacute; X llev&aacute; Y), regalos por compra m&iacute;nima, descuentos en carrito, y cupones.</p>
-          <table class="admin-table"><thead><tr><th>Nombre</th><th>Tipo</th><th>Condici&oacute;n</th><th>Beneficio</th><th>Vigencia</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="promos-tbody"></tbody></table>
+      <div id="offer-descuentos-marca" class="offer-content" style="display:none">
+        <div class="card">
+          <div class="card-header" style="justify-content:space-between">
+            <h3>Descuentos por Marca</h3>
+            <button id="btn-nuevo-descuento-marca" class="btn btn-primary">+ Nuevo</button>
+          </div>
+          <div class="card-body">
+            <p class="help-text" style="margin-bottom:16px">Aplica descuento a todos los productos de una marca. Podés excluir productos específicos o incluir solo algunos.</p>
+            <div id="descuentos-marca-lista"></div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div id="tab-bundles" class="tab-content">
-      <div class="card">
-        <div class="card-header" style="justify-content:space-between">
-          <h3>Bundles (Packs)</h3>
-          <button id="btn-nuevo-bundle" class="btn btn-primary">+ Nuevo</button>
+      <div id="offer-promos" class="offer-content" style="display:none">
+        <div class="card">
+          <div class="card-header" style="justify-content:space-between">
+            <h3>Promos y Ofertas</h3>
+            <button id="btn-nueva-promo" class="btn btn-primary">+ Nueva Promo</button>
+          </div>
+          <div class="card-body">
+            <p class="help-text" style="margin-bottom:16px">BOGO, regalos, descuentos en carrito y cupones.</p>
+            <table class="admin-table"><thead><tr><th>Nombre</th><th>Tipo</th><th>Condici&oacute;n</th><th>Beneficio</th><th>Vigencia</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="promos-tbody"></tbody></table>
+          </div>
         </div>
-        <div class="card-body">
-          <p class="help-text" style="margin-bottom:16px">Cre&aacute; packs de productos con precio especial. El bundle agrega todos los productos juntos al carrito con descuento.</p>
-          <table class="admin-table"><thead><tr><th>Nombre</th><th>Productos</th><th>Precio</th><th>Ahorro</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="bundles-tbody"></tbody></table>
+      </div>
+
+      <div id="offer-bundles" class="offer-content" style="display:none">
+        <div class="card">
+          <div class="card-header" style="justify-content:space-between">
+            <h3>Bundles (Packs)</h3>
+            <button id="btn-nuevo-bundle" class="btn btn-primary">+ Nuevo</button>
+          </div>
+          <div class="card-body">
+            <p class="help-text" style="margin-bottom:16px">Creá packs de productos con precio especial.</p>
+            <table class="admin-table"><thead><tr><th>Nombre</th><th>Productos</th><th>Precio</th><th>Ahorro</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="bundles-tbody"></tbody></table>
+          </div>
         </div>
       </div>
     </div>
@@ -236,6 +237,64 @@
           <button type="submit" class="btn btn-primary">Guardar</button>
         </form>
         <p id="env-msg" class="msg hidden"></p>
+      </div>
+    </div>
+
+    <div id="tab-pagos" class="tab-content">
+      <div class="card" style="max-width:680px">
+        <div class="card-header"><h3>Métodos de Pago</h3></div>
+        <div class="card-body">
+          <form id="pagos-form">
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div class="form-group" style="padding:12px;border:1px solid var(--border);border-radius:8px">
+                <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer">
+                  <input type="checkbox" id="pagos-whatsapp" checked onchange="togglePagoSection('whatsapp')"> WhatsApp
+                </label>
+                <div id="pagos-section-whatsapp" class="pago-section" style="margin-top:8px">
+                  <label class="block font-body text-xs mb-1" style="color:var(--muted)">Número de WhatsApp</label>
+                  <input type="text" id="pagos-whatsapp-numero" class="form-input" placeholder="595992120303">
+                </div>
+              </div>
+
+              <div class="form-group" style="padding:12px;border:1px solid var(--border);border-radius:8px">
+                <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer">
+                  <input type="checkbox" id="pagos-efectivo" checked onchange="togglePagoSection('efectivo')"> Efectivo
+                </label>
+                <div id="pagos-section-efectivo" class="pago-section" style="margin-top:8px">
+                  <label class="block font-body text-xs mb-1" style="color:var(--muted)">Descripción</label>
+                  <input type="text" id="pagos-efectivo-desc" class="form-input" placeholder="Pagás cuando recibís el producto">
+                </div>
+              </div>
+
+              <div class="form-group" style="padding:12px;border:1px solid var(--border);border-radius:8px">
+                <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer">
+                  <input type="checkbox" id="pagos-transferencia" checked onchange="togglePagoSection('transferencia')"> Transferencia
+                </label>
+                <div id="pagos-section-transferencia" class="pago-section" style="margin-top:8px">
+                  <label class="block font-body text-xs mb-1" style="color:var(--muted)">Descripción</label>
+                  <input type="text" id="pagos-transferencia-desc" class="form-input" placeholder="Te enviamos los datos para transferir">
+                </div>
+              </div>
+
+              <div class="form-group" style="padding:12px;border:1px solid var(--border);border-radius:8px">
+                <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer">
+                  <input type="checkbox" id="pagos-qr" onchange="togglePagoSection('qr')"> Pago QR
+                </label>
+                <div id="pagos-section-qr" class="pago-section" style="margin-top:8px">
+                  <label class="block font-body text-xs mb-1" style="color:var(--muted)">URL de imagen QR</label>
+                  <input type="text" id="pagos-qr-imagen" class="form-input" placeholder="https://...">
+                  <label class="block font-body text-xs mb-1 mt-2" style="color:var(--muted)">Instrucciones</label>
+                  <textarea id="pagos-qr-instrucciones" rows="3" class="form-input" placeholder="Escaneá el QR y envianos el comprobante..."></textarea>
+                  <div id="pagos-qr-preview" style="margin-top:8px;display:none">
+                    <img id="pagos-qr-preview-img" src="" style="max-width:200px;border-radius:8px;border:1px solid var(--border)">
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top:16px">Guardar</button>
+          </form>
+          <p id="pagos-msg" class="msg hidden"></p>
+        </div>
       </div>
     </div>
 
