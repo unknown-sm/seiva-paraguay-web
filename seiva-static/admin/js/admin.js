@@ -46,7 +46,7 @@ function toast(msg, type) {
 function getTabFromUrl() {
   var params = new URLSearchParams(window.location.search);
   var tab = params.get("tab");
-  var validTabs = ["dashboard", "pedidos", "productos", "ventas", "ofertas", "carritos", "config"];
+  var validTabs = ["dashboard", "pedidos", "productos", "marcas", "carritos", "ofertas", "pagos", "stock", "venta", "historico", "contenido", "analytics"];
   if (tab && validTabs.indexOf(tab) !== -1) return "tab-" + tab;
   return "tab-dashboard";
 }
@@ -64,28 +64,49 @@ function switchTab(tabId, skipUrl) {
   var link = document.querySelector("[data-tab=" + tabId + "]");
   if (link) link.classList.add("active");
 
+  // Update page title
   var titles = {
     "tab-dashboard": "Dashboard",
     "tab-pedidos": "Pedidos",
     "tab-productos": "Productos",
-    "tab-ventas": "Ventas",
-    "tab-ofertas": "Ofertas",
+    "tab-marcas": "Marcas",
     "tab-carritos": "Carritos",
-    "tab-config": "Configuración",
+    "tab-ofertas": "Ofertas",
+    "tab-pagos": "Pagos",
+    "tab-descuentos": "Descuentos por Cantidad",
+    "tab-categorias": "Categor&iacute;as",
+    "tab-stock": "Alertas de Stock",
+    "tab-venta": "Nueva Venta",
+    "tab-envios": "Env&iacute;os",
+    "tab-historico": "Histórico",
+    "tab-contenido": "Contenido",
+    "tab-paginas": "P&aacute;ginas",
+    "tab-analytics": "Analytics",
+    "tab-logs": "Log de Errores"
   };
   document.getElementById("page-title").textContent = titles[tabId] || "Dashboard";
   document.title = (titles[tabId] || "Dashboard") + " — Seiva Admin";
 
+  // Update URL
   if (!skipUrl) updateUrl(tabId);
 
-  // Standalone tabs
+  // Load data
   if (tabId === "tab-dashboard") loadDashboard();
   if (tabId === "tab-pedidos") loadPedidos();
   if (tabId === "tab-productos") loadProductos();
-  if (tabId === "tab-ventas") { renderVentaProductos(); }
-  if (tabId === "tab-ofertas") { loadDescuentos(); loadDescuentosMarca(); loadPromos(); loadBundles(); }
+  if (tabId === "tab-marcas") loadMarcas();
   if (tabId === "tab-carritos") loadCarritos();
-  if (tabId === "tab-config") loadPagos();
+  if (tabId === "tab-ofertas") { loadDescuentos(); loadDescuentosMarca(); loadPromos(); loadBundles(); }
+  if (tabId === "tab-pagos") loadPagos();
+  if (tabId === "tab-descuentos") { loadDescuentos(); loadDescuentosMarca(); }
+  if (tabId === "tab-categorias") loadCategorias();
+  if (tabId === "tab-stock") loadStockAlertas();
+  if (tabId === "tab-envios") loadEnvios();
+  if (tabId === "tab-historico") loadHistorico();
+  if (tabId === "tab-contenido") loadContenido();
+  if (tabId === "tab-analytics") loadAnalytics();
+  if (tabId === "tab-logs") loadErrorLogs();
+  if (tabId === "tab-paginas") loadPaginas();
 }
 
 // Handle browser back/forward
@@ -1369,23 +1390,23 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   // Pagos form
-  document.getElementById("pagos-form").addEventListener("submit", function(e) {
-    e.preventDefault();
-    var body = {
-      whatsapp_activo: document.getElementById("pagos-whatsapp").checked ? "1" : "0",
-      whatsapp_numero: document.getElementById("pagos-whatsapp-numero").value,
-      efectivo_activo: document.getElementById("pagos-efectivo").checked ? "1" : "0",
-      efectivo_desc: document.getElementById("pagos-efectivo-desc").value,
-      transferencia_activo: document.getElementById("pagos-transferencia").checked ? "1" : "0",
-      transferencia_desc: document.getElementById("pagos-transferencia-desc").value,
-      qr_activo: document.getElementById("pagos-qr").checked ? "1" : "0",
-      qr_imagen: document.getElementById("pagos-qr-imagen").value,
-      qr_instrucciones: document.getElementById("pagos-qr-instrucciones").value
-    };
-    api("/contenido", { method: "PUT", body: JSON.stringify(body) }).then(function() {
-      toast("Pagos guardados");
+  var pagosForm = document.getElementById("pagos-form");
+  if (pagosForm) {
+    pagosForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      api("/contenido", { method: "PUT", body: JSON.stringify({
+        whatsapp_activo: document.getElementById("pagos-whatsapp").checked ? "1" : "0",
+        whatsapp_numero: document.getElementById("pagos-whatsapp-numero").value,
+        efectivo_activo: document.getElementById("pagos-efectivo").checked ? "1" : "0",
+        efectivo_desc: document.getElementById("pagos-efectivo-desc").value,
+        transferencia_activo: document.getElementById("pagos-transferencia").checked ? "1" : "0",
+        transferencia_desc: document.getElementById("pagos-transferencia-desc").value,
+        qr_activo: document.getElementById("pagos-qr").checked ? "1" : "0",
+        qr_imagen: document.getElementById("pagos-qr-imagen").value,
+        qr_instrucciones: document.getElementById("pagos-qr-instrucciones").value
+      }) }).then(function() { toast("Pagos guardados"); });
     });
-  });
+  }
 });
 
 // ---------- DESCUENTOS POR MARCA ----------
@@ -1750,108 +1771,40 @@ function eliminarBundle(id) {
   });
 }
 
-// ---------- OFERTAS SUB-TABS ----------
 window.switchOfferTab = function(tab) {
   document.querySelectorAll(".offer-tab").forEach(function(t) {
-    t.style.color = "var(--muted)";
-    t.style.fontWeight = "500";
-    t.style.borderBottom = "none";
+    t.style.color = "var(--muted)"; t.style.fontWeight = "500"; t.style.borderBottom = "none"; t.style.marginBottom = "0";
   });
   document.querySelectorAll(".offer-content").forEach(function(c) { c.style.display = "none"; });
-  var activeTab = document.querySelector(".offer-tab[data-offer=" + tab + "]");
-  if (activeTab) {
-    activeTab.style.color = "var(--primary)";
-    activeTab.style.fontWeight = "600";
-    activeTab.style.borderBottom = "2px solid var(--primary)";
-  }
+  var btn = document.querySelector(".offer-tab[onclick*='" + tab + "']");
+  if (btn) { btn.style.color = "var(--primary)"; btn.style.fontWeight = "600"; btn.style.borderBottom = "2px solid var(--primary)"; btn.style.marginBottom = "-2px"; }
   var content = document.getElementById("offer-" + tab);
   if (content) content.style.display = "";
-  if (tab === "promos") loadPromos();
-  if (tab === "bundles") loadBundles();
 };
 
-window.switchProdTab = function(tab) {
-  document.querySelectorAll("#tab-productos .subtab-btn").forEach(function(b) {
-    b.style.color = "var(--muted)"; b.style.fontWeight = "500"; b.style.borderBottom = "none";
-  });
-  document.querySelectorAll("#tab-productos .subtab-content").forEach(function(c) { c.style.display = "none"; });
-  var content = document.getElementById("prod-content-" + tab);
-  if (content) content.style.display = "";
-  var btn = document.querySelector("#tab-productos .subtab-btn[onclick*='" + tab + "']");
-  if (btn) { btn.style.color = "var(--primary)"; btn.style.fontWeight = "600"; btn.style.borderBottom = "2px solid var(--primary)"; }
-  if (tab === "productos-list") loadProductos();
-  else if (tab === "marcas") loadMarcas();
-  else if (tab === "categorias") loadCategorias();
-  else if (tab === "stock") loadStockAlertas();
-};
-
-window.switchVentasTab = function(tab) {
-  document.querySelectorAll("#tab-ventas .subtab-btn").forEach(function(b) {
-    b.style.color = "var(--muted)"; b.style.fontWeight = "500"; b.style.borderBottom = "none";
-  });
-  document.querySelectorAll("#tab-ventas .subtab-content").forEach(function(c) { c.style.display = "none"; });
-  var content = document.getElementById("ventas-content-" + tab);
-  if (content) content.style.display = "";
-  var btn = document.querySelector("#tab-ventas .subtab-btn[onclick*='" + tab + "']");
-  if (btn) { btn.style.color = "var(--primary)"; btn.style.fontWeight = "600"; btn.style.borderBottom = "2px solid var(--primary)"; }
-  if (tab === "venta") renderVentaProductos();
-  else if (tab === "historico") loadHistorico();
-};
-
-window.switchConfigTab = function(tab) {
-  document.querySelectorAll("#tab-config .subtab-btn").forEach(function(b) {
-    b.style.color = "var(--muted)"; b.style.fontWeight = "500"; b.style.borderBottom = "none";
-  });
-  document.querySelectorAll("#tab-config .subtab-content").forEach(function(c) { c.style.display = "none"; });
-  var content = document.getElementById("config-content-" + tab);
-  if (content) content.style.display = "";
-  var btn = document.querySelector("#tab-config .subtab-btn[onclick*='" + tab + "']");
-  if (btn) { btn.style.color = "var(--primary)"; btn.style.fontWeight = "600"; btn.style.borderBottom = "2px solid var(--primary)"; }
-  if (tab === "envios") loadEnvios();
-  else if (tab === "pagos") loadPagos();
-  else if (tab === "contenido") loadContenido();
-  else if (tab === "paginas") loadPaginas();
-  else if (tab === "analytics") loadAnalytics();
-  else if (tab === "logs") loadErrorLogs();
-};
-
-// ---------- PAGOS ----------
 function togglePagoSection(type) {
   var cb = document.getElementById("pagos-" + type);
   var section = document.getElementById("pagos-section-" + type);
-  if (section) section.style.display = cb && cb.checked ? "" : "none";
+  if (section && cb) section.style.display = cb.checked ? "" : "none";
 }
 
 function loadPagos() {
   api("/contenido").then(function(data) {
-    var cbWhats = document.getElementById("pagos-whatsapp");
-    var cbEfe = document.getElementById("pagos-efectivo");
-    var cbTrans = document.getElementById("pagos-transferencia");
-    var cbQr = document.getElementById("pagos-qr");
-    if (cbWhats) cbWhats.checked = data.whatsapp_activo !== "0";
-    if (cbEfe) cbEfe.checked = data.efectivo_activo !== "0";
-    if (cbTrans) cbTrans.checked = data.transferencia_activo !== "0";
-    if (cbQr) cbQr.checked = data.qr_activo === "1";
-    if (cbWhats) document.getElementById("pagos-whatsapp-numero").value = data.whatsapp_numero || "595992120303";
-    if (cbEfe) document.getElementById("pagos-efectivo-desc").value = data.efectivo_desc || "Pagás cuando recibís el producto";
-    if (cbTrans) document.getElementById("pagos-transferencia-desc").value = data.transferencia_desc || "Te enviamos los datos para transferir";
-    if (cbQr) {
-      document.getElementById("pagos-qr-imagen").value = data.qr_imagen || "";
-      document.getElementById("pagos-qr-instrucciones").value = data.qr_instrucciones || "";
-      var prev = document.getElementById("pagos-qr-preview");
-      var prevImg = document.getElementById("pagos-qr-preview-img");
-      if (prev && prevImg && data.qr_imagen) {
-        prev.style.display = "";
-        prevImg.src = data.qr_imagen;
-      }
-    }
+    document.getElementById("pagos-whatsapp").checked = data.whatsapp_activo !== "0";
+    document.getElementById("pagos-efectivo").checked = data.efectivo_activo !== "0";
+    document.getElementById("pagos-transferencia").checked = data.transferencia_activo !== "0";
+    document.getElementById("pagos-qr").checked = data.qr_activo === "1";
+    document.getElementById("pagos-whatsapp-numero").value = data.whatsapp_numero || "595992120303";
+    document.getElementById("pagos-efectivo-desc").value = data.efectivo_desc || "Pagás cuando recibís el producto";
+    document.getElementById("pagos-transferencia-desc").value = data.transferencia_desc || "Te enviamos los datos para transferir";
+    document.getElementById("pagos-qr-imagen").value = data.qr_imagen || "";
+    document.getElementById("pagos-qr-instrucciones").value = data.qr_instrucciones || "";
     togglePagoSection("whatsapp");
     togglePagoSection("efectivo");
     togglePagoSection("transferencia");
     togglePagoSection("qr");
   });
 }
-
 
 // ---------- ERROR LOGS ----------
 function loadErrorLogs() {
