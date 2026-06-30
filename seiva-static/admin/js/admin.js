@@ -51,108 +51,6 @@ function getTabFromUrl() {
   return "tab-dashboard";
 }
 
-var subTabGroups = {
-  "tab-productos": [
-    { id: "productos", label: "Productos", loader: loadProductos },
-    { id: "marcas", label: "Marcas", loader: loadMarcas },
-    { id: "categorias", label: "Categorías", loader: loadCategorias },
-    { id: "stock", label: "Stock", loader: loadStockAlertas },
-  ],
-  "tab-ventas": [
-    { id: "venta", label: "Nueva Venta", loader: function() { renderVentaProductos(); } },
-    { id: "historico", label: "Histórico", loader: loadHistorico },
-  ],
-  "tab-config": [
-    { id: "envios", label: "Envíos", loader: loadEnvios },
-    { id: "pagos", label: "Pagos", loader: loadPagos },
-    { id: "contenido", label: "Contenido", loader: loadContenido },
-    { id: "paginas", label: "Páginas", loader: loadPaginas },
-    { id: "analytics", label: "Analytics", loader: loadAnalytics },
-    { id: "logs", label: "Logs", loader: loadErrorLogs },
-  ],
-};
-
-function renderSubTabs(parentId) {
-  var group = subTabGroups[parentId];
-  if (!group) return;
-  var existing = document.querySelector(".subtab-bar");
-  if (existing) existing.remove();
-  var existingContent = document.querySelector(".subtab-content-wrap");
-  if (existingContent) {
-    // Unwrap content
-    var children = existingContent.children;
-    while (children.length) {
-      existingContent.parentNode.insertBefore(children[0], existingContent);
-    }
-    existingContent.remove();
-  }
-
-  // Create sub-tab bar inside the active tab-content
-  var parent = document.getElementById(parentId);
-  if (!parent) return;
-
-  var bar = document.createElement("div");
-  bar.className = "subtab-bar";
-  bar.style.cssText = "display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:0";
-
-  group.forEach(function(item) {
-    var btn = document.createElement("button");
-    btn.textContent = item.label;
-    btn.className = "subtab-btn";
-    btn.setAttribute("data-subtab", item.id);
-    btn.onclick = function() { switchSubTab(parentId, item.id); };
-    btn.style.cssText = "padding:10px 16px;border:none;background:none;font-weight:500;font-size:0.85rem;color:var(--muted);cursor:pointer";
-    bar.appendChild(btn);
-  });
-
-  parent.insertBefore(bar, parent.firstChild);
-
-  // Wrap all existing content divs in a container
-  var wrap = document.createElement("div");
-  wrap.className = "subtab-content-wrap";
-  var next = bar.nextSibling;
-  while (next) {
-    var toMove = next;
-    next = next.nextSibling;
-    // Only wrap tab-content divs (not modals)
-    if (toMove.nodeType === 1 && toMove.classList && (toMove.classList.contains("tab-content") || toMove.id)) {
-      wrap.appendChild(toMove);
-    }
-  }
-  parent.appendChild(wrap);
-
-  // Activate first sub-tab
-  switchSubTab(parentId, group[0].id);
-}
-
-function switchSubTab(parentId, tabId) {
-  var group = subTabGroups[parentId];
-  if (!group) return;
-
-  // Update button styles
-  var bar = document.querySelector("#" + parentId + " .subtab-bar");
-  if (bar) {
-    bar.querySelectorAll(".subtab-btn").forEach(function(btn) {
-      var isActive = btn.getAttribute("data-subtab") === tabId;
-      btn.style.color = isActive ? "var(--primary)" : "var(--muted)";
-      btn.style.fontWeight = isActive ? "600" : "500";
-      btn.style.borderBottom = isActive ? "2px solid var(--primary)" : "none";
-      btn.style.marginBottom = isActive ? "-2px" : "0";
-    });
-  }
-
-  // Show/hide content
-  group.forEach(function(item) {
-    var contentId = "tab-" + item.id;
-    var el = document.getElementById(contentId);
-    if (el) el.style.display = item.id === tabId ? "" : "none";
-  });
-
-  // Call loader
-  var active = group.find(function(i) { return i.id === tabId; });
-  if (active && active.loader) active.loader();
-}
-
 function updateUrl(tabId) {
   var tab = tabId.replace("tab-", "");
   var url = window.location.pathname + "?tab=" + tab;
@@ -180,17 +78,14 @@ function switchTab(tabId, skipUrl) {
 
   if (!skipUrl) updateUrl(tabId);
 
-  // Parent tabs with sub-tabs
-  if (subTabGroups[tabId]) {
-    renderSubTabs(tabId);
-    return;
-  }
-
   // Standalone tabs
   if (tabId === "tab-dashboard") loadDashboard();
   if (tabId === "tab-pedidos") loadPedidos();
+  if (tabId === "tab-productos") loadProductos();
+  if (tabId === "tab-ventas") { renderVentaProductos(); }
   if (tabId === "tab-ofertas") { loadDescuentos(); loadDescuentosMarca(); loadPromos(); loadBundles(); }
   if (tabId === "tab-carritos") loadCarritos();
+  if (tabId === "tab-config") loadPagos();
 }
 
 // Handle browser back/forward
@@ -1873,6 +1768,51 @@ window.switchOfferTab = function(tab) {
   if (content) content.style.display = "";
   if (tab === "promos") loadPromos();
   if (tab === "bundles") loadBundles();
+};
+
+window.switchProdTab = function(tab) {
+  document.querySelectorAll("#tab-productos .subtab-btn").forEach(function(b) {
+    b.style.color = "var(--muted)"; b.style.fontWeight = "500"; b.style.borderBottom = "none";
+  });
+  document.querySelectorAll("#tab-productos .subtab-content").forEach(function(c) { c.style.display = "none"; });
+  var content = document.getElementById("prod-content-" + tab);
+  if (content) content.style.display = "";
+  var btn = document.querySelector("#tab-productos .subtab-btn[onclick*='" + tab + "']");
+  if (btn) { btn.style.color = "var(--primary)"; btn.style.fontWeight = "600"; btn.style.borderBottom = "2px solid var(--primary)"; }
+  if (tab === "productos-list") loadProductos();
+  else if (tab === "marcas") loadMarcas();
+  else if (tab === "categorias") loadCategorias();
+  else if (tab === "stock") loadStockAlertas();
+};
+
+window.switchVentasTab = function(tab) {
+  document.querySelectorAll("#tab-ventas .subtab-btn").forEach(function(b) {
+    b.style.color = "var(--muted)"; b.style.fontWeight = "500"; b.style.borderBottom = "none";
+  });
+  document.querySelectorAll("#tab-ventas .subtab-content").forEach(function(c) { c.style.display = "none"; });
+  var content = document.getElementById("ventas-content-" + tab);
+  if (content) content.style.display = "";
+  var btn = document.querySelector("#tab-ventas .subtab-btn[onclick*='" + tab + "']");
+  if (btn) { btn.style.color = "var(--primary)"; btn.style.fontWeight = "600"; btn.style.borderBottom = "2px solid var(--primary)"; }
+  if (tab === "venta") renderVentaProductos();
+  else if (tab === "historico") loadHistorico();
+};
+
+window.switchConfigTab = function(tab) {
+  document.querySelectorAll("#tab-config .subtab-btn").forEach(function(b) {
+    b.style.color = "var(--muted)"; b.style.fontWeight = "500"; b.style.borderBottom = "none";
+  });
+  document.querySelectorAll("#tab-config .subtab-content").forEach(function(c) { c.style.display = "none"; });
+  var content = document.getElementById("config-content-" + tab);
+  if (content) content.style.display = "";
+  var btn = document.querySelector("#tab-config .subtab-btn[onclick*='" + tab + "']");
+  if (btn) { btn.style.color = "var(--primary)"; btn.style.fontWeight = "600"; btn.style.borderBottom = "2px solid var(--primary)"; }
+  if (tab === "envios") loadEnvios();
+  else if (tab === "pagos") loadPagos();
+  else if (tab === "contenido") loadContenido();
+  else if (tab === "paginas") loadPaginas();
+  else if (tab === "analytics") loadAnalytics();
+  else if (tab === "logs") loadErrorLogs();
 };
 
 // ---------- PAGOS ----------

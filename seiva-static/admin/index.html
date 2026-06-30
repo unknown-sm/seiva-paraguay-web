@@ -69,25 +69,50 @@
       </div>
     </div>
 
-    <div id="tab-productos" class="tab-content">
-      <div class="card">
-        <div class="card-header" style="justify-content:space-between">
-          <h3>Productos</h3>
-          <div style="display:flex;gap:12px;align-items:center"><input type="text" id="productos-search" placeholder="Buscar..." class="form-input" style="width:200px"><button id="btn-nuevo-producto" class="btn btn-primary">+ Nuevo</button></div>
-        </div>
-        <div class="card-body"><table class="admin-table"><thead><tr><th>Nombre</th><th>Precio</th><th>Prov.</th><th>Margen</th><th>Categor&iacute;a</th><th>Stock</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="productos-tbody"></tbody></table></div>
+    <div id="tab-productos" class="tab-content subtab-parent">
+      <div class="subtab-bar" style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border)">
+        <button class="subtab-btn active" onclick="switchProdTab('productos-list')" style="padding:10px 16px;border:none;background:none;font-weight:600;font-size:0.85rem;color:var(--primary);border-bottom:2px solid var(--primary);margin-bottom:-2px;cursor:pointer">Productos</button>
+        <button class="subtab-btn" onclick="switchProdTab('marcas')" style="padding:10px 16px;border:none;background:none;font-weight:500;font-size:0.85rem;color:var(--muted);cursor:pointer">Marcas</button>
+        <button class="subtab-btn" onclick="switchProdTab('categorias')" style="padding:10px 16px;border:none;background:none;font-weight:500;font-size:0.85rem;color:var(--muted);cursor:pointer">Categorías</button>
+        <button class="subtab-btn" onclick="switchProdTab('stock')" style="padding:10px 16px;border:none;background:none;font-weight:500;font-size:0.85rem;color:var(--muted);cursor:pointer">Stock</button>
       </div>
-    </div>
-
-    <div id="tab-marcas" class="tab-content">
-      <div class="card">
-        <div class="card-header" style="justify-content:space-between">
-          <h3>Marcas</h3>
-          <button id="btn-normalizar-marcas" class="btn btn-primary">Normalizar marcas desde productos</button>
+      <div id="prod-content-list" class="subtab-content">
+        <div class="card">
+          <div class="card-header" style="justify-content:space-between">
+            <h3>Productos</h3>
+            <div style="display:flex;gap:12px;align-items:center"><input type="text" id="productos-search" placeholder="Buscar..." class="form-input" style="width:200px"><button id="btn-nuevo-producto" class="btn btn-primary">+ Nuevo</button></div>
+          </div>
+          <div class="card-body"><table class="admin-table"><thead><tr><th>Nombre</th><th>Precio</th><th>Prov.</th><th>Margen</th><th>Categor&iacute;a</th><th>Stock</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="productos-tbody"></tbody></table></div>
         </div>
-        <div class="card-body">
-          <p class="help-text" style="margin-bottom:16px">Prioridad: n&uacute;mero menor = aparece primero. Prioridad alta (ej: 100) = aparece al fondo. Us&aacute; "Bajar prioridad" para mandar una marca al final.</p>
-          <table class="admin-table"><thead><tr><th>Marca</th><th>Productos</th><th>Prioridad</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="marcas-tbody"></tbody></table>
+      </div>
+      <div id="prod-content-marcas" class="subtab-content" style="display:none">
+        <div class="card">
+          <div class="card-header" style="justify-content:space-between">
+            <h3>Marcas</h3>
+            <button id="btn-normalizar-marcas" class="btn btn-primary">Normalizar marcas desde productos</button>
+          </div>
+          <div class="card-body">
+            <p class="help-text" style="margin-bottom:16px">Prioridad: n&uacute;mero menor = aparece primero. Prioridad alta (ej: 100) = aparece al fondo. Us&aacute; "Bajar prioridad" para mandar una marca al final.</p>
+            <table class="admin-table"><thead><tr><th>Marca</th><th>Productos</th><th>Prioridad</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="marcas-tbody"></tbody></table>
+          </div>
+        </div>
+      </div>
+      <div id="prod-content-categorias" class="subtab-content" style="display:none">
+        <div class="card">
+          <div class="card-header" style="justify-content:space-between">
+            <h3>Categor&iacute;as</h3>
+            <button id="btn-nueva-categoria" class="btn btn-primary">+ Nueva</button>
+          </div>
+          <div class="card-body"><table class="admin-table"><thead><tr><th>Nombre</th><th>Slug</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="categorias-tbody"></tbody></table></div>
+        </div>
+      </div>
+      <div id="prod-content-stock" class="subtab-content" style="display:none">
+        <div class="card">
+          <div class="card-header" style="justify-content:space-between">
+            <h3>&#9888;&#65039; Alertas de Stock Bajo</h3>
+            <span style="color:var(--muted);font-size:0.85rem">Productos con stock menor a 5 unidades</span>
+          </div>
+          <div class="card-body" id="stock-alertas-page"></div>
         </div>
       </div>
     </div>
@@ -163,17 +188,31 @@
       </div>
     </div>
 
-    <div id="tab-categorias" class="tab-content">
-      <div class="card">
-        <div class="card-header" style="justify-content:space-between">
-          <h3>Categor&iacute;as</h3>
-          <button id="btn-nueva-categoria" class="btn btn-primary">+ Nueva</button>
+    <div id="tab-ventas" class="tab-content subtab-parent">
+      <div class="subtab-bar" style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border)">
+        <button class="subtab-btn active" onclick="switchVentasTab('venta')" style="padding:10px 16px;border:none;background:none;font-weight:600;font-size:0.85rem;color:var(--primary);border-bottom:2px solid var(--primary);margin-bottom:-2px;cursor:pointer">Nueva Venta</button>
+        <button class="subtab-btn" onclick="switchVentasTab('historico')" style="padding:10px 16px;border:none;background:none;font-weight:500;font-size:0.85rem;color:var(--muted);cursor:pointer">Histórico</button>
+      </div>
+      <div id="ventas-content-venta" class="subtab-content">
+        <div class="card" style="max-width:720px">
+          <div class="card-header"><h3>Registrar Venta</h3></div>
+          <div class="card-body">
+            <form id="venta-form">
+              <div class="form-grid"><div class="form-group"><label>Cliente</label><input type="text" id="venta-cliente" class="form-input"></div><div class="form-group"><label>WhatsApp</label><input type="text" id="venta-whatsapp" class="form-input"></div></div>
+              <div class="form-group"><label>Productos</label><div id="venta-productos"></div><button type="button" id="btn-agregar-producto-venta" class="btn btn-sm">+ Agregar</button></div>
+              <div class="form-grid"><div class="form-group"><label>Total (Gs.)</label><input type="number" id="venta-total" value="0" readonly class="form-input"></div><div class="form-group"><label>M&eacute;todo</label><select id="venta-metodo" class="form-select"><option value="efectivo">Efectivo</option><option value="transferencia">Transferencia</option><option value="qr">QR</option></select></div></div>
+              <button type="submit" class="btn btn-primary">Registrar Venta</button>
+            </form>
+          </div>
         </div>
-        <div class="card-body"><table class="admin-table"><thead><tr><th>Nombre</th><th>Slug</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="categorias-tbody"></tbody></table></div>
+      </div>
+      <div id="ventas-content-historico" class="subtab-content" style="display:none">
+        <div class="card">
+          <div class="card-header" style="justify-content:space-between"><h3>Hist&oacute;rico</h3><input type="date" id="historico-fecha" class="form-input" style="width:auto"></div>
+          <div class="card-body"><table class="admin-table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Productos</th><th>Total</th><th>Costo</th><th>Ganancia</th><th>Pago</th></tr></thead><tbody id="historico-tbody"></tbody></table></div>
+        </div>
       </div>
     </div>
-
-    <div id="tab-modal-categoria" class="modal hidden">
       <div class="modal-overlay" id="modal-overlay-cat"></div>
       <div class="modal-content">
         <div class="modal-header"><h3 id="cat-modal-title">Nueva Categor&iacute;a</h3><button class="modal-close" id="modal-close-cat">&times;</button></div>
@@ -294,6 +333,110 @@
             <button type="submit" class="btn btn-primary" style="margin-top:16px">Guardar</button>
           </form>
           <p id="pagos-msg" class="msg hidden"></p>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-config" class="tab-content subtab-parent">
+      <div class="subtab-bar" style="display:flex;flex-wrap:wrap;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border)">
+        <button class="subtab-btn active" onclick="switchConfigTab('envios')" style="padding:10px 16px;border:none;background:none;font-weight:600;font-size:0.85rem;color:var(--primary);border-bottom:2px solid var(--primary);margin-bottom:-2px;cursor:pointer">Envíos</button>
+        <button class="subtab-btn" onclick="switchConfigTab('pagos')" style="padding:10px 16px;border:none;background:none;font-weight:500;font-size:0.85rem;color:var(--muted);cursor:pointer">Pagos</button>
+        <button class="subtab-btn" onclick="switchConfigTab('contenido')" style="padding:10px 16px;border:none;background:none;font-weight:500;font-size:0.85rem;color:var(--muted);cursor:pointer">Contenido</button>
+        <button class="subtab-btn" onclick="switchConfigTab('paginas')" style="padding:10px 16px;border:none;background:none;font-weight:500;font-size:0.85rem;color:var(--muted);cursor:pointer">Páginas</button>
+        <button class="subtab-btn" onclick="switchConfigTab('analytics')" style="padding:10px 16px;border:none;background:none;font-weight:500;font-size:0.85rem;color:var(--muted);cursor:pointer">Analytics</button>
+      </div>
+      <div id="config-content-envios" class="subtab-content">
+        <div class="card">
+          <div class="card-header" style="justify-content:space-between">
+            <h3>Zonas de Envío</h3>
+            <button id="btn-nuevo-envio" class="btn btn-primary">+ Nueva</button>
+          </div>
+          <div class="card-body"><table class="admin-table"><thead><tr><th>Ciudad</th><th>Departamento</th><th>Tipo</th><th>Costo (Gs.)</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="envios-tbody"></tbody></table></div>
+        </div>
+      </div>
+      <div id="config-content-pagos" class="subtab-content" style="display:none">
+        <div class="card" style="max-width:680px">
+          <div class="card-header"><h3>Métodos de Pago</h3></div>
+          <div class="card-body">
+            <form id="pagos-form">
+              <div style="display:flex;flex-direction:column;gap:16px">
+                <div class="form-group" style="padding:12px;border:1px solid var(--border);border-radius:8px">
+                  <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer">
+                    <input type="checkbox" id="pagos-whatsapp" checked onchange="togglePagoSection('whatsapp')"> WhatsApp
+                  </label>
+                  <div id="pagos-section-whatsapp" class="pago-section" style="margin-top:8px">
+                    <label class="block font-body text-xs mb-1" style="color:var(--muted)">Número</label>
+                    <input type="text" id="pagos-whatsapp-numero" class="form-input">
+                  </div>
+                </div>
+                <div class="form-group" style="padding:12px;border:1px solid var(--border);border-radius:8px">
+                  <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer">
+                    <input type="checkbox" id="pagos-efectivo" checked onchange="togglePagoSection('efectivo')"> Efectivo
+                  </label>
+                  <div id="pagos-section-efectivo" class="pago-section" style="margin-top:8px">
+                    <label class="block font-body text-xs mb-1" style="color:var(--muted)">Descripción</label>
+                    <input type="text" id="pagos-efectivo-desc" class="form-input">
+                  </div>
+                </div>
+                <div class="form-group" style="padding:12px;border:1px solid var(--border);border-radius:8px">
+                  <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer">
+                    <input type="checkbox" id="pagos-transferencia" checked onchange="togglePagoSection('transferencia')"> Transferencia
+                  </label>
+                  <div id="pagos-section-transferencia" class="pago-section" style="margin-top:8px">
+                    <label class="block font-body text-xs mb-1" style="color:var(--muted)">Descripción</label>
+                    <input type="text" id="pagos-transferencia-desc" class="form-input">
+                  </div>
+                </div>
+                <div class="form-group" style="padding:12px;border:1px solid var(--border);border-radius:8px">
+                  <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer">
+                    <input type="checkbox" id="pagos-qr" onchange="togglePagoSection('qr')"> Pago QR
+                  </label>
+                  <div id="pagos-section-qr" class="pago-section" style="margin-top:8px">
+                    <label class="block font-body text-xs mb-1" style="color:var(--muted)">URL de imagen QR</label>
+                    <input type="text" id="pagos-qr-imagen" class="form-input">
+                    <label class="block font-body text-xs mb-1 mt-2" style="color:var(--muted)">Instrucciones</label>
+                    <textarea id="pagos-qr-instrucciones" rows="3" class="form-input"></textarea>
+                    <div id="pagos-qr-preview" style="margin-top:8px;display:none">
+                      <img id="pagos-qr-preview-img" src="" style="max-width:200px;border-radius:8px">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary" style="margin-top:16px">Guardar</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div id="config-content-contenido" class="subtab-content" style="display:none">
+        <div class="card" style="max-width:640px">
+          <div class="card-header"><h3>Contenido del Sitio</h3></div>
+          <div class="card-body">
+            <form id="contenido-form">
+              <div class="form-group"><label>T&iacute;tulo Hero</label><input type="text" id="contenido-hero_titulo" class="form-input"></div>
+              <div class="form-group"><label>Descripci&oacute;n Hero</label><textarea id="contenido-hero_descripcion" rows="2" class="form-input"></textarea></div>
+              <div class="form-group"><label>WhatsApp N&uacute;mero</label><input type="text" id="contenido-whatsapp_numero" class="form-input"></div>
+              <div class="form-group"><label>Monto m&iacute;nimo delivery gratis (Gs.)</label><input type="number" id="contenido-envio_minimo_gratis" class="form-input"></div>
+              <button type="submit" class="btn btn-primary">Guardar</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div id="config-content-paginas" class="subtab-content" style="display:none">
+        <div class="card">
+          <div class="card-header" style="justify-content:space-between">
+            <h3>P&aacute;ginas</h3>
+            <button id="btn-nueva-pagina" class="btn btn-primary">+ Nueva</button>
+          </div>
+          <div class="card-body"><table class="admin-table"><thead><tr><th>T&iacute;tulo</th><th>Slug</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="paginas-tbody"></tbody></table></div>
+        </div>
+      </div>
+      <div id="config-content-analytics" class="subtab-content" style="display:none">
+        <div class="card" style="max-width:480px">
+          <div class="card-header"><h3>Google Analytics</h3></div>
+          <div class="card-body">
+            <div class="form-group"><label>Measurement ID</label><input type="text" id="analytics-id" placeholder="G-XXXXXXXXXX" class="form-input"></div>
+            <button id="btn-analytics-save" class="btn btn-primary">Guardar</button>
+          </div>
         </div>
       </div>
     </div>
