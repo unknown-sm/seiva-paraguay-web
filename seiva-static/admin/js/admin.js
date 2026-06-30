@@ -1820,6 +1820,28 @@ function loadPagos() {
   });
 }
 
+window.uploadQRImage = function() {
+  var fileInput = document.getElementById("pagos-qr-file");
+  if (!fileInput || !fileInput.files || !fileInput.files[0]) return;
+  var file = fileInput.files[0];
+  var formData = new FormData();
+  formData.append("qr", file);
+  var headers = {};
+  if (token) headers["Authorization"] = "Bearer " + token;
+  fetch(API + "/upload-qr", { method: "POST", headers: headers, body: formData })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.url) {
+        document.getElementById("pagos-qr-imagen").value = data.url;
+        var preview = document.getElementById("pagos-qr-preview");
+        var img = document.getElementById("pagos-qr-preview-img");
+        if (preview && img) { preview.style.display = ""; img.src = data.url; }
+        toast("QR subido");
+      }
+    })
+    .catch(function() { toast("Error al subir", "error"); });
+};
+
 // ---------- ERROR LOGS ----------
 function loadErrorLogs() {
   var el = document.getElementById("error-logs-list");

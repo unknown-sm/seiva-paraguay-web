@@ -254,7 +254,13 @@
               <div style="padding:12px;border:1px solid var(--border);border-radius:8px">
                 <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer"><input type="checkbox" id="pagos-qr" onchange="togglePagoSection('qr')"> Pago QR</label>
                 <div id="pagos-section-qr" style="margin-top:8px">
-                  <label style="color:var(--muted);font-size:0.8rem">URL imagen QR</label><input type="text" id="pagos-qr-imagen" class="form-input">
+                  <label style="color:var(--muted);font-size:0.8rem">Subir imagen QR</label>
+                  <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+                    <input type="file" id="pagos-qr-file" accept="image/*" class="form-input" style="flex:1" onchange="uploadQRImage()">
+                    <span style="font-size:0.75rem;color:var(--muted)">o</span>
+                  </div>
+                  <label style="color:var(--muted);font-size:0.8rem;margin-top:8px;display:block">URL imagen QR</label>
+                  <input type="text" id="pagos-qr-imagen" class="form-input" style="margin-top:4px">
                   <label style="color:var(--muted);font-size:0.8rem;margin-top:8px;display:block">Instrucciones</label><textarea id="pagos-qr-instrucciones" rows="3" class="form-input"></textarea>
                   <div id="pagos-qr-preview" style="margin-top:8px;display:none"><img id="pagos-qr-preview-img" src="" style="max-width:200px;border-radius:8px"></div>
                 </div>

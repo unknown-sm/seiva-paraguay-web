@@ -9,6 +9,7 @@ const cheerio = require("cheerio");
 const webpush = require("web-push");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const multer = require("multer");
 require("dotenv").config();
 
 const app = express();
@@ -101,6 +102,15 @@ if (!fs.existsSync(imgPath)) {
 }
 console.log("imgPath: " + imgPath + " exists: " + fs.existsSync(imgPath));
 app.use("/img/productos", express.static(imgPath));
+
+const qrUpload = multer({
+  storage: multer.diskStorage({
+    destination: imgPath,
+    filename: (req, file, cb) => cb(null, "qr-" + Date.now() + "." + (file.originalname.split(".").pop() || "png"))
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => cb(null, file.mimetype.startsWith("image/"))
+});
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, "data", "database.sqlite");
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
@@ -579,7 +589,12 @@ function parseProducto(row) {
             min_cantidad: md.min_cantidad,
             max_cantidad: md.max_cantidad,
             descuento: descuento
-          });
+});
+
+app.post("/api/upload-qr", auth, qrUpload.single("qr"), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No se subió imagen" });
+  res.json({ url: "/img/productos/" + req.file.filename });
+});
         }
       }
       // Re-sort
