@@ -20,7 +20,7 @@ interface Promo {
 }
 
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  ? 'http://85.239.246.177:3001/api'
+  ? 'http://localhost:3001/api'
   : '/api'
 
 const tipoIcons: Record<string, any> = {

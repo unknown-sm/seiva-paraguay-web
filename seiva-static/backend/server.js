@@ -7,6 +7,8 @@ const fs = require("fs");
 const { DatabaseSync } = require("node:sqlite");
 const cheerio = require("cheerio");
 const webpush = require("web-push");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 
 const app = express();
@@ -59,6 +61,30 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json({ limit: "5mb" }));
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "https://www.googletagmanager.com", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      imgSrc: ["'self'", "data:", "https:", "http:"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      connectSrc: ["'self'"],
+      frameSrc: ["'none'"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
+    },
+  },
+  hsts: { maxAge: 31536000, includeSubDomains: true },
+}));
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { error: "Demasiados intentos. Espera 15 minutos." },
+});
 
 // Error log in-memory (last 500 entries)
 const errorLogs = [];
@@ -447,7 +473,7 @@ seedProductos();
 // ---------- AUTH ----------
 const ADMIN_HASH = bcrypt.hashSync(ADMIN_PASSWORD, 10);
 
-app.post("/api/auth/login", (req, res) => {
+app.post("/api/auth/login", loginLimiter, (req, res) => {
   const { password } = req.body;
   if (!password || !bcrypt.compareSync(password, ADMIN_HASH)) {
     return res.status(401).json({ error: "Contrasena incorrecta" });
@@ -752,12 +778,22 @@ app.post("/api/marcas/normalizar", auth, (req, res) => {
 });
 
 // ---------- SCRAPE PRODUCTO ----------
+function sanitizeHtml(html) {
+  if (!html) return '';
+  // Remove event handlers and javascript: URLs
+  return html
+    .replace(/\s(on\w+)=["'][^"']*["']/gi, '')
+    .replace(/\s(on\w+)=[^\s>]*/gi, '')
+    .replace(/href=["']javascript:[^"']*["']/gi, 'href="#"')
+    .replace(/src=["']javascript:[^"']*["']/gi, 'src=""');
+}
+
 function formatDescription(rawText) {
   if (!rawText) return '';
   
-  // Si ya es HTML con estructura válida, preservar
+  // Si ya es HTML con estructura válida, sanitizar
   if (/<(ul|li|strong|b|em|h[1-6])[\s>]/i.test(rawText) && /<\/(ul|li|strong|b|em|h[1-6])>/i.test(rawText)) {
-    return rawText;
+    return sanitizeHtml(rawText);
   }
   
   // Limpiar HTML tags pero preservar saltos de linea
@@ -833,7 +869,19 @@ function formatDescriptionLarga(rawText) {
 }
 
 async function downloadImage(imgUrl, nombre) {
+  if (!isValidScrapeUrl(imgUrl)) throw new Error('URL no permitida');
   try {
+
+function isValidScrapeUrl(url) {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
+    const host = parsed.hostname.toLowerCase();
+    if (host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0' || host === '[::1]') return false;
+    if (host.startsWith('10.') || host.startsWith('192.168.') || host.startsWith('172.16.') || host.startsWith('169.254.')) return false;
+    return true;
+  } catch { return false; }
+}
     const response = await fetch(imgUrl);
     if (!response.ok) throw new Error('No se pudo descargar imagen');
     
@@ -1071,6 +1119,10 @@ app.post("/api/scrape-product", auth, async (req, res) => {
   
   if (!url) {
     return res.status(400).json({ error: "URL requerida" });
+  }
+
+  if (!isValidScrapeUrl(url)) {
+    return res.status(400).json({ error: "URL no permitida. Solo URLs públicas HTTP/HTTPS." });
   }
 
   try {

@@ -1,5 +1,5 @@
 var API = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
-  ? "http://85.239.246.177:3001/api"
+  ? "http://localhost:3001/api"
   : "/api";
 var token = localStorage.getItem("seiva-admin-token");
 
