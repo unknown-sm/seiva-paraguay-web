@@ -7,6 +7,7 @@ const fs = require("fs");
 const { DatabaseSync } = require("node:sqlite");
 const cheerio = require("cheerio");
 const webpush = require("web-push");
+require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
