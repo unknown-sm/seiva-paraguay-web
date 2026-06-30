@@ -1803,20 +1803,28 @@ function togglePagoSection(type) {
 
 function loadPagos() {
   api("/contenido").then(function(data) {
-    document.getElementById("pagos-whatsapp").checked = data.whatsapp_activo !== "0";
-    document.getElementById("pagos-efectivo").checked = data.efectivo_activo !== "0";
-    document.getElementById("pagos-transferencia").checked = data.transferencia_activo !== "0";
-    document.getElementById("pagos-qr").checked = data.qr_activo === "1";
-    document.getElementById("pagos-whatsapp-numero").value = data.whatsapp_numero || "595992120303";
-    document.getElementById("pagos-efectivo-desc").value = data.efectivo_desc || "Pagás cuando recibís el producto";
-    document.getElementById("pagos-transferencia-desc").value = data.transferencia_desc || "Te enviamos los datos para transferir";
-    document.getElementById("pagos-qr-imagen").value = data.qr_imagen || "";
-    document.getElementById("pagos-qr-instrucciones").value = data.qr_instrucciones || "";
-    togglePagoSection("whatsapp");
-    togglePagoSection("efectivo");
-    togglePagoSection("transferencia");
-    togglePagoSection("qr");
-  });
+    setPagoVal("pagos-whatsapp", data.whatsapp_activo !== "0");
+    setPagoVal("pagos-whatsapp-numero", data.whatsapp_numero || "595992120303");
+    setPagoVal("pagos-efectivo", data.efectivo_activo !== "0");
+    setPagoVal("pagos-efectivo-desc", data.efectivo_desc || "");
+    setPagoVal("pagos-transferencia", data.transferencia_activo !== "0");
+    setPagoVal("pagos-transferencia-desc", data.transferencia_desc || "");
+    setPagoVal("pagos-qr", data.qr_activo === "1");
+    setPagoVal("pagos-qr-imagen", data.qr_imagen || "");
+    setPagoVal("pagos-qr-instrucciones", data.qr_instrucciones || "");
+    if (data.qr_imagen) {
+      var prev = document.getElementById("pagos-qr-preview");
+      var img = document.getElementById("pagos-qr-preview-img");
+      if (prev && img) { prev.style.display = ""; img.src = data.qr_imagen; }
+    }
+  }).catch(function(e) { console.error("Error loading pagos:", e); });
+}
+
+function setPagoVal(id, val) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  if (el.type === "checkbox") el.checked = val;
+  else el.value = val;
 }
 
 window.uploadQRImage = function() {
