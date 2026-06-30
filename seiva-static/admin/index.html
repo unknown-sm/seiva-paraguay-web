@@ -37,10 +37,8 @@
       <button class="sidebar-link" data-tab="tab-carritos"><span class="sidebar-icon">&#128722;</span><span class="sidebar-label">Carritos</span></button>
       <button class="sidebar-link" data-tab="tab-ofertas"><span class="sidebar-icon">&#127881;</span><span class="sidebar-label">Ofertas</span></button>
       <button class="sidebar-link" data-tab="tab-pagos"><span class="sidebar-icon">&#128179;</span><span class="sidebar-label">Pagos</span></button>
-      <button class="sidebar-link" data-tab="tab-venta"><span class="sidebar-icon">&#128722;</span><span class="sidebar-label">Nueva Venta</span></button>
+      <button class="sidebar-link" data-tab="tab-ventas"><span class="sidebar-icon">&#128722;</span><span class="sidebar-label">Ventas</span></button>
       <button class="sidebar-link" data-tab="tab-envios"><span class="sidebar-icon">&#128666;</span><span class="sidebar-label">Env&iacute;os</span></button>
-      <button class="sidebar-link" data-tab="tab-pagos"><span class="sidebar-icon">&#128179;</span><span class="sidebar-label">Pagos</span></button>
-      <button class="sidebar-link" data-tab="tab-historico"><span class="sidebar-icon">&#128203;</span><span class="sidebar-label">Hist&oacute;rico</span></button>
       <button class="sidebar-link" data-tab="tab-paginas"><span class="sidebar-icon">&#128196;</span><span class="sidebar-label">P&aacute;ginas</span></button>
       <button class="sidebar-link" data-tab="tab-contenido"><span class="sidebar-icon">&#128221;</span><span class="sidebar-label">Contenido</span></button>
       <button class="sidebar-link" data-tab="tab-analytics"><span class="sidebar-icon">&#128200;</span><span class="sidebar-label">Analytics</span></button>
@@ -77,24 +75,49 @@
     </div>
 
     <div id="tab-productos" class="tab-content">
-      <div class="card">
-        <div class="card-header" style="justify-content:space-between">
-          <h3>Productos</h3>
-          <div style="display:flex;gap:12px;align-items:center"><input type="text" id="productos-search" placeholder="Buscar..." class="form-input" style="width:200px"><button id="btn-nuevo-producto" class="btn btn-primary">+ Nuevo</button></div>
-        </div>
-        <div class="card-body"><table class="admin-table"><thead><tr><th>Nombre</th><th>Precio</th><th>Prov.</th><th>Margen</th><th>Categor&iacute;a</th><th>Stock</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="productos-tbody"></tbody></table></div>
+      <div class="offer-tabs" style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border)">
+        <button class="offer-tab active" data-offer="productos-list">Productos</button>
+        <button class="offer-tab" data-offer="marcas-list">Marcas</button>
+        <button class="offer-tab" data-offer="categorias">Categorías</button>
+        <button class="offer-tab" data-offer="stock">Stock</button>
       </div>
-    </div>
-
-    <div id="tab-marcas" class="tab-content">
-      <div class="card">
-        <div class="card-header" style="justify-content:space-between">
-          <h3>Marcas</h3>
-          <button id="btn-normalizar-marcas" class="btn btn-primary">Normalizar marcas desde productos</button>
+      <div class="offer-content" data-offer-panel="productos-list">
+        <div class="card">
+          <div class="card-header" style="justify-content:space-between">
+            <h3>Productos</h3>
+            <div style="display:flex;gap:12px;align-items:center"><input type="text" id="productos-search" placeholder="Buscar..." class="form-input" style="width:200px"><button id="btn-nuevo-producto" class="btn btn-primary">+ Nuevo</button></div>
+          </div>
+          <div class="card-body"><table class="admin-table"><thead><tr><th>Nombre</th><th>Precio</th><th>Prov.</th><th>Margen</th><th>Categor&iacute;a</th><th>Stock</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="productos-tbody"></tbody></table></div>
         </div>
-        <div class="card-body">
-          <p class="help-text" style="margin-bottom:16px">Prioridad: n&uacute;mero menor = aparece primero. Prioridad alta (ej: 100) = aparece al fondo. Us&aacute; "Bajar prioridad" para mandar una marca al final.</p>
-          <table class="admin-table"><thead><tr><th>Marca</th><th>Productos</th><th>Prioridad</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="marcas-tbody"></tbody></table>
+      </div>
+      <div class="offer-content" data-offer-panel="marcas-list" style="display:none">
+        <div class="card">
+          <div class="card-header" style="justify-content:space-between">
+            <h3>Marcas</h3>
+            <button id="btn-normalizar-marcas" class="btn btn-primary">Normalizar marcas desde productos</button>
+          </div>
+          <div class="card-body">
+            <p class="help-text" style="margin-bottom:16px">Prioridad: n&uacute;mero menor = aparece primero. Prioridad alta (ej: 100) = aparece al fondo.</p>
+            <table class="admin-table"><thead><tr><th>Marca</th><th>Productos</th><th>Prioridad</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="marcas-tbody"></tbody></table>
+          </div>
+        </div>
+      </div>
+      <div class="offer-content" data-offer-panel="categorias" style="display:none">
+        <div class="card">
+          <div class="card-header" style="justify-content:space-between">
+            <h3>Categor&iacute;as</h3>
+            <button id="btn-nueva-categoria" class="btn btn-primary">+ Nueva</button>
+          </div>
+          <div class="card-body"><table class="admin-table"><thead><tr><th>Nombre</th><th>Slug</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="categorias-tbody"></tbody></table></div>
+        </div>
+      </div>
+      <div class="offer-content" data-offer-panel="stock" style="display:none">
+        <div class="card">
+          <div class="card-header" style="justify-content:space-between">
+            <h3>&#9888;&#65039; Alertas de Stock Bajo</h3>
+            <span style="color:var(--muted);font-size:0.85rem">Productos con stock menor a 5 unidades</span>
+          </div>
+          <div class="card-body" id="stock-alertas-page"></div>
         </div>
       </div>
     </div>
@@ -142,16 +165,6 @@
       </div>
     </div>
 
-    <div id="tab-categorias" class="tab-content">
-      <div class="card">
-        <div class="card-header" style="justify-content:space-between">
-          <h3>Categor&iacute;as</h3>
-          <button id="btn-nueva-categoria" class="btn btn-primary">+ Nueva</button>
-        </div>
-        <div class="card-body"><table class="admin-table"><thead><tr><th>Nombre</th><th>Slug</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="categorias-tbody"></tbody></table></div>
-      </div>
-    </div>
-
     <div id="tab-modal-categoria" class="modal hidden">
       <div class="modal-overlay" id="modal-overlay-cat"></div>
       <div class="modal-content">
@@ -168,27 +181,28 @@
       </div>
     </div>
 
-    <div id="tab-stock" class="tab-content">
-      <div class="card">
-        <div class="card-header" style="justify-content:space-between">
-          <h3>&#9888;&#65039; Alertas de Stock Bajo</h3>
-          <span style="color:var(--muted);font-size:0.85rem">Productos con stock menor a 5 unidades</span>
-        </div>
-        <div class="card-body" id="stock-alertas-page"></div>
+    <div id="tab-ventas" class="tab-content">
+      <div class="offer-tabs" style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border)">
+        <button class="offer-tab active" data-offer="venta">Nueva Venta</button>
+        <button class="offer-tab" data-offer="historico">Histórico</button>
       </div>
-    </div>
-
-    <div id="tab-venta" class="tab-content">
-      <div class="card" style="max-width:720px">
-        <div class="card-header"><h3>Registrar Venta</h3></div>
-        <div class="card-body">
-          <form id="venta-form">
-            <div class="form-grid"><div class="form-group"><label>Cliente</label><input type="text" id="venta-cliente" class="form-input"></div><div class="form-group"><label>WhatsApp</label><input type="text" id="venta-whatsapp" class="form-input"></div></div>
-            <div class="form-group"><label>Productos</label><div id="venta-productos"></div><button type="button" id="btn-agregar-producto-venta" class="btn btn-sm">+ Agregar</button></div>
-            <div class="form-grid"><div class="form-group"><label>Total (Gs.)</label><input type="number" id="venta-total" value="0" readonly class="form-input"></div><div class="form-group"><label>M&eacute;todo</label><select id="venta-metodo" class="form-select"><option value="efectivo">Efectivo</option><option value="transferencia">Transferencia</option><option value="qr">QR</option></select></div></div>
-            <button type="submit" class="btn btn-primary">Registrar Venta</button>
-          </form>
-          <p id="venta-msg" class="msg hidden"></p>
+      <div class="offer-content" data-offer-panel="venta">
+        <div class="card" style="max-width:720px">
+          <div class="card-header"><h3>Registrar Venta</h3></div>
+          <div class="card-body">
+            <form id="venta-form">
+              <div class="form-grid"><div class="form-group"><label>Cliente</label><input type="text" id="venta-cliente" class="form-input"></div><div class="form-group"><label>WhatsApp</label><input type="text" id="venta-whatsapp" class="form-input"></div></div>
+              <div class="form-group"><label>Productos</label><div id="venta-productos"></div><button type="button" id="btn-agregar-producto-venta" class="btn btn-sm">+ Agregar</button></div>
+              <div class="form-grid"><div class="form-group"><label>Total (Gs.)</label><input type="number" id="venta-total" value="0" readonly class="form-input"></div><div class="form-group"><label>M&eacute;todo</label><select id="venta-metodo" class="form-select"><option value="efectivo">Efectivo</option><option value="transferencia">Transferencia</option><option value="qr">QR</option></select></div></div>
+              <button type="submit" class="btn btn-primary">Registrar Venta</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="offer-content" data-offer-panel="historico" style="display:none">
+        <div class="card">
+          <div class="card-header" style="justify-content:space-between"><h3>Hist&oacute;rico</h3><input type="date" id="historico-fecha" class="form-input" style="width:auto"></div>
+          <div class="card-body"><table class="admin-table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Productos</th><th>Total</th><th>Costo</th><th>Ganancia</th><th>Pago</th></tr></thead><tbody id="historico-tbody"></tbody></table></div>
         </div>
       </div>
     </div>
@@ -249,13 +263,6 @@
             <button type="submit" class="btn btn-primary" style="margin-top:16px">Guardar</button>
           </form>
         </div>
-      </div>
-    </div>
-
-    <div id="tab-historico" class="tab-content">
-      <div class="card">
-        <div class="card-header" style="justify-content:space-between"><h3>Hist&oacute;rico</h3><input type="date" id="historico-fecha" class="form-input" style="width:auto"></div>
-        <div class="card-body"><table class="admin-table"><thead><tr><th>Fecha</th><th>Cliente</th><th>Productos</th><th>Total</th><th>Costo</th><th>Ganancia</th><th>Pago</th></tr></thead><tbody id="historico-tbody"></tbody></table></div>
       </div>
     </div>
 

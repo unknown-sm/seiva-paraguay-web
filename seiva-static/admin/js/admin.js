@@ -46,7 +46,7 @@ function toast(msg, type) {
 function getTabFromUrl() {
   var params = new URLSearchParams(window.location.search);
   var tab = params.get("tab");
-  var validTabs = ["dashboard", "pedidos", "productos", "marcas", "carritos", "ofertas", "pagos", "stock", "venta", "historico", "contenido", "analytics"];
+  var validTabs = ["dashboard", "pedidos", "productos", "carritos", "ofertas", "pagos", "ventas", "contenido", "analytics"];
   if (tab && validTabs.indexOf(tab) !== -1) return "tab-" + tab;
   return "tab-dashboard";
 }
@@ -69,10 +69,10 @@ function switchTab(tabId, skipUrl) {
     "tab-dashboard": "Dashboard",
     "tab-pedidos": "Pedidos",
     "tab-productos": "Productos",
-    "tab-marcas": "Marcas",
     "tab-carritos": "Carritos",
     "tab-ofertas": "Ofertas",
     "tab-pagos": "Pagos",
+    "tab-ventas": "Ventas",
     "tab-descuentos": "Descuentos por Cantidad",
     "tab-categorias": "Categor&iacute;as",
     "tab-stock": "Alertas de Stock",
@@ -93,11 +93,11 @@ function switchTab(tabId, skipUrl) {
   // Load data
   if (tabId === "tab-dashboard") loadDashboard();
   if (tabId === "tab-pedidos") loadPedidos();
-  if (tabId === "tab-productos") loadProductos();
-  if (tabId === "tab-marcas") loadMarcas();
+  if (tabId === "tab-productos") { loadProductos(); loadMarcas(); loadCategorias(); loadStockAlertas(); }
   if (tabId === "tab-carritos") loadCarritos();
   if (tabId === "tab-ofertas") { loadDescuentos(); loadDescuentosMarca(); loadPromos(); loadBundles(); }
   if (tabId === "tab-pagos") loadPagos();
+  if (tabId === "tab-ventas") { renderVentaProductos(); loadHistorico(); }
   if (tabId === "tab-descuentos") { loadDescuentos(); loadDescuentosMarca(); }
   if (tabId === "tab-categorias") loadCategorias();
   if (tabId === "tab-stock") loadStockAlertas();
@@ -1784,6 +1784,16 @@ window.switchOfferTab = function(tab) {
   if (btn) btn.classList.add("active");
   var panel = document.querySelector(".offer-content[data-offer-panel='" + tab + "']");
   if (panel) panel.style.display = "";
+  if (tab === "descuentos") loadDescuentos();
+  if (tab === "marca") loadDescuentosMarca();
+  if (tab === "promos") loadPromos();
+  if (tab === "bundles") loadBundles();
+  if (tab === "productos-list") loadProductos();
+  if (tab === "marcas-list") loadMarcas();
+  if (tab === "categorias") loadCategorias();
+  if (tab === "stock") loadStockAlertas();
+  if (tab === "venta") renderVentaProductos();
+  if (tab === "historico") loadHistorico();
 };
 
 function togglePagoSection(type) {
