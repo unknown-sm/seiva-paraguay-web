@@ -34,11 +34,9 @@
       <button class="sidebar-link active" data-tab="tab-dashboard"><span class="sidebar-icon">&#128202;</span><span class="sidebar-label">Dashboard</span></button>
       <button class="sidebar-link" data-tab="tab-pedidos"><span class="sidebar-icon">&#128717;&#65039;</span><span class="sidebar-label">Pedidos</span></button>
       <button class="sidebar-link" data-tab="tab-productos"><span class="sidebar-icon">&#128230;</span><span class="sidebar-label">Productos</span></button>
-      <button class="sidebar-link" data-tab="tab-marcas"><span class="sidebar-icon">&#127991;</span><span class="sidebar-label">Marcas</span></button>
       <button class="sidebar-link" data-tab="tab-carritos"><span class="sidebar-icon">&#128722;</span><span class="sidebar-label">Carritos</span></button>
       <button class="sidebar-link" data-tab="tab-ofertas"><span class="sidebar-icon">&#127881;</span><span class="sidebar-label">Ofertas</span></button>
-      <button class="sidebar-link" data-tab="tab-categorias"><span class="sidebar-icon">&#128193;</span><span class="sidebar-label">Categor&iacute;as</span></button>
-      <button class="sidebar-link" data-tab="tab-stock"><span class="sidebar-icon">&#9888;&#65039;</span><span class="sidebar-label">Alertas de Stock</span></button>
+      <button class="sidebar-link" data-tab="tab-pagos"><span class="sidebar-icon">&#128179;</span><span class="sidebar-label">Pagos</span></button>
       <button class="sidebar-link" data-tab="tab-venta"><span class="sidebar-icon">&#128722;</span><span class="sidebar-label">Nueva Venta</span></button>
       <button class="sidebar-link" data-tab="tab-envios"><span class="sidebar-icon">&#128666;</span><span class="sidebar-label">Env&iacute;os</span></button>
       <button class="sidebar-link" data-tab="tab-pagos"><span class="sidebar-icon">&#128179;</span><span class="sidebar-label">Pagos</span></button>
@@ -112,31 +110,31 @@
     </div>
 
     <div id="tab-ofertas" class="tab-content">
-      <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border)">
-        <button class="offer-tab active" style="padding:10px 16px;border:none;background:none;font-weight:600;font-size:0.85rem;color:var(--primary);border-bottom:2px solid var(--primary);margin-bottom:-2px;cursor:pointer" onclick="switchOfferTab('descuentos')">Por Cantidad</button>
-        <button class="offer-tab" style="padding:10px 16px;border:none;background:none;font-weight:500;font-size:0.85rem;color:var(--muted);cursor:pointer" onclick="switchOfferTab('marca')">Por Marca</button>
-        <button class="offer-tab" style="padding:10px 16px;border:none;background:none;font-weight:500;font-size:0.85rem;color:var(--muted);cursor:pointer" onclick="switchOfferTab('promos')">Promos</button>
-        <button class="offer-tab" style="padding:10px 16px;border:none;background:none;font-weight:500;font-size:0.85rem;color:var(--muted);cursor:pointer" onclick="switchOfferTab('bundles')">Bundles</button>
+      <div class="offer-tabs" style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border)">
+        <button class="offer-tab active" data-offer="descuentos">Por Cantidad</button>
+        <button class="offer-tab" data-offer="marca">Por Marca</button>
+        <button class="offer-tab" data-offer="promos">Promos</button>
+        <button class="offer-tab" data-offer="bundles">Bundles</button>
       </div>
-      <div id="offer-descuentos" class="offer-content">
+      <div class="offer-content" data-offer-panel="descuentos">
         <div class="card">
           <div class="card-header" style="justify-content:space-between"><h3>Descuentos por Cantidad</h3><button id="btn-nuevo-descuento" class="btn btn-primary">+ Nuevo</button></div>
           <div class="card-body"><p class="help-text" style="margin-bottom:16px">Configurá descuentos automáticos según la cantidad de productos que el cliente compre.</p><div id="descuentos-lista"></div></div>
         </div>
       </div>
-      <div id="offer-marca" class="offer-content" style="display:none">
+      <div class="offer-content" data-offer-panel="marca" style="display:none">
         <div class="card">
           <div class="card-header" style="justify-content:space-between"><h3>Descuentos por Marca</h3><button id="btn-nuevo-descuento-marca" class="btn btn-primary">+ Nuevo</button></div>
           <div class="card-body"><p class="help-text" style="margin-bottom:16px">Aplica descuento a todos los productos de una marca. Podés excluir productos específicos o incluir solo algunos.</p><div id="descuentos-marca-lista"></div></div>
         </div>
       </div>
-      <div id="offer-promos" class="offer-content" style="display:none">
+      <div class="offer-content" data-offer-panel="promos" style="display:none">
         <div class="card">
           <div class="card-header" style="justify-content:space-between"><h3>Promos y Ofertas</h3><button id="btn-nueva-promo" class="btn btn-primary">+ Nueva Promo</button></div>
           <div class="card-body"><p class="help-text" style="margin-bottom:16px">BOGO, regalos, descuentos en carrito y cupones.</p><table class="admin-table"><thead><tr><th>Nombre</th><th>Tipo</th><th>Condición</th><th>Beneficio</th><th>Vigencia</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="promos-tbody"></tbody></table></div>
         </div>
       </div>
-      <div id="offer-bundles" class="offer-content" style="display:none">
+      <div class="offer-content" data-offer-panel="bundles" style="display:none">
         <div class="card">
           <div class="card-header" style="justify-content:space-between"><h3>Bundles (Packs)</h3><button id="btn-nuevo-bundle" class="btn btn-primary">+ Nuevo</button></div>
           <div class="card-body"><p class="help-text" style="margin-bottom:16px">Creá packs de productos con precio especial.</p><table class="admin-table"><thead><tr><th>Nombre</th><th>Productos</th><th>Precio</th><th>Ahorro</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="bundles-tbody"></tbody></table></div>
@@ -479,6 +477,22 @@
 
 <!-- Estilos inline para los nuevos componentes -->
 <style>
+.offer-tab {
+  padding: 10px 16px;
+  border: none;
+  background: none;
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.offer-tab.active {
+  color: var(--primary);
+  font-weight: 600;
+  border-bottom: 2px solid var(--primary);
+  margin-bottom: -2px;
+}
 .autocomplete-dropdown {
   position: absolute;
   top: 100%;

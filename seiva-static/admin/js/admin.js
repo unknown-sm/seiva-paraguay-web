@@ -348,6 +348,13 @@ document.addEventListener("DOMContentLoaded", function() {
   if (btnAddV) {
     btnAddV.addEventListener("click", function() { addVarianteRow(); });
   }
+  // Offer sub-tabs
+  document.querySelectorAll(".offer-tab").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      var tab = this.getAttribute("data-offer");
+      switchOfferTab(tab);
+    });
+  });
 });
 
 function editarProducto(id) {
@@ -1223,7 +1230,6 @@ document.addEventListener("DOMContentLoaded", function() {
   window.addTierRow = addTierRow;
 
   document.getElementById("btn-nuevo-descuento").addEventListener("click", function() {
-    var select = document.getElementById("desc-producto");
     select.innerHTML = allProductos.map(function(p) {
       return '<option value="' + p.id + '">' + xt(p.nombre) + ' (' + formatGs(p.precio) + ')</option>';
     }).join('');
@@ -1772,14 +1778,12 @@ function eliminarBundle(id) {
 }
 
 window.switchOfferTab = function(tab) {
-  document.querySelectorAll(".offer-tab").forEach(function(t) {
-    t.style.color = "var(--muted)"; t.style.fontWeight = "500"; t.style.borderBottom = "none"; t.style.marginBottom = "0";
-  });
+  document.querySelectorAll(".offer-tab").forEach(function(t) { t.classList.remove("active"); });
   document.querySelectorAll(".offer-content").forEach(function(c) { c.style.display = "none"; });
-  var btn = document.querySelector(".offer-tab[onclick*='" + tab + "']");
-  if (btn) { btn.style.color = "var(--primary)"; btn.style.fontWeight = "600"; btn.style.borderBottom = "2px solid var(--primary)"; btn.style.marginBottom = "-2px"; }
-  var content = document.getElementById("offer-" + tab);
-  if (content) content.style.display = "";
+  var btn = document.querySelector(".offer-tab[data-offer='" + tab + "']");
+  if (btn) btn.classList.add("active");
+  var panel = document.querySelector(".offer-content[data-offer-panel='" + tab + "']");
+  if (panel) panel.style.display = "";
 };
 
 function togglePagoSection(type) {
