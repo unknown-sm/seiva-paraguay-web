@@ -223,12 +223,12 @@ function renderStockAlertas() {
   el.innerHTML = html;
 }
 
-function goStockPage(page) {
+window.goStockPage = function(page) {
   stockPage = page;
   renderStockAlertas();
 }
 
-function saveStockChanges() {
+window.saveStockChanges = function() {
   var ids = Object.keys(stockChanges);
   if (!ids.length) {
     toast("No hay cambios para guardar");
