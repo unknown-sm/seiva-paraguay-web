@@ -260,33 +260,86 @@ function loadStockAlertas() {
 }
 
 // ---------- PRODUCTOS ----------
+var prodPage = 1;
+var prodPerPage = 20;
+var prodAllData = [];
+
 function loadProductos() {
   var searchVal = (document.getElementById("productos-search") || {}).value || "";
   api("/productos/all").then(function(data) {
-    if (searchVal) {
-      var q = searchVal.toLowerCase();
-      data = data.filter(function(p) { return p.nombre.toLowerCase().indexOf(q) !== -1; });
+    prodAllData = data;
+    prodPage = 1;
+    renderProductos(searchVal);
+  });
+}
+
+function renderProductos(searchVal) {
+  var data = prodAllData;
+  if (searchVal) {
+    var q = searchVal.toLowerCase();
+    data = data.filter(function(p) { return p.nombre.toLowerCase().indexOf(q) !== -1; });
+  }
+  var total = data.length;
+  var totalPages = Math.ceil(total / prodPerPage);
+  if (prodPage > totalPages) prodPage = Math.max(1, totalPages);
+  var start = (prodPage - 1) * prodPerPage;
+  var paginated = data.slice(start, start + prodPerPage);
+
+  var tbody = document.getElementById("productos-tbody");
+  if (!tbody) return;
+  tbody.innerHTML = paginated.map(function(p) {
+    var cls = p.activo ? "" : "inactive";
+    return '<tr class="' + cls + '">' +
+      '<td>' + xt(p.nombre) + (p.featured_order > 0 ? ' <span style="font-size:0.7rem;background:var(--accent);color:#fff;padding:1px 6px;border-radius:10px">#' + p.featured_order + '</span>' : '') + (p.destacado && !p.featured_order ? ' <span style="font-size:0.7rem;background:var(--accent);color:#fff;padding:1px 6px;border-radius:10px">Destacado</span>' : '') + '</td>' +
+      '<td>' + formatGs(p.precio) + (p.precio_anterior ? ' <del style="font-size:0.7rem;color:var(--muted)">' + formatGs(p.precio_anterior) + '</del>' : '') + '</td>' +
+      '<td>' + (p.precio_proveedor ? formatGs(p.precio_proveedor) : '—') + '</td>' +
+      '<td>' + (p.precio_proveedor ? '<span style="color:var(--success);font-weight:600">' + formatGs(p.precio - p.precio_proveedor) + '</span>' : '—') + '</td>' +
+      '<td>' + p.categoria + '</td>' +
+      '<td>' + p.stock + '</td>' +
+      '<td>' + (p.activo ? '&#9989;' : '&#10060;') + '</td>' +
+      '<td>' +
+        '<button class="btn-icon" onclick="editarProducto(' + p.id + ')" title="Editar">&#9999;</button>' +
+        '<button class="btn-icon" onclick="toggleProducto(' + p.id + ')" title="Activar/Desactivar">' + (p.activo ? '&#128065;' : '&#128065;&#8205;&#128488;') + '</button>' +
+        '<button class="btn-icon" onclick="eliminarProducto(' + p.id + ')" title="Eliminar">&#128465;</button>' +
+        (p.activo ? '<a href="/producto/' + p.id + '" target="_blank" class="btn-icon" title="Ver en web">&#128269;</a>' : '') +
+      '</td>' +
+    '</tr>';
+  }).join("");
+
+  // Pagination footer
+  var footer = document.getElementById("productos-pagination");
+  if (!footer) {
+    var tbl = tbody.closest("table");
+    if (tbl) {
+      footer = document.createElement("div");
+      footer.id = "productos-pagination";
+      footer.style.cssText = "display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:8px;border-top:1px solid var(--border)";
+      tbl.parentNode.insertBefore(footer, tbl.nextSibling);
     }
-    var tbody = document.getElementById("productos-tbody");
-    if (!tbody) return;
-    tbody.innerHTML = data.map(function(p) {
-      var cls = p.activo ? "" : "inactive";
-      return '<tr class="' + cls + '">' +
-        '<td>' + p.nombre + (p.featured_order > 0 ? ' <span style="font-size:0.7rem;background:var(--accent);color:#fff;padding:1px 6px;border-radius:10px">#' + p.featured_order + '</span>' : '') + (p.destacado && !p.featured_order ? ' <span style="font-size:0.7rem;background:var(--accent);color:#fff;padding:1px 6px;border-radius:10px">Destacado</span>' : '') + '</td>' +
-        '<td>' + formatGs(p.precio) + (p.precio_anterior ? ' <del style="font-size:0.7rem;color:var(--muted)">' + formatGs(p.precio_anterior) + '</del>' : '') + '</td>' +
-        '<td>' + (p.precio_proveedor ? formatGs(p.precio_proveedor) : '—') + '</td>' +
-        '<td>' + (p.precio_proveedor ? '<span style="color:var(--success);font-weight:600">' + formatGs(p.precio - p.precio_proveedor) + '</span>' : '—') + '</td>' +
-        '<td>' + p.categoria + '</td>' +
-        '<td>' + p.stock + '</td>' +
-        '<td>' + (p.activo ? '&#9989;' : '&#10060;') + '</td>' +
-        '<td>' +
-          '<button class="btn-icon" onclick="editarProducto(' + p.id + ')" title="Editar">&#9999;</button>' +
-          '<button class="btn-icon" onclick="toggleProducto(' + p.id + ')" title="Activar/Desactivar">' + (p.activo ? '&#128065;' : '&#128065;&#8205;&#128488;') + '</button>' +
-          '<button class="btn-icon" onclick="eliminarProducto(' + p.id + ')" title="Eliminar">&#128465;</button>' +
-          (p.activo ? '<a href="/producto/' + p.id + '" target="_blank" class="btn-icon" title="Ver en web">&#128269;</a>' : '') +
-        '</td>' +
-      '</tr>';
-    }).join("");
+  }
+  if (footer) {
+    var html = '<span style="font-size:0.8rem;color:var(--muted)">' + total + ' productos</span>';
+    html += '<div style="display:flex;align-items:center;gap:12px">';
+    html += '<select onchange="prodPerPage=parseInt(this.value);prodPage=1;renderProductos()" style="padding:4px 8px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);font-size:0.8rem">';
+    [10, 20, 50, 100].forEach(function(n) {
+      html += '<option value="' + n + '"' + (prodPerPage === n ? ' selected' : '') + '>' + n + '</option>';
+    });
+    html += '</select>';
+    html += '<div style="display:flex;gap:4px">';
+    for (var i = 1; i <= totalPages; i++) {
+      html += '<button onclick="prodPage=' + i + ';renderProductos()" style="padding:4px 8px;border:1px solid ' + (i === prodPage ? 'var(--primary)' : 'var(--border)') + ';border-radius:4px;background:' + (i === prodPage ? 'var(--primary)' : 'var(--bg)') + ';color:' + (i === prodPage ? '#fff' : 'var(--muted)') + ';font-size:0.8rem;cursor:pointer">' + i + '</button>';
+    }
+    html += '</div></div>';
+    footer.innerHTML = html;
+  }
+}
+
+// Buscar en productos — use renderProductos to keep pagination
+var productosSearchInput = document.getElementById("productos-search");
+if (productosSearchInput) {
+  productosSearchInput.addEventListener("input", function() {
+    prodPage = 1;
+    renderProductos(this.value);
   });
 }
 
@@ -855,7 +908,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   var searchInput = document.getElementById("productos-search");
   if (searchInput) {
-    searchInput.addEventListener("input", function() { loadProductos(); });
+    searchInput.addEventListener("input", function() { prodPage = 1; renderProductos(this.value); });
   }
 
   var historicoFecha = document.getElementById("historico-fecha");
