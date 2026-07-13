@@ -18,6 +18,7 @@ export default function CheckoutPage() {
 
   // Form fields — matching WooCommerce fields minus email
   const [telefono, setTelefono] = useState('')
+  const [codigoPais, setCodigoPais] = useState('+595')
   const [nombre, setNombre] = useState('')
   const [apellido, setApellido] = useState('')
   const [direccion, setDireccion] = useState('')
@@ -130,7 +131,7 @@ export default function CheckoutPage() {
       const { departamento, ciudad } = parseCiudadSeleccionada(ciudadSeleccionada)
       const result = await createPedido({
         cliente: `${nombre} ${apellido}`,
-        whatsapp: telefono,
+        whatsapp: codigoPais + telefono,
         direccion: `${direccion}, ${ciudad}, ${departamento}${ruc ? `, RUC: ${ruc}` : ''}`,
         productos,
         total: totalConEnvio,
@@ -220,14 +221,29 @@ export default function CheckoutPage() {
                     <label className="block font-body text-sm font-medium mb-1.5" style={{ color: 'var(--theme-text, #3D2817)' }}>
                       Teléfono / WhatsApp <span style={{ color: '#ef4444' }}>*</span>
                     </label>
-                    <input
-                      type="tel"
-                      value={telefono}
-                      onChange={e => { setTelefono(e.target.value); setErrors(prev => ({ ...prev, telefono: '' })) }}
-                      placeholder="0991234567"
-                      className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary,#1B4332)] focus:border-[var(--theme-primary,#1B4332)]"
-                      style={{ borderColor: errors.telefono ? '#ef4444' : 'rgba(0,0,0,0.18)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
-                    />
+                    <div className="flex gap-2">
+                      <select
+                        value={codigoPais}
+                        onChange={e => setCodigoPais(e.target.value)}
+                        className="px-2 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary,#1B4332)] focus:border-[var(--theme-primary,#1B4332)]"
+                        style={{ borderColor: errors.telefono ? '#ef4444' : 'rgba(0,0,0,0.18)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)', minWidth: '95px' }}
+                      >
+                        <option value="+595">🇵🇾 +595</option>
+                        <option value="+55">🇧🇷 +55</option>
+                        <option value="+54">🇦🇷 +54</option>
+                        <option value="+598">🇺🇾 +598</option>
+                        <option value="+591">🇧🇴 +591</option>
+                        <option value="+34">🇪🇸 +34</option>
+                      </select>
+                      <input
+                        type="tel"
+                        value={telefono}
+                        onChange={e => { setTelefono(e.target.value); setErrors(prev => ({ ...prev, telefono: '' })) }}
+                        placeholder="0991234567"
+                        className="flex-1 px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary,#1B4332)] focus:border-[var(--theme-primary,#1B4332)]"
+                        style={{ borderColor: errors.telefono ? '#ef4444' : 'rgba(0,0,0,0.18)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
+                      />
+                    </div>
                     {errors.telefono && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.telefono}</p>}
                   </div>
 
