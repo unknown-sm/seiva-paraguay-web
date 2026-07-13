@@ -242,7 +242,7 @@ export default function CheckoutPage() {
                         onChange={e => { setNombre(e.target.value); setErrors(prev => ({ ...prev, nombre: '' })) }}
                         placeholder="Juan"
                         className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary,#1B4332)] focus:border-[var(--theme-primary,#1B4332)]"
-                        style={{ borderColor: errors.nombre ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
+                        style={{ borderColor: errors.nombre ? '#ef4444' : 'rgba(0,0,0,0.18)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
                       />
                       {errors.nombre && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.nombre}</p>}
                     </div>
@@ -256,7 +256,7 @@ export default function CheckoutPage() {
                         onChange={e => { setApellido(e.target.value); setErrors(prev => ({ ...prev, apellido: '' })) }}
                         placeholder="Pérez"
                         className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary,#1B4332)] focus:border-[var(--theme-primary,#1B4332)]"
-                        style={{ borderColor: errors.apellido ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
+                        style={{ borderColor: errors.apellido ? '#ef4444' : 'rgba(0,0,0,0.18)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
                       />
                       {errors.apellido && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.apellido}</p>}
                     </div>
@@ -277,14 +277,14 @@ export default function CheckoutPage() {
                       onFocus={() => setShowCiudadDropdown(true)}
                       placeholder="Escribí para buscar... (ej: Asunción, Capiatá)"
                       className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary,#1B4332)] focus:border-[var(--theme-primary,#1B4332)]"
-                      style={{ borderColor: errors.ciudad ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
+                      style={{ borderColor: errors.ciudad ? '#ef4444' : 'rgba(0,0,0,0.18)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
                     />
                     {errors.ciudad && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.ciudad}</p>}
 
                     {showCiudadDropdown && (
                       <div
                         className="absolute z-50 w-full mt-1 max-h-64 overflow-y-auto rounded-lg border shadow-lg"
-                        style={{ backgroundColor: '#FFFFFF', borderColor: 'var(--theme-border, #E8E0D5)' }}
+                        style={{ backgroundColor: '#FFFFFF', borderColor: 'rgba(0,0,0,0.18)' }}
                       >
                         {Object.keys(groupedCiudades).length === 0 ? (
                           <div className="px-4 py-3 text-sm font-body" style={{ color: 'var(--theme-muted, #5C4033)' }}>
@@ -347,7 +347,7 @@ export default function CheckoutPage() {
                       onChange={e => setRuc(e.target.value)}
                       placeholder="Ej: 1234567-8"
                       className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary,#1B4332)] focus:border-[var(--theme-primary,#1B4332)]"
-                      style={{ borderColor: 'var(--theme-border, #E8E0D5)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
+                      style={{ borderColor: 'rgba(0,0,0,0.18)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
                     />
                   </div>
                 </div>
@@ -370,11 +370,11 @@ export default function CheckoutPage() {
                       onClick={() => setMetodoPago(option.value)}
                       className="w-full flex items-start gap-4 p-4 rounded-lg border-2 transition-all text-left"
                       style={{
-                        borderColor: metodoPago === option.value ? 'var(--theme-primary, #1B4332)' : 'var(--theme-border, #E8E0D5)',
+                        borderColor: metodoPago === option.value ? 'var(--theme-primary, #1B4332)' : 'rgba(0,0,0,0.18)',
                         backgroundColor: metodoPago === option.value ? 'rgba(27,67,50,0.04)' : '#FFFFFF',
                       }}
                     >
-                      <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5" style={{ borderColor: metodoPago === option.value ? 'var(--theme-primary, #1B4332)' : 'var(--theme-border, #E8E0D5)' }}>
+                      <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5" style={{ borderColor: metodoPago === option.value ? 'var(--theme-primary, #1B4332)' : 'rgba(0,0,0,0.18)' }}>
                         {metodoPago === option.value && <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: 'var(--theme-primary, #1B4332)' }} />}
                       </div>
                       <div className="flex-1">
@@ -427,7 +427,7 @@ export default function CheckoutPage() {
               </h2>
 
               {/* Products */}
-              <div className="space-y-4 mb-6 max-h-64 overflow-y-auto">
+              <div className="space-y-4 mb-6 max-h-64 overflow-y-visible">
                 {items.map(({ product, quantity }) => (
                   <div key={product.id} className="flex gap-3">
                     <div className="relative shrink-0" style={{ overflow: 'visible' }}>
