@@ -222,19 +222,24 @@ export default function CheckoutPage() {
                       Teléfono / WhatsApp <span style={{ color: '#ef4444' }}>*</span>
                     </label>
                     <div className="flex gap-2">
-                      <select
-                        value={codigoPais}
-                        onChange={e => setCodigoPais(e.target.value)}
-                        className="px-2 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary,#1B4332)] focus:border-[var(--theme-primary,#1B4332)]"
-                        style={{ borderColor: errors.telefono ? '#ef4444' : 'rgba(0,0,0,0.18)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)', minWidth: '95px' }}
-                      >
-                        <option value="+595">🇵🇾 +595</option>
-                        <option value="+55">🇧🇷 +55</option>
-                        <option value="+54">🇦🇷 +54</option>
-                        <option value="+598">🇺🇾 +598</option>
-                        <option value="+591">🇧🇴 +591</option>
-                        <option value="+34">🇪🇸 +34</option>
-                      </select>
+                      <div className="relative">
+                        <select
+                          value={codigoPais}
+                          onChange={e => setCodigoPais(e.target.value)}
+                          className="appearance-none pl-8 pr-6 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary,#1B4332)] focus:border-[var(--theme-primary,#1B4332)] cursor-pointer"
+                          style={{ borderColor: errors.telefono ? '#ef4444' : 'rgba(0,0,0,0.18)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)', minWidth: '110px' }}
+                        >
+                          <option value="+595">+595</option>
+                          <option value="+55">+55</option>
+                          <option value="+54">+54</option>
+                          <option value="+598">+598</option>
+                          <option value="+591">+591</option>
+                          <option value="+34">+34</option>
+                        </select>
+                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-base pointer-events-none">
+                          {codigoPais === '+595' ? '🇵🇾' : codigoPais === '+55' ? '🇧🇷' : codigoPais === '+54' ? '🇦🇷' : codigoPais === '+598' ? '🇺🇾' : codigoPais === '+591' ? '🇧🇴' : '🇪🇸'}
+                        </span>
+                      </div>
                       <input
                         type="tel"
                         value={telefono}
