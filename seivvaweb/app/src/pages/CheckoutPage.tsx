@@ -225,8 +225,8 @@ export default function CheckoutPage() {
                       value={telefono}
                       onChange={e => { setTelefono(e.target.value); setErrors(prev => ({ ...prev, telefono: '' })) }}
                       placeholder="0991234567"
-                      className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
-                      style={{ borderColor: errors.telefono ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
+                      className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary,#1B4332)] focus:border-[var(--theme-primary,#1B4332)]"
+                      style={{ borderColor: errors.telefono ? '#ef4444' : 'rgba(0,0,0,0.18)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
                     />
                     {errors.telefono && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.telefono}</p>}
                   </div>
@@ -241,7 +241,7 @@ export default function CheckoutPage() {
                         value={nombre}
                         onChange={e => { setNombre(e.target.value); setErrors(prev => ({ ...prev, nombre: '' })) }}
                         placeholder="Juan"
-                        className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
+                        className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary,#1B4332)] focus:border-[var(--theme-primary,#1B4332)]"
                         style={{ borderColor: errors.nombre ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
                       />
                       {errors.nombre && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.nombre}</p>}
@@ -255,7 +255,7 @@ export default function CheckoutPage() {
                         value={apellido}
                         onChange={e => { setApellido(e.target.value); setErrors(prev => ({ ...prev, apellido: '' })) }}
                         placeholder="Pérez"
-                        className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
+                        className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary,#1B4332)] focus:border-[var(--theme-primary,#1B4332)]"
                         style={{ borderColor: errors.apellido ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
                       />
                       {errors.apellido && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.apellido}</p>}
@@ -276,7 +276,7 @@ export default function CheckoutPage() {
                       }}
                       onFocus={() => setShowCiudadDropdown(true)}
                       placeholder="Escribí para buscar... (ej: Asunción, Capiatá)"
-                      className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
+                      className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary,#1B4332)] focus:border-[var(--theme-primary,#1B4332)]"
                       style={{ borderColor: errors.ciudad ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
                     />
                     {errors.ciudad && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.ciudad}</p>}
@@ -331,8 +331,8 @@ export default function CheckoutPage() {
                       onChange={e => { setDireccion(e.target.value); setErrors(prev => ({ ...prev, direccion: '' })) }}
                       placeholder="Calle Principal 123, casa blanca, cerca del supermercado..."
                       rows={3}
-                      className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2 resize-none"
-                      style={{ borderColor: errors.direccion ? '#ef4444' : 'var(--theme-border, #E8E0D5)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
+                      className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary,#1B4332)] focus:border-[var(--theme-primary,#1B4332)] resize-none"
+                      style={{ borderColor: errors.direccion ? '#ef4444' : 'rgba(0,0,0,0.18)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
                     />
                     {errors.direccion && <p className="text-xs mt-1 font-body" style={{ color: '#ef4444' }}>{errors.direccion}</p>}
                   </div>
@@ -346,7 +346,7 @@ export default function CheckoutPage() {
                       value={ruc}
                       onChange={e => setRuc(e.target.value)}
                       placeholder="Ej: 1234567-8"
-                      className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2"
+                      className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary,#1B4332)] focus:border-[var(--theme-primary,#1B4332)]"
                       style={{ borderColor: 'var(--theme-border, #E8E0D5)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
                     />
                   </div>
