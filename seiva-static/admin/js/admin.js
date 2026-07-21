@@ -46,7 +46,7 @@ function toast(msg, type) {
 function getTabFromUrl() {
   var params = new URLSearchParams(window.location.search);
   var tab = params.get("tab");
-  var validTabs = ["dashboard", "pedidos", "productos", "carritos", "ofertas", "pagos", "ventas", "contenido", "analytics"];
+  var validTabs = ["dashboard", "pedidos", "productos", "carritos", "ofertas", "pagos", "ventas", "envios", "contenido", "paginas", "analytics", "logs"];
   if (tab && validTabs.indexOf(tab) !== -1) return "tab-" + tab;
   return "tab-dashboard";
 }
