@@ -733,6 +733,12 @@ app.patch("/api/productos/:id/toggle", auth, (req, res) => {
   res.json({ activo: !!nuevo });
 });
 
+app.patch("/api/productos/:id/featured", auth, (req, res) => {
+  const { featured_order } = req.body;
+  db.prepare("UPDATE productos SET featured_order = ? WHERE id = ?").run(parseInt(featured_order) || 0, req.params.id);
+  res.json({ ok: true });
+});
+
 // Batch stock update
 app.patch("/api/productos/stock-batch", auth, (req, res) => {
   const { updates } = req.body;
