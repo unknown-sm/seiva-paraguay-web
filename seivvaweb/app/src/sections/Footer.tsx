@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -16,7 +16,6 @@ const supportLinks = [
 
 export default function Footer() {
   const footerRef = useRef<HTMLElement>(null)
-  const [email, setEmail] = useState('')
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -39,14 +38,6 @@ export default function Footer() {
     return () => ctx.revert()
   }, [])
 
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (email) {
-      alert('¡Gracias por suscribirte!')
-      setEmail('')
-    }
-  }
-
   return (
     <footer
       id="footer"
@@ -55,44 +46,32 @@ export default function Footer() {
       style={{ backgroundColor: 'var(--theme-primary, #1B4332)' }}
     >
       <div className="container-main">
-        {/* Newsletter */}
-        <div
-          className="animate-in rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 mb-12"
-          style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
+        {/* WhatsApp CTA */}
+        <a
+          href="https://wa.me/595992120303"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="animate-in rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 mb-12 transition-all hover:scale-[1.02]"
+          style={{ backgroundColor: 'rgba(37,211,102,0.12)', border: '1px solid rgba(37,211,102,0.25)' }}
         >
-          <div>
-            <h3 className="font-display font-semibold text-lg text-white">
-              Únete a nuestra comunidad
-            </h3>
-            <p className="font-body text-sm mt-1" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              Recibe tips de salud y descuentos exclusivos.
-            </p>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: '#25D366' }}>
+              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
+            </div>
+            <div>
+              <h3 className="font-display font-semibold text-lg text-white">
+                ¿Tenés dudas? Escribinos
+              </h3>
+              <p className="font-body text-sm mt-1" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                Te respondemos al instante por WhatsApp
+              </p>
+            </div>
           </div>
-          <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Tu email"
-              className="w-full sm:w-64 h-11 px-5 rounded-full font-body text-sm text-white placeholder:text-white/40 outline-none focus:ring-2 focus:ring-[#D4A843] transition-all"
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.15)',
-              }}
-            />
-            <button
-              type="submit"
-              className="h-11 px-6 rounded-full font-body font-semibold text-sm transition-all duration-300 hover:scale-105 whitespace-nowrap"
-              style={{
-                backgroundColor: 'var(--theme-accent, #D4A843)',
-                color: 'var(--theme-primary, #1B4332)',
-                letterSpacing: '0.08em',
-              }}
-            >
-              Suscribirse
-            </button>
-          </form>
-        </div>
+          <span className="h-11 px-6 rounded-full font-body font-semibold text-sm transition-all duration-300 hover:scale-105 whitespace-nowrap inline-flex items-center"
+            style={{ backgroundColor: '#25D366', color: '#FFF', letterSpacing: '0.04em' }}>
+            0992 120303
+          </span>
+        </a>
 
         {/* Main Footer Content */}
         <div className="animate-in flex flex-col lg:flex-row justify-between gap-12 mb-12">
@@ -101,7 +80,7 @@ export default function Footer() {
             <div className="flex items-center gap-2">
               <Leaf className="w-6 h-6" style={{ color: 'var(--theme-accent, #D4A843)' }} />
               <span className="font-display font-semibold text-xl text-white">
-                NATURAVITAL
+                SEIVA
               </span>
             </div>
             <p className="font-body text-sm mt-3 max-w-[240px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.7)' }}>
