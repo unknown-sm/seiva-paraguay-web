@@ -139,6 +139,10 @@ function toggleTheme() {
   setTheme(current !== "dark");
 }
 
+function toggleSidebar() {
+  document.querySelector(".sidebar").classList.toggle("collapsed");
+}
+
 // ---------- DASHBOARD ----------
 function loadDashboard() {
   api("/stats").then(function(stats) {
