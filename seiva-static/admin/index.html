@@ -16,9 +16,10 @@
     <h1 class="login-title">Seiva Admin</h1>
     <p class="login-sub">Panel de administraci&oacute;n</p>
       <form id="login-form">
+        <input type="text" id="login-username" placeholder="Usuario" class="login-input" value="admin">
         <input type="password" id="login-password" placeholder="Contrase&ntilde;a" class="login-input" autofocus>
         <button type="submit" class="login-btn">Ingresar</button>
-        <p id="login-error" class="login-error hidden">Contrase&ntilde;a incorrecta</p>
+        <p id="login-error" class="login-error hidden">Usuario o contrase&ntilde;a incorrecta</p>
       </form>
     </div>
   </div>
@@ -33,6 +34,7 @@
     <nav class="sidebar-nav">
       <button class="sidebar-link active" data-tab="tab-dashboard"><span class="sidebar-icon">&#128202;</span><span class="sidebar-label">Dashboard</span></button>
       <button class="sidebar-link" data-tab="tab-pedidos"><span class="sidebar-icon">&#128717;&#65039;</span><span class="sidebar-label">Pedidos</span></button>
+      <button class="sidebar-link" data-tab="tab-usuarios"><span class="sidebar-icon">&#128100;</span><span class="sidebar-label">Usuarios</span></button>
       <button class="sidebar-link" data-tab="tab-productos"><span class="sidebar-icon">&#128230;</span><span class="sidebar-label">Productos</span></button>
       <button class="sidebar-link" data-tab="tab-carritos"><span class="sidebar-icon">&#128722;</span><span class="sidebar-label">Carritos</span></button>
       <button class="sidebar-link" data-tab="tab-ofertas"><span class="sidebar-icon">&#127881;</span><span class="sidebar-label">Ofertas</span></button>
@@ -71,6 +73,16 @@
           <select id="pedidos-filtro" class="form-select" style="width:auto"><option value="">Todos</option><option value="pendiente">Pendiente</option><option value="confirmado">Confirmado</option><option value="enviado">Enviado</option><option value="entregado">Entregado</option><option value="cancelado">Cancelado</option></select>
         </div>
         <div class="card-body"><table class="admin-table"><thead><tr><th>ID</th><th>Fecha</th><th>Cliente</th><th>WhatsApp</th><th>Productos</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="pedidos-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <div id="tab-usuarios" class="tab-content">
+      <div class="card" style="max-width:680px">
+        <div class="card-header" style="justify-content:space-between">
+          <h3>Usuarios del Admin</h3>
+          <button id="btn-nuevo-usuario" class="btn btn-primary">+ Nuevo</button>
+        </div>
+        <div class="card-body"><table class="admin-table"><thead><tr><th>Usuario</th><th>Nombre</th><th>Activo</th><th>Creado</th><th>Acciones</th></tr></thead><tbody id="usuarios-tbody"></tbody></table></div>
       </div>
     </div>
 
@@ -659,6 +671,22 @@
       <button type="submit" class="btn btn-primary" style="margin-top:16px">Guardar Bundle</button>
     </form>
     <p id="bundle-msg" class="msg hidden"></p>
+  </div>
+</div>
+
+<div id="modal-usuario" class="modal hidden">
+  <div class="modal-overlay" id="modal-overlay-usuario"></div>
+  <div class="modal-content" style="max-width:480px">
+    <div class="modal-header"><h3 id="usuario-modal-title">Nuevo Usuario</h3><button class="modal-close" id="modal-close-usuario">&times;</button></div>
+    <form id="usuario-form">
+      <input type="hidden" id="usuario-id" value="">
+      <div class="form-group"><label>Username *</label><input type="text" id="usuario-username" required class="form-input" autocomplete="off"></div>
+      <div class="form-group"><label>Nombre</label><input type="text" id="usuario-nombre" class="form-input"></div>
+      <div class="form-group"><label>Password <span id="usuario-pass-label" style="color:var(--muted);font-weight:normal"></span></label><input type="password" id="usuario-password" class="form-input" autocomplete="new-password"></div>
+      <div class="form-group"><label><input type="checkbox" id="usuario-activo" checked> Activo</label></div>
+      <button type="submit" class="btn btn-primary">Guardar</button>
+    </form>
+    <p id="usuario-msg" class="msg hidden"></p>
   </div>
 </div>
 

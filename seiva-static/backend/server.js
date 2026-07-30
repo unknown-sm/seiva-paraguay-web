@@ -280,6 +280,15 @@ db.exec(`
     imagen TEXT DEFAULT '',
     creado TEXT DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS usuarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    nombre TEXT DEFAULT '',
+    activo INTEGER DEFAULT 1,
+    creado TEXT DEFAULT (datetime('now'))
+  );
 `);
 
 const contenidoDefault = {
@@ -482,13 +491,32 @@ function seedProductos() {
 
 seedProductos();
 
+// Seed default admin user
+const userCount = db.prepare("SELECT COUNT(*) as c FROM usuarios").get();
+if (userCount.c === 0) {
+  const adminHash = bcrypt.hashSync(ADMIN_PASSWORD, 10);
+  db.prepare("INSERT INTO usuarios (username, password_hash, nombre) VALUES (?, ?, ?)").run("admin", adminHash, "Administrador");
+  console.log("Default admin user created (username: admin)");
+}
+
 // ---------- AUTH ----------
 const ADMIN_HASH = bcrypt.hashSync(ADMIN_PASSWORD, 10);
 
 app.post("/api/auth/login", loginLimiter, (req, res) => {
-  const { password } = req.body;
+  const { username, password } = req.body;
+  
+  if (username) {
+    const user = db.prepare("SELECT * FROM usuarios WHERE username = ? AND activo = 1").get(username);
+    if (!user || !bcrypt.compareSync(password || "", user.password_hash)) {
+      return res.status(401).json({ error: "Usuario o contraseña incorrecta" });
+    }
+    const token = jwt.sign({ role: "admin", username: user.username, userId: user.id }, JWT_SECRET, { expiresIn: "24h" });
+    return res.json({ token, username: user.username });
+  }
+
+  // Backward compat: login sin username (usa ADMIN_PASSWORD directo)
   if (!password || !bcrypt.compareSync(password, ADMIN_HASH)) {
-    return res.status(401).json({ error: "Contrasena incorrecta" });
+    return res.status(401).json({ error: "Contraseña incorrecta" });
   }
   const token = jwt.sign({ role: "admin" }, JWT_SECRET, { expiresIn: "24h" });
   res.json({ token });
@@ -523,6 +551,40 @@ app.post("/api/push/test", auth, (req, res) => {
     "/admin?tab=pedidos"
   );
   res.json({ ok: true, subscribers: db.prepare("SELECT COUNT(*) as c FROM push_subs").get().c });
+});
+
+// ---------- USUARIOS ----------
+app.get("/api/usuarios", auth, (req, res) => {
+  const rows = db.prepare("SELECT id, username, nombre, activo, creado FROM usuarios ORDER BY id").all();
+  res.json(rows);
+});
+
+app.post("/api/usuarios", auth, (req, res) => {
+  const { username, password, nombre } = req.body;
+  if (!username || !password) return res.status(400).json({ error: "Username y password requeridos" });
+  const hash = bcrypt.hashSync(password, 10);
+  try {
+    const result = db.prepare("INSERT INTO usuarios (username, password_hash, nombre) VALUES (?, ?, ?)").run(username, hash, nombre || "");
+    res.json({ id: result.lastInsertRowid });
+  } catch (e) {
+    res.status(400).json({ error: "El usuario ya existe" });
+  }
+});
+
+app.put("/api/usuarios/:id", auth, (req, res) => {
+  const { username, password, nombre, activo } = req.body;
+  if (password) {
+    const hash = bcrypt.hashSync(password, 10);
+    db.prepare("UPDATE usuarios SET username=?, password_hash=?, nombre=?, activo=? WHERE id=?").run(username, hash, nombre || "", activo !== false ? 1 : 0, req.params.id);
+  } else {
+    db.prepare("UPDATE usuarios SET username=?, nombre=?, activo=? WHERE id=?").run(username, nombre || "", activo !== false ? 1 : 0, req.params.id);
+  }
+  res.json({ ok: true });
+});
+
+app.delete("/api/usuarios/:id", auth, (req, res) => {
+  db.prepare("DELETE FROM usuarios WHERE id = ?").run(req.params.id);
+  res.json({ ok: true });
 });
 
 function auth(req, res, next) {

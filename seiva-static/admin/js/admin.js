@@ -22,8 +22,8 @@ function formatGs(n) { return "Gs." + Number(n).toLocaleString("es-PY"); }
 function formatDate(d) { return new Date(d).toLocaleDateString("es-PY", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }); }
 
 // ---------- AUTH ----------
-function login(password) {
-  return api("/auth/login", { method: "POST", body: JSON.stringify({ password: password }) });
+function login(username, password) {
+  return api("/auth/login", { method: "POST", body: JSON.stringify({ username: username, password: password }) });
 }
 
 function logout() {
@@ -46,7 +46,7 @@ function toast(msg, type) {
 function getTabFromUrl() {
   var params = new URLSearchParams(window.location.search);
   var tab = params.get("tab");
-  var validTabs = ["dashboard", "pedidos", "productos", "carritos", "ofertas", "pagos", "ventas", "envios", "contenido", "paginas", "analytics", "logs"];
+  var validTabs = ["dashboard", "pedidos", "usuarios", "productos", "carritos", "ofertas", "pagos", "ventas", "envios", "contenido", "paginas", "analytics", "logs"];
   if (tab && validTabs.indexOf(tab) !== -1) return "tab-" + tab;
   return "tab-dashboard";
 }
@@ -68,6 +68,7 @@ function switchTab(tabId, skipUrl) {
   var titles = {
     "tab-dashboard": "Dashboard",
     "tab-pedidos": "Pedidos",
+    "tab-usuarios": "Usuarios",
     "tab-productos": "Productos",
     "tab-carritos": "Carritos",
     "tab-ofertas": "Ofertas",
@@ -93,6 +94,7 @@ function switchTab(tabId, skipUrl) {
   // Load data
   if (tabId === "tab-dashboard") loadDashboard();
   if (tabId === "tab-pedidos") loadPedidos();
+  if (tabId === "tab-usuarios") loadUsuarios();
   if (tabId === "tab-productos") { loadProductos(); loadMarcas(); loadCategorias(); loadStockAlertas(); }
   if (tabId === "tab-carritos") loadCarritos();
   if (tabId === "tab-ofertas") { loadDescuentos(); loadDescuentosMarca(); loadPromos(); loadBundles(); }
@@ -867,9 +869,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
   document.getElementById("login-form").addEventListener("submit", function(e) {
     e.preventDefault();
+    var user = document.getElementById("login-username").value;
     var pass = document.getElementById("login-password").value;
     document.getElementById("login-error").classList.add("hidden");
-    login(pass).then(function(r) {
+    login(user, pass).then(function(r) {
       if (r.token) {
         token = r.token;
         localStorage.setItem("seiva-admin-token", token);
@@ -1467,6 +1470,38 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 
+// Usuarios events
+document.addEventListener("DOMContentLoaded", function() {
+  var btnNu = document.getElementById("btn-nuevo-usuario");
+  if (btnNu) btnNu.addEventListener("click", nuevoUsuario);
+
+  document.getElementById("usuario-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+    var id = document.getElementById("usuario-id").value;
+    var body = {
+      username: document.getElementById("usuario-username").value,
+      nombre: document.getElementById("usuario-nombre").value,
+      activo: document.getElementById("usuario-activo").checked
+    };
+    var pass = document.getElementById("usuario-password").value;
+    if (pass) body.password = pass;
+    var method = id ? "PUT" : "POST";
+    var url = id ? "/usuarios/" + id : "/usuarios";
+    api(url, { method: method, body: JSON.stringify(body) }).then(function(r) {
+      if (r.error) { document.getElementById("usuario-msg").textContent = r.error; document.getElementById("usuario-msg").classList.remove("hidden"); return; }
+      document.getElementById("modal-usuario").classList.add("hidden");
+      toast("Usuario guardado"); loadUsuarios();
+    });
+  });
+
+  document.getElementById("modal-close-usuario").addEventListener("click", function() {
+    document.getElementById("modal-usuario").classList.add("hidden");
+  });
+  document.getElementById("modal-overlay-usuario").addEventListener("click", function() {
+    document.getElementById("modal-usuario").classList.add("hidden");
+  });
+});
+
 // ---------- DESCUENTOS POR MARCA ----------
 function loadDescuentosMarca() {
   api("/marcas/all").then(function(marcas) {
@@ -1826,6 +1861,60 @@ function eliminarBundle(id) {
   if (!confirm("Eliminar este bundle?")) return;
   api("/bundles/" + id, { method: "DELETE" }).then(function() {
     toast("Bundle eliminado"); loadBundles();
+  });
+}
+
+// ---------- USUARIOS ----------
+function loadUsuarios() {
+  api("/usuarios").then(function(data) {
+    var tbody = document.getElementById("usuarios-tbody");
+    if (!tbody) return;
+    if (!data.length) { tbody.innerHTML = '<tr><td colspan="5">No hay usuarios.</td></tr>'; return; }
+    tbody.innerHTML = data.map(function(u) {
+      return '<tr>' +
+        '<td><strong>' + xt(u.username) + '</strong></td>' +
+        '<td>' + xt(u.nombre || "—") + '</td>' +
+        '<td>' + (u.activo ? '✅' : '❌') + '</td>' +
+        '<td>' + formatDate(u.creado) + '</td>' +
+        '<td>' +
+          '<button class="btn btn-sm" onclick="editarUsuario(' + u.id + ')">Editar</button> ' +
+          (u.username !== 'admin' ? '<button class="btn btn-sm btn-danger" onclick="eliminarUsuario(' + u.id + ')">Eliminar</button>' : '') +
+        '</td>' +
+      '</tr>';
+    }).join("");
+  });
+}
+
+function nuevoUsuario() {
+  document.getElementById("usuario-id").value = "";
+  document.getElementById("usuario-username").value = "";
+  document.getElementById("usuario-nombre").value = "";
+  document.getElementById("usuario-password").value = "";
+  document.getElementById("usuario-activo").checked = true;
+  document.getElementById("usuario-pass-label").textContent = "(requerido para nuevo usuario)";
+  document.getElementById("usuario-modal-title").textContent = "Nuevo Usuario";
+  document.getElementById("modal-usuario").classList.remove("hidden");
+}
+
+function editarUsuario(id) {
+  api("/usuarios").then(function(users) {
+    var u = users.find(function(x) { return x.id === id; });
+    if (!u) return;
+    document.getElementById("usuario-id").value = u.id;
+    document.getElementById("usuario-username").value = u.username;
+    document.getElementById("usuario-nombre").value = u.nombre || "";
+    document.getElementById("usuario-password").value = "";
+    document.getElementById("usuario-activo").checked = u.activo;
+    document.getElementById("usuario-pass-label").textContent = "(dejar vacío para no cambiar)";
+    document.getElementById("usuario-modal-title").textContent = "Editar Usuario";
+    document.getElementById("modal-usuario").classList.remove("hidden");
+  });
+}
+
+function eliminarUsuario(id) {
+  if (!confirm("Eliminar este usuario?")) return;
+  api("/usuarios/" + id, { method: "DELETE" }).then(function() {
+    toast("Usuario eliminado"); loadUsuarios();
   });
 }
 
