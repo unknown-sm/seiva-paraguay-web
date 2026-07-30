@@ -16,5 +16,5 @@ COPY seiva-static/img ./img
 EXPOSE 80
 ENV PORT=80
 ENV NODE_ENV=production
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD wget -qO- http://localhost:80/api/productos || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD node -e "require('http').get('http://localhost:80/api/productos',r=>{process.exit(r.statusCode===200?0:1)})"
 CMD ["node", "server.js"]
