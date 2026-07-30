@@ -165,6 +165,23 @@ function loadDashboard() {
         return '<tr><td>' + (i + 1) + ". " + p.nombre + '</td><td>' + p.cantidad + '</td></tr>';
       }).join("") + '</tbody></table>';
   });
+
+  // Stock crítico
+  api("/stock-alertas?limite=5").then(function(alertas) {
+    var sc = document.getElementById("stats-stock-critico");
+    if (sc) sc.textContent = alertas.length + " productos con stock bajo";
+    if (alertas.length > 0) {
+      var scv = document.getElementById("stats-stock-critico-val");
+      if (scv) scv.textContent = alertas.length;
+    }
+  });
+
+  // Carritos sin notificar
+  api("/carritos").then(function(data) {
+    var noNotif = (data || []).filter(function(c) { return !c.notificado; }).length;
+    var cn = document.getElementById("stats-carritos-val");
+    if (cn) cn.textContent = noNotif;
+  });
 }
 
 // ---------- ALERTAS DE STOCK ----------
@@ -271,15 +288,32 @@ function loadProductos() {
   api("/productos/all").then(function(data) {
     prodAllData = data;
     prodPage = 1;
+    // Populate category dropdown
+    var catSel = document.getElementById("prod-filter-cat");
+    if (catSel && catSel.options.length <= 1) {
+      api("/categorias").then(function(cats) {
+        for (var c of cats) {
+          catSel.innerHTML += '<option value="' + c.nombre + '">' + c.nombre + '</option>';
+        }
+      });
+    }
     renderProductos(searchVal);
   });
 }
 
-function renderProductos(searchVal) {
+function renderProductos(searchVal, filterCat, filterActivo) {
   var data = prodAllData;
   if (searchVal) {
     var q = searchVal.toLowerCase();
     data = data.filter(function(p) { return p.nombre.toLowerCase().indexOf(q) !== -1; });
+  }
+  if (filterCat) {
+    data = data.filter(function(p) { return p.categoria.toLowerCase() === filterCat.toLowerCase(); });
+  }
+  if (filterActivo === '1') {
+    data = data.filter(function(p) { return p.activo; });
+  } else if (filterActivo === '0') {
+    data = data.filter(function(p) { return !p.activo; });
   }
   var total = data.length;
   var totalPages = Math.ceil(total / prodPerPage);
@@ -339,7 +373,9 @@ var productosSearchInput = document.getElementById("productos-search");
 if (productosSearchInput) {
   productosSearchInput.addEventListener("input", function() {
     prodPage = 1;
-    renderProductos(this.value);
+    var cat = document.getElementById("prod-filter-cat").value;
+    var act = document.getElementById("prod-filter-activo").value;
+    renderProductos(this.value, cat, act);
   });
 }
 
@@ -368,6 +404,7 @@ function loadMarcas() {
         '<td><input type="number" value="' + m.prioridad + '" min="0" max="999" style="width:70px" onchange="updateMarcaPrioridad(' + m.id + ', this.value)" id="marca-prio-' + m.id + '"> <span style="font-size:0.8rem;' + prioColor + '">(' + (m.prioridad >= 100 ? 'BAJA' : m.prioridad > 0 ? 'media-baja' : 'normal') + ')</span></td>' +
         '<td>' + (m.activo ? '&#9989;' : '&#10060;') + '</td>' +
         '<td>' +
+          '<button class="btn-icon" onclick="editarMarca(' + m.id + ')" title="Editar">&#9999;</button> ' +
           '<button class="btn btn-sm" onclick="updateMarcaPrioridad(' + m.id + ', 100)" title="Mandar al fondo">&#128315; Bajar</button> ' +
           '<button class="btn btn-sm" onclick="toggleMarca(' + m.id + ', ' + m.activo + ')" title="Activar/Desactivar">' + (m.activo ? '&#128065;' : '&#128065;&#8205;&#128488;') + '</button>' +
         '</td>' +
@@ -380,6 +417,37 @@ function updateMarcaPrioridad(id, valor) {
   api("/marcas/" + id, { method: "PUT", body: JSON.stringify({ prioridad: parseInt(valor) || 0 }) }).then(function() {
     toast("Prioridad actualizada");
     loadMarcas();
+  });
+}
+
+function nuevoMarca() {
+  document.getElementById("marca-id").value = "";
+  document.getElementById("marca-nombre").value = "";
+  document.getElementById("marca-prioridad").value = "0";
+  document.getElementById("marca-logo").value = "";
+  document.getElementById("marca-activo").checked = true;
+  document.getElementById("marca-modal-title").textContent = "Nueva Marca";
+  document.getElementById("modal-marca").classList.remove("hidden");
+}
+
+function editarMarca(id) {
+  api("/marcas/all").then(function(marcas) {
+    var m = marcas.find(function(x) { return x.id === id; });
+    if (!m) return;
+    document.getElementById("marca-id").value = m.id;
+    document.getElementById("marca-nombre").value = m.nombre;
+    document.getElementById("marca-prioridad").value = m.prioridad || 0;
+    document.getElementById("marca-logo").value = m.logo || "";
+    document.getElementById("marca-activo").checked = m.activo !== false;
+    document.getElementById("marca-modal-title").textContent = "Editar Marca";
+    document.getElementById("modal-marca").classList.remove("hidden");
+  });
+}
+
+function eliminarMarca(id) {
+  if (!confirm("Eliminar esta marca?")) return;
+  api("/marcas/" + id, { method: "DELETE" }).then(function() {
+    toast("Marca eliminada"); loadMarcas();
   });
 }
 
@@ -725,28 +793,45 @@ document.getElementById("venta-form").addEventListener("submit", function(e) {
 });
 
 // ---------- HISTORICO ----------
+var historicoPage = 1;
+var historicoPerPage = 20;
+var historicoAllData = [];
+
 function loadHistorico() {
+  historicoPage = 1;
   var fecha = document.getElementById("historico-fecha").value;
-  var url = "/ventas?limit=200";
-  api(url).then(function(data) {
+  api("/ventas?limit=200").then(function(data) {
     if (fecha) data = data.filter(function(v) { return v.fecha.indexOf(fecha) === 0; });
-    document.getElementById("historico-tbody").innerHTML = data.map(function(v) {
-      var prods = v.productos.map(function(p) { return p.cantidad + "x " + p.nombre; }).join(", ");
-      var costo = 0;
-      v.productos.forEach(function(p) {
-        if (p.precio_proveedor) costo += p.precio_proveedor * (p.cantidad || 1);
-      });
-      return '<tr>' +
-        '<td>' + formatDate(v.fecha) + '</td>' +
-        '<td>' + (v.cliente || "—") + (v.whatsapp ? ' <span style="font-size:0.7rem;color:var(--muted)">' + v.whatsapp + '</span>' : '') + '</td>' +
-        '<td>' + prods + '</td>' +
-        '<td><strong>' + formatGs(v.total) + '</strong></td>' +
-        '<td>' + (costo > 0 ? formatGs(costo) : '—') + '</td>' +
-        '<td>' + (costo > 0 ? '<strong style="color:var(--success)">' + formatGs(v.total - costo) + '</strong>' : '—') + '</td>' +
-        '<td>' + v.metodo_pago + '</td>' +
-      '</tr>';
-    }).join("");
+    historicoAllData = data;
+    renderHistorico();
   });
+}
+
+function renderHistorico() {
+  var data = historicoAllData;
+  var total = data.length;
+  var totalPages = Math.ceil(total / historicoPerPage);
+  if (historicoPage > totalPages) historicoPage = Math.max(1, totalPages);
+  var start = (historicoPage - 1) * historicoPerPage;
+  var paginated = data.slice(start, start + historicoPerPage);
+
+  document.getElementById("historico-tbody").innerHTML = paginated.map(function(v) {
+    var prods = v.productos.map(function(p) { return p.cantidad + "x " + p.nombre; }).join(", ");
+    var costo = 0;
+    v.productos.forEach(function(p) {
+      if (p.precio_proveedor) costo += p.precio_proveedor * (p.cantidad || 1);
+    });
+    return '<tr>' +
+      '<td>' + formatDate(v.fecha) + '</td>' +
+      '<td>' + (v.cliente || "—") + (v.whatsapp ? ' <span style="font-size:0.7rem;color:var(--muted)">' + v.whatsapp + '</span>' : '') + '</td>' +
+      '<td>' + prods + '</td>' +
+      '<td><strong>' + formatGs(v.total) + '</strong></td>' +
+      '<td>' + (costo > 0 ? formatGs(costo) : '—') + '</td>' +
+      '<td>' + (costo > 0 ? '<strong style="color:var(--success)">' + formatGs(v.total - costo) + '</strong>' : '—') + '</td>' +
+      '<td>' + v.metodo_pago + '</td>' +
+    '</tr>';
+  }).join("");
+  renderPaginationFooter("historico-tbody", total, totalPages, "historicoPage", "renderHistorico()");
 }
 
 // ---------- CONTENIDO ----------
@@ -814,46 +899,90 @@ function loadGAScript() {
 }
 
 // ---------- PEDIDOS ----------
+var pedidosPage = 1;
+var pedidosPerPage = 20;
+var pedidosAllData = [];
+
 function loadPedidos() {
+  pedidosPage = 1;
   var filtro = document.getElementById("pedidos-filtro").value;
   var url = "/pedidos" + (filtro ? "?estado=" + encodeURIComponent(filtro) : "");
   api(url).then(function(data) {
-    document.getElementById("pedidos-tbody").innerHTML = data.map(function(p) {
-      var prods = p.productos.map(function(pr) { return pr.cantidad + "x " + pr.nombre; }).join(", ");
-      var badgeClass = "badge-" + p.estado;
-      return '<tr>' +
-        '<td>#' + p.id + '</td>' +
-        '<td>' + formatDate(p.fecha) + '</td>' +
-        '<td>' + (p.cliente || "—") + '</td>' +
-        '<td>' + (p.whatsapp || "—") + '</td>' +
-        '<td>' + prods + '</td>' +
-        '<td><strong>' + formatGs(p.total) + '</strong></td>' +
-        '<td><span class="badge ' + badgeClass + '">' + p.estado + '</span></td>' +
-        '<td>' +
-          '<select onchange="cambiarEstadoPedido(' + p.id + ', this.value)" class="estado-select">' +
-            '<option value="pendiente"' + (p.estado === 'pendiente' ? ' selected' : '') + '>Pendiente</option>' +
-            '<option value="confirmado"' + (p.estado === 'confirmado' ? ' selected' : '') + '>Confirmado</option>' +
-            '<option value="enviado"' + (p.estado === 'enviado' ? ' selected' : '') + '>Enviado</option>' +
-            '<option value="entregado"' + (p.estado === 'entregado' ? ' selected' : '') + '>Entregado</option>' +
-            '<option value="cancelado"' + (p.estado === 'cancelado' ? ' selected' : '') + '>Cancelado</option>' +
-          '</select>' +
-          '<button class="btn-icon" onclick="eliminarPedido(' + p.id + ')" title="Eliminar">🗑</button>' +
-        '</td>' +
-      '</tr>';
-    }).join("");
+    pedidosAllData = data;
+    renderPedidos();
   });
+}
+
+function renderPedidos() {
+  var data = pedidosAllData;
+  var total = data.length;
+  var totalPages = Math.ceil(total / pedidosPerPage);
+  if (pedidosPage > totalPages) pedidosPage = Math.max(1, totalPages);
+  var start = (pedidosPage - 1) * pedidosPerPage;
+  var paginated = data.slice(start, start + pedidosPerPage);
+
+  document.getElementById("pedidos-tbody").innerHTML = paginated.map(function(p) {
+    var prods = p.productos.map(function(pr) { return pr.cantidad + "x " + pr.nombre; }).join(", ");
+    var badgeClass = "badge-" + p.estado;
+    return '<tr>' +
+      '<td>#' + p.id + '</td>' +
+      '<td>' + formatDate(p.fecha) + '</td>' +
+      '<td>' + (p.cliente || "—") + '</td>' +
+      '<td>' + (p.whatsapp || "—") + '</td>' +
+      '<td>' + prods + '</td>' +
+      '<td><strong>' + formatGs(p.total) + '</strong></td>' +
+      '<td><span class="badge ' + badgeClass + '">' + p.estado + '</span></td>' +
+      '<td>' +
+        '<select onchange="cambiarEstadoPedido(' + p.id + ', this.value)" class="estado-select">' +
+          '<option value="pendiente"' + (p.estado === 'pendiente' ? ' selected' : '') + '>Pendiente</option>' +
+          '<option value="confirmado"' + (p.estado === 'confirmado' ? ' selected' : '') + '>Confirmado</option>' +
+          '<option value="enviado"' + (p.estado === 'enviado' ? ' selected' : '') + '>Enviado</option>' +
+          '<option value="entregado"' + (p.estado === 'entregado' ? ' selected' : '') + '>Entregado</option>' +
+          '<option value="cancelado"' + (p.estado === 'cancelado' ? ' selected' : '') + '>Cancelado</option>' +
+        '</select>' +
+        '<button class="btn-icon" onclick="eliminarPedido(' + p.id + ')" title="Eliminar">🗑</button>' +
+      '</td>' +
+    '</tr>';
+  }).join("");
+  renderPaginationFooter("pedidos-tbody", total, totalPages, "pedidosPage", "renderPedidos()");
+}
+
+function renderPaginationFooter(tbodyId, total, totalPages, pageVarName, renderFn) {
+  var tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+  var table = tbody.closest("table");
+  if (!table) return;
+  var footerId = tbodyId + "-footer";
+  var footer = document.getElementById(footerId);
+  if (!footer) {
+    footer = document.createElement("div");
+    footer.id = footerId;
+    footer.style.cssText = "display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:8px;border-top:1px solid var(--border);font-size:0.8rem;color:var(--muted)";
+    table.parentNode.insertBefore(footer, table.nextSibling);
+  }
+  var html = "<span>" + total + " resultados</span>";
+  if (totalPages > 1) {
+    var currentPage = window[pageVarName] || 1;
+    var btns = "";
+    for (var p = 1; p <= totalPages; p++) {
+      btns += '<button onclick="' + pageVarName + "=" + p + ";" + renderFn + '" style="padding:4px 8px;margin:0 2px;border:1px solid ' + (p === currentPage ? "var(--primary)" : "var(--border)") + ";border-radius:4px;background:" + (p === currentPage ? "var(--primary)" : "var(--bg)") + ";color:" + (p === currentPage ? "#fff" : "var(--muted)") + ';cursor:pointer;font-size:0.75rem">' + p + "</button>";
+    }
+    html += '<span>P\u00e1gina ' + currentPage + " de " + totalPages + ": " + btns + "</span>";
+  }
+  footer.innerHTML = html;
 }
 
 function cambiarEstadoPedido(id, estado) {
   api("/pedidos/" + id + "/estado", { method: "PATCH", body: JSON.stringify({ estado: estado }) }).then(function() {
     toast("Estado actualizado a " + estado);
-    loadPedidos();
+    renderPedidos();
   });
 }
 
 function eliminarPedido(id) {
   if (!confirm("Eliminar este pedido?")) return;
   api("/pedidos/" + id, { method: "DELETE" }).then(function() {
+    pedidosPage = 1;
     loadPedidos();
     toast("Pedido eliminado");
   });
@@ -962,7 +1091,7 @@ function editCategoria(id) {
     document.getElementById("cat-descripcion").value = c.descripcion || "";
     document.getElementById("cat-activo").checked = !!c.activo;
     document.getElementById("cat-modal-title").textContent = "Editar Categor&iacute;a";
-    document.getElementById("tab-modal-categoria").classList.remove("hidden");
+    document.getElementById("modal-categoria").classList.remove("hidden");
     document.getElementById("cat-msg").classList.add("hidden");
   });
 }
@@ -988,16 +1117,38 @@ function loadCategoriasSelect(selectId) {
 }
 
 // ---------- ENVIOS ----------
+var enviosPage = 1;
+var enviosPerPage = 20;
+var enviosAllData = [];
+
 function loadEnvios() {
+  enviosPage = 1;
   api("/envios/all").then(function(rows) {
-    var tbody = document.getElementById("envios-tbody");
-    tbody.innerHTML = "";
-    if (!rows || !rows.length) { tbody.innerHTML = "<tr><td colspan='5' class='empty-row'>Sin zonas de env&iacute;o</td></tr>"; return; }
-    for (var r of rows) {
-      var tipoLabel = r.tipo === 'delivery' ? '🚚 Delivery' : '📦 Encomienda';
-      tbody.innerHTML += "<tr><td>" + xt(r.ciudad) + "</td><td>" + xt(r.departamento) + "</td><td>" + tipoLabel + "</td><td>" + (r.tipo === 'delivery' ? 'Gs.' + (r.costo || 0).toLocaleString('es-PY') : '-') + "</td><td>" + (r.activo ? "✅" : "❌") + "</td><td><button class='btn btn-small' onclick='editEnvio(" + r.id + ")'>Editar</button> <button class='btn btn-small btn-danger' onclick='deleteEnvio(" + r.id + ")'>Eliminar</button></td></tr>";
-    }
+    enviosAllData = rows || [];
+    renderEnvios();
   });
+}
+
+function renderEnvios() {
+  var data = enviosAllData;
+  var total = data.length;
+  var totalPages = Math.ceil(total / enviosPerPage);
+  if (enviosPage > totalPages) enviosPage = Math.max(1, totalPages);
+  var start = (enviosPage - 1) * enviosPerPage;
+  var paginated = data.slice(start, start + enviosPerPage);
+  var tbody = document.getElementById("envios-tbody");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+  if (!paginated.length) {
+    tbody.innerHTML = "<tr><td colspan='5' class='empty-row'>Sin zonas de env&iacute;o</td></tr>";
+    renderPaginationFooter("envios-tbody", 0, 0, "enviosPage", "renderEnvios()");
+    return;
+  }
+  for (var r of paginated) {
+    var tipoLabel = r.tipo === 'delivery' ? '🚚 Delivery' : '📦 Encomienda';
+    tbody.innerHTML += "<tr><td>" + xt(r.ciudad) + "</td><td>" + xt(r.departamento) + "</td><td>" + tipoLabel + "</td><td>" + (r.tipo === 'delivery' ? 'Gs.' + (r.costo || 0).toLocaleString('es-PY') : '-') + "</td><td>" + (r.activo ? "✅" : "❌") + "</td><td><button class='btn btn-small' onclick='editEnvio(" + r.id + ")'>Editar</button> <button class='btn btn-small btn-danger' onclick='deleteEnvio(" + r.id + ")'>Eliminar</button></td></tr>";
+  }
+  renderPaginationFooter("envios-tbody", total, totalPages, "enviosPage", "renderEnvios()");
 }
 
 function editEnvio(id) {
@@ -1111,7 +1262,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("cat-descripcion").value = "";
     document.getElementById("cat-activo").checked = true;
     document.getElementById("cat-modal-title").textContent = "Nueva Categor&iacute;a";
-    document.getElementById("tab-modal-categoria").classList.remove("hidden");
+    document.getElementById("modal-categoria").classList.remove("hidden");
     document.getElementById("cat-msg").classList.add("hidden");
   });
 
@@ -1128,17 +1279,46 @@ document.addEventListener("DOMContentLoaded", function() {
     var url = id ? "/categorias/" + id : "/categorias";
     api(url, { method: method, body: JSON.stringify(data) }).then(function(r) {
       if (r.error) { document.getElementById("cat-msg").textContent = r.error; document.getElementById("cat-msg").classList.remove("hidden"); return; }
-      document.getElementById("tab-modal-categoria").classList.add("hidden");
+      document.getElementById("modal-categoria").classList.add("hidden");
       toast("Categor&iacute;a guardada");
       loadCategorias();
     });
   });
 
   document.getElementById("modal-close-cat").addEventListener("click", function() {
-    document.getElementById("tab-modal-categoria").classList.add("hidden");
+    document.getElementById("modal-categoria").classList.add("hidden");
   });
   document.getElementById("modal-overlay-cat").addEventListener("click", function() {
-    document.getElementById("tab-modal-categoria").classList.add("hidden");
+    document.getElementById("modal-categoria").classList.add("hidden");
+  });
+
+  // Marcas events
+  var btnNm = document.getElementById("btn-nueva-marca");
+  if (btnNm) btnNm.addEventListener("click", nuevoMarca);
+
+  document.getElementById("marca-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+    var id = document.getElementById("marca-id").value;
+    var body = {
+      nombre: document.getElementById("marca-nombre").value,
+      prioridad: parseInt(document.getElementById("marca-prioridad").value) || 0,
+      logo: document.getElementById("marca-logo").value,
+      activo: document.getElementById("marca-activo").checked
+    };
+    var method = id ? "PUT" : "POST";
+    var url = id ? "/marcas/" + id : "/marcas";
+    api(url, { method: method, body: JSON.stringify(body) }).then(function(r) {
+      if (r.error) { document.getElementById("marca-msg").textContent = r.error; document.getElementById("marca-msg").classList.remove("hidden"); return; }
+      document.getElementById("modal-marca").classList.add("hidden");
+      toast("Marca guardada"); loadMarcas();
+    });
+  });
+
+  document.getElementById("modal-close-marca").addEventListener("click", function() {
+    document.getElementById("modal-marca").classList.add("hidden");
+  });
+  document.getElementById("modal-overlay-marca").addEventListener("click", function() {
+    document.getElementById("modal-marca").classList.add("hidden");
   });
 
   // ---------- ENVIOS EVENTS ----------
@@ -1601,26 +1781,44 @@ function eliminarDescuentoMarca(id) {
 }
 
 // ---------- CARRITOS ----------
+var carritosPage = 1;
+var carritosPerPage = 20;
+var carritosAllData = [];
+
 function loadCarritos() {
+  carritosPage = 1;
   api("/carritos").then(function(data) {
-    var tbody = document.getElementById("carritos-tbody");
-    if (!tbody) return;
-    if (!data.length) {
-      tbody.innerHTML = '<tr><td colspan="5">No hay carritos abandonados.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = data.map(function(c) {
-      var prods = (c.productos || []).map(function(p) { return p.cantidad + 'x ' + p.nombre; }).join(', ');
-      var wa = c.whatsapp || 'Sin WhatsApp';
-      return '<tr>' +
-        '<td>' + (c.whatsapp ? '<a href="https://wa.me/595' + c.whatsapp.replace(/^0+/, '').replace(/\D/g, '') + '?text=' + encodeURIComponent('Hola! Vimos que dejaste productos en tu carrito: ' + prods) + '" target="_blank" style="color:var(--success)">' + wa + '</a>' : wa) + '</td>' +
-        '<td>' + prods + '</td>' +
-        '<td>' + formatDate(c.creado) + '</td>' +
-        '<td>' + (c.notificado ? '&#9989;' : '&#10060;') + '</td>' +
-        '<td><button class="btn btn-sm btn-danger" onclick="eliminarCarrito(' + c.id + ')">Eliminar</button></td>' +
-      '</tr>';
-    }).join("");
+    carritosAllData = data || [];
+    renderCarritos();
   });
+}
+
+function renderCarritos() {
+  var data = carritosAllData;
+  var total = data.length;
+  var totalPages = Math.ceil(total / carritosPerPage);
+  if (carritosPage > totalPages) carritosPage = Math.max(1, totalPages);
+  var start = (carritosPage - 1) * carritosPerPage;
+  var paginated = data.slice(start, start + carritosPerPage);
+  var tbody = document.getElementById("carritos-tbody");
+  if (!tbody) return;
+  if (!paginated.length) {
+    tbody.innerHTML = '<tr><td colspan="5">No hay carritos abandonados.</td></tr>';
+    renderPaginationFooter("carritos-tbody", 0, 0, "carritosPage", "renderCarritos()");
+    return;
+  }
+  tbody.innerHTML = paginated.map(function(c) {
+    var prods = (c.productos || []).map(function(p) { return p.cantidad + 'x ' + p.nombre; }).join(', ');
+    var wa = c.whatsapp || 'Sin WhatsApp';
+    return '<tr>' +
+      '<td>' + (c.whatsapp ? '<a href="https://wa.me/595' + c.whatsapp.replace(/^0+/, '').replace(/\D/g, '') + '?text=' + encodeURIComponent('Hola! Vimos que dejaste productos en tu carrito: ' + prods) + '" target="_blank" style="color:var(--success)">' + wa + '</a>' : wa) + '</td>' +
+      '<td>' + prods + '</td>' +
+      '<td>' + formatDate(c.creado) + '</td>' +
+      '<td>' + (c.notificado ? '&#9989;' : '&#10060;') + '</td>' +
+      '<td><button class="btn btn-sm btn-danger" onclick="eliminarCarrito(' + c.id + ')">Eliminar</button></td>' +
+    '</tr>';
+  }).join("");
+  renderPaginationFooter("carritos-tbody", total, totalPages, "carritosPage", "renderCarritos()");
 }
 
 function eliminarCarrito(id) {

@@ -842,6 +842,20 @@ app.put("/api/marcas/:id", auth, (req, res) => {
   res.json({ ok: true });
 });
 
+app.post("/api/marcas", auth, (req, res) => {
+  const { nombre, prioridad, logo } = req.body;
+  if (!nombre) return res.status(400).json({ error: "Nombre requerido" });
+  const result = db.prepare("INSERT INTO marcas (nombre, prioridad, logo) VALUES (?, ?, ?)").run(
+    nombre, parseInt(prioridad) || 0, logo || ""
+  );
+  res.json({ id: result.lastInsertRowid });
+});
+
+app.delete("/api/marcas/:id", auth, (req, res) => {
+  db.prepare("DELETE FROM marcas WHERE id = ?").run(req.params.id);
+  res.json({ ok: true });
+});
+
 app.post("/api/marcas/normalizar", auth, (req, res) => {
   normalizarMarcas();
   res.json({ ok: true });

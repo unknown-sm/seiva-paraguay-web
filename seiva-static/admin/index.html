@@ -59,7 +59,14 @@
     </header>
 
     <div id="tab-dashboard" class="tab-content active">
-      <div class="stats-grid" id="stats-cards"></div>
+      <div class="stats-grid" id="stats-cards">
+        <div class="stat-card"><div class="stat-card-label">Ventas Hoy</div><div class="stat-card-value">—</div></div>
+        <div class="stat-card"><div class="stat-card-label">Ventas 7 Días</div><div class="stat-card-value">—</div></div>
+        <div class="stat-card"><div class="stat-card-label">Ventas 30 Días</div><div class="stat-card-value">—</div></div>
+        <div class="stat-card"><div class="stat-card-label">Productos Activos</div><div class="stat-card-value">—</div></div>
+        <div class="stat-card" style="border-left:3px solid var(--danger)"><div class="stat-card-label">Stock Crítico</div><div class="stat-card-value" id="stats-stock-critico-val" style="color:var(--danger)">—</div><div id="stats-stock-critico" style="font-size:0.75rem;color:var(--muted)">cargando...</div></div>
+        <div class="stat-card" style="border-left:3px solid var(--accent)"><div class="stat-card-label">Carritos Sin Notificar</div><div class="stat-card-value" id="stats-carritos-val">—</div></div>
+      </div>
       <div class="dashboard-grid">
         <div class="card"><div class="card-header"><h3>Top 5 Productos</h3><span>30 d&iacute;as</span></div><div class="card-body" id="top-productos"></div></div>
         <div class="card"><div class="card-header"><h3>&Uacute;ltimas Ventas</h3></div><div class="card-body" id="ultimas-ventas"></div></div>
@@ -97,7 +104,18 @@
         <div class="card">
           <div class="card-header" style="justify-content:space-between">
             <h3>Productos</h3>
-            <div style="display:flex;gap:12px;align-items:center"><input type="text" id="productos-search" placeholder="Buscar..." class="form-input" style="width:200px"><button id="btn-nuevo-producto" class="btn btn-primary">+ Nuevo</button></div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input type="text" id="productos-search" placeholder="Buscar..." class="form-input" style="width:180px" oninput="prodPage=1;renderProductos(this.value,document.getElementById('prod-filter-cat').value,document.getElementById('prod-filter-activo').value)">
+              <select id="prod-filter-cat" class="form-select" style="width:auto;height:32px;font-size:0.8rem" onchange="prodPage=1;renderProductos(document.getElementById('productos-search').value,this.value,document.getElementById('prod-filter-activo').value)">
+                <option value="">Todas las categorías</option>
+              </select>
+              <select id="prod-filter-activo" class="form-select" style="width:auto;height:32px;font-size:0.8rem" onchange="prodPage=1;renderProductos(document.getElementById('productos-search').value,document.getElementById('prod-filter-cat').value,this.value)">
+                <option value="">Todos</option>
+                <option value="1">Solo activos</option>
+                <option value="0">Solo inactivos</option>
+              </select>
+              <button id="btn-nuevo-producto" class="btn btn-primary">+ Nuevo</button>
+            </div>
           </div>
           <div class="card-body"><table class="admin-table"><thead><tr><th>Nombre</th><th>Precio</th><th>Marca</th><th>Stock</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="productos-tbody"></tbody></table></div>
         </div>
@@ -106,7 +124,10 @@
         <div class="card">
           <div class="card-header" style="justify-content:space-between">
             <h3>Marcas</h3>
-            <button id="btn-normalizar-marcas" class="btn btn-primary">Normalizar marcas desde productos</button>
+            <div style="display:flex;gap:8px">
+              <button id="btn-nueva-marca" class="btn btn-primary">+ Nueva Marca</button>
+              <button id="btn-normalizar-marcas" class="btn btn-secondary">Normalizar desde productos</button>
+            </div>
           </div>
           <div class="card-body">
             <p class="help-text" style="margin-bottom:16px">Prioridad: n&uacute;mero menor = aparece primero. Prioridad alta (ej: 100) = aparece al fondo.</p>
@@ -177,7 +198,7 @@
       </div>
     </div>
 
-    <div id="tab-modal-categoria" class="modal hidden">
+    <div id="modal-categoria" class="modal hidden">
       <div class="modal-overlay" id="modal-overlay-cat"></div>
       <div class="modal-content">
         <div class="modal-header"><h3 id="cat-modal-title">Nueva Categor&iacute;a</h3><button class="modal-close" id="modal-close-cat">&times;</button></div>
@@ -266,14 +287,14 @@
               <div style="padding:12px;border:1px solid var(--border);border-radius:8px">
                 <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer"><input type="checkbox" id="pagos-qr"> Pago QR</label>
                 <div id="pagos-section-qr" style="margin-top:8px">
-                  <label style="color:var(--muted);font-size:0.8rem">Subir imagen QR</label>
+                  <label style="color:var(--muted);font-size:0.8rem;font-weight:600">Subir imagen QR</label>
                   <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
                     <input type="file" id="pagos-qr-file" accept="image/*" class="form-input" style="flex:1" onchange="uploadQRImage()">
-                    <span style="font-size:0.75rem;color:var(--muted)">o</span>
                   </div>
-                  <label style="color:var(--muted);font-size:0.8rem;margin-top:8px;display:block">URL imagen QR</label>
-                  <input type="text" id="pagos-qr-imagen" class="form-input" style="margin-top:4px">
-                  <label style="color:var(--muted);font-size:0.8rem;margin-top:8px;display:block">Instrucciones</label><textarea id="pagos-qr-instrucciones" rows="3" class="form-input"></textarea>
+                  <div style="text-align:center;font-size:0.7rem;color:var(--muted);margin:4px 0">— o pegar URL —</div>
+                  <input type="text" id="pagos-qr-imagen" class="form-input" placeholder="https://...">
+                  <label style="color:var(--muted);font-size:0.8rem;margin-top:8px;display:block">Instrucciones para el cliente</label>
+                  <textarea id="pagos-qr-instrucciones" rows="3" class="form-input" placeholder="Escaneá y envianos el comprobante por WhatsApp"></textarea>
                   <div id="pagos-qr-preview" style="margin-top:8px;display:none"><img id="pagos-qr-preview-img" src="" style="max-width:200px;border-radius:8px"></div>
                 </div>
               </div>
@@ -817,6 +838,26 @@
       <button type="submit" class="btn btn-primary">Guardar</button>
     </form>
     <p id="usuario-msg" class="msg hidden"></p>
+  </div>
+</div>
+
+<div id="modal-marca" class="modal hidden">
+  <div class="modal-overlay" id="modal-overlay-marca"></div>
+  <div class="modal-content" style="max-width:520px">
+    <div class="modal-header"><h3 id="marca-modal-title">Nueva Marca</h3><button class="modal-close" id="modal-close-marca">&times;</button></div>
+    <form id="marca-form">
+      <input type="hidden" id="marca-id" value="">
+      <div class="form-group"><label>Nombre *</label><input type="text" id="marca-nombre" required class="form-input" placeholder="Ej: Seiva, NutriMix, etc."></div>
+      <div class="form-group"><label>Prioridad <span style="color:var(--muted);font-weight:normal;font-size:0.75rem">(menor = aparece primero)</span></label>
+        <input type="number" id="marca-prioridad" value="0" min="0" max="999" class="form-input">
+      </div>
+      <div class="form-group"><label>Logo URL <span style="color:var(--muted);font-weight:normal;font-size:0.75rem">(opcional)</span></label>
+        <input type="text" id="marca-logo" class="form-input" placeholder="https://...">
+      </div>
+      <div class="form-group"><label><input type="checkbox" id="marca-activo" checked> Activa</label></div>
+      <button type="submit" class="btn btn-primary">Guardar</button>
+    </form>
+    <p id="marca-msg" class="msg hidden"></p>
   </div>
 </div>
 
