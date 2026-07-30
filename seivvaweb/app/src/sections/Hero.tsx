@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 
-const ingredients = [
+const defaultIngredients = [
   { img: '/images/floating-leaf.png', top: '8%', left: '10%', size: 80, delay: 0, duration: 3.5, rotate: -20 },
   { img: '/images/floating-orange.png', top: '5%', right: '12%', size: 90, delay: 0.5, duration: 4, rotate: 15 },
   { img: '/images/floating-berries.png', top: '35%', left: '3%', size: 70, delay: 1, duration: 3, rotate: 10 },
@@ -18,10 +18,30 @@ export default function Hero() {
   const ctaRef = useRef<HTMLDivElement>(null)
   const bottleRef = useRef<HTMLImageElement>(null)
   const ingredientRefs = useRef<(HTMLImageElement | null)[]>([])
+  const [heroImage, setHeroImage] = useState('/images/hero-bottle.jpg')
+  const [ingredients, setIngredients] = useState(defaultIngredients)
+
+  useEffect(() => {
+    const API = window.location.hostname === 'localhost' ? 'http://localhost:3001/api' : '/api'
+    fetch(API + '/contenido')
+      .then(r => r.json())
+      .then(data => {
+        if (data.hero_imagen) setHeroImage(data.hero_imagen)
+        if (data.hero_imagenes) {
+          const imgList = data.hero_imagenes.split(',').map((s: string) => s.trim()).filter(Boolean)
+          if (imgList.length > 0) {
+            setIngredients(prev => prev.map((item, i) => ({
+              ...item,
+              img: imgList[i] || item.img
+            })))
+          }
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Headline character animation (word by word for simplicity)
       if (headlineRef.current) {
         gsap.fromTo(headlineRef.current,
           { y: 60, opacity: 0 },
@@ -188,7 +208,7 @@ export default function Hero() {
             {/* Main Bottle */}
             <img
               ref={bottleRef}
-              src="/images/hero-bottle.jpg"
+              src={heroImage}
               alt="Espirulina Orgánica Premium"
               className="relative z-10 w-[200px] sm:w-[280px] lg:w-[380px] object-contain"
               style={{
