@@ -61,6 +61,7 @@ app.use(cors({
     : ["https://seiva.com.py", "https://www.seiva.com.py"],
   credentials: true
 }));
+app.set("trust proxy", 1);
 app.use(express.json({ limit: "5mb" }));
 
 app.use(helmet({
