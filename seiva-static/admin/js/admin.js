@@ -433,6 +433,8 @@ function editarProducto(id) {
     document.getElementById("prod-sku").value = prod.sku || "";
     document.getElementById("prod-slug").value = prod.slug || "";
     document.getElementById("prod-seo_descripcion").value = prod.seo_descripcion || "";
+    var seoCnt = document.getElementById("prod-seo-count");
+    if (seoCnt) seoCnt.textContent = (prod.seo_descripcion || "").length + "/160";
     document.getElementById("prod-descripcion").value = prod.descripcion || "";
     document.getElementById("prod-descripcion_larga").value = prod.descripcion_larga || "";
     document.getElementById("prod-stock").value = prod.stock || 0;

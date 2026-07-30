@@ -364,58 +364,188 @@
 
 <div id="modal-producto" class="modal hidden">
   <div class="modal-overlay" id="modal-overlay-prod"></div>
-  <div class="modal-content">
-    <div class="modal-header"><h3 id="modal-title">Nuevo Producto</h3><button class="modal-close" id="modal-close-prod">&times;</button></div>
-    <div class="form-group" style="background:var(--surface);padding:12px;border-radius:8px;margin-bottom:16px;border:1px solid var(--border)">
-      <label style="font-weight:600;margin-bottom:8px;display:block">🔗 Importar desde URL</label>
-      <div style="display:flex;gap:8px">
-        <input type="url" id="scrape-url" placeholder="https://ejemplo.com/producto-xyz" class="form-input" style="flex:1">
-        <button type="button" id="btn-scrape-url" class="btn btn-secondary" style="height:38px">Importar</button>
-      </div>
-      <div id="scrape-progress" style="display:none;margin-top:12px">
-        <div style="background:var(--border);border-radius:4px;height:6px;overflow:hidden">
-          <div id="scrape-progress-bar" style="background:var(--primary);height:100%;width:0%;transition:width 0.3s"></div>
-        </div>
-        <p id="scrape-status" style="margin-top:6px;font-size:0.85rem;color:var(--muted)"></p>
-      </div>
-      <div id="scrape-preview" style="display:none;margin-top:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden">
-        <div style="display:flex;gap:12px;padding:12px">
-          <div style="width:120px;height:120px;border-radius:6px;overflow:hidden;background:var(--surface);flex-shrink:0">
-            <img id="scrape-preview-img" src="" style="width:100%;height:100%;object-fit:cover" alt="">
-          </div>
-          <div style="flex:1;min-width:0">
-            <h4 id="scrape-preview-nombre" style="margin:0 0 4px;font-size:0.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></h4>
-            <p id="scrape-preview-precio" style="margin:0 0 8px;color:var(--primary);font-weight:600;font-size:1.1rem"></p>
-            <p id="scrape-preview-desc" style="margin:0;font-size:0.8rem;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden"></p>
-          </div>
-        </div>
-        <div style="padding:8px 12px;background:var(--surface);border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-          <a id="scrape-preview-link" href="#" target="_blank" style="font-size:0.8rem;color:var(--primary);text-decoration:none">↗ Ver producto original</a>
-          <span style="font-size:0.75rem;color:var(--muted)">Datos extraídos — editá antes de guardar</span>
-        </div>
-      </div>
+  <div class="modal-content" style="max-width:1100px;width:95vw;height:90vh;display:flex;flex-direction:column">
+    <div class="modal-header" style="flex-shrink:0">
+      <h3 id="modal-title">Nuevo Producto</h3>
+      <button class="modal-close" id="modal-close-prod">&times;</button>
     </div>
-    <form id="producto-form">
+
+    <form id="producto-form" style="display:flex;flex-direction:column;flex:1;min-height:0">
       <input type="hidden" id="prod-id" value="">
-      <div class="form-group"><label>Nombre *</label><input type="text" id="prod-nombre" required class="form-input"></div>
-      <div class="form-grid"><div class="form-group"><label>Precio (Gs.) *</label><input type="number" id="prod-precio" required class="form-input"></div><div class="form-group"><label>Precio Anterior</label><input type="number" id="prod-precio-anterior" class="form-input"></div><div class="form-group"><label>Precio Proveedor (Gs.)</label><input type="number" id="prod-precio-proveedor" class="form-input" placeholder="Interno - no visible al cliente"></div></div>
-      <div class="form-grid"><div class="form-group"><label>Categor&iacute;a</label><select id="prod-categoria" class="form-select"></select></div><div class="form-group"><label>Subcategor&iacute;a</label><select id="prod-subcategoria" class="form-select"><option value="chocolate">Chocolate</option><option value="mix">Mix</option><option value="almendras">Almendras</option><option value="frutas">Frutas</option><option value="nueces">Nueces</option><option value="barras">Barritas</option><option value="castanas">Casta&ntilde;as</option><option value="aceites">Aceites</option><option value="magnesios">Magnesios</option><option value="omega3">Omega 3</option><option value="gym">Gym</option><option value="colagenos">Col&aacute;genos</option><option value="naturales">Naturales</option><option value="minerales">Minerales</option><option value="combos">Combos</option></select></div></div>
-      <div class="form-group"><label>Marca</label><input type="text" id="prod-marca" class="form-input" placeholder="Ej: NutriMix, Seiva, Gen&eacute;rico"></div>
-      <div class="form-grid"><div class="form-group"><label>SKU / Referencia</label><input type="text" id="prod-sku" class="form-input" placeholder="Código interno"></div><div class="form-group"><label>Slug (URL)</label><input type="text" id="prod-slug" class="form-input" placeholder="Auto-generado desde nombre" readonly></div></div>
-      <div class="form-group"><label>SEO Descripción</label><textarea id="prod-seo_descripcion" rows="2" class="form-input" placeholder="Meta description para Google (máx 160 chars)" maxlength="160"></textarea></div>
-      <div class="form-group"><label>Descripci&oacute;n corta</label><textarea id="prod-descripcion" rows="2" class="form-input"></textarea></div>
-      <div class="form-group"><label>Descripci&oacute;n larga</label><textarea id="prod-descripcion_larga" rows="5" class="form-input"></textarea></div>
-      <div class="form-grid"><div class="form-group"><label>Stock</label><input type="number" id="prod-stock" value="50" class="form-input"></div><div class="form-group"><label>Orden Destacado (0=no)</label><input type="number" id="prod-featured_order" value="0" min="0" max="99" class="form-input" placeholder="0-8"></div><div class="form-group" style="display:flex;align-items:flex-end;gap:16px;padding-bottom:8px"><label><input type="checkbox" id="prod-destacado"> Destacado</label><label><input type="checkbox" id="prod-activo" checked> Visible en tienda</label><label><input type="checkbox" id="prod-delivery-gratis"> Delivery gratis</label></div></div>
-      <div class="form-group"><label>Etiquetas</label><div style="display:flex;gap:12px;flex-wrap:wrap"><label><input type="checkbox" class="prod-etiqueta" value="nuevo"> Nuevo</label><label><input type="checkbox" class="prod-etiqueta" value="popular"> Popular</label><label><input type="checkbox" class="prod-etiqueta" value="oferta"> Oferta</label><label><input type="checkbox" class="prod-etiqueta" value="envio_gratis"> Envío gratis</label><label><input type="checkbox" class="prod-etiqueta" value="mas_vendido"> Más vendido</label><label><input type="checkbox" class="prod-etiqueta" value="2x1"> 2x1</label><label><input type="checkbox" class="prod-etiqueta" value="3x2"> 3x2</label></div></div>
-      <div class="form-group"><label>Cross-sell (IDs separados por coma)</label><input type="text" id="prod-crosssell" class="form-input" placeholder="Ej: 178, 179, 180"></div>
-      <div class="form-group"><label>Up-sell (IDs separados por coma)</label><input type="text" id="prod-upsell" class="form-input" placeholder="Ej: 181, 182"></div>
-      <div class="form-group"><label>Variantes (presentaciones)</label>
-        <div id="prod-variantes-container"></div>
-        <button type="button" id="btn-add-variante" class="btn btn-sm" style="margin-top:8px">+ Agregar variante</button>
+
+      <!-- Scraper bar (compacto) -->
+      <div style="padding:8px 24px;background:var(--bg);border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-shrink:0">
+        <span style="font-size:0.8rem;color:var(--muted);white-space:nowrap">🔗 Importar:</span>
+        <input type="url" id="scrape-url" placeholder="https://ejemplo.com/producto-xyz" class="form-input" style="flex:1;height:32px;font-size:0.85rem">
+        <button type="button" id="btn-scrape-url" class="btn btn-sm btn-secondary" style="height:32px">Importar</button>
+        <span id="scrape-status" style="font-size:0.75rem;color:var(--muted);min-width:120px"></span>
       </div>
-      <button type="submit" id="btn-guardar-producto" class="btn btn-primary" style="width:100%"><span id="btn-guardar-text">Guardar Producto</span><span id="btn-guardar-loading" style="display:none">⏳ Guardando...</span></button>
+      <div id="scrape-preview" style="display:none;margin:0 24px 8px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;flex-shrink:0">
+        <span style="font-size:0.75rem;color:var(--muted)">Datos extraídos — revisá antes de guardar</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.4fr 1fr;flex:1;min-height:0;overflow:hidden">
+
+        <!-- COLUMNA IZQUIERDA: Info principal -->
+        <div style="padding:20px 24px;overflow-y:auto;border-right:1px solid var(--border)">
+
+          <!-- Nombre -->
+          <div class="form-group">
+            <label style="font-weight:600">Nombre del producto *</label>
+            <input type="text" id="prod-nombre" required class="form-input" style="font-size:1.1rem;padding:10px 14px" placeholder="Ej: Omega 3 Puro 1000mg 60 caps">
+          </div>
+
+          <!-- Descripción corta -->
+          <div class="form-group">
+            <label style="font-weight:600">Descripción corta</label>
+            <textarea id="prod-descripcion" rows="2" class="form-input" placeholder="Resumen de 1-2 líneas para cards y listados"></textarea>
+          </div>
+
+          <!-- Descripción larga -->
+          <div class="form-group">
+            <label style="font-weight:600">Descripción completa</label>
+            <textarea id="prod-descripcion_larga" rows="8" class="form-input" placeholder="Descripción detallada del producto"></textarea>
+          </div>
+
+          <!-- Variantes -->
+          <div class="form-group" style="background:var(--bg);padding:14px;border-radius:8px;border:1px solid var(--border)">
+            <label style="font-weight:600;display:flex;align-items:center;gap:6px">
+              📦 Variantes (presentaciones)
+              <span style="font-weight:400;font-size:0.75rem;color:var(--muted)">- ej: 60 caps, 120 caps, 500g</span>
+            </label>
+            <div id="prod-variantes-container"></div>
+            <button type="button" id="btn-add-variante" class="btn btn-sm" style="margin-top:8px">+ Agregar variante</button>
+          </div>
+
+          <!-- SEO -->
+          <div class="form-group" style="margin-top:12px">
+            <label style="font-weight:600">SEO Descripción <span style="font-weight:400;color:var(--muted);font-size:0.75rem">(Google, máx 160 chars)</span></label>
+            <textarea id="prod-seo_descripcion" rows="2" class="form-input" maxlength="160" placeholder="Meta description para resultados de búsqueda" oninput="document.getElementById('prod-seo-count').textContent=this.value.length+'/160'"></textarea>
+            <div style="font-size:0.7rem;color:var(--muted);text-align:right;margin-top:2px" id="prod-seo-count">0/160</div>
+          </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: Pricing, inventario, extras -->
+        <div style="padding:20px 24px;overflow-y:auto;background:var(--bg)">
+
+          <!-- Pricing card -->
+          <div style="background:var(--surface);padding:14px;border-radius:8px;border:1px solid var(--border);margin-bottom:12px">
+            <h4 style="margin:0 0 10px;font-size:0.85rem;text-transform:uppercase;color:var(--muted);letter-spacing:0.05em">Precios</h4>
+            <div class="form-group" style="margin-bottom:8px">
+              <label style="font-size:0.8rem">Precio de venta (Gs.) *</label>
+              <input type="number" id="prod-precio" required class="form-input" placeholder="0" style="font-weight:600">
+            </div>
+            <div class="form-group" style="margin-bottom:8px">
+              <label style="font-size:0.8rem">Precio anterior (tachado)</label>
+              <input type="number" id="prod-precio-anterior" class="form-input" placeholder="Opcional">
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label style="font-size:0.8rem">Precio proveedor (interno)</label>
+              <input type="number" id="prod-precio-proveedor" class="form-input" placeholder="Costo de compra">
+            </div>
+          </div>
+
+          <!-- Categorización card -->
+          <div style="background:var(--surface);padding:14px;border-radius:8px;border:1px solid var(--border);margin-bottom:12px">
+            <h4 style="margin:0 0 10px;font-size:0.85rem;text-transform:uppercase;color:var(--muted);letter-spacing:0.05em">Categorización</h4>
+            <div class="form-group" style="margin-bottom:8px">
+              <label style="font-size:0.8rem">Categoría</label>
+              <select id="prod-categoria" class="form-select"></select>
+            </div>
+            <div class="form-group" style="margin-bottom:8px">
+              <label style="font-size:0.8rem">Subcategoría</label>
+              <select id="prod-subcategoria" class="form-select">
+                <option value="chocolate">Chocolate</option>
+                <option value="mix">Mix</option>
+                <option value="almendras">Almendras</option>
+                <option value="frutas">Frutas</option>
+                <option value="nueces">Nueces</option>
+                <option value="barras">Barritas</option>
+                <option value="castanas">Castañas</option>
+                <option value="aceites">Aceites</option>
+                <option value="magnesios">Magnesios</option>
+                <option value="omega3">Omega 3</option>
+                <option value="gym">Gym</option>
+                <option value="colagenos">Colágenos</option>
+                <option value="naturales">Naturales</option>
+                <option value="minerales">Minerales</option>
+                <option value="combos">Combos</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label style="font-size:0.8rem">Marca</label>
+              <input type="text" id="prod-marca" class="form-input" placeholder="Ej: NutriMix, Seiva, Genérico">
+            </div>
+          </div>
+
+          <!-- Inventario card -->
+          <div style="background:var(--surface);padding:14px;border-radius:8px;border:1px solid var(--border);margin-bottom:12px">
+            <h4 style="margin:0 0 10px;font-size:0.85rem;text-transform:uppercase;color:var(--muted);letter-spacing:0.05em">Inventario</h4>
+            <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:8px;margin-bottom:0">
+              <div class="form-group" style="margin-bottom:0">
+                <label style="font-size:0.8rem">Stock</label>
+                <input type="number" id="prod-stock" value="50" class="form-input">
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label style="font-size:0.8rem">SKU</label>
+                <input type="text" id="prod-sku" class="form-input" placeholder="Código interno">
+              </div>
+            </div>
+            <div class="form-group" style="margin:8px 0 0">
+              <label style="font-size:0.8rem">Slug (URL)</label>
+              <input type="text" id="prod-slug" class="form-input" placeholder="Auto-generado" readonly style="font-family:monospace;font-size:0.8rem">
+            </div>
+          </div>
+
+          <!-- Display card -->
+          <div style="background:var(--surface);padding:14px;border-radius:8px;border:1px solid var(--border);margin-bottom:12px">
+            <h4 style="margin:0 0 10px;font-size:0.85rem;text-transform:uppercase;color:var(--muted);letter-spacing:0.05em">Visibilidad</h4>
+            <div class="form-group" style="margin-bottom:8px">
+              <label style="font-size:0.8rem">Orden destacado (1-8, 0=no)</label>
+              <input type="number" id="prod-featured_order" value="0" min="0" max="99" class="form-input">
+            </div>
+            <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:4px">
+              <label style="font-size:0.85rem;display:flex;align-items:center;gap:4px"><input type="checkbox" id="prod-destacado"> Destacado</label>
+              <label style="font-size:0.85rem;display:flex;align-items:center;gap:4px"><input type="checkbox" id="prod-activo" checked> Visible en tienda</label>
+              <label style="font-size:0.85rem;display:flex;align-items:center;gap:4px"><input type="checkbox" id="prod-delivery-gratis"> Delivery gratis</label>
+            </div>
+          </div>
+
+          <!-- Etiquetas -->
+          <div class="form-group" style="background:var(--surface);padding:14px;border-radius:8px;border:1px solid var(--border)">
+            <h4 style="margin:0 0 10px;font-size:0.85rem;text-transform:uppercase;color:var(--muted);letter-spacing:0.05em">Etiquetas</h4>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <label style="font-size:0.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" class="prod-etiqueta" value="nuevo"> Nuevo</label>
+              <label style="font-size:0.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" class="prod-etiqueta" value="popular"> Popular</label>
+              <label style="font-size:0.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" class="prod-etiqueta" value="oferta"> Oferta</label>
+              <label style="font-size:0.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" class="prod-etiqueta" value="envio_gratis"> Envío gratis</label>
+              <label style="font-size:0.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" class="prod-etiqueta" value="mas_vendido"> Más vendido</label>
+              <label style="font-size:0.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" class="prod-etiqueta" value="2x1"> 2x1</label>
+              <label style="font-size:0.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" class="prod-etiqueta" value="3x2"> 3x2</label>
+            </div>
+          </div>
+
+          <!-- Cross-sell / Up-sell -->
+          <div class="form-group" style="margin-top:12px">
+            <label style="font-size:0.8rem">Cross-sell (IDs)</label>
+            <input type="text" id="prod-crosssell" class="form-input" placeholder="178, 179, 180" style="font-family:monospace;font-size:0.8rem">
+          </div>
+          <div class="form-group">
+            <label style="font-size:0.8rem">Up-sell (IDs)</label>
+            <input type="text" id="prod-upsell" class="form-input" placeholder="181, 182" style="font-family:monospace;font-size:0.8rem">
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer fijo -->
+      <div style="padding:12px 24px;border-top:1px solid var(--border);background:var(--surface);display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+        <p id="prod-msg" class="msg" style="margin:0;font-size:0.85rem"></p>
+        <button type="submit" id="btn-guardar-producto" class="btn btn-primary" style="padding:10px 32px">
+          <span id="btn-guardar-text">Guardar Producto</span>
+          <span id="btn-guardar-loading" style="display:none">⏳ Guardando...</span>
+        </button>
+      </div>
     </form>
-    <p id="prod-msg" class="msg hidden"></p>
   </div>
 </div>
 
