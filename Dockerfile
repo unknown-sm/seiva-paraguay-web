@@ -13,8 +13,8 @@ COPY seiva-static/backend/ ./
 COPY --from=build-react /react/dist ./dist
 COPY seiva-static/admin ./admin
 COPY seiva-static/img ./img
-EXPOSE 80
-ENV PORT=80
+EXPOSE 3001
+ENV PORT=3001
 ENV NODE_ENV=production
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD node -e "require('http').get('http://localhost:80/api/productos',r=>{process.exit(r.statusCode===200?0:1)})"
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD node -e "require('http').get('http://localhost:3001/api/productos',r=>{process.exit(r.statusCode===200?0:1)})"
 CMD ["node", "server.js"]
