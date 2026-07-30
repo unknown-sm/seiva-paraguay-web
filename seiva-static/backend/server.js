@@ -1511,7 +1511,7 @@ app.put("/api/categorias/:id", auth, (req, res) => {
 });
 
 app.delete("/api/categorias/:id", auth, (req, res) => {
-  db.prepare("UPDATE productos SET categoria_id = NULL WHERE categoria_id = ?").run(req.params.id);
+  db.prepare("UPDATE productos SET categoria_id = NULL, activo = 0 WHERE categoria_id = ?").run(req.params.id);
   db.prepare("DELETE FROM categorias WHERE id = ?").run(req.params.id);
   res.json({ ok: true });
 });
