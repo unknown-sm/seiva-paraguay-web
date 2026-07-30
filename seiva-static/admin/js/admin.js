@@ -297,7 +297,7 @@ function renderProductos(searchVal) {
       '<td>' + (p.precio_proveedor ? formatGs(p.precio_proveedor) : '—') + '</td>' +
       '<td>' + (p.precio_proveedor ? '<span style="color:var(--success);font-weight:600">' + formatGs(p.precio - p.precio_proveedor) + '</span>' : '—') + '</td>' +
       '<td>' + p.categoria + '</td>' +
-      '<td>' + p.stock + '</td>' +
+      '<td><input type="number" value="' + p.stock + '" min="0" onchange="updateStockInline(' + p.id + ', this.value)" style="width:55px;padding:4px 6px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);font-size:0.85rem;text-align:center"></td>' +
       '<td>' + (p.activo ? '&#9989;' : '&#10060;') + '</td>' +
       '<td>' +
         '<button class="btn-icon" onclick="editarProducto(' + p.id + ')" title="Editar">&#9999;</button>' +
@@ -344,6 +344,14 @@ if (productosSearchInput) {
     renderProductos(this.value);
   });
 }
+
+window.updateStockInline = function(id, val) {
+  var stock = parseInt(val) || 0;
+  api("/productos/stock-batch", { method: "PATCH", body: JSON.stringify({ updates: [{ id: id, stock: stock }] }) }).then(function() {
+    toast("Stock #" + id + " → " + stock);
+    prodAllData.find(function(p) { return p.id === id; }).stock = stock;
+  }).catch(function(e) { toast("Error al guardar stock", "error"); });
+};
 
 // ---------- MARCAS ----------
 function loadMarcas() {
