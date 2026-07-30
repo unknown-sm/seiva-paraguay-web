@@ -104,17 +104,17 @@
         <div class="card">
           <div class="card-header" style="justify-content:space-between">
             <h3>Productos</h3>
-            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-              <input type="text" id="productos-search" placeholder="Buscar..." class="form-input" style="width:180px" oninput="prodPage=1;renderProductos(this.value,document.getElementById('prod-filter-cat').value,document.getElementById('prod-filter-activo').value)">
-              <select id="prod-filter-cat" class="form-select" style="min-width:140px;font-size:0.8rem;padding:6px 10px" onchange="prodPage=1;renderProductos(document.getElementById('productos-search').value,this.value,document.getElementById('prod-filter-activo').value)">
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="text" id="productos-search" placeholder="Buscar..." class="form-input" style="flex:1;max-width:200px" oninput="prodPage=1;renderProductos(this.value,document.getElementById('prod-filter-cat').value,document.getElementById('prod-filter-activo').value)">
+              <select id="prod-filter-cat" class="form-select" style="width:auto;min-width:120px;font-size:0.8rem;padding:6px 10px" onchange="prodPage=1;renderProductos(document.getElementById('productos-search').value,this.value,document.getElementById('prod-filter-activo').value)">
                 <option value="">Todas las categorías</option>
               </select>
-              <select id="prod-filter-activo" class="form-select" style="min-width:100px;font-size:0.8rem;padding:6px 10px" onchange="prodPage=1;renderProductos(document.getElementById('productos-search').value,document.getElementById('prod-filter-cat').value,this.value)">
+              <select id="prod-filter-activo" class="form-select" style="width:auto;min-width:90px;font-size:0.8rem;padding:6px 10px" onchange="prodPage=1;renderProductos(document.getElementById('productos-search').value,document.getElementById('prod-filter-cat').value,this.value)">
                 <option value="">Todos</option>
-                <option value="1">Solo activos</option>
-                <option value="0">Solo inactivos</option>
+                <option value="1">Activos</option>
+                <option value="0">Inactivos</option>
               </select>
-              <button id="btn-nuevo-producto" class="btn btn-primary">+ Nuevo</button>
+              <button id="btn-nuevo-producto" class="btn btn-primary" style="white-space:nowrap">+ Nuevo</button>
             </div>
           </div>
           <div class="card-body"><table class="admin-table"><thead><tr><th>Nombre</th><th>Precio</th><th>Marca</th><th>Stock</th><th>Activo</th><th>Acciones</th></tr></thead><tbody id="productos-tbody"></tbody></table></div>
