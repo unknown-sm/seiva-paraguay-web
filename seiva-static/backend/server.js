@@ -74,11 +74,15 @@ const loginLimiter = rateLimit({
   message: { error: "Demasiados intentos. Espera 15 minutos." },
 });
 
-// Error log in-memory (last 500 entries)
-const errorLogs = [];
+// Error log — persisted in SQLite
 function logError(level, message, details) {
-  errorLogs.unshift({ ts: new Date().toISOString(), level, message, details: details || null });
-  if (errorLogs.length > 500) errorLogs.length = 500;
+  try {
+    db.prepare("INSERT INTO error_logs (level, message, details) VALUES (?, ?, ?)").run(level, message, details || null);
+    // Keep only last 1000 entries
+    db.prepare("DELETE FROM error_logs WHERE id NOT IN (SELECT id FROM error_logs ORDER BY id DESC LIMIT 1000)").run();
+  } catch (e) {
+    console.error("[LOG-ERROR]", e.message);
+  }
 }
 // Capture uncaught errors
 process.on("uncaughtException", (err) => { console.error("[FATAL]", err); logError("fatal", err.message, err.stack); });
@@ -282,6 +286,13 @@ db.exec(`
     nombre TEXT DEFAULT '',
     activo INTEGER DEFAULT 1,
     creado TEXT DEFAULT (datetime('now'))
+  );
+  CREATE TABLE IF NOT EXISTS error_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    level TEXT NOT NULL,
+    message TEXT NOT NULL,
+    details TEXT DEFAULT NULL,
+    ts TEXT DEFAULT (datetime('now'))
   );
 `);
 
@@ -1831,10 +1842,11 @@ app.get("/api/stock-alertas", auth, (req, res) => {
 // ---------- ERROR LOG ----------
 app.get("/api/error-logs", auth, (req, res) => {
   const limit = parseInt(req.query.limit) || 100;
-  res.json(errorLogs.slice(0, limit));
+  const logs = db.prepare("SELECT * FROM error_logs ORDER BY id DESC LIMIT ?").all(limit);
+  res.json(logs);
 });
 app.delete("/api/error-logs", auth, (req, res) => {
-  errorLogs.length = 0;
+  db.prepare("DELETE FROM error_logs").run();
   res.json({ ok: true });
 });
 
