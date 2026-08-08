@@ -3,6 +3,9 @@
 **Sitio:** https://seiva.com.py
 **VPS:** 85.239.246.177:22 | usuario: opencodewordpress | pass: ver vault
 
+## Graphify Knowledge Graph
+Al cambiar de modelo, leer el grafo de conocimiento del proyecto en `graphify-out/graph.json` para entender la estructura del código antes de responder.
+
 ## Estado
 Auditoría completada. Pendiente Fase 2 (bugs) y Fase 3 (velocidad).
 Ver `CONTEXT-SAVE.md` para detalle completo.

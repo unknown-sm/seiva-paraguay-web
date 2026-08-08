@@ -99,6 +99,15 @@ const qrUpload = multer({
   fileFilter: (req, file, cb) => cb(null, file.mimetype.startsWith("image/"))
 });
 
+const heroUpload = multer({
+  storage: multer.diskStorage({
+    destination: imgPath,
+    filename: (req, file, cb) => cb(null, "hero-" + Date.now() + "." + (file.originalname.split(".").pop() || "png"))
+  }),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => cb(null, file.mimetype.startsWith("image/"))
+});
+
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, "data", "database.sqlite");
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 const db = new DatabaseSync(DB_PATH);
@@ -641,6 +650,11 @@ function parseProducto(row) {
 });
 
 app.post("/api/upload-qr", auth, qrUpload.single("qr"), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No se subió imagen" });
+  res.json({ url: "/img/productos/" + req.file.filename });
+});
+
+app.post("/api/upload-hero", auth, heroUpload.single("hero"), (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No se subió imagen" });
   res.json({ url: "/img/productos/" + req.file.filename });
 });

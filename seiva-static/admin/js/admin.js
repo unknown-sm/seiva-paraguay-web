@@ -866,6 +866,57 @@ document.getElementById("contenido-form").addEventListener("submit", function(e)
   });
 });
 
+document.getElementById("hero-upload").addEventListener("change", function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var fd = new FormData();
+  fd.append("hero", file);
+  var token = localStorage.getItem("seiva-token");
+  fetch("/api/upload-hero", {
+    method: "POST",
+    headers: { "Authorization": "Bearer " + token },
+    body: fd
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.url) {
+      document.getElementById("contenido-hero_imagen").value = data.url;
+      toast("Imagen subida. Guardá para aplicar.");
+    } else {
+      toast("Error al subir imagen");
+    }
+  }).catch(function() { toast("Error de red"); });
+});
+
+document.getElementById("hero-ingredients-upload").addEventListener("change", function(e) {
+  var files = Array.from(e.target.files);
+  if (files.length === 0) return;
+  var token = localStorage.getItem("seiva-token");
+  var existing = document.getElementById("contenido-hero_imagenes").value.trim();
+  var urls = existing ? existing.split(",").map(function(s) { return s.trim(); }).filter(Boolean) : [];
+  var pending = files.length;
+  files.forEach(function(file) {
+    var fd = new FormData();
+    fd.append("hero", file);
+    fetch("/api/upload-hero", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + token },
+      body: fd
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      if (data.url) urls.push(data.url);
+      pending--;
+      if (pending === 0) {
+        document.getElementById("contenido-hero_imagenes").value = urls.join(", ");
+        toast(files.length + " imágenes subidas. Guardá para aplicar.");
+      }
+    }).catch(function() {
+      pending--;
+      if (pending === 0) {
+        document.getElementById("contenido-hero_imagenes").value = urls.join(", ");
+        toast("Algunas imágenes no se subieron");
+      }
+    });
+  });
+});
+
 // ---------- ANALYTICS ----------
 function loadAnalytics() {
   var saved = localStorage.getItem("seiva-ga-id") || "";
