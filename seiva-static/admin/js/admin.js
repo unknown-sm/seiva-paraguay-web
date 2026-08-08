@@ -871,8 +871,7 @@ document.getElementById("hero-upload").addEventListener("change", function(e) {
   if (!file) return;
   var fd = new FormData();
   fd.append("hero", file);
-  var token = localStorage.getItem("seiva-token");
-  fetch("/api/upload-hero", {
+  fetch(API + "/upload-hero", {
     method: "POST",
     headers: { "Authorization": "Bearer " + token },
     body: fd
@@ -889,14 +888,13 @@ document.getElementById("hero-upload").addEventListener("change", function(e) {
 document.getElementById("hero-ingredients-upload").addEventListener("change", function(e) {
   var files = Array.from(e.target.files);
   if (files.length === 0) return;
-  var token = localStorage.getItem("seiva-token");
   var existing = document.getElementById("contenido-hero_imagenes").value.trim();
   var urls = existing ? existing.split(",").map(function(s) { return s.trim(); }).filter(Boolean) : [];
   var pending = files.length;
   files.forEach(function(file) {
     var fd = new FormData();
     fd.append("hero", file);
-    fetch("/api/upload-hero", {
+    fetch(API + "/upload-hero", {
       method: "POST",
       headers: { "Authorization": "Bearer " + token },
       body: fd
