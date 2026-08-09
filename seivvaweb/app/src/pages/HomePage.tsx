@@ -6,6 +6,7 @@ const StatsBar = lazy(() => import('../sections/StatsBar'))
 const ProductFeatured = lazy(() => import('../sections/ProductFeatured'))
 const FeaturedGrid = lazy(() => import('../sections/FeaturedGrid'))
 const Categories = lazy(() => import('../sections/Categories'))
+const CombosSection = lazy(() => import('../sections/CombosSection'))
 const LatestProducts = lazy(() => import('../sections/LatestProducts'))
 
 export default function HomePage() {
@@ -25,6 +26,9 @@ export default function HomePage() {
       </Suspense>
       <Suspense fallback={<ProductSkeleton count={6} className="lg:grid-cols-3 container-main px-4 py-12" />}>
         <Categories />
+      </Suspense>
+      <Suspense fallback={<div className="min-h-[40vh]" />}>
+        <CombosSection />
       </Suspense>
       <Suspense fallback={<ProductSkeleton count={4} className="lg:grid-cols-4 container-main px-4 py-12" />}>
         <LatestProducts />
