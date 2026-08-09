@@ -138,7 +138,15 @@ export default function CombosSection() {
                       id: bundle.id,
                       nombre: bundle.nombre,
                       precio: bundle.precio_bundle || precioOriginal,
+                      precio_anterior: null,
+                      categoria: 'combos',
+                      subcategoria: '',
+                      descripcion: bundle.nombre,
                       imagen: bundle.imagen || bundle.productos[0]?.imagen || '',
+                      etiquetas: [],
+                      destacado: false,
+                      activo: true,
+                      stock: 999,
                     }, 1)}
                     className="mt-4 w-full py-2.5 rounded-full font-body font-semibold text-sm transition-all duration-300 hover:scale-105"
                     style={{
