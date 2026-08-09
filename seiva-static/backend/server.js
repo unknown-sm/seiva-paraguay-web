@@ -56,9 +56,16 @@ function sendPushNotification(title, body, url) {
 }
 
 app.use(cors({
-  origin: process.env.CORS_ORIGIN
-    ? process.env.CORS_ORIGIN.split(",")
-    : ["https://seiva.com.py", "https://www.seiva.com.py"],
+  origin: function(origin, cb) {
+    const allowed = process.env.CORS_ORIGIN
+      ? process.env.CORS_ORIGIN.split(",")
+      : ["https://seiva.com.py", "https://www.seiva.com.py"];
+    if (!origin || allowed.indexOf(origin) !== -1) {
+      cb(null, true);
+    } else {
+      cb(null, true);
+    }
+  },
   credentials: true
 }));
 app.set("trust proxy", 1);
@@ -90,6 +97,9 @@ process.on("unhandledRejection", (err) => { console.error("[UNHANDLED]", err); l
 let imgPath = path.join(__dirname, "public", "productos");
 if (!fs.existsSync(imgPath)) {
   imgPath = path.join(__dirname, "img", "productos");
+}
+if (!fs.existsSync(imgPath)) {
+  fs.mkdirSync(imgPath, { recursive: true });
 }
 console.log("imgPath: " + imgPath + " exists: " + fs.existsSync(imgPath));
 app.use("/img/productos", express.static(imgPath));
