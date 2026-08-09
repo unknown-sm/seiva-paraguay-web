@@ -669,16 +669,6 @@ function parseProducto(row) {
             max_cantidad: md.max_cantidad,
             descuento: descuento
 });
-
-app.post("/api/upload-qr", auth, qrUpload.single("qr"), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "No se subió imagen" });
-  res.json({ url: "/img/productos/" + req.file.filename });
-});
-
-app.post("/api/upload-hero", auth, heroUpload.single("hero"), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "No se subió imagen" });
-  res.json({ url: "/img/productos/" + req.file.filename });
-});
         }
       }
       // Re-sort
@@ -733,6 +723,17 @@ function backfillSlugs() {
     console.log(`[Backfill] ${productos.length} slugs generados`);
   }
 }
+
+// ---------- UPLOADS ----------
+app.post("/api/upload-qr", auth, qrUpload.single("qr"), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No se subió imagen" });
+  res.json({ url: "/img/productos/" + req.file.filename });
+});
+
+app.post("/api/upload-hero", auth, heroUpload.single("hero"), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No se subió imagen" });
+  res.json({ url: "/img/productos/" + req.file.filename });
+});
 
 // ---------- PRODUCTOS ----------
 app.get("/api/productos", (req, res) => {
