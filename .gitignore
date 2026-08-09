@@ -15,3 +15,4 @@ Thumbs.db
 .swarm/
 ruvector.db
 .mcp.json
+seiva-static/backend/data/database.sqlite
