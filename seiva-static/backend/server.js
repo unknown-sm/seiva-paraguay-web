@@ -24,8 +24,8 @@ if (!process.env.JWT_SECRET) console.warn("WARN: JWT_SECRET not set. Using auto-
 if (!process.env.ADMIN_PASSWORD) console.warn("WARN: ADMIN_PASSWORD not set. Using auto-generated value: " + ADMIN_PASSWORD);
 
 // VAPID keys for web push
-const VAPID_PUBLIC = process.env.VAPID_PUBLIC_KEY || "";
-const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY || "";
+const VAPID_PUBLIC = process.env.VAPID_PUBLIC_KEY || "BOeFF0Sfcc8j7xHiQHZCdnNzWB2ib6Co7dLWJMf109QC7VwZTbxeKi4LbEt2vGhDgLUv1Jca1pd6T1CX1fZ5HVU";
+const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY || "KwUPAzxdOnuWlWP-A7cIff1-j5sMZdY1ehMA8zfEQXE";
 let webpushEnabled = false;
 if (VAPID_PUBLIC && VAPID_PRIVATE) {
   try {
