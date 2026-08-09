@@ -667,13 +667,16 @@ document.getElementById("prod-image-upload").addEventListener("change", function
   }).then(function(r) { return r.json(); }).then(function(data) {
     if (data.url) {
       window._scrapedImage = data.url;
-      document.getElementById("prod-custom-image-img").src = data.url;
-      document.getElementById("prod-custom-image-preview").style.display = "flex";
+      var img = document.getElementById("prod-custom-image-img"); if (img) img.src = data.url;
+      var prev = document.getElementById("prod-custom-image-preview"); if (prev) prev.style.display = "flex";
       toast("Imagen cargada. Guardá para aplicar.");
     } else {
       toast("Error al subir imagen");
     }
-  }).catch(function() { toast("Error de red"); });
+  }).catch(function(err) {
+    console.error("Upload error:", err);
+    toast("Error de red: " + err.message);
+  });
   e.target.value = "";
 });
 
@@ -914,14 +917,26 @@ document.getElementById("hero-upload").addEventListener("change", function(e) {
     method: "POST",
     headers: { "Authorization": "Bearer " + token },
     body: fd
-  }).then(function(r) { return r.json(); }).then(function(data) {
-    if (data.url) {
-      document.getElementById("contenido-hero_imagen").value = data.url;
-      toast("Imagen subida. Guardá para aplicar.");
-    } else {
-      toast("Error al subir imagen");
+  }).then(function(r) {
+    console.log("Upload response status:", r.status);
+    return r.text();
+  }).then(function(text) {
+    console.log("Upload response:", text);
+    try {
+      var data = JSON.parse(text);
+      if (data.url) {
+        document.getElementById("contenido-hero_imagen").value = data.url;
+        toast("Imagen subida. Guardá para aplicar.");
+      } else {
+        toast("Error: " + (data.error || "desconocido"));
+      }
+    } catch(e) {
+      toast("Error respuesta: " + text.substring(0, 100));
     }
-  }).catch(function() { toast("Error de red"); });
+  }).catch(function(err) {
+    console.error("Upload error:", err);
+    toast("Error de red: " + err.message);
+  });
 });
 
 document.getElementById("hero-ingredients-upload").addEventListener("change", function(e) {
@@ -937,18 +952,26 @@ document.getElementById("hero-ingredients-upload").addEventListener("change", fu
       method: "POST",
       headers: { "Authorization": "Bearer " + token },
       body: fd
-    }).then(function(r) { return r.json(); }).then(function(data) {
-      if (data.url) urls.push(data.url);
+    }).then(function(r) {
+      console.log("Upload response status:", r.status);
+      return r.text();
+    }).then(function(text) {
+      console.log("Upload response:", text);
+      try {
+        var data = JSON.parse(text);
+        if (data.url) urls.push(data.url);
+      } catch(e) {}
       pending--;
       if (pending === 0) {
         document.getElementById("contenido-hero_imagenes").value = urls.join(", ");
         toast(files.length + " imágenes subidas. Guardá para aplicar.");
       }
-    }).catch(function() {
+    }).catch(function(err) {
+      console.error("Upload error:", err);
       pending--;
       if (pending === 0) {
         document.getElementById("contenido-hero_imagenes").value = urls.join(", ");
-        toast("Algunas imágenes no se subieron");
+        toast("Algunas imágenes no se subieron: " + err.message);
       }
     });
   });
