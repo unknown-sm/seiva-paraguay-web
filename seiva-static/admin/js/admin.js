@@ -528,11 +528,12 @@ function editarProducto(id) {
     document.querySelectorAll(".prod-etiqueta").forEach(function(cb) { cb.checked = (prod.etiquetas || []).indexOf(cb.value) !== -1; });
     // Preservar imagen actual para que no se pierda al guardar sin scrape
     window._scrapedImage = prod.imagen || "";
+    var el;
     if (prod.imagen) {
-      document.getElementById("prod-custom-image-img").src = prod.imagen;
-      document.getElementById("prod-custom-image-preview").style.display = "flex";
+      el = document.getElementById("prod-custom-image-img"); if (el) el.src = prod.imagen;
+      el = document.getElementById("prod-custom-image-preview"); if (el) el.style.display = "flex";
     } else {
-      document.getElementById("prod-custom-image-preview").style.display = "none";
+      el = document.getElementById("prod-custom-image-preview"); if (el) el.style.display = "none";
     }
     setTimeout(function() {
       document.getElementById("prod-categoria").value = prod.categoria_id || "";
@@ -582,10 +583,11 @@ function nuevoProducto() {
   if (vc) vc.innerHTML = "";
   document.querySelectorAll(".prod-etiqueta").forEach(function(cb) { cb.checked = false; });
   document.getElementById("scrape-url").value = "";
-  document.getElementById("scrape-progress").style.display = "none";
-  document.getElementById("scrape-preview").style.display = "none";
-  document.getElementById("prod-custom-image-preview").style.display = "none";
-  document.getElementById("prod-custom-image-img").src = "";
+  var el;
+  el = document.getElementById("scrape-progress"); if (el) el.style.display = "none";
+  el = document.getElementById("scrape-preview"); if (el) el.style.display = "none";
+  el = document.getElementById("prod-custom-image-preview"); if (el) el.style.display = "none";
+  el = document.getElementById("prod-custom-image-img"); if (el) el.src = "";
   window._scrapedImage = null;
   document.getElementById("modal-producto").classList.remove("hidden");
 }
@@ -598,31 +600,30 @@ document.getElementById("btn-scrape-url").addEventListener("click", async functi
   const statusEl = document.getElementById("scrape-status");
   const previewEl = document.getElementById("scrape-preview");
   
-  if (!url) { statusEl.textContent = "❌ Ingresá una URL válida"; statusEl.style.color = "var(--danger)"; progressEl.style.display = "block"; return; }
+  if (!url) { if (statusEl) { statusEl.textContent = "❌ Ingresá una URL válida"; statusEl.style.color = "var(--danger)"; } if (progressEl) progressEl.style.display = "block"; return; }
 
-  previewEl.style.display = "none";
-  progressEl.style.display = "block";
-  barEl.style.width = "30%";
-  statusEl.textContent = "⏳ Conectando...";
-  statusEl.style.color = "var(--muted)";
+  if (previewEl) previewEl.style.display = "none";
+  if (progressEl) progressEl.style.display = "block";
+  if (barEl) barEl.style.width = "30%";
+  if (statusEl) { statusEl.textContent = "⏳ Conectando..."; statusEl.style.color = "var(--muted)"; }
 
   try {
-    barEl.style.width = "50%";
-    statusEl.textContent = "⏳ Extrayendo datos...";
+    if (barEl) barEl.style.width = "50%";
+    if (statusEl) statusEl.textContent = "⏳ Extrayendo datos...";
     const res = await api("/scrape-product", { method: "POST", body: JSON.stringify({ url }) });
     if (res.error) throw new Error(res.error);
 
-    barEl.style.width = "80%";
-    statusEl.textContent = "⏳ Procesando imagen...";
+    if (barEl) barEl.style.width = "80%";
+    if (statusEl) statusEl.textContent = "⏳ Procesando imagen...";
     setTimeout(() => {
-      barEl.style.width = "100%";
-      statusEl.textContent = "✅ Datos extraídos";
-      statusEl.style.color = "var(--success)";
-      document.getElementById("scrape-preview-img").src = res.imagen ? (res.imagen.startsWith('http') ? res.imagen : '/img/productos/' + res.imagen) : '';
-      document.getElementById("scrape-preview-nombre").textContent = res.nombre || 'Sin nombre';
-      document.getElementById("scrape-preview-precio").textContent = res.precio ? 'Gs. ' + res.precio.toLocaleString('es-PY') : 'Sin precio';
-      document.getElementById("scrape-preview-desc").textContent = res.descripcion ? res.descripcion.replace(/<[^>]*>/g, '').substring(0, 120) : 'Sin descripción';
-      document.getElementById("scrape-preview-link").href = url;
+      if (barEl) barEl.style.width = "100%";
+      if (statusEl) { statusEl.textContent = "✅ Datos extraídos"; statusEl.style.color = "var(--success)"; }
+      var imgEl;
+      imgEl = document.getElementById("scrape-preview-img"); if (imgEl) imgEl.src = res.imagen ? (res.imagen.startsWith('http') ? res.imagen : '/img/productos/' + res.imagen) : '';
+      imgEl = document.getElementById("scrape-preview-nombre"); if (imgEl) imgEl.textContent = res.nombre || 'Sin nombre';
+      imgEl = document.getElementById("scrape-preview-precio"); if (imgEl) imgEl.textContent = res.precio ? 'Gs. ' + res.precio.toLocaleString('es-PY') : 'Sin precio';
+      imgEl = document.getElementById("scrape-preview-desc"); if (imgEl) imgEl.textContent = res.descripcion ? res.descripcion.replace(/<[^>]*>/g, '').substring(0, 120) : 'Sin descripción';
+      imgEl = document.getElementById("scrape-preview-link"); if (imgEl) imgEl.href = url;
       previewEl.style.display = "block";
       document.getElementById("prod-nombre").value = res.nombre || "";
       document.getElementById("prod-marca").value = res.marca || "";
@@ -634,11 +635,9 @@ document.getElementById("btn-scrape-url").addEventListener("click", async functi
       window._scrapedImage = res.imagen;
     }, 500);
   } catch (err) {
-    barEl.style.width = "100%";
-    barEl.style.background = "var(--danger)";
-    statusEl.textContent = "❌ " + err.message;
-    statusEl.style.color = "var(--danger)";
-    setTimeout(() => { barEl.style.background = "var(--primary)"; }, 2000);
+    if (barEl) { barEl.style.width = "100%"; barEl.style.background = "var(--danger)"; }
+    if (statusEl) { statusEl.textContent = "❌ " + err.message; statusEl.style.color = "var(--danger)"; }
+    setTimeout(() => { if (barEl) barEl.style.background = "var(--primary)"; }, 2000);
   }
 });
 
@@ -646,12 +645,12 @@ document.getElementById("btn-scrape-url").addEventListener("click", async functi
 function cerrarModalProducto() {
   document.getElementById("modal-producto").classList.add("hidden");
   document.getElementById("scrape-url").value = "";
-  document.getElementById("scrape-progress").style.display = "none";
-  document.getElementById("scrape-preview").style.display = "none";
-  document.getElementById("scrape-progress-bar").style.width = "0%";
-  document.getElementById("scrape-progress-bar").style.background = "var(--primary)";
-  document.getElementById("prod-custom-image-preview").style.display = "none";
-  document.getElementById("prod-custom-image-img").src = "";
+  var el;
+  el = document.getElementById("scrape-progress"); if (el) el.style.display = "none";
+  el = document.getElementById("scrape-preview"); if (el) el.style.display = "none";
+  el = document.getElementById("scrape-progress-bar"); if (el) { el.style.width = "0%"; el.style.background = "var(--primary)"; }
+  el = document.getElementById("prod-custom-image-preview"); if (el) el.style.display = "none";
+  el = document.getElementById("prod-custom-image-img"); if (el) el.src = "";
   window._scrapedImage = null;
 }
 
