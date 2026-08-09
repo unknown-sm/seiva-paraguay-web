@@ -139,8 +139,7 @@ export default function CombosSection() {
                       nombre: bundle.nombre,
                       precio: bundle.precio_bundle || precioOriginal,
                       imagen: bundle.imagen || bundle.productos[0]?.imagen || '',
-                      cantidad: 1,
-                    })}
+                    }, 1)}
                     className="mt-4 w-full py-2.5 rounded-full font-body font-semibold text-sm transition-all duration-300 hover:scale-105"
                     style={{
                       backgroundColor: '#E9C46A',
