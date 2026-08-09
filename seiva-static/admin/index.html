@@ -429,10 +429,20 @@
         <span style="font-size:0.8rem;color:var(--muted);white-space:nowrap">🔗 Importar:</span>
         <input type="url" id="scrape-url" placeholder="https://ejemplo.com/producto-xyz" class="form-input" style="flex:1;height:32px;font-size:0.85rem">
         <button type="button" id="btn-scrape-url" class="btn btn-sm btn-secondary" style="height:32px">Importar</button>
+        <span style="color:var(--border)">|</span>
+        <label for="prod-image-upload" class="btn btn-sm btn-secondary" style="height:32px;margin:0;cursor:pointer;display:inline-flex;align-items:center;gap:4px">📷 Subir imagen</label>
+        <input type="file" id="prod-image-upload" accept="image/*" style="display:none">
         <span id="scrape-status" style="font-size:0.75rem;color:var(--muted);min-width:120px"></span>
       </div>
       <div id="scrape-preview" style="display:none;margin:0 24px 8px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;flex-shrink:0">
         <span style="font-size:0.75rem;color:var(--muted)">Datos extraídos — revisá antes de guardar</span>
+      </div>
+      <div id="prod-custom-image-preview" style="display:none;margin:0 24px 8px;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;flex-shrink:0;align-items:center;gap:12px">
+        <img id="prod-custom-image-img" src="" style="width:60px;height:60px;object-fit:contain;border-radius:6px;background:#fff">
+        <div style="flex:1">
+          <span style="font-size:0.75rem;color:var(--muted)">Imagen personalizada cargada</span>
+          <button type="button" id="btn-remove-custom-image" style="margin-left:8px;font-size:0.75rem;color:#c0392b;background:none;border:none;cursor:pointer">Quitar</button>
+        </div>
       </div>
 
       <div style="display:grid;grid-template-columns:1.4fr 1fr;flex:1;min-height:0;overflow:hidden">

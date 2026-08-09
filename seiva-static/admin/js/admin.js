@@ -528,6 +528,12 @@ function editarProducto(id) {
     document.querySelectorAll(".prod-etiqueta").forEach(function(cb) { cb.checked = (prod.etiquetas || []).indexOf(cb.value) !== -1; });
     // Preservar imagen actual para que no se pierda al guardar sin scrape
     window._scrapedImage = prod.imagen || "";
+    if (prod.imagen) {
+      document.getElementById("prod-custom-image-img").src = prod.imagen;
+      document.getElementById("prod-custom-image-preview").style.display = "flex";
+    } else {
+      document.getElementById("prod-custom-image-preview").style.display = "none";
+    }
     setTimeout(function() {
       document.getElementById("prod-categoria").value = prod.categoria_id || "";
     }, 100);
@@ -578,6 +584,8 @@ function nuevoProducto() {
   document.getElementById("scrape-url").value = "";
   document.getElementById("scrape-progress").style.display = "none";
   document.getElementById("scrape-preview").style.display = "none";
+  document.getElementById("prod-custom-image-preview").style.display = "none";
+  document.getElementById("prod-custom-image-img").src = "";
   window._scrapedImage = null;
   document.getElementById("modal-producto").classList.remove("hidden");
 }
@@ -642,8 +650,39 @@ function cerrarModalProducto() {
   document.getElementById("scrape-preview").style.display = "none";
   document.getElementById("scrape-progress-bar").style.width = "0%";
   document.getElementById("scrape-progress-bar").style.background = "var(--primary)";
+  document.getElementById("prod-custom-image-preview").style.display = "none";
+  document.getElementById("prod-custom-image-img").src = "";
   window._scrapedImage = null;
 }
+
+// ---------- PRODUCT IMAGE UPLOAD ----------
+document.getElementById("prod-image-upload").addEventListener("change", function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var fd = new FormData();
+  fd.append("hero", file);
+  fetch(API + "/upload-hero", {
+    method: "POST",
+    headers: { "Authorization": "Bearer " + token },
+    body: fd
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.url) {
+      window._scrapedImage = data.url;
+      document.getElementById("prod-custom-image-img").src = data.url;
+      document.getElementById("prod-custom-image-preview").style.display = "flex";
+      toast("Imagen cargada. Guardá para aplicar.");
+    } else {
+      toast("Error al subir imagen");
+    }
+  }).catch(function() { toast("Error de red"); });
+  e.target.value = "";
+});
+
+document.getElementById("btn-remove-custom-image").addEventListener("click", function() {
+  window._scrapedImage = null;
+  document.getElementById("prod-custom-image-preview").style.display = "none";
+  document.getElementById("prod-custom-image-img").src = "";
+});
 
 document.getElementById("modal-overlay-prod").addEventListener("click", cerrarModalProducto);
 document.getElementById("modal-close-prod").addEventListener("click", cerrarModalProducto);
