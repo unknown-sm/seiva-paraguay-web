@@ -852,6 +852,7 @@ function loadContenido() {
       }
     }
   });
+  loadHeroProduct();
 }
 
 document.getElementById("contenido-form").addEventListener("submit", function(e) {
@@ -914,6 +915,61 @@ document.getElementById("hero-ingredients-upload").addEventListener("change", fu
     });
   });
 });
+
+// ---------- HERO PRODUCT (ProductFeatured) ----------
+var heroProductoId = null;
+var heroSearchTimeout = null;
+
+function loadHeroProduct() {
+  api("/hero-producto").then(function(prod) {
+    if (prod) {
+      heroProductoId = prod.id;
+      document.getElementById("hero-producto-name").textContent = prod.nombre + " —Gs." + Number(prod.precio).toLocaleString("es-PY");
+      document.getElementById("hero-producto-selected").style.display = "block";
+    }
+  }).catch(function() {});
+}
+
+document.getElementById("hero-producto-search").addEventListener("input", function(e) {
+  var q = e.target.value.trim();
+  clearTimeout(heroSearchTimeout);
+  if (q.length < 2) {
+    document.getElementById("hero-producto-results").innerHTML = "";
+    return;
+  }
+  heroSearchTimeout = setTimeout(function() {
+    api("/hero-producto/search?q=" + encodeURIComponent(q)).then(function(products) {
+      var html = "";
+      products.forEach(function(p) {
+        html += '<div style="display:flex;align-items:center;gap:10px;padding:8px;cursor:pointer;border-bottom:1px solid var(--border);border-radius:6px" onmouseover="this.style.background=\'var(--bg-secondary)\'" onmouseout="this.style.background=\'none\'" onclick="selectHeroProduct(' + p.id + ', ' + xt(JSON.stringify(p.nombre).replace(/"/g, '&quot;')) + ', ' + p.precio + ')">';
+        if (p.imagen) html += '<img src="' + xt(p.imagen) + '" style="width:40px;height:40px;object-fit:cover;border-radius:6px">';
+        html += '<div><div style="font-weight:600;font-size:0.9em">' + xt(p.nombre) + '</div><div style="font-size:0.8em;color:var(--muted)">Gs.' + Number(p.precio).toLocaleString("es-PY") + '</div></div>';
+        html += '</div>';
+      });
+      if (!products.length) html = '<p style="color:var(--muted);padding:8px">No se encontraron productos</p>';
+      document.getElementById("hero-producto-results").innerHTML = html;
+    });
+  }, 300);
+});
+
+function selectHeroProduct(id, nombre, precio) {
+  heroProductoId = id;
+  document.getElementById("hero-producto-name").textContent = nombre + " —Gs." + Number(precio).toLocaleString("es-PY");
+  document.getElementById("hero-producto-selected").style.display = "block";
+  document.getElementById("hero-producto-results").innerHTML = "";
+  document.getElementById("hero-producto-search").value = "";
+  api("/hero-producto", { method: "PUT", body: JSON.stringify({ producto_id: id }) }).then(function() {
+    toast("Producto destacado guardado");
+  });
+}
+
+function clearHeroProduct() {
+  heroProductoId = null;
+  document.getElementById("hero-producto-selected").style.display = "none";
+  api("/hero-producto", { method: "PUT", body: JSON.stringify({ producto_id: "" }) }).then(function() {
+    toast("Producto destacado quitado");
+  });
+}
 
 // ---------- ANALYTICS ----------
 function loadAnalytics() {

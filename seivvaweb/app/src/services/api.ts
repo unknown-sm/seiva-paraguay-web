@@ -67,6 +67,14 @@ export async function fetchFeatured(): Promise<Product[]> {
   return products.map(p => ({ ...p, imagen: fixImageUrl(p.imagen) }));
 }
 
+export async function fetchHeroProduct(): Promise<Product | null> {
+  const res = await fetch(`${API_BASE}/hero-producto`);
+  if (!res.ok) return null;
+  const product: Product = await res.json();
+  if (!product) return null;
+  return { ...product, imagen: fixImageUrl(product.imagen) };
+}
+
 export function formatPrice(price: number): string {
   return 'Gs.' + price.toLocaleString('es-PY');
 }

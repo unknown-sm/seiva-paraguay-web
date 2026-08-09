@@ -1504,6 +1504,29 @@ app.put("/api/contenido", auth, (req, res) => {
   res.json({ ok: true });
 });
 
+// ---------- HERO PRODUCT (ProductFeatured) ----------
+app.get("/api/hero-producto", (req, res) => {
+  const row = db.prepare("SELECT value FROM contenido WHERE key = ?").get("hero_producto_id");
+  if (!row || !row.value) return res.json(null);
+  const prod = db.prepare("SELECT * FROM productos WHERE id = ? AND activo = 1").get(parseInt(row.value));
+  if (!prod) return res.json(null);
+  res.json(parseProducto(prod));
+});
+
+app.get("/api/hero-producto/search", auth, (req, res) => {
+  const q = req.query.q || "";
+  if (q.length < 2) return res.json([]);
+  const rows = db.prepare("SELECT id, nombre, precio, imagen FROM productos WHERE activo = 1 AND nombre LIKE ? ORDER BY nombre LIMIT 20").all("%" + q + "%");
+  res.json(rows);
+});
+
+app.put("/api/hero-producto", auth, (req, res) => {
+  const { producto_id } = req.body;
+  const update = db.prepare("INSERT OR REPLACE INTO contenido (key, value) VALUES (?, ?)");
+  update.run("hero_producto_id", String(producto_id || ""));
+  res.json({ ok: true });
+});
+
 // ---------- PAGINAS (publico: obtener por slug) ----------
 app.get("/api/paginas", auth, (req, res) => {
   const rows = db.prepare("SELECT * FROM paginas ORDER BY titulo").all();

@@ -3,7 +3,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Star, Check, Shield, Minus, Plus } from 'lucide-react'
 import { useCart } from '../context/CartContext'
-import { fetchFeatured, formatPrice, type Product } from '../services/api'
+import { fetchHeroProduct, formatPrice, type Product } from '../services/api'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -24,10 +24,9 @@ export default function ProductFeatured() {
   const { addItem } = useCart()
 
   useEffect(() => {
-    fetchFeatured()
+    fetchHeroProduct()
       .then(data => {
-        const first = data[0] || null
-        setProduct(first)
+        setProduct(data)
         setLoading(false)
       })
       .catch(() => {
