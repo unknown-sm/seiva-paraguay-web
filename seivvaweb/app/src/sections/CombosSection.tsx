@@ -94,7 +94,7 @@ export default function CombosSection() {
                         color: '#1B4332',
                       }}
                     >
-                      -{Math.round((1 - product.precio / product.precio_anterior) * 100)}%
+                      -{Math.round((1 - product.precio / (product.precio_anterior || product.precio)) * 100)}%
                     </div>
                   )}
                 </div>
