@@ -941,7 +941,7 @@ document.getElementById("hero-producto-search").addEventListener("input", functi
     api("/hero-producto/search?q=" + encodeURIComponent(q)).then(function(products) {
       var html = "";
       products.forEach(function(p) {
-        html += '<div style="display:flex;align-items:center;gap:10px;padding:8px;cursor:pointer;border-bottom:1px solid var(--border);border-radius:6px" onmouseover="this.style.background=\'var(--bg-secondary)\'" onmouseout="this.style.background=\'none\'" onclick="selectHeroProduct(' + p.id + ', ' + xt(JSON.stringify(p.nombre).replace(/"/g, '&quot;')) + ', ' + p.precio + ')">';
+        html += '<div style="display:flex;align-items:center;gap:10px;padding:8px;cursor:pointer;border-bottom:1px solid var(--border);border-radius:6px" onmouseover="this.style.background=\'var(--bg-secondary)\'" onmouseout="this.style.background=\'none\'" onclick="selectHeroProduct(' + p.id + ', \'' + xt(p.nombre).replace(/'/g, "\\'") + '\', ' + p.precio + ')">';
         if (p.imagen) html += '<img src="' + xt(p.imagen) + '" style="width:40px;height:40px;object-fit:cover;border-radius:6px">';
         html += '<div><div style="font-weight:600;font-size:0.9em">' + xt(p.nombre) + '</div><div style="font-size:0.8em;color:var(--muted)">Gs.' + Number(p.precio).toLocaleString("es-PY") + '</div></div>';
         html += '</div>';
