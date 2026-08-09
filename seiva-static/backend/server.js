@@ -749,6 +749,15 @@ app.get("/api/productos/destacados", (req, res) => {
   res.json(result);
 });
 
+app.get("/api/productos/combos", (req, res) => {
+  const rows = db.prepare("SELECT * FROM productos WHERE activo = 1 ORDER BY id DESC").all();
+  const combos = rows.filter(r => {
+    const tags = JSON.parse(r.etiquetas || "[]");
+    return tags.includes("combo");
+  }).map(parseProducto);
+  res.json(combos);
+});
+
 app.get("/api/productos/all", auth, (req, res) => {
   const rows = db.prepare("SELECT * FROM productos ORDER BY id DESC").all();
   res.json(rows.map(parseProducto));

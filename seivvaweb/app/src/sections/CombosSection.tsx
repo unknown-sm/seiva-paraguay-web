@@ -2,38 +2,30 @@ import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useCart } from '../context/CartContext'
+import { type Product } from '../services/api'
 
 gsap.registerPlugin(ScrollTrigger)
-
-interface Bundle {
-  id: number
-  nombre: string
-  productos: any[]
-  precio_bundle: number
-  descuento_porcentaje: number
-  imagen: string
-}
 
 const API = window.location.hostname === 'localhost' ? 'http://localhost:3001/api' : '/api'
 
 export default function CombosSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
-  const [bundles, setBundles] = useState<Bundle[]>([])
+  const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const { addItem } = useCart()
 
   useEffect(() => {
-    fetch(`${API}/bundles`)
+    fetch(`${API}/productos/combos`)
       .then(r => r.json())
       .then(data => {
-        setBundles(data)
+        setProducts(data)
         setLoading(false)
       })
       .catch(() => setLoading(false))
   }, [])
 
   useEffect(() => {
-    if (loading || bundles.length === 0) return
+    if (loading || products.length === 0) return
 
     const ctx = gsap.context(() => {
       gsap.fromTo('.combo-card',
@@ -49,9 +41,9 @@ export default function CombosSection() {
     }, sectionRef)
 
     return () => ctx.revert()
-  }, [loading, bundles])
+  }, [loading, products])
 
-  if (loading || bundles.length === 0) return null
+  if (loading || products.length === 0) return null
 
   return (
     <section
@@ -76,13 +68,12 @@ export default function CombosSection() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {bundles.map(bundle => {
-            const precioOriginal = bundle.productos.reduce((sum: number, p: any) => sum + (p.precio || 0) * (p.cantidad || 1), 0)
-            const tieneDescuento = bundle.descuento_porcentaje > 0 || bundle.precio_bundle < precioOriginal
+          {products.map(product => {
+            const tieneDescuento = product.precio_anterior && product.precio_anterior > product.precio
 
             return (
               <div
-                key={bundle.id}
+                key={product.id}
                 className="combo-card rounded-2xl overflow-hidden relative group cursor-pointer"
                 style={{
                   backgroundColor: 'rgba(255,255,255,0.1)',
@@ -91,11 +82,11 @@ export default function CombosSection() {
               >
                 <div className="relative h-48 overflow-hidden">
                   <img
-                    src={bundle.imagen || bundle.productos[0]?.imagen || '/images/placeholder.png'}
-                    alt={bundle.nombre}
+                    src={product.imagen || '/images/placeholder.png'}
+                    alt={product.nombre}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  {tieneDescuento && bundle.descuento_porcentaje > 0 && (
+                  {tieneDescuento && (
                     <div
                       className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold"
                       style={{
@@ -103,7 +94,7 @@ export default function CombosSection() {
                         color: '#1B4332',
                       }}
                     >
-                      -{bundle.descuento_porcentaje}%
+                      -{Math.round((1 - product.precio / product.precio_anterior) * 100)}%
                     </div>
                   )}
                 </div>
@@ -113,7 +104,7 @@ export default function CombosSection() {
                     className="font-display font-bold text-lg mb-3 leading-tight"
                     style={{ color: '#FFFFFF' }}
                   >
-                    {bundle.nombre}
+                    {product.nombre}
                   </h3>
 
                   <div className="flex items-center gap-3">
@@ -122,32 +113,19 @@ export default function CombosSection() {
                         className="text-sm line-through"
                         style={{ color: 'rgba(255,255,255,0.5)' }}
                       >
-                        Gs.{precioOriginal.toLocaleString('es-PY')}
+                        Gs.{product.precio_anterior!.toLocaleString('es-PY')}
                       </span>
                     )}
                     <span
                       className="font-display font-bold text-xl"
                       style={{ color: '#E9C46A' }}
                     >
-                      Gs.{(bundle.precio_bundle || precioOriginal).toLocaleString('es-PY')}
+                      Gs.{product.precio.toLocaleString('es-PY')}
                     </span>
                   </div>
 
                   <button
-                    onClick={() => addItem({
-                      id: bundle.id,
-                      nombre: bundle.nombre,
-                      precio: bundle.precio_bundle || precioOriginal,
-                      precio_anterior: null,
-                      categoria: 'combos',
-                      subcategoria: '',
-                      descripcion: bundle.nombre,
-                      imagen: bundle.imagen || bundle.productos[0]?.imagen || '',
-                      etiquetas: [],
-                      destacado: false,
-                      activo: true,
-                      stock: 999,
-                    }, 1)}
+                    onClick={() => addItem(product, 1)}
                     className="mt-4 w-full py-2.5 rounded-full font-body font-semibold text-sm transition-all duration-300 hover:scale-105"
                     style={{
                       backgroundColor: '#E9C46A',
