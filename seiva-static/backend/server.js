@@ -566,6 +566,41 @@ async function importFromWooCommerce() {
     });
   }
 
+  // Brand code mapping
+  const brandMap = {
+    "UE": "UniErvas", "UNIERVAS": "UniErvas",
+    "RY": "Rei Terra", "REI": "Rei Terra",
+    "UL": "Unilife", "UN": "Unilife",
+    "AP": "ApisNutri",
+    "NG": "NaturalGreen",
+    "MX": "MixNutri", "MIX": "MixNutri",
+    "V7": "Videira7",
+    "BIO": "Bionutri",
+    "FL": "Flora Nativa do Brasil", "FNB": "Flora Nativa do Brasil",
+    "KT": "Katigua",
+    "BA": "Balincer",
+    "AB": "American Builders", "Americano": "American Builders",
+    "ONE": "ONE FIT",
+    "NB": "Naturalis Brasil",
+    "AN": "Anil",
+    "AD": "ADA Nutraceuticos",
+    "SM": "Smart Nutrition",
+    "DN": "Denature",
+    "SW": "Copra"
+  };
+  function extractBrand(name) {
+    const parts = name.trim().split(" ");
+    const last = parts[parts.length - 1].replace(/[^a-zA-Z]/g, "");
+    if (last.length <= 4 && brandMap[last]) return brandMap[last];
+    const upper = last.toUpperCase();
+    if (brandMap[upper]) return brandMap[upper];
+    // Check full name for known full-word brands
+    for (const kw of Object.keys(brandMap)) {
+      if (kw.length > 3 && name.toLowerCase().includes(kw.toLowerCase())) return brandMap[kw];
+    }
+    return "";
+  }
+
   const insert = db.prepare("INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, etiquetas, destacado, imagen, stock, activo, marca, slug, sku) VALUES (?,?,?,?,?,?,?,?,?,?,1,?,?,?)");
 
   let imported = 0;
@@ -582,11 +617,7 @@ async function importFromWooCommerce() {
       const desc = stripHtml(wc.description || "");
       const tags = []; if (pa) tags.push("oferta"); if (wc.featured) tags.push("popular");
       const slug = slugify(nombre);
-      let marca = "";
-      if (wc.categories && wc.categories.length > 0) {
-        const cn = wc.categories[0].name;
-        if (cn && !cn.toLowerCase().includes("suplemento") && !cn.toLowerCase().includes("todos")) marca = cn;
-      }
+      const marca = extractBrand(nombre);
       let img = "";
       if (wc.images && wc.images.length > 0) {
         const ext = wc.images[0].src.split(".").pop().split("?")[0] || "jpg";
@@ -597,6 +628,10 @@ async function importFromWooCommerce() {
       insert.run(nombre, precio, pa, cat, subcat, desc, JSON.stringify(tags), wc.featured ? 1 : 0, img, wc.stock_quantity || 50, marca, slug, wc.sku || "");
       imported++;
     } catch(e) { console.warn("[Import] skip:", nombre, e.message); }
+  }
+  // Create brand entries
+  if (imported > 0) {
+    try { normalizarMarcas(); } catch(e) { console.warn("[Import] marcas error:", e.message); }
   }
   console.log("[Import] Done — imported " + imported + " products");
 }
