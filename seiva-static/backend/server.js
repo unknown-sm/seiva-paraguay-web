@@ -547,6 +547,10 @@ try {
       }
     }
     console.log("[Migration] Fixed " + fixed + " brands");
+    // Rebuild marcas with correct names + UniErvas priority
+    try { normalizarMarcas(); } catch(e) {}
+    // Clean up old category-as-brand entries
+    db.prepare("DELETE FROM marcas WHERE nombre IN ('Magnesios','Gym','Vitaminas','Aceites','Naturales','Inmune','Cognitivo','Minerales','Omega3','Colagenos','Adaptogenos','Control-peso','Probióticos','Antioxidantes','General','Combos','')").run();
   }
 } catch(e) { console.warn("[Migration] brand fix skip:", e.message); }
 
