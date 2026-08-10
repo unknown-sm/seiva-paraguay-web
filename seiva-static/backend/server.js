@@ -428,8 +428,9 @@ if (dcCount.c === 0) {
     [175, 2, 10, 10000],
   ];
   const insertDC = db.prepare("INSERT OR IGNORE INTO descuentos_cantidad (producto_id, min_cantidad, max_cantidad, descuento) VALUES (?, ?, ?, ?)");
+  const checkProd = db.prepare("SELECT id FROM productos WHERE id = ?");
   for (const d of descuentosSeed) {
-    insertDC.run(d[0], d[1], d[2], d[3]);
+    if (checkProd.get(d[0])) insertDC.run(d[0], d[1], d[2], d[3]);
   }
 }
 
