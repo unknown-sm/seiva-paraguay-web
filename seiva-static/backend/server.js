@@ -430,7 +430,7 @@ if (dcCount.c === 0) {
   const insertDC = db.prepare("INSERT OR IGNORE INTO descuentos_cantidad (producto_id, min_cantidad, max_cantidad, descuento) VALUES (?, ?, ?, ?)");
   const checkProd = db.prepare("SELECT id FROM productos WHERE id = ?");
   for (const d of descuentosSeed) {
-    if (checkProd.get(d[0])) insertDC.run(d[0], d[1], d[2], d[3]);
+    try { if (checkProd.get(d[0])) insertDC.run(d[0], d[1], d[2], d[3]); } catch(e) {}
   }
 }
 
@@ -482,18 +482,19 @@ if (catCount.c === 0) {
 }
 
 // Migration: move snacks products to suplementos
-const snacksCount = db.prepare("SELECT COUNT(*) as c FROM productos WHERE categoria = 'snacks'").get();
-if (snacksCount.c > 0) {
-  const supId = db.prepare("SELECT id FROM categorias WHERE nombre = 'suplementos'").get();
-  if (supId) {
-    db.prepare("UPDATE productos SET categoria = 'suplementos', categoria_id = ? WHERE categoria = 'snacks'").run(supId.id);
-  } else {
-    db.prepare("UPDATE productos SET categoria = 'suplementos' WHERE categoria = 'snacks'").run();
+try {
+  const snacksCount = db.prepare("SELECT COUNT(*) as c FROM productos WHERE categoria = 'snacks'").get();
+  if (snacksCount.c > 0) {
+    const supId = db.prepare("SELECT id FROM categorias WHERE nombre = 'suplementos'").get();
+    if (supId) {
+      db.prepare("UPDATE productos SET categoria = 'suplementos', categoria_id = ? WHERE categoria = 'snacks'").run(supId.id);
+    } else {
+      db.prepare("UPDATE productos SET categoria = 'suplementos' WHERE categoria = 'snacks'").run();
+    }
+    console.log("[Migration] " + snacksCount.c + " productos snacks movidos a suplementos");
   }
-  console.log("[Migration] " + snacksCount.c + " productos snacks movidos a suplementos");
-}
-// Delete snacks category if exists
-db.prepare("DELETE FROM categorias WHERE nombre = 'snacks'").run();
+  db.prepare("DELETE FROM categorias WHERE nombre = 'snacks'").run();
+} catch(e) { console.warn("[Migration] snacks skip:", e.message); }
 
 function seedProductos() {
   const row = db.prepare("SELECT COUNT(*) as c FROM productos").get();
@@ -516,7 +517,7 @@ function seedProductos() {
   ];
 
   const insert = db.prepare("INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, etiquetas, destacado, imagen, stock, activo, categoria_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 50, 1, ?)");
-  for (const p of seed) insert.run(...p);
+  for (const p of seed) { try { insert.run(...p); } catch(e) { console.warn("[Seed] skip:", p[0], e.message); } }
 }
 
 seedProductos();
