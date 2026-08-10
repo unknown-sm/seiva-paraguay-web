@@ -484,7 +484,12 @@ if (catCount.c === 0) {
 // Migration: move snacks products to suplementos
 const snacksCount = db.prepare("SELECT COUNT(*) as c FROM productos WHERE categoria = 'snacks'").get();
 if (snacksCount.c > 0) {
-  db.prepare("UPDATE productos SET categoria = 'suplementos' WHERE categoria = 'snacks'").run();
+  const supId = db.prepare("SELECT id FROM categorias WHERE nombre = 'suplementos'").get();
+  if (supId) {
+    db.prepare("UPDATE productos SET categoria = 'suplementos', categoria_id = ? WHERE categoria = 'snacks'").run(supId.id);
+  } else {
+    db.prepare("UPDATE productos SET categoria = 'suplementos' WHERE categoria = 'snacks'").run();
+  }
   console.log("[Migration] " + snacksCount.c + " productos snacks movidos a suplementos");
 }
 // Delete snacks category if exists
