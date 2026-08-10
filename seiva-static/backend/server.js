@@ -519,8 +519,15 @@ function inferSubcat(titulo) {
 }
 
 async function importFromWooCommerce() {
-  const existing = db.prepare("SELECT COUNT(*) as c FROM productos").get().c;
-  if (existing > 0) { console.log("[Import] DB has " + existing + " products, skipping import"); return; }
+  let existing = db.prepare("SELECT COUNT(*) as c FROM productos").get().c;
+  // Detect seed data — delete if only placeholder products
+  const seedCheck = db.prepare("SELECT COUNT(*) as c FROM productos WHERE nombre IN ('Almendras con Chocolate Negro','Mix de Frutos Secos Premium','Datiles Medjool 400g')").get().c;
+  if (existing > 0 && existing < 20 && seedCheck > 0) {
+    console.log("[Import] Seed data detected — cleaning " + existing + " products...");
+    db.prepare("DELETE FROM productos").run();
+    existing = 0;
+  }
+  if (existing > 10) { console.log("[Import] DB has " + existing + " products, skipping"); return; }
 
   console.log("[Import] Fetching from WooCommerce...");
   const WC_URL = "https://seiva.com.py/wp-json/wc/v3";
