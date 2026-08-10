@@ -375,7 +375,7 @@ function normalizarMarcas() {
     }
   }
   // Uniervas default prioridad=100 si existe
-  db.prepare("UPDATE marcas SET prioridad = 100 WHERE LOWER(nombre) = 'uniervas' AND prioridad = 0").run();
+  db.prepare("UPDATE marcas SET prioridad = 1 WHERE LOWER(nombre) = 'uniervas' AND prioridad = 0").run();
   } catch(e) { console.warn("[normalizarMarcas] skip:", e.message); }
 }
 try { db.exec("ALTER TABLE marcas ADD COLUMN logo TEXT DEFAULT ''"); } catch (e) {}
