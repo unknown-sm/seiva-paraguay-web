@@ -725,6 +725,7 @@ function backfillSlugs() {
 }
 
 // ---------- UPLOADS ----------
+app.get("/api/ping", (req, res) => res.json({ pong: true, ts: Date.now() }));
 app.post("/api/upload-qr", auth, qrUpload.single("qr"), (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No se subió imagen" });
   res.json({ url: "/img/productos/" + req.file.filename });
