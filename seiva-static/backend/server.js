@@ -512,7 +512,7 @@ function seedProductos() {
     ["Creatina Monohidratada 300g", 78000, null, "suplementos", "gym", "Creatina monohidratada micronizada. 300g.", '[]', 0, "creatina-unilife-paraguay1.jpg", 2],
     ["Colageno Hidrolizado 500g", 120000, 145000, "suplementos", "colagenos", "Colageno tipo I y III para piel y articulaciones.", '["oferta"]', 0, "colageno-hidrolisado-rei-terra-120-500mg.webp", 2],
     ["Curcuma con Pimienta Negra", 65000, null, "suplementos", "naturales", "Curcuma organica con pimienta negra.", '[]', 0, "curcuma.png", 2],
-    ["Combo Omega 3 + Magnesio Citrato", 150000, 205000, "combos", "combos", "Omega 3 Puro + Magnesio Citrato. Combo bienestar.", '["oferta","popular"]', 1, "combo-ome.jpeg", 3]
+    ["Combo Omega 3 + Magnesio Citrato", 150000, 205000, "combos", "combos", "Omega 3 Puro + Magnesio Citrato. Combo bienestar.", '["oferta","popular"]', 1, "combo-ome.jpeg", 2]
   ];
 
   const insert = db.prepare("INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, etiquetas, destacado, imagen, stock, activo, categoria_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 50, 1, ?)");
