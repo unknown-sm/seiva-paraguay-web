@@ -363,6 +363,7 @@ try { db.exec("ALTER TABLE envios ADD COLUMN tipo TEXT DEFAULT 'delivery'"); } c
 
 // Normalizar marcas desde productos.marca
 function normalizarMarcas() {
+  try {
   const marcasExistentes = db.prepare("SELECT nombre FROM marcas").all().map(r => r.nombre.toLowerCase());
   const prods = db.prepare("SELECT DISTINCT marca FROM productos WHERE marca != '' AND marca IS NOT NULL").all();
   const insertMarca = db.prepare("INSERT OR IGNORE INTO marcas (nombre) VALUES (?)");
@@ -375,6 +376,7 @@ function normalizarMarcas() {
   }
   // Uniervas default prioridad=100 si existe
   db.prepare("UPDATE marcas SET prioridad = 100 WHERE LOWER(nombre) = 'uniervas' AND prioridad = 0").run();
+  } catch(e) { console.warn("[normalizarMarcas] skip:", e.message); }
 }
 try { db.exec("ALTER TABLE marcas ADD COLUMN logo TEXT DEFAULT ''"); } catch (e) {}
 normalizarMarcas();
@@ -496,31 +498,104 @@ try {
   db.prepare("DELETE FROM categorias WHERE nombre = 'snacks'").run();
 } catch(e) { console.warn("[Migration] snacks skip:", e.message); }
 
-function seedProductos() {
-  const row = db.prepare("SELECT COUNT(*) as c FROM productos").get();
-  if (row.c > 0) return;
-
-  const seed = [
-    ["Almendras con Chocolate Negro", 45000, null, "suplementos", "chocolate", "Almendras seleccionadas cubiertas con chocolate negro 70% cacao.", '["nuevo","popular"]', 1, "product-4073.jpg", 1],
-    ["Mix de Frutos Secos Premium", 55000, 65000, "suplementos", "mix", "Combinacion de almendras, nueces, castanas, arandanos y pasas.", '["oferta"]', 1, "product-4079.jpg", 1],
-    ["Almendras Naturales 500g", 58000, null, "suplementos", "almendras", "Almendras crudas sin sal, empacadas al vacio.", '[]', 1, "product-2564.jpg", 1],
-    ["Datiles Medjool 400g", 42000, null, "suplementos", "frutas", "Datiles Medjool premium, naturalmente dulces.", '["nuevo"]', 0, "product-2505.jpg", 1],
-    ["Nueces Pecanas 300g", 62000, null, "suplementos", "nueces", "Nueces pecanas frescas, ricas en antioxidantes.", '[]', 0, "product-3116.jpg", 1],
-    ["Barritas de Granola Artesanal", 12000, null, "suplementos", "barras", "Barritas de granola caseras. Pack x3.", '["popular"]', 1, "product-2468.png", 1],
-    ["Aceite de Oregano 120 Capsulas", 75000, 90000, "suplementos", "aceites", "Aceite de oregano 500mg. Refuerzo inmune.", '["oferta"]', 0, "aceite-de-ajo-mix-nutri-3.webp", 2],
-    ["Magnesio Quelato 120 Capsulas", 85000, null, "suplementos", "magnesios", "Magnesio quelato de alta absorcion.", '["popular"]', 1, "magnesio-quelato-bio-120-paraguay.jpg", 2],
-    ["Omega 3 Puro 1000mg", 95000, 120000, "suplementos", "omega3", "Omega 3 puro con EPA y DHA. 120 capsulas.", '["oferta"]', 1, "product-3995.jpg", 2],
-    ["Creatina Monohidratada 300g", 78000, null, "suplementos", "gym", "Creatina monohidratada micronizada. 300g.", '[]', 0, "creatina-unilife-paraguay1.jpg", 2],
-    ["Colageno Hidrolizado 500g", 120000, 145000, "suplementos", "colagenos", "Colageno tipo I y III para piel y articulaciones.", '["oferta"]', 0, "colageno-hidrolisado-rei-terra-120-500mg.webp", 2],
-    ["Curcuma con Pimienta Negra", 65000, null, "suplementos", "naturales", "Curcuma organica con pimienta negra.", '[]', 0, "curcuma.png", 2],
-    ["Combo Omega 3 + Magnesio Citrato", 150000, 205000, "combos", "combos", "Omega 3 Puro + Magnesio Citrato. Combo bienestar.", '["oferta","popular"]', 1, "combo-ome.jpeg", 2]
-  ];
-
-  const insert = db.prepare("INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, etiquetas, destacado, imagen, stock, activo, categoria_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 50, 1, ?)");
-  for (const p of seed) { try { insert.run(...p); } catch(e) { console.warn("[Seed] skip:", p[0], e.message); } }
+function stripHtml(html) { if (!html) return ""; return html.replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim(); }
+function slugify(text) { return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").substring(0, 60); }
+function inferSubcat(titulo) {
+  const t = titulo.toLowerCase();
+  if (t.includes("magnesio")) return "magnesios"; if (t.includes("omega")) return "omega3";
+  if (t.includes("colageno") || t.includes("colágeno")) return "colagenos";
+  if (t.includes("vitamina")) return "vitaminas"; if (t.includes("creatina")) return "gym";
+  if (t.includes("curcuma") || t.includes("cúrcuma")) return "naturales";
+  if (t.includes("oregano") || t.includes("orégano")) return "aceites";
+  if (t.includes("potasio") || t.includes("zinc") || t.includes("selenio") || t.includes("cromo")) return "minerales";
+  if (t.includes("resveratrol")) return "antioxidantes"; if (t.includes("probioticos")) return "probióticos";
+  if (t.includes("ashwagandha") || t.includes("shilajit") || t.includes("maca")) return "adaptogenos";
+  if (t.includes("testosterona") || t.includes("bcaa") || t.includes("carnitina")) return "gym";
+  if (t.includes("ginkgo") || t.includes("nac") || t.includes("neumax")) return "cognitivo";
+  if (t.includes("ozempic") || t.includes("berberina")) return "control-peso";
+  if (t.includes("calostro") || t.includes("reishi")) return "inmune";
+  if (t.includes("combo")) return "combos";
+  return "general";
 }
 
-seedProductos();
+async function importFromWooCommerce() {
+  const existing = db.prepare("SELECT COUNT(*) as c FROM productos").get().c;
+  if (existing > 0) { console.log("[Import] DB has " + existing + " products, skipping import"); return; }
+
+  console.log("[Import] Fetching from WooCommerce...");
+  const WC_URL = "https://seiva.com.py/wp-json/wc/v3";
+  const WC_KEY = "ck_2d4eeb0b2a526a6e3b37e579f9cc5ff46d872e10";
+  const WC_SECRET = "cs_eb55bc48f54f791676760c60287da71f1be7b78a";
+  const auth = Buffer.from(WC_KEY + ":" + WC_SECRET).toString("base64");
+
+  let products = [];
+  let page = 1;
+  while (true) {
+    try {
+      const res = await fetch(`${WC_URL}/products?per_page=100&page=${page}`, { headers: { Authorization: `Basic ${auth}` } });
+      if (!res.ok) { console.warn("[Import] WC error:", res.status); break; }
+      const data = await res.json();
+      if (!data.length) break;
+      products = products.concat(data);
+      const totalPages = parseInt(res.headers.get("x-wp-totalpages") || "1");
+      if (page >= totalPages) break;
+      page++;
+    } catch (e) { console.warn("[Import] fetch error:", e.message); break; }
+  }
+  console.log("[Import] Fetched " + products.length + " products");
+
+  const https = require("https"), http = require("http");
+  function downloadImg(url, dest) {
+    return new Promise(resolve => {
+      if (fs.existsSync(dest)) return resolve(true);
+      const c = url.startsWith("https") ? https : http;
+      c.get(url, { headers: { "User-Agent": "Seiva/1.0" } }, res => {
+        if (res.statusCode === 301 || res.statusCode === 302) return downloadImg(res.headers.location, dest).then(resolve);
+        if (res.statusCode !== 200) return resolve(true);
+        const f = fs.createWriteStream(dest);
+        res.pipe(f);
+        f.on("finish", () => { f.close(); resolve(true); });
+      }).on("error", () => { try { fs.unlinkSync(dest); } catch(e) {} resolve(true); });
+    });
+  }
+
+  const insert = db.prepare("INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, etiquetas, destacado, imagen, stock, activo, marca, slug, sku) VALUES (?,?,?,?,?,?,?,?,?,?,1,?,?,?)");
+
+  let imported = 0;
+  for (const wc of products) {
+    const nombre = wc.name.trim();
+    if (!nombre) continue;
+    try {
+      const precio = parseInt(wc.price) || 0;
+      const reg = parseInt(wc.regular_price) || 0;
+      const sale = parseInt(wc.sale_price) || 0;
+      const pa = (sale && sale < reg) ? reg : null;
+      const cat = nombre.toLowerCase().includes("combo") ? "combos" : "suplementos";
+      const subcat = inferSubcat(nombre);
+      const desc = stripHtml(wc.description || "");
+      const tags = []; if (pa) tags.push("oferta"); if (wc.featured) tags.push("popular");
+      const slug = slugify(nombre);
+      let marca = "";
+      if (wc.categories && wc.categories.length > 0) {
+        const cn = wc.categories[0].name;
+        if (cn && !cn.toLowerCase().includes("suplemento") && !cn.toLowerCase().includes("todos")) marca = cn;
+      }
+      let img = "";
+      if (wc.images && wc.images.length > 0) {
+        const ext = wc.images[0].src.split(".").pop().split("?")[0] || "jpg";
+        img = slug + "." + ext;
+        const dest = path.join(imgPath, img);
+        await downloadImg(wc.images[0].src, dest);
+      }
+      insert.run(nombre, precio, pa, cat, subcat, desc, JSON.stringify(tags), wc.featured ? 1 : 0, img, wc.stock_quantity || 50, marca, slug, wc.sku || "");
+      imported++;
+    } catch(e) { console.warn("[Import] skip:", nombre, e.message); }
+  }
+  console.log("[Import] Done — imported " + imported + " products");
+}
+
+// Launch import async — don't block server
+importFromWooCommerce().catch(e => console.warn("[Import] failed:", e.message));
 
 // Seed default admin user
 const userCount = db.prepare("SELECT COUNT(*) as c FROM usuarios").get();
