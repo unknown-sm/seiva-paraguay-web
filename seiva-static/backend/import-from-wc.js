@@ -114,27 +114,73 @@ async function main() {
   console.log(`   Found ${wcProducts.length} products\n`);
 
   console.log("2. Connecting to DB...");
+  fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
   const db = new DatabaseSync(DB_PATH);
-  const existing = db.prepare("SELECT COUNT(*) as c FROM productos").get().c;
-  console.log(`   Existing products in DB: ${existing}\n`);
 
-  if (dryRun) console.log("=== DRY RUN (sin cambios) ===\n");
+  // Create all tables if they don't exist
+  db.exec("PRAGMA journal_mode = WAL");
+  db.exec("PRAGMA foreign_keys = ON");
 
-  if (!skipImages) fs.mkdirSync(IMAGES_DIR, { recursive: true });
+  db.exec(`CREATE TABLE IF NOT EXISTS productos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    precio INTEGER NOT NULL DEFAULT 0,
+    precio_anterior INTEGER,
+    categoria TEXT NOT NULL DEFAULT 'suplementos',
+    subcategoria TEXT NOT NULL DEFAULT '',
+    descripcion TEXT DEFAULT '',
+    etiquetas TEXT DEFAULT '[]',
+    destacado INTEGER DEFAULT 0,
+    imagen TEXT DEFAULT '',
+    stock INTEGER DEFAULT 0,
+    activo INTEGER DEFAULT 1,
+    creado TEXT DEFAULT (datetime('now'))
+  )`);
 
-  // Ensure columns exist
+  db.exec(`CREATE TABLE IF NOT EXISTS marcas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL UNIQUE,
+    prioridad INTEGER DEFAULT 0,
+    activo INTEGER DEFAULT 1,
+    logo TEXT DEFAULT '',
+    creado TEXT DEFAULT (datetime('now'))
+  )`);
+
+  // Add missing columns
   const cols = [
     "categoria_id", "descripcion_larga", "galeria", "sku", "marca",
     "seo_descripcion", "crosssell", "upsell", "slug", "featured_order",
     "precio_proveedor", "delivery_gratis", "presentaciones"
   ];
   for (const col of cols) {
-    try { db.exec(`ALTER TABLE productos ADD COLUMN ${col} ${col === 'galeria' || col === 'crosssell' || col === 'upsell' || col === 'presentaciones' ? "TEXT DEFAULT '[]'" : col === 'featured_order' || col === 'precio_proveedor' || col === 'delivery_gratis' ? "INTEGER DEFAULT 0" : "TEXT DEFAULT ''"}`); } catch (e) {}
+    const types = { galeria: "TEXT DEFAULT '[]'", crosssell: "TEXT DEFAULT '[]'", upsell: "TEXT DEFAULT '[]'", presentaciones: "TEXT DEFAULT '[]'", featured_order: "INTEGER DEFAULT 0", precio_proveedor: "INTEGER DEFAULT NULL", delivery_gratis: "INTEGER DEFAULT 0" };
+    try { db.exec(`ALTER TABLE productos ADD COLUMN ${col} ${types[col] || "TEXT DEFAULT ''"}`); } catch (e) {}
   }
 
-  const insertSQL = `INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, etiquetas, destacado, imagen, stock, activo, marca, slug, sku, created_at, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, datetime('now'), datetime('now'))`;
-  // Simplified — use what we actually have
+  const existing = db.prepare("SELECT COUNT(*) as c FROM productos").get().c;
+  console.log(`   Existing products in DB: ${existing}\n`);
+
+  // Purge old seed data
+  if (existing > 0 && !dryRun) {
+    const seedNames = [
+      "Almendras con Chocolate Negro", "Mix de Frutos Secos Premium", "Almendras Naturales 500g",
+      "Datiles Medjool 400g", "Nueces Pecanas 300g", "Barritas de Granola Artesanal",
+      "Aceite de Oregano 120 Capsulas", "Magnesio Quelato 120 Capsulas", "Omega 3 Puro 1000mg",
+      "Creatina Monohidratada 300g", "Colageno Hidrolizado 500g", "Curcuma con Pimienta Negra",
+      "Combo Omega 3 + Magnesio Citrato"
+    ];
+    let deleted = 0;
+    for (const n of seedNames) {
+      const r = db.prepare("DELETE FROM productos WHERE nombre = ?").run(n);
+      deleted += r.changes;
+    }
+    console.log(`   Purged ${deleted} seed products\n`);
+  }
+
+  if (dryRun) console.log("=== DRY RUN (sin cambios) ===\n");
+
+  if (!skipImages) fs.mkdirSync(IMAGES_DIR, { recursive: true });
+
   const insertSimple = `INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, etiquetas, destacado, imagen, stock, activo, marca, slug, sku)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)`;
 
@@ -172,14 +218,17 @@ async function main() {
       }
     }
 
-    // Image
+    // Image — use full WC URL so images work immediately
     let imagenFile = "";
     if (wc.images && wc.images.length > 0) {
       const imgUrl = wc.images[0].src;
-      const ext = imgUrl.split(".").pop().split("?")[0] || "jpg";
-      imagenFile = slug + "." + ext;
-
-      if (!skipImages && imagenFile) {
+      if (skipImages) {
+        // Store full URL — works immediately
+        imagenFile = imgUrl;
+      } else {
+        // Download locally
+        const ext = imgUrl.split(".").pop().split("?")[0] || "jpg";
+        imagenFile = slug + "." + ext;
         const dest = path.join(IMAGES_DIR, imagenFile);
         if (!dryRun) {
           const ok = await downloadImage(imgUrl, dest);
@@ -189,6 +238,7 @@ async function main() {
           imagesOk++;
         }
       }
+      imagesOk++;
     }
 
     if (existingNames.has(nombre)) {
@@ -234,13 +284,15 @@ async function main() {
     }
   }
 
+  const totalEnDb = db.prepare("SELECT COUNT(*) as c FROM productos").get().c;
+
   console.log(`\n=== Resultados ===`);
   console.log(`  Importados: ${imported}`);
   console.log(`  Actualizados: ${updated}`);
   console.log(`  Imágenes OK: ${imagesOk}`);
   console.log(`  Imágenes fallidas: ${imagesFail}`);
   console.log(`  Marcas creadas: ${brandsCreated}`);
-  console.log(`  Total en DB: ${existing + imported}`);
+  console.log(`  Total en DB: ${totalEnDb}`);
 
   const marcas = db.prepare("SELECT COUNT(*) as c FROM marcas").get().c;
   console.log(`  Marcas totales: ${marcas}`);
