@@ -135,7 +135,7 @@ db.exec(`
     nombre TEXT NOT NULL,
     precio INTEGER NOT NULL DEFAULT 0,
     precio_anterior INTEGER,
-    categoria TEXT NOT NULL DEFAULT 'snacks',
+    categoria TEXT NOT NULL DEFAULT 'suplementos',
     subcategoria TEXT NOT NULL DEFAULT '',
     descripcion TEXT DEFAULT '',
     etiquetas TEXT DEFAULT '[]',
@@ -467,30 +467,39 @@ if (envCount.c === 0) {
 
 const catCount = db.prepare("SELECT COUNT(*) as c FROM categorias").get();
 if (catCount.c === 0) {
-  const defCats = [["snacks","snacks","Snacks saludables"],["suplementos","suplementos","Suplementos"],["combos","combos","Combos"]];
+  const defCats = [["suplementos","suplementos","Suplementos"],["combos","combos","Combos"]];
   const ins = db.prepare("INSERT INTO categorias (nombre, slug, descripcion) VALUES (?, ?, ?)");
   for (const c of defCats) ins.run(c[0], c[1], c[2]);
   // Map existing category text to ID
   const prods = db.prepare("SELECT id, categoria FROM productos WHERE categoria_id IS NULL").all();
-  const catMap = { snacks: 1, suplementos: 2, combos: 3 };
+  const catMap = { suplementos: 1, combos: 2 };
   const upd = db.prepare("UPDATE productos SET categoria_id = ? WHERE id = ?");
   for (const p of prods) {
-    const cid = catMap[p.categoria];
-    if (cid) upd.run(cid, p.id);
+    const cid = catMap[p.categoria] || catMap["suplementos"];
+    upd.run(cid, p.id);
   }
 }
+
+// Migration: move snacks products to suplementos
+const snacksCount = db.prepare("SELECT COUNT(*) as c FROM productos WHERE categoria = 'snacks'").get();
+if (snacksCount.c > 0) {
+  db.prepare("UPDATE productos SET categoria = 'suplementos' WHERE categoria = 'snacks'").run();
+  console.log("[Migration] " + snacksCount.c + " productos snacks movidos a suplementos");
+}
+// Delete snacks category if exists
+db.prepare("DELETE FROM categorias WHERE nombre = 'snacks'").run();
 
 function seedProductos() {
   const row = db.prepare("SELECT COUNT(*) as c FROM productos").get();
   if (row.c > 0) return;
 
   const seed = [
-    ["Almendras con Chocolate Negro", 45000, null, "snacks", "chocolate", "Almendras seleccionadas cubiertas con chocolate negro 70% cacao.", '["nuevo","popular"]', 1, "product-4073.jpg", 1],
-    ["Mix de Frutos Secos Premium", 55000, 65000, "snacks", "mix", "Combinacion de almendras, nueces, castanas, arandanos y pasas.", '["oferta"]', 1, "product-4079.jpg", 1],
-    ["Almendras Naturales 500g", 58000, null, "snacks", "almendras", "Almendras crudas sin sal, empacadas al vacio.", '[]', 1, "product-2564.jpg", 1],
-    ["Datiles Medjool 400g", 42000, null, "snacks", "frutas", "Datiles Medjool premium, naturalmente dulces.", '["nuevo"]', 0, "product-2505.jpg", 1],
-    ["Nueces Pecanas 300g", 62000, null, "snacks", "nueces", "Nueces pecanas frescas, ricas en antioxidantes.", '[]', 0, "product-3116.jpg", 1],
-    ["Barritas de Granola Artesanal", 12000, null, "snacks", "barras", "Barritas de granola caseras. Pack x3.", '["popular"]', 1, "product-2468.png", 1],
+    ["Almendras con Chocolate Negro", 45000, null, "suplementos", "chocolate", "Almendras seleccionadas cubiertas con chocolate negro 70% cacao.", '["nuevo","popular"]', 1, "product-4073.jpg", 1],
+    ["Mix de Frutos Secos Premium", 55000, 65000, "suplementos", "mix", "Combinacion de almendras, nueces, castanas, arandanos y pasas.", '["oferta"]', 1, "product-4079.jpg", 1],
+    ["Almendras Naturales 500g", 58000, null, "suplementos", "almendras", "Almendras crudas sin sal, empacadas al vacio.", '[]', 1, "product-2564.jpg", 1],
+    ["Datiles Medjool 400g", 42000, null, "suplementos", "frutas", "Datiles Medjool premium, naturalmente dulces.", '["nuevo"]', 0, "product-2505.jpg", 1],
+    ["Nueces Pecanas 300g", 62000, null, "suplementos", "nueces", "Nueces pecanas frescas, ricas en antioxidantes.", '[]', 0, "product-3116.jpg", 1],
+    ["Barritas de Granola Artesanal", 12000, null, "suplementos", "barras", "Barritas de granola caseras. Pack x3.", '["popular"]', 1, "product-2468.png", 1],
     ["Aceite de Oregano 120 Capsulas", 75000, 90000, "suplementos", "aceites", "Aceite de oregano 500mg. Refuerzo inmune.", '["oferta"]', 0, "aceite-de-ajo-mix-nutri-3.webp", 2],
     ["Magnesio Quelato 120 Capsulas", 85000, null, "suplementos", "magnesios", "Magnesio quelato de alta absorcion.", '["popular"]', 1, "magnesio-quelato-bio-120-paraguay.jpg", 2],
     ["Omega 3 Puro 1000mg", 95000, 120000, "suplementos", "omega3", "Omega 3 puro con EPA y DHA. 120 capsulas.", '["oferta"]', 1, "product-3995.jpg", 2],
@@ -781,7 +790,7 @@ app.post("/api/productos", auth, (req, res) => {
     const variantesData = variantes || presentaciones || [];
     if (!nombre || !precio) return res.status(400).json({ error: "Nombre y precio requeridos" });
     const cid = categoria_id || null;
-    const catName = categoria || (cid ? db.prepare("SELECT nombre FROM categorias WHERE id=?").get(cid)?.nombre : "snacks") || "snacks";
+    const catName = categoria || (cid ? db.prepare("SELECT nombre FROM categorias WHERE id=?").get(cid)?.nombre : "suplementos") || "suplementos";
     const finalSlug = slug || generateSlug(nombre);
     const fo = parseInt(featured_order) || 0;
     const pp = precio_proveedor ? parseInt(precio_proveedor) : null;
@@ -799,7 +808,7 @@ app.put("/api/productos/:id", auth, (req, res) => {
   try {
     const { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell, slug, featured_order, precio_proveedor, delivery_gratis, variantes } = req.body;
     const cid = categoria_id !== undefined ? categoria_id : null;
-    const catName = categoria || (cid ? db.prepare("SELECT nombre FROM categorias WHERE id=?").get(cid)?.nombre : "snacks") || "snacks";
+    const catName = categoria || (cid ? db.prepare("SELECT nombre FROM categorias WHERE id=?").get(cid)?.nombre : "suplementos") || "suplementos";
     const finalSlug = slug || (nombre ? generateSlug(nombre, req.params.id) : undefined);
     const fo = parseInt(featured_order) || 0;
     const pp = precio_proveedor !== undefined ? (precio_proveedor ? parseInt(precio_proveedor) : null) : undefined;

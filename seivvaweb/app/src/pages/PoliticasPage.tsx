@@ -13,7 +13,7 @@ const policies = [
   },
   {
     title: 'Política de Devoluciones',
-    content: 'Aceptamos devoluciones dentro de los 7 días corridos desde la entrega. El producto debe estar sin abrir, en su empaque original y en condiciones de reventa. Los gastos de envío por devolución corren por cuenta del cliente. Para iniciar una devolución, contactanos por WhatsApp. Productos perecederos (snacks, frutos secos) no tienen devolución una vez abiertos.',
+    content: 'Aceptamos devoluciones dentro de los 7 días corridos desde la entrega. El producto debe estar sin abrir, en su empaque original y en condiciones de reventa. Los gastos de envío por devolución corren por cuenta del cliente. Para iniciar una devolución, contactanos por WhatsApp. Productos perecederos (frutos secos) no tienen devolución una vez abiertos.',
   },
   {
     title: 'Política de Privacidad',

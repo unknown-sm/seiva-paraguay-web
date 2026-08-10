@@ -88,7 +88,7 @@ export default function Categories() {
             className="animate-in font-display font-bold leading-tight"
             style={{ color: 'var(--theme-text, #3D2817)', fontSize: 'clamp(28px, 3.5vw, 48px)' }}
           >
-            Suplementos y Snacks<br />100% Naturales
+            Suplementos<br />100% Naturales
           </h2>
           <p
             className="animate-in font-body text-base mt-4 max-w-lg mx-auto leading-relaxed"

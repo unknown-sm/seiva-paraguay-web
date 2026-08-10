@@ -170,7 +170,7 @@ export default function Hero() {
               className="font-body text-base leading-relaxed mt-5 max-w-md"
               style={{ color: 'rgba(255,255,255,0.8)' }}
             >
-              Suplementos, snacks saludables y frutos secos premium. Directo a tu puerta sin vueltas.
+              Suplementos y frutos secos premium. Directo a tu puerta sin vueltas.
             </p>
 
             <div ref={ctaRef} className="flex flex-wrap gap-4 mt-8">

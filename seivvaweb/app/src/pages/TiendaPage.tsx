@@ -8,7 +8,6 @@ import ProductSkeleton from '../components/ProductSkeleton'
 const CATEGORIAS = [
   { id: 'all', label: 'Todos' },
   { id: 'suplementos', label: 'Suplementos' },
-  { id: 'snacks', label: 'Snacks' },
   { id: 'combos', label: 'Combos' },
 ]
 

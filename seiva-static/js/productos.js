@@ -1,5 +1,4 @@
 var CATEGORIAS = [
-  { id: "snacks", nombre: "Snacks" },
   { id: "suplementos", nombre: "Suplementos" },
   { id: "combos", nombre: "Combos" }
 ];
