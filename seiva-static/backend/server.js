@@ -498,6 +498,58 @@ try {
   db.prepare("DELETE FROM categorias WHERE nombre = 'snacks'").run();
 } catch(e) { console.warn("[Migration] snacks skip:", e.message); }
 
+// Migration: fix brands — maps product name suffix codes to real brand names
+const brandMap = {
+  "UE": "UniErvas", "UNIERVAS": "UniErvas",
+  "RY": "Rei Terra", "REI": "Rei Terra",
+  "UL": "Unilife", "UN": "Unilife",
+  "AP": "ApisNutri",
+  "NG": "NaturalGreen",
+  "MX": "MixNutri", "MIX": "MixNutri",
+  "V7": "Videira7",
+  "BIO": "Bionutri",
+  "FL": "Flora Nativa do Brasil", "FNB": "Flora Nativa do Brasil",
+  "KT": "Katigua",
+  "BA": "Balincer",
+  "AB": "American Builders", "Americano": "American Builders",
+  "ONE": "ONE FIT",
+  "NB": "Naturalis Brasil",
+  "AN": "Anil",
+  "AD": "ADA Nutraceuticos",
+  "SM": "Smart Nutrition",
+  "DN": "Denature",
+  "SW": "Copra"
+};
+function extractBrand(name) {
+  const parts = name.trim().split(" ");
+  const last = parts[parts.length - 1].replace(/[^a-zA-Z]/g, "");
+  if (last.length <= 4 && brandMap[last]) return brandMap[last];
+  const upper = last.toUpperCase();
+  if (brandMap[upper]) return brandMap[upper];
+  for (const kw of Object.keys(brandMap)) {
+    if (kw.length > 3 && name.toLowerCase().includes(kw.toLowerCase())) return brandMap[kw];
+  }
+  return "";
+}
+// Fix all products with wrong/empty brands (runs every startup, idempotent)
+try {
+  const fixable = db.prepare("SELECT COUNT(*) as c FROM productos WHERE marca IS NULL OR marca = '' OR marca IN ('Magnesios','Gym','Vitaminas','Aceites','Naturales','Inmune','Cognitivo','Minerales','Omega3','Colagenos','Adaptogenos','Control-peso','Probióticos','Antioxidantes','General','Combos')").get().c;
+  if (fixable > 0) {
+    console.log("[Migration] Fixing " + fixable + " product brands...");
+    const prods = db.prepare("SELECT id, nombre, marca FROM productos").all();
+    const upd = db.prepare("UPDATE productos SET marca = ? WHERE id = ?");
+    let fixed = 0;
+    for (const p of prods) {
+      const realBrand = extractBrand(p.nombre);
+      if (realBrand && realBrand !== p.marca) {
+        upd.run(realBrand, p.id);
+        fixed++;
+      }
+    }
+    console.log("[Migration] Fixed " + fixed + " brands");
+  }
+} catch(e) { console.warn("[Migration] brand fix skip:", e.message); }
+
 function stripHtml(html) { if (!html) return ""; return html.replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim(); }
 function slugify(text) { return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").substring(0, 60); }
 function inferSubcat(titulo) {
@@ -564,41 +616,6 @@ async function importFromWooCommerce() {
         f.on("finish", () => { f.close(); resolve(true); });
       }).on("error", () => { try { fs.unlinkSync(dest); } catch(e) {} resolve(true); });
     });
-  }
-
-  // Brand code mapping
-  const brandMap = {
-    "UE": "UniErvas", "UNIERVAS": "UniErvas",
-    "RY": "Rei Terra", "REI": "Rei Terra",
-    "UL": "Unilife", "UN": "Unilife",
-    "AP": "ApisNutri",
-    "NG": "NaturalGreen",
-    "MX": "MixNutri", "MIX": "MixNutri",
-    "V7": "Videira7",
-    "BIO": "Bionutri",
-    "FL": "Flora Nativa do Brasil", "FNB": "Flora Nativa do Brasil",
-    "KT": "Katigua",
-    "BA": "Balincer",
-    "AB": "American Builders", "Americano": "American Builders",
-    "ONE": "ONE FIT",
-    "NB": "Naturalis Brasil",
-    "AN": "Anil",
-    "AD": "ADA Nutraceuticos",
-    "SM": "Smart Nutrition",
-    "DN": "Denature",
-    "SW": "Copra"
-  };
-  function extractBrand(name) {
-    const parts = name.trim().split(" ");
-    const last = parts[parts.length - 1].replace(/[^a-zA-Z]/g, "");
-    if (last.length <= 4 && brandMap[last]) return brandMap[last];
-    const upper = last.toUpperCase();
-    if (brandMap[upper]) return brandMap[upper];
-    // Check full name for known full-word brands
-    for (const kw of Object.keys(brandMap)) {
-      if (kw.length > 3 && name.toLowerCase().includes(kw.toLowerCase())) return brandMap[kw];
-    }
-    return "";
   }
 
   const insert = db.prepare("INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, etiquetas, destacado, imagen, stock, activo, marca, slug, sku) VALUES (?,?,?,?,?,?,?,?,?,?,1,?,?,?)");
