@@ -21,6 +21,7 @@ export default function ProductFeatured() {
   const [selectedOption, setSelectedOption] = useState(0)
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showFullDesc, setShowFullDesc] = useState(false)
   const { addItem } = useCart()
 
   useEffect(() => {
@@ -78,8 +79,6 @@ export default function ProductFeatured() {
   }
 
   if (loading || !product) return null
-
-  const [showFullDesc, setShowFullDesc] = useState(false)
 
   const cleanDesc = stripHtml(product.descripcion || '')
     .replace(/[•·]/g, '')
