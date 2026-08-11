@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ShoppingCart } from 'lucide-react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { fetchProducts, formatPrice, stripHtml, getProductBadges, getTierLabel, type Product } from '../services/api'
+
+gsap.registerPlugin(ScrollTrigger)
 import { useCart } from '../context/CartContext'
 import ProductSkeleton from '../components/ProductSkeleton'
 

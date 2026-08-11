@@ -1689,7 +1689,7 @@ app.get("/api/stats/top-productos", auth, (req, res) => {
 });
 
 // ---------- CONTENIDO ----------
-app.get("/api/contenido", auth, (req, res) => {
+app.get("/api/contenido", (req, res) => {
   const rows = db.prepare("SELECT * FROM contenido").all();
   const obj = {};
   for (const r of rows) obj[r.key] = r.value;
