@@ -1457,7 +1457,7 @@ app.post("/api/scrape-product", auth, async (req, res) => {
 });
 
 // ---------- DESCUENTOS POR CANTIDAD ----------
-app.get("/api/descuentos", auth, (req, res) => {
+app.get("/api/descuentos", (req, res) => {
   const rows = db.prepare(`
     SELECT d.*, p.nombre as producto_nombre, p.precio as producto_precio, p.imagen as producto_imagen
     FROM descuentos_cantidad d
