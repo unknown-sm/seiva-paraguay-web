@@ -235,12 +235,6 @@ export default function TiendaPage() {
                       className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105 p-2"
                       loading="lazy"
                     />
-                    <span
-                      className="absolute top-2 left-2 font-body font-semibold text-[9px] px-2 py-0.5 rounded-full tracking-wider z-10"
-                      style={{ backgroundColor: 'var(--theme-primary-overlay, rgba(27,67,50,0.85))', color: 'var(--theme-text-on-primary, #FFFFFF)' }}
-                    >
-                      {product.categoria.toUpperCase()}
-                    </span>
                     {product.precio_anterior && (
                       <span
                         className="absolute bottom-2 right-2 font-body font-bold text-[9px] px-2 py-0.5 rounded-full z-10"

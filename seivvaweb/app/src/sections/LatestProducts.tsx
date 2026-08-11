@@ -99,16 +99,6 @@ export default function LatestProducts() {
                     (e.target as HTMLImageElement).style.display = 'none'
                   }}
                 />
-                <span
-                  className="absolute top-2.5 left-2.5 font-body font-semibold text-[10px] px-2.5 py-1 rounded-full tracking-wider"
-                  style={{
-                    backgroundColor: 'var(--theme-primary, #1B4332)',
-                    color: 'var(--theme-text-on-primary, #FFFFFF)',
-                    zIndex: 10,
-                  }}
-                >
-                  {product.categoria.toUpperCase()}
-                </span>
                 {product.precio_anterior && product.precio_anterior > product.precio && (
                   <span
                     className="absolute top-2.5 right-2.5 font-body font-semibold text-[10px] px-2.5 py-1 rounded-full"
