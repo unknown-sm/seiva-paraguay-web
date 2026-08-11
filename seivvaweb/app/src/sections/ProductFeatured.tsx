@@ -79,12 +79,13 @@ export default function ProductFeatured() {
 
   if (loading || !product) return null
 
+  const [showFullDesc, setShowFullDesc] = useState(false)
+
   const cleanDesc = stripHtml(product.descripcion || '')
     .replace(/[•·]/g, '')
     .replace(/\s+/g, ' ')
     .trim()
   const shortDesc = cleanDesc.length > 160 ? cleanDesc.substring(0, 160).trim() + '...' : cleanDesc
-  const [showFullDesc, setShowFullDesc] = useState(false)
   const displayDesc = showFullDesc ? cleanDesc : shortDesc
 
   const descuento = product.precio_anterior
