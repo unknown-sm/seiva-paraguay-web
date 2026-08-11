@@ -84,6 +84,8 @@ export default function ProductFeatured() {
     .replace(/\s+/g, ' ')
     .trim()
   const shortDesc = cleanDesc.length > 160 ? cleanDesc.substring(0, 160).trim() + '...' : cleanDesc
+  const [showFullDesc, setShowFullDesc] = useState(false)
+  const displayDesc = showFullDesc ? cleanDesc : shortDesc
 
   const descuento = product.precio_anterior
     ? Math.round((1 - product.precio / product.precio_anterior) * 100)
@@ -133,12 +135,23 @@ export default function ProductFeatured() {
             >
               {product.nombre}
             </h2>
-            <p
-              className="animate-in font-body text-base lg:text-lg leading-relaxed mb-6"
-              style={{ color: 'rgba(255,255,255,0.8)' }}
-            >
-              {shortDesc || 'Producto premium de alta calidad.'}
-            </p>
+            <div className="animate-in mb-6">
+              <p
+                className="font-body text-base lg:text-lg leading-relaxed"
+                style={{ color: 'rgba(255,255,255,0.8)' }}
+              >
+                {displayDesc || 'Producto premium de alta calidad.'}
+              </p>
+              {cleanDesc.length > 160 && (
+                <button
+                  onClick={() => setShowFullDesc(!showFullDesc)}
+                  className="mt-2 text-sm font-semibold hover:underline"
+                  style={{ color: 'var(--theme-accent, #D4A843)' }}
+                >
+                  {showFullDesc ? 'Ver menos ↑' : 'Ver más →'}
+                </button>
+              )}
+            </div>
 
             {/* Precio */}
             <div className="animate-in flex items-baseline gap-3 mb-6">
