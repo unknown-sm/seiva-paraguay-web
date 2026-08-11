@@ -1,0 +1,27 @@
+version: "3.8"
+services:
+  seiva:
+    build: .
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+      - DB_PATH=/app/data/database.sqlite
+      # Setear en Dokploy env vars:
+      # JWT_SECRET=<random>
+      # ADMIN_PASSWORD=<secure>
+    volumes:
+      - seiva_data:/app/data
+      - seiva_img:/app/img/productos
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/api/ping', r => { process.exit(r.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+
+volumes:
+  seiva_data:
+  seiva_img:

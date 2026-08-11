@@ -124,6 +124,22 @@ const heroUpload = multer({
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, "data", "database.sqlite");
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+
+// Auto-backup before any migration
+const BACKUP_DIR = path.join(path.dirname(DB_PATH), "backups");
+try {
+  if (fs.existsSync(DB_PATH)) {
+    fs.mkdirSync(BACKUP_DIR, { recursive: true });
+    const ts = new Date().toISOString().replace(/[:.]/g, "-").substring(0, 19);
+    const bk = path.join(BACKUP_DIR, `backup-${ts}.sqlite`);
+    fs.copyFileSync(DB_PATH, bk);
+    // Keep last 5 backups
+    const files = fs.readdirSync(BACKUP_DIR).filter(f => f.endsWith(".sqlite")).sort();
+    while (files.length > 5) { fs.unlinkSync(path.join(BACKUP_DIR, files.shift())); }
+    console.log("[Backup] Saved to " + bk);
+  }
+} catch(e) { console.warn("[Backup] skip:", e.message); }
+
 const db = new DatabaseSync(DB_PATH);
 
 db.exec("PRAGMA journal_mode = WAL");
