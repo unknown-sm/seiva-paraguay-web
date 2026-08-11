@@ -209,12 +209,13 @@ export default function Hero() {
             <img
               ref={bottleRef}
               src={heroImage}
-              alt="Espirulina Orgánica Premium"
+              alt="Seiva Paraguay"
               className="relative z-10 w-[200px] sm:w-[280px] lg:w-[380px] object-contain"
               style={{
                 filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.5))',
                 transform: 'rotate(-8deg)',
               }}
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
             />
 
             {/* Floating Ingredients */}
@@ -234,6 +235,7 @@ export default function Hero() {
                   bottom: ing.bottom,
                   transform: `rotate(${ing.rotate}deg)`,
                 }}
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
               />
             ))}
           </div>

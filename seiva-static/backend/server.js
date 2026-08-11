@@ -333,7 +333,9 @@ db.exec(`
 
 const contenidoDefault = {
   hero_titulo: "Frescura natural que se siente",
-  hero_descripcion: "Almendras con chocolate, frutos secos premium, snacks saludables y suplementos. Directo a tu puerta. Sin vueltas.",
+  hero_descripcion: "Suplementos y frutos secos premium. Directo a tu puerta. Sin vueltas.",
+  hero_imagen: "/img/logo/seiva-logo.png",
+  hero_imagenes: "",
   whatsapp_numero: "595992120303",
   site_titulo: "Seiva Paraguay — Snacks Saludables y Suplementos Naturales",
   site_descripcion: "Almendras con chocolate, frutos secos, snacks saludables y suplementos naturales. Envios a todo Paraguay. Pedi por WhatsApp.",
