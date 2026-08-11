@@ -1538,7 +1538,7 @@ document.addEventListener("DOMContentLoaded", function() {
   var allProductos = [];
   var descuentosByProducto = {};
 
-  function loadDescuentos() {
+  window.loadDescuentos = function() {
     Promise.all([
       api("/productos/all"),
       api("/descuentos")
