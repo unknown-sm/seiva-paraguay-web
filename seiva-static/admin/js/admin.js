@@ -1643,7 +1643,7 @@ document.addEventListener("DOMContentLoaded", function() {
   window.addTierRow = addTierRow;
 
   document.getElementById("btn-nuevo-descuento").addEventListener("click", function() {
-    select.innerHTML = allProductos.map(function(p) {
+    document.getElementById("desc-producto").innerHTML = allProductos.map(function(p) {
       return '<option value="' + p.id + '">' + xt(p.nombre) + ' (' + formatGs(p.precio) + ')</option>';
     }).join('');
 
