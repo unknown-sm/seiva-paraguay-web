@@ -3,7 +3,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Star, Check, Shield, Minus, Plus } from 'lucide-react'
 import { useCart } from '../context/CartContext'
-import { fetchHeroProduct, formatPrice, type Product } from '../services/api'
+import { fetchHeroProduct, formatPrice, stripHtml, type Product } from '../services/api'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -79,6 +79,12 @@ export default function ProductFeatured() {
 
   if (loading || !product) return null
 
+  const cleanDesc = stripHtml(product.descripcion || '')
+    .replace(/[•·]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+  const shortDesc = cleanDesc.length > 160 ? cleanDesc.substring(0, 160).trim() + '...' : cleanDesc
+
   const descuento = product.precio_anterior
     ? Math.round((1 - product.precio / product.precio_anterior) * 100)
     : 0
@@ -131,7 +137,7 @@ export default function ProductFeatured() {
               className="animate-in font-body text-base lg:text-lg leading-relaxed mb-6"
               style={{ color: 'rgba(255,255,255,0.8)' }}
             >
-              {product.descripcion?.replace(/<[^>]*>/g, '') || 'Producto premium de alta calidad.'}
+              {shortDesc || 'Producto premium de alta calidad.'}
             </p>
 
             {/* Precio */}
