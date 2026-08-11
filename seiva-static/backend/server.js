@@ -125,20 +125,29 @@ const heroUpload = multer({
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, "data", "database.sqlite");
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
-// Auto-backup before any migration
+// Daily auto-backup (once every 24h, keep last 2)
 const BACKUP_DIR = path.join(path.dirname(DB_PATH), "backups");
-try {
-  if (fs.existsSync(DB_PATH)) {
+function dailyBackup() {
+  try {
+    if (!fs.existsSync(DB_PATH)) return;
     fs.mkdirSync(BACKUP_DIR, { recursive: true });
+    const files = fs.readdirSync(BACKUP_DIR).filter(f => f.endsWith(".sqlite")).sort().reverse();
+    if (files.length > 0) {
+      const lastDate = files[0].substring(7, 17);
+      const today = new Date().toISOString().substring(0, 10);
+      if (lastDate === today) return;
+    }
     const ts = new Date().toISOString().replace(/[:.]/g, "-").substring(0, 19);
     const bk = path.join(BACKUP_DIR, `backup-${ts}.sqlite`);
     fs.copyFileSync(DB_PATH, bk);
-    // Keep last 5 backups
-    const files = fs.readdirSync(BACKUP_DIR).filter(f => f.endsWith(".sqlite")).sort();
-    while (files.length > 5) { fs.unlinkSync(path.join(BACKUP_DIR, files.shift())); }
-    console.log("[Backup] Saved to " + bk);
-  }
-} catch(e) { console.warn("[Backup] skip:", e.message); }
+    const all = fs.readdirSync(BACKUP_DIR).filter(f => f.endsWith(".sqlite")).sort();
+    while (all.length > 2) { fs.unlinkSync(path.join(BACKUP_DIR, all.shift())); }
+    console.log("[Backup] " + bk);
+  } catch(e) { console.warn("[Backup] skip:", e.message); }
+}
+dailyBackup();
+// Backup again every 24h
+setInterval(dailyBackup, 24 * 60 * 60 * 1000);
 
 const db = new DatabaseSync(DB_PATH);
 
