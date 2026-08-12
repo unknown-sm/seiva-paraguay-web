@@ -131,20 +131,23 @@ export function getProductBadges(product: Product): { label: string; color: stri
 }
 
 export function getDiscountedPrice(product: Product, quantity: number): number {
-  if (!product.price_tiers?.length) return product.precio
-  const tier = product.price_tiers.find(t =>
-    quantity >= t.min_cantidad &&
-    (t.max_cantidad === null || quantity <= t.max_cantidad)
-  )
+  const tier = getBestActiveTier(product, quantity)
   return tier ? product.precio - tier.descuento : product.precio
 }
 
 export function getActiveTier(product: Product, quantity: number): PriceTier | undefined {
+  return getBestActiveTier(product, quantity)
+}
+
+function getBestActiveTier(product: Product, quantity: number): PriceTier | undefined {
   if (!product.price_tiers?.length) return undefined
-  return product.price_tiers.find(t =>
-    quantity >= t.min_cantidad &&
-    (t.max_cantidad === null || quantity <= t.max_cantidad)
-  )
+  let best: PriceTier | undefined
+  for (const t of product.price_tiers) {
+    if (quantity >= t.min_cantidad && (t.max_cantidad === null || quantity <= t.max_cantidad)) {
+      if (!best || t.descuento > best.descuento) best = t
+    }
+  }
+  return best
 }
 
 export function getNextTier(product: Product, quantity: number): PriceTier | undefined {
