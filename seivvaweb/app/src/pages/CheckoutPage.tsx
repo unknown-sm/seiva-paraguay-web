@@ -38,15 +38,17 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (!ciudadSeleccionada) { setEnvioCosto(0); setEnvioCiudad(''); setEnvioTipo('delivery'); return }
+    const { ciudad: soloCiudad } = parseCiudadSeleccionada(ciudadSeleccionada)
     fetch('/api/envios').then(r => r.json()).then((data) => {
       const match = data.find((e: any) =>
-        e.ciudad.toLowerCase() === ciudadSeleccionada.toLowerCase() ||
-        e.ciudad === 'Otra ciudad'
+        e.ciudad.toLowerCase() === soloCiudad.toLowerCase()
       )
-      if (match) {
-        setEnvioCosto(match.costo)
-        setEnvioCiudad(match.ciudad)
-        setEnvioTipo(match.tipo || 'delivery')
+      const fallback = data.find((e: any) => e.ciudad === 'Otra ciudad')
+      const result = match || fallback
+      if (result) {
+        setEnvioCosto(result.costo)
+        setEnvioCiudad(result.tipo === 'encomienda' ? 'Encomienda' : soloCiudad)
+        setEnvioTipo(result.tipo || 'delivery')
       }
     }).catch(() => {})
   }, [ciudadSeleccionada])
