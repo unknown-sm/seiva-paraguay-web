@@ -809,6 +809,7 @@ function parseProducto(row) {
   const price_tiers = db.prepare("SELECT min_cantidad, max_cantidad, descuento FROM descuentos_cantidad WHERE producto_id = ? ORDER BY min_cantidad").all(row.id);
 
   // Buscar descuentos por marca
+  let marca_descuento = undefined;
   if (row.marca) {
     const marca = db.prepare("SELECT id FROM marcas WHERE LOWER(nombre) = LOWER(?) AND activo = 1").get(row.marca);
     if (marca) {
@@ -828,6 +829,19 @@ function parseProducto(row) {
         if (exclusiones.indexOf(row.id) !== -1) continue;
         // Si hay inclusiones y producto no está, saltar
         if (inclusiones.length > 0 && inclusiones.indexOf(row.id) === -1) continue;
+
+        // Guardar config cruda para que el carrito calcule cross-producto
+        marca_descuento = {
+          marca_id: marca.id,
+          marca_nombre: row.marca,
+          min_cantidad: md.min_cantidad,
+          max_cantidad: md.max_cantidad,
+          tipo_descuento: md.tipo_descuento,
+          valor: md.valor,
+          exclusiones: exclusiones,
+          inclusiones: inclusiones,
+          etiqueta: md.etiqueta || ""
+        };
 
         let descuento = md.valor;
         if (md.tipo_descuento === "porcentaje") {
@@ -867,7 +881,8 @@ function parseProducto(row) {
     destacado: !!row.destacado,
     activo: !!row.activo,
     precio_anterior: row.precio_anterior || null,
-    price_tiers: price_tiers.length > 0 ? price_tiers : undefined
+    price_tiers: price_tiers.length > 0 ? price_tiers : undefined,
+    marca_descuento: marca_descuento
   };
 }
 

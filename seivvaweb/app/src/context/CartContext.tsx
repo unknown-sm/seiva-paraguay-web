@@ -20,6 +20,7 @@ interface CartContextValue {
   totalItems: number
   totalPrice: number
   totalSavings: number
+  getEffectiveUnitPrice: (i: CartItem) => number
   activePromos: Promo[]
   promoDiscount: number
   appliedCoupon: Promo | null
@@ -125,14 +126,46 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0)
+
+  // Calcular cantidad total por marca (para descuento cross-producto)
+  const brandTotals = (() => {
+    const totals: Record<string, number> = {}
+    for (const i of items) {
+      if (i.product.marca_descuento) {
+        const key = i.product.marca_descuento.marca_nombre
+        // Solo sumar si el producto no está en exclusiones
+        const excl = i.product.marca_descuento.exclusiones
+        if (!excl.includes(i.product.id)) {
+          totals[key] = (totals[key] || 0) + i.quantity
+        }
+      }
+    }
+    return totals
+  })()
+
+  // Precio unitario considerando descuento cross-producto por marca
+  const getEffectiveUnitPrice = (i: CartItem): number => {
+    const md = i.product.marca_descuento
+    if (md) {
+      const brandTotal = brandTotals[md.marca_nombre] || 0
+      if (brandTotal >= md.min_cantidad && (md.max_cantidad === null || brandTotal <= md.max_cantidad)) {
+        // Descuento de marca aplica (cross-producto)
+        const descuento = md.tipo_descuento === 'porcentaje'
+          ? Math.round(i.product.precio * md.valor / 100)
+          : md.valor
+        return Math.max(0, i.product.precio - descuento)
+      }
+    }
+    // Fallback: descuento por producto individual
+    return getDiscountedPrice(i.product, i.quantity)
+  }
+
   const totalPrice = items.reduce((sum, i) => {
-    const discountedPrice = getDiscountedPrice(i.product, i.quantity)
-    return sum + discountedPrice * i.quantity
+    return sum + getEffectiveUnitPrice(i) * i.quantity
   }, 0)
   const totalSavings = items.reduce((sum, i) => {
-    const discountedPrice = getDiscountedPrice(i.product, i.quantity)
-    const saving = (i.product.precio - discountedPrice) * i.quantity
-    return sum + saving
+    const unit = getEffectiveUnitPrice(i)
+    return sum + (i.product.precio - unit) * i.quantity
   }, 0)
 
   // Calcular descuento de promos activas (descuento_carrito + cupón)
@@ -188,7 +221,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <CartContext.Provider value={{ items, isOpen, addItem, removeItem, updateQuantity, clearCart, openCart, closeCart, totalItems, totalPrice, totalSavings, activePromos, promoDiscount, appliedCoupon, applyCoupon, removeCoupon }}>
+    <CartContext.Provider value={{ items, isOpen, addItem, removeItem, updateQuantity, clearCart, openCart, closeCart, totalItems, totalPrice, totalSavings, getEffectiveUnitPrice, activePromos, promoDiscount, appliedCoupon, applyCoupon, removeCoupon }}>
       {children}
     </CartContext.Provider>
   )

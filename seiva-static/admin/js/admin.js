@@ -1902,24 +1902,49 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 // ---------- DESCUENTOS POR MARCA ----------
+var dmExclusiones = [];
+var dmInclusiones = [];
+var dmAllProductos = [];
+var dmAllMarcas = [];
+var dmExclTimeout, dmInclTimeout;
+
 function loadDescuentosMarca() {
   api("/marcas/all").then(function(marcas) {
+    dmAllMarcas = marcas;
     api("/descuentos-marca").then(function(descuentos) {
       var container = document.getElementById("descuentos-marca-lista");
       if (!container) return;
       if (!descuentos.length) {
-        container.innerHTML = '<p style="text-align:center;color:var(--muted);padding:40px">No hay descuentos por marca.</p>';
+        container.innerHTML = '<p style="text-align:center;color:var(--muted);padding:40px">No hay descuentos por marca. Hacé clic en "+ Nuevo" para crear uno.</p>';
         return;
       }
-      var html = '<table class="admin-table"><thead><tr><th>Marca</th><th>Tipo</th><th>Valor</th><th>Desde cant.</th><th>Excluye</th><th>Incluye</th><th>Acciones</th></tr></thead><tbody>';
+      var html = '<table class="admin-table"><thead><tr><th>Marca</th><th>Tipo</th><th>Valor</th><th>Desde cant.</th><th>Excluye</th><th>Incluye</th><th>Vigencia</th><th>Acciones</th></tr></thead><tbody>';
       descuentos.forEach(function(d) {
+        var now = new Date().toISOString();
+        var vigente = (!d.fecha_inicio || d.fecha_inicio <= now) && (!d.fecha_fin || d.fecha_fin >= now);
+        var vigText = vigente ? '<span style="color:var(--success)">Activa</span>' : '<span style="color:var(--muted)">Inactiva</span>';
+        var exclNames = '-';
+        if (d.exclusiones && d.exclusiones.length) {
+          exclNames = d.exclusiones.map(function(id) {
+            var p = dmAllProductos.find(function(x) { return x.id === id; });
+            return p ? xt(p.nombre.substring(0, 25)) : '#' + id;
+          }).join(', ');
+        }
+        var inclNames = 'Todos';
+        if (d.inclusiones && d.inclusiones.length) {
+          inclNames = d.inclusiones.map(function(id) {
+            var p = dmAllProductos.find(function(x) { return x.id === id; });
+            return p ? xt(p.nombre.substring(0, 25)) : '#' + id;
+          }).join(', ');
+        }
         html += '<tr>' +
           '<td><strong>' + xt(d.marca_nombre) + '</strong></td>' +
+          '<td>' + (d.tipo_descuento === 'porcentaje' ? '%' : 'Gs.') + '</td>' +
           '<td>' + (d.tipo_descuento === 'porcentaje' ? d.valor + '%' : formatGs(d.valor)) + '</td>' +
-          '<td>' + (d.tipo_descuento === 'porcentaje' ? 'Descuento %' : 'Monto fijo') + '</td>' +
           '<td>' + d.min_cantidad + ' unid.</td>' +
-          '<td>' + (d.exclusiones && d.exclusiones.length ? d.exclusiones.join(', ') : '-') + '</td>' +
-          '<td>' + (d.inclusiones && d.inclusiones.length ? d.inclusiones.join(', ') : 'Todos') + '</td>' +
+          '<td style="font-size:0.85em">' + exclNames + '</td>' +
+          '<td style="font-size:0.85em">' + inclNames + '</td>' +
+          '<td>' + vigText + '</td>' +
           '<td><button class="btn btn-sm btn-danger" onclick="eliminarDescuentoMarca(' + d.id + ')">Eliminar</button></td>' +
         '</tr>';
       });
@@ -1930,58 +1955,179 @@ function loadDescuentosMarca() {
 }
 
 function nuevoDescuentoMarca() {
-  api("/marcas/all").then(function(marcas) {
-    if (!marcas.length) {
-      toast("No hay marcas. Normalizá primero desde la pestaña Marcas.", "error");
+  if (!dmAllMarcas.length) {
+    api("/marcas/all").then(function(marcas) { dmAllMarcas = marcas; abrirModalDescMarca(); });
+  } else {
+    abrirModalDescMarca();
+  }
+}
+
+function abrirModalDescMarca() {
+  if (!dmAllMarcas.length) {
+    toast("No hay marcas. Normalizá primero desde la pestaña Marcas.", "error");
+    return;
+  }
+  var select = '<option value="">Seleccionar marca...</option>';
+  for (var m of dmAllMarcas) {
+    select += '<option value="' + m.id + '">' + xt(m.nombre) + ' (' + (m.total_productos || 0) + ' productos)</option>';
+  }
+  document.getElementById("dm-marca").innerHTML = select;
+
+  dmExclusiones = [];
+  dmInclusiones = [];
+  renderDmExclList();
+  renderDmInclList();
+
+  document.getElementById("dm-valor").value = '';
+  document.getElementById("dm-min").value = '2';
+  document.getElementById("dm-max").value = '';
+  document.getElementById("dm-etiqueta").value = '';
+  document.getElementById("dm-fecha-inicio").value = '';
+  document.getElementById("dm-fecha-fin").value = '';
+  document.getElementById("dm-excl-search").value = '';
+  document.getElementById("dm-incl-search").value = '';
+
+  document.getElementById("desc-marca-title").textContent = "Nuevo Descuento por Marca";
+  document.getElementById("modal-descuento-marca").classList.remove("hidden");
+  document.getElementById("dm-msg").classList.add("hidden");
+
+  if (!dmAllProductos.length) {
+    api("/productos/all").then(function(p) { dmAllProductos = p; });
+  }
+}
+
+function renderDmExclList() {
+  var c = document.getElementById("dm-excl-list");
+  c.innerHTML = dmExclusiones.map(function(id) {
+    var p = dmAllProductos.find(function(x) { return x.id === id; });
+    return '<span style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:0.85em;display:flex;align-items:center;gap:6px">' +
+      xt(p ? p.nombre.substring(0, 30) : '#' + id) +
+      ' <button type="button" onclick="removeDmExcl(' + id + ')" style="border:none;background:none;color:var(--danger);cursor:pointer;font-size:14px">&times;</button></span>';
+  }).join('');
+}
+
+function renderDmInclList() {
+  var c = document.getElementById("dm-incl-list");
+  c.innerHTML = dmInclusiones.map(function(id) {
+    var p = dmAllProductos.find(function(x) { return x.id === id; });
+    return '<span style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:0.85em;display:flex;align-items:center;gap:6px">' +
+      xt(p ? p.nombre.substring(0, 30) : '#' + id) +
+      ' <button type="button" onclick="removeDmIncl(' + id + ')" style="border:none;background:none;color:var(--danger);cursor:pointer;font-size:14px">&times;</button></span>';
+  }).join('');
+}
+
+window.removeDmExcl = function(id) {
+  dmExclusiones = dmExclusiones.filter(function(x) { return x !== id; });
+  renderDmExclList();
+};
+
+window.removeDmIncl = function(id) {
+  dmInclusiones = dmInclusiones.filter(function(x) { return x !== id; });
+  renderDmInclList();
+};
+
+window.addDmExcl = function(id, nombre) {
+  if (dmExclusiones.indexOf(id) === -1) {
+    dmExclusiones.push(id);
+    renderDmExclList();
+  }
+  document.getElementById("dm-excl-search").value = '';
+  document.getElementById("dm-excl-dropdown").innerHTML = '';
+  document.getElementById("dm-excl-dropdown").classList.add("hidden");
+};
+
+window.addDmIncl = function(id, nombre) {
+  if (dmInclusiones.indexOf(id) === -1) {
+    dmInclusiones.push(id);
+    renderDmInclList();
+  }
+  document.getElementById("dm-incl-search").value = '';
+  document.getElementById("dm-incl-dropdown").innerHTML = '';
+  document.getElementById("dm-incl-dropdown").classList.add("hidden");
+};
+
+function setupDmSearch(searchId, dropdownId, addFnName) {
+  document.getElementById(searchId).addEventListener("input", function(e) {
+    var q = e.target.value.trim();
+    clearTimeout(searchId === "dm-excl-search" ? dmExclTimeout : dmInclTimeout);
+    var dropdown = document.getElementById(dropdownId);
+    if (q.length < 2) {
+      dropdown.innerHTML = "";
+      dropdown.classList.add("hidden");
       return;
     }
-    var select = '<option value="">Seleccionar marca...</option>';
-    for (var m of marcas) {
-      select += '<option value="' + m.id + '">' + xt(m.nombre) + ' (' + m.total_productos + ' productos)</option>';
-    }
-    
-    var msg = 'Tipo de descuento:\n1 = Monto fijo (Gs.)\n2 = Porcentaje (%)';
-    var tipoP = prompt(msg, '1');
-    if (!tipoP) return;
-    var tipo = tipoP === '2' ? 'porcentaje' : 'monto_fijo';
-    
-    var valorP = prompt(tipo === 'porcentaje' ? 'Porcentaje (ej: 10 = 10%):' : 'Monto en Gs. a restar:');
-    if (!valorP) return;
-    var valor = parseInt(valorP);
-    if (isNaN(valor)) { toast("Valor inválido", "error"); return; }
-    
-    var marcaId = prompt('ID de la marca:\n' + select.replace(/<[^>]*>/g, ''));
-    if (!marcaId) return;
-    
-    var min = prompt('Cantidad mínima (desde 1):', '1');
-    if (!min) return;
-    
-    var excl = prompt('IDs de productos a excluir (separados por coma, vacío = ninguno):', '');
-    var exclArr = excl ? excl.split(',').map(function(s) { return parseInt(s.trim()); }).filter(function(n) { return !isNaN(n); }) : [];
-    
-    var incl = prompt('IDs de productos a incluir (vacío = todos los de la marca):', '');
-    var inclArr = incl ? incl.split(',').map(function(s) { return parseInt(s.trim()); }).filter(function(n) { return !isNaN(n); }) : [];
-    
-    api("/descuentos-marca", {
-      method: "POST",
-      body: JSON.stringify({
-        marca_id: parseInt(marcaId),
-        tipo_descuento: tipo,
-        valor: valor,
-        min_cantidad: parseInt(min) || 1,
-        exclusiones: exclArr,
-        inclusiones: inclArr,
-        etiqueta: '',
-        audiencia: 'todos'
-      })
-    }).then(function() {
-      toast("Descuento por marca guardado");
-      loadDescuentosMarca();
-    }).catch(function(e) {
-      toast("Error: " + (e.message || "desconocido"), "error");
-    });
+    var timeout = setTimeout(function() {
+      var filtered = dmAllProductos.filter(function(p) {
+        return p.nombre.toLowerCase().indexOf(q.toLowerCase()) !== -1;
+      }).slice(0, 10);
+      var html = "";
+      filtered.forEach(function(p) {
+        html += '<div style="display:flex;align-items:center;gap:10px;padding:8px;cursor:pointer;border-bottom:1px solid var(--border)" onmouseover="this.style.background=\'var(--bg-secondary)\'" onmouseout="this.style.background=\'none\'" onclick="' + addFnName + '(' + p.id + ', \'' + xt(p.nombre).replace(/'/g, "\\'") + '\')">';
+        if (p.imagen) html += '<img src="' + xt(p.imagen) + '" style="width:36px;height:36px;object-fit:cover;border-radius:6px">';
+        html += '<div><div style="font-weight:600;font-size:0.85em">' + xt(p.nombre) + '</div><div style="font-size:0.8em;color:var(--muted)">' + (p.marca || '') + ' ' + formatGs(p.precio) + '</div></div></div>';
+      });
+      if (!filtered.length) html = '<p style="color:var(--muted);padding:8px">No se encontraron productos</p>';
+      dropdown.innerHTML = html;
+      dropdown.classList.remove("hidden");
+    }, 200);
+    if (searchId === "dm-excl-search") dmExclTimeout = timeout; else dmInclTimeout = timeout;
   });
 }
+
+setupDmSearch("dm-excl-search", "dm-excl-dropdown", "addDmExcl");
+setupDmSearch("dm-incl-search", "dm-incl-dropdown", "addDmIncl");
+
+document.getElementById("descuento-marca-form").addEventListener("submit", function(e) {
+  e.preventDefault();
+  var marcaId = parseInt(document.getElementById("dm-marca").value);
+  var tipo = document.querySelector("input[name='dm-tipo']:checked").value;
+  var valor = parseInt(document.getElementById("dm-valor").value);
+  var min = parseInt(document.getElementById("dm-min").value);
+  var max = parseInt(document.getElementById("dm-max").value) || null;
+  var etiqueta = document.getElementById("dm-etiqueta").value;
+  var audiencia = document.getElementById("dm-audiencia").value;
+  var fechaInicio = document.getElementById("dm-fecha-inicio").value;
+  var fechaFin = document.getElementById("dm-fecha-fin").value;
+
+  if (!marcaId || !valor || !min) {
+    var msg = document.getElementById("dm-msg");
+    msg.textContent = "Marca, valor y cantidad mínima son requeridos";
+    msg.classList.remove("hidden");
+    return;
+  }
+
+  api("/descuentos-marca", {
+    method: "POST",
+    body: JSON.stringify({
+      marca_id: marcaId,
+      tipo_descuento: tipo,
+      valor: valor,
+      min_cantidad: min,
+      max_cantidad: max,
+      exclusiones: dmExclusiones,
+      inclusiones: dmInclusiones,
+      etiqueta: etiqueta,
+      audiencia: audiencia,
+      fecha_inicio: fechaInicio || null,
+      fecha_fin: fechaFin || null
+    })
+  }).then(function() {
+    toast("Descuento por marca guardado");
+    document.getElementById("modal-descuento-marca").classList.add("hidden");
+    loadDescuentosMarca();
+  }).catch(function(e) {
+    var msg = document.getElementById("dm-msg");
+    msg.textContent = "Error: " + (e.message || "desconocido");
+    msg.classList.remove("hidden");
+  });
+});
+
+document.getElementById("modal-close-desc-marca").addEventListener("click", function() {
+  document.getElementById("modal-descuento-marca").classList.add("hidden");
+});
+document.getElementById("modal-overlay-desc-marca").addEventListener("click", function() {
+  document.getElementById("modal-descuento-marca").classList.add("hidden");
+});
 
 function eliminarDescuentoMarca(id) {
   if (!confirm("Eliminar este descuento por marca?")) return;

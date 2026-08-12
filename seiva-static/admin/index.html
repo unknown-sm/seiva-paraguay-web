@@ -690,6 +690,98 @@
   </div>
 </div>
 
+<!-- Modal Descuento por Marca -->
+<div id="modal-descuento-marca" class="modal hidden">
+  <div class="modal-overlay" id="modal-overlay-desc-marca"></div>
+  <div class="modal-content" style="max-width:680px">
+    <div class="modal-header"><h3 id="desc-marca-title">Nuevo Descuento por Marca</h3><button class="modal-close" id="modal-close-desc-marca">&times;</button></div>
+    <form id="descuento-marca-form">
+      <div class="form-group">
+        <label>Marca *</label>
+        <select id="dm-marca" class="form-select" required></select>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Tipo de descuento *</label>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <label class="radio-card"><input type="radio" name="dm-tipo" value="monto_fijo" checked> <span>Monto fijo (Gs.)</span></label>
+            <label class="radio-card"><input type="radio" name="dm-tipo" value="porcentaje"> <span>Porcentaje (%)</span></label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Valor *</label>
+          <input type="number" id="dm-valor" class="form-input" placeholder="Ej: 10000 o 10" min="1" required>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Cantidad mínima *</label>
+          <input type="number" id="dm-min" class="form-input" value="2" min="1" required>
+          <p class="help-text">El descuento aplica cuando el total de productos de esta marca en el carrito alcanza esta cantidad.</p>
+        </div>
+        <div class="form-group">
+          <label>Cantidad máxima (opcional)</label>
+          <input type="number" id="dm-max" class="form-input" placeholder="Vacío = sin límite">
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Etiqueta (visible al cliente)</label>
+          <input type="text" id="dm-etiqueta" class="form-input" placeholder="Ej: 2x1 UniErvas, Combo Marca" maxlength="40">
+        </div>
+        <div class="form-group">
+          <label>Audiencia</label>
+          <select id="dm-audiencia" class="form-select">
+            <option value="todos">Todos los clientes</option>
+            <option value="nuevo">Solo clientes nuevos</option>
+            <option value="vip">Clientes VIP</option>
+            <option value="mayorista">Mayoristas</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Desde (opcional)</label>
+          <input type="date" id="dm-fecha-inicio" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Hasta (opcional)</label>
+          <input type="date" id="dm-fecha-fin" class="form-input">
+        </div>
+      </div>
+
+      <!-- Exclusiones -->
+      <div class="form-group">
+        <label>Productos a excluir</label>
+        <p class="help-text">Estos productos de la marca NO tendrán descuento. Ej: Omega 3, Orégano.</p>
+        <div style="position:relative">
+          <input type="text" id="dm-excl-search" class="form-input" placeholder="Buscar producto para excluir..." autocomplete="off">
+          <div id="dm-excl-dropdown" class="autocomplete-dropdown hidden"></div>
+        </div>
+        <div id="dm-excl-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
+      </div>
+
+      <!-- Inclusiones -->
+      <div class="form-group">
+        <label>Solo aplicar a estos productos (opcional)</label>
+        <p class="help-text">Si agregás productos acá, el descuento SOLO aplica a ellos. Si lo dejás vacío, aplica a todos los de la marca (menos los excluidos).</p>
+        <div style="position:relative">
+          <input type="text" id="dm-incl-search" class="form-input" placeholder="Buscar producto para incluir..." autocomplete="off">
+          <div id="dm-incl-dropdown" class="autocomplete-dropdown hidden"></div>
+        </div>
+        <div id="dm-incl-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="margin-top:16px">Guardar descuento por marca</button>
+    </form>
+    <p id="dm-msg" class="msg hidden"></p>
+  </div>
+</div>
+
 <!-- Estilos inline para los nuevos componentes -->
 <style>
 .offer-tab {

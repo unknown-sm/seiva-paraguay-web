@@ -2,12 +2,12 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Lock, Check, MapPin, CreditCard, MessageCircle, Package } from 'lucide-react'
 import { useCart } from '../context/CartContext'
-import { formatPrice, createPedido, getDiscountedPrice } from '../services/api'
+import { formatPrice, createPedido } from '../services/api'
 import { ciudadesParaguay, parseCiudadSeleccionada } from '../data/ciudades'
 
 export default function CheckoutPage() {
   const navigate = useNavigate()
-  const { items, clearCart, totalPrice } = useCart()
+  const { items, clearCart, totalPrice, getEffectiveUnitPrice } = useCart()
 
   // Redirect if cart is empty
   useEffect(() => {
@@ -142,7 +142,7 @@ export default function CheckoutPage() {
 
       setTimeout(() => {
         const lines = items.map(i => {
-          const unit = getDiscountedPrice(i.product, i.quantity)
+          const unit = getEffectiveUnitPrice(i)
           const lineTotal = unit * i.quantity
           const ahorro = (i.product.precio - unit) * i.quantity
           let s = `• ${i.product.nombre} x${i.quantity} = ${formatPrice(lineTotal)}`

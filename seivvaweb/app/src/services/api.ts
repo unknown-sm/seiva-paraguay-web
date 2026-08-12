@@ -8,6 +8,18 @@ export interface PriceTier {
   descuento: number;
 }
 
+export interface MarcaDescuento {
+  marca_id: number;
+  marca_nombre: string;
+  min_cantidad: number;
+  max_cantidad: number | null;
+  tipo_descuento: string;
+  valor: number;
+  exclusiones: number[];
+  inclusiones: number[];
+  etiqueta: string;
+}
+
 export interface Variante {
   nombre: string
   precio?: number
@@ -37,6 +49,7 @@ export interface Product {
   upsell?: number[];
   categoria_id?: number;
   price_tiers?: PriceTier[];
+  marca_descuento?: MarcaDescuento;
   featured_order?: number;
   delivery_gratis?: boolean;
   variantes?: Variante[];
