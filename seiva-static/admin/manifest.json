@@ -9,12 +9,12 @@
   "orientation": "any",
   "icons": [
     {
-      "src": "/admin/icon-192.png",
+      "src": "https://old.seiva.com.py/wp-content/uploads/seiva-logo-rectangulo.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/admin/icon-512.png",
+      "src": "https://old.seiva.com.py/wp-content/uploads/seiva-logo-rectangulo.png",
       "sizes": "512x512",
       "type": "image/png"
     }

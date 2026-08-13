@@ -19,6 +19,8 @@ export default function Hero() {
   const bottleRef = useRef<HTMLImageElement>(null)
   const ingredientRefs = useRef<(HTMLImageElement | null)[]>([])
   const [heroImage, setHeroImage] = useState('/images/hero-bottle.jpg')
+  const [heroTitle, setHeroTitle] = useState('')
+  const [heroSubtitle, setHeroSubtitle] = useState('')
   const [ingredients, setIngredients] = useState(defaultIngredients)
 
   useEffect(() => {
@@ -27,6 +29,8 @@ export default function Hero() {
       .then(r => r.json())
       .then(data => {
         if (data.hero_imagen) setHeroImage(data.hero_imagen)
+        if (data.hero_titulo) setHeroTitle(data.hero_titulo)
+        if (data.hero_descripcion) setHeroSubtitle(data.hero_descripcion)
         if (data.hero_imagenes) {
           const imgList = data.hero_imagenes.split(',').map((s: string) => s.trim()).filter(Boolean)
           if (imgList.length > 0) {
@@ -152,26 +156,28 @@ export default function Hero() {
                ENVÍOS A TODO PARAGUAY
             </div>
 
-            <h1
-              ref={headlineRef}
-              className="font-display font-bold text-white leading-[1.05] tracking-tight"
-              style={{
-                fontSize: 'clamp(40px, 6vw, 72px)',
-                textShadow: '0 4px 24px rgba(0,0,0,0.2)',
-              }}
-            >
-              FRESCURA<br />
-              NATURAL QUE<br />
-              SE SIENTE
-            </h1>
+             <h1
+               ref={headlineRef}
+               className="font-display font-bold text-white leading-[1.05] tracking-tight"
+               style={{
+                 fontSize: 'clamp(40px, 6vw, 72px)',
+                 textShadow: '0 4px 24px rgba(0,0,0,0.2)',
+               }}
+             >
+               {(heroTitle || 'SUPLEMENTOS<br />PREMIUM PARA<br />TU SALUT').split('\n').map((line, i, arr) => (
+                 <span key={i}>
+                   {line}{i < arr.length - 1 && <br />}
+                 </span>
+               ))}
+             </h1>
 
-            <p
-              ref={subRef}
-              className="font-body text-base leading-relaxed mt-5 max-w-md"
-              style={{ color: 'rgba(255,255,255,0.8)' }}
-            >
-              Suplementos y frutos secos premium. Directo a tu puerta sin vueltas.
-            </p>
+             <p
+               ref={subRef}
+               className="font-body text-base leading-relaxed mt-5 max-w-md"
+               style={{ color: 'rgba(255,255,255,0.8)' }}
+             >
+               {heroSubtitle || 'Las mejores marcas de suplementos, vitaminas y proteinas. Envio rapido a todo Paraguay.'}
+             </p>
 
             <div ref={ctaRef} className="flex flex-wrap gap-4 mt-8">
               <a

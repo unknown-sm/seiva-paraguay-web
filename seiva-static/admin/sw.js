@@ -12,8 +12,8 @@ self.addEventListener("push", function(e) {
     var data = e.data.json();
     var options = {
       body: data.body,
-      icon: "/admin/icon-192.png",
-      badge: "/admin/icon-192.png",
+      icon: "https://old.seiva.com.py/wp-content/uploads/seiva-logo-rectangulo.png",
+      badge: "https://old.seiva.com.py/wp-content/uploads/seiva-logo-rectangulo.png",
       vibrate: [200, 100, 200, 100, 200],
       tag: "seiva-notif",
       data: { url: data.url || "/admin" },
@@ -32,7 +32,7 @@ self.addEventListener("push", function(e) {
   } catch (err) {
     var options = {
       body: e.data.text(),
-      icon: "/admin/icon-192.png",
+      icon: "https://old.seiva.com.py/wp-content/uploads/seiva-logo-rectangulo.png",
       vibrate: [200, 100, 200],
       requireInteraction: true
     };
