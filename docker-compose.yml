@@ -11,6 +11,7 @@ services:
       # Setear en Dokploy env vars:
       # JWT_SECRET=<random>
       # ADMIN_PASSWORD=<secure>
+      # CORS_ORIGIN=https://seiva.com.py,https://www.seiva.com.py  (agregar staging si aplica)
     volumes:
       - seiva_data:/app/data
       - seiva_img:/app/img/productos

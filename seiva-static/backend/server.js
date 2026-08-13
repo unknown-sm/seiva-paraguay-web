@@ -8,7 +8,7 @@ const { DatabaseSync } = require("node:sqlite");
 const cheerio = require("cheerio");
 const webpush = require("web-push");
 const helmet = require("helmet");
-const rateLimit = require("express-rate-limit");
+const { rateLimit, ipKeyGenerator } = require("express-rate-limit");
 const multer = require("multer");
 require("dotenv").config();
 
@@ -59,7 +59,7 @@ app.use(cors({
   origin: function(origin, cb) {
     const allowed = process.env.CORS_ORIGIN
       ? process.env.CORS_ORIGIN.split(",")
-      : ["https://seiva.com.py", "https://www.seiva.com.py", "http://localhost:3000", "http://127.0.0.1:3000"];
+      : ["https://seiva.com.py", "https://www.seiva.com.py", "https://webseiva-seiva-web20-af1lyl-48df1d-85-239-246-177.sslip.io", "http://localhost:3000", "http://127.0.0.1:3000"];
     if (!origin || allowed.indexOf(origin) !== -1) {
       cb(null, true);
     } else {
@@ -86,7 +86,7 @@ const pedidoLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hora
   max: 20,
   message: { error: "Demasiados pedidos. Esperá un momento." },
-  keyGenerator: (req) => req.ip + ":" + (req.body?.whatsapp || "anon"),
+   keyGenerator: (req) => ipKeyGenerator(req.ip) + ":" + (req.body?.whatsapp || "anon"),
 });
 const carritoLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
