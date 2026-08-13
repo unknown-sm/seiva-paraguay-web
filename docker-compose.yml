@@ -2,27 +2,47 @@ version: "3.8"
 services:
   seiva:
     build: .
-    ports:
-      - "3001:3001"
+    container_name: seiva-app
+    restart: unless-stopped
+    expose:
+      - "3001"
     environment:
       - PORT=3001
       - NODE_ENV=production
       - DB_PATH=/app/data/database.sqlite
-      # Setear en Dokploy env vars:
-      # JWT_SECRET=<random>
-      # ADMIN_PASSWORD=<secure>
-      # CORS_ORIGIN=https://seiva.com.py,https://www.seiva.com.py  (agregar staging si aplica)
+      # Setear en Dokploy env vars (no hardcoded):
+      # JWT_SECRET=<random-64-char>
+      # ADMIN_PASSWORD=<secure-password>
+      # CORS_ORIGIN=https://seiva.com.py,https://www.seiva.com.py
     volumes:
       - seiva_data:/app/data
       - seiva_img:/app/img/productos
-    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      # Dominio principal
+      - "traefik.http.routers.seiva.rule=Host(`seiva.com.py`) || Host(`www.seiva.com.py`)"
+      - "traefik.http.routers.seiva.entrypoints=websecure"
+      - "traefik.http.routers.seiva.tls.certresolver=letsencrypt"
+      - "traefik.http.services.seiva.loadbalancer.server.port=3001"
+      # Redirect www → no-www (opcional, descomentar si querés)
+      # - "traefik.http.routers.seiva-www.rule=Host(`www.seiva.com.py`)"
+      # - "traefik.http.routers.seiva-www.entrypoints=websecure"
+      # - "traefik.http.routers.seiva-www.middlewares=redirect-www"
+      # - "traefik.http.middlewares.redirect-www.redirectregex.regex=^https://www\\.(.*)"
+      # - "traefik.http.middlewares.redirect-www.redirectregex.replacement=https://$${1}"
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/api/ping', r => { process.exit(r.statusCode === 200 ? 0 : 1) })"]
       interval: 30s
       timeout: 5s
       start_period: 15s
       retries: 3
+    networks:
+      - traefik-proxy
 
 volumes:
   seiva_data:
   seiva_img:
+
+networks:
+  traefik-proxy:
+    external: true
