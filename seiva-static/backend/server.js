@@ -509,9 +509,7 @@ if (envCount.c === 0) {
      ["Concepción", "Concepción", 0],
      ["Salto del Guairá", "Canindeyú", 0],
      ["Neuland", "Chaco", 0],
-     ["Filadelfia", "Chaco", 0],
      ["Fuerte Olimpo", "Chaco", 0],
-     ["Loma Plata", "Chaco", 0],
      ["Lolita", "Chaco", 0],
      ["Otra ciudad", "", 0],
   ];
