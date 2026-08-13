@@ -337,14 +337,20 @@
                     <input type="file" id="logo-upload" accept="image/*" style="display:none">
                   </div>
                 </div>
-                <div class="form-group">
-                  <label>Favicon</label>
-                  <div style="display:flex;gap:8px;align-items:center">
-                    <input type="text" id="contenido-site_favicon" class="form-input" placeholder="/img/favicon.ico" style="flex:1">
-                    <label for="favicon-upload" class="btn btn-primary" style="margin:0;cursor:pointer;white-space:nowrap">Subir</label>
-                    <input type="file" id="favicon-upload" accept="image/*,.ico" style="display:none">
-                  </div>
-                </div>
+                 <div class="form-group">
+                   <label>Favicon</label>
+                   <div style="display:flex;gap:8px;align-items:center">
+                     <input type="text" id="contenido-site_favicon" class="form-input" placeholder="/img/favicon.ico" style="flex:1">
+                     <label for="favicon-upload" class="btn btn-primary" style="margin:0;cursor:pointer;white-space:nowrap">Subir</label>
+                     <input type="file" id="favicon-upload" accept="image/*,.ico" style="display:none">
+                     <button type="button" id="favicon-crop-btn" class="btn btn-sm" style="white-space:nowrap">Recortar</button>
+                   </div>
+                   <div id="favicon-preview" style="margin-top:8px;display:none"><img id="favicon-preview-img" src="" style="width:32px;height:32px;"></div>
+                 </div>
+                 <hr style="margin:16px 0;border:none;border-top:1px solid #e0d6cc">
+                 <h4 style="margin-bottom:12px">Ajustes del Logo</h4>
+                 <div class="form-group"><label>Altura del logo (px)</label><input type="number" id="contenido-logo_height" class="form-input" placeholder="32" min="16" max="120"></div>
+                 <div class="form-group"><label>Ajuste del logo</label><select id="contenido-logo_fit" class="form-input"><option value="contain">Contener (recomendado)</option><option value="cover">Cubrir</option><option value="fill">Estirar</option></select></div>
                 <hr style="margin:16px 0;border:none;border-top:1px solid #e0d6cc">
                 <h4 style="margin-bottom:12px">Secciones globales</h4>
                 <div class="form-group"><label>Envios</label><textarea id="contenido-global_envios" rows="4" class="form-input"></textarea></div>
@@ -1054,6 +1060,24 @@
 
 <div id="toast" class="toast hidden"></div>
 
+<!-- Favicon Cropper Modal -->
+<div id="modal-favicon-crop" class="modal hidden">
+  <div class="modal-overlay" id="modal-overlay-favicon-crop"></div>
+  <div class="modal-content" style="max-width:520px">
+    <div class="modal-header"><h3>Recortar Favicon</h3><button class="modal-close" id="modal-close-favicon-crop">&times;</button></div>
+    <div class="modal-body">
+      <p class="help-text">Recortá la imagen en formato cuadrado para usar como favicon.</p>
+      <div style="margin:12px 0"><img id="favicon-crop-img" src="" style="max-width:100%;max-height:300px;"></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button type="button" id="favicon-crop-apply" class="btn btn-primary">Aplicar</button>
+        <button type="button" id="favicon-crop-cancel" class="btn btn-sm">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 <script src="js/admin.js"></script>
 <script src="js/pwa.js"></script>
 </body>

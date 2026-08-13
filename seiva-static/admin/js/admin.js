@@ -920,7 +920,7 @@ function loadContenido() {
  document.getElementById("contenido-form").addEventListener("submit", function(e) {
    e.preventDefault();
    var body = {};
-   var keys = ["hero_titulo", "hero_descripcion", "whatsapp_numero", "hero_imagen", "hero_imagenes", "site_titulo", "site_descripcion", "site_logo", "site_favicon", "envio_minimo_gratis", "pagos_instrucciones", "global_envios", "global_pagos", "global_garantia"];
+   var keys = ["hero_titulo", "hero_descripcion", "whatsapp_numero", "hero_imagen", "hero_imagenes", "site_titulo", "site_descripcion", "site_logo", "site_favicon", "logo_height", "logo_fit", "envio_minimo_gratis", "pagos_instrucciones", "global_envios", "global_pagos", "global_garantia"];
    for (var i = 0; i < keys.length; i++) {
      body[keys[i]] = document.getElementById("contenido-" + keys[i]).value;
    }
@@ -1051,7 +1051,49 @@ document.getElementById("favicon-upload").addEventListener("change", function(e)
   }).catch(function(err) { toast("Error de red: " + err.message); });
 });
 
-// ---------- HERO PRODUCT (ProductFeatured) ----------
+// Favicon Cropper
+var faviconCropper = null;
+document.getElementById("favicon-crop-btn").addEventListener("click", function() {
+  var url = document.getElementById("contenido-site_favicon").value;
+  if (!url) { toast("Primero subí o pegá una URL de imagen"); return; }
+  var img = document.getElementById("favicon-crop-img");
+  img.src = url;
+  document.getElementById("modal-favicon-crop").classList.remove("hidden");
+  img.onload = function() {
+    if (faviconCropper) faviconCropper.destroy();
+    faviconCropper = new Cropper(img, {
+      aspectRatio: 1,
+      viewMode: 1,
+      autoCropArea: 1
+    });
+  };
+});
+document.getElementById("modal-close-favicon-crop").addEventListener("click", closeFaviconCrop);
+document.getElementById("modal-overlay-favicon-crop").addEventListener("click", closeFaviconCrop);
+document.getElementById("favicon-crop-cancel").addEventListener("click", closeFaviconCrop);
+document.getElementById("favicon-crop-apply").addEventListener("click", function() {
+  if (!faviconCropper) return;
+  var canvas = faviconCropper.getCroppedCanvas({ width: 64, height: 64 });
+  canvas.toBlob(function(blob) {
+    var fd = new FormData();
+    fd.append("hero", blob, "favicon.png");
+    fetch(API + "/upload-hero", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + token },
+      body: fd
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      if (data.url) {
+        document.getElementById("contenido-site_favicon").value = data.url;
+        closeFaviconCrop();
+        toast("Favicon recortado. Guarda para aplicar.");
+      }
+    }).catch(function() { toast("Error al subir"); });
+  }, "image/png");
+});
+function closeFaviconCrop() {
+  document.getElementById("modal-favicon-crop").classList.add("hidden");
+  if (faviconCropper) { faviconCropper.destroy(); faviconCropper = null; }
+}
 var heroProductoId = null;
 var heroSearchTimeout = null;
 

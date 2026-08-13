@@ -360,6 +360,8 @@ const contenidoDefault = {
    site_descripcion: "Suplementos deportivos, vitaminas, proteinas y mas. Las mejores marcas con envio a todo Paraguay. Pedi por WhatsApp.",
    site_logo: "https://old.seiva.com.py/wp-content/uploads/seiva-logo-rectangulo.png",
    site_favicon: "https://old.seiva.com.py/wp-content/uploads/seiva-logo-rectangulo.png",
+   logo_height: "32",
+   logo_fit: "contain",
   qr_activo: "",
   qr_imagen: "",
    transferencia_instrucciones: `<p><strong>Datos para transferencia:</strong></p>

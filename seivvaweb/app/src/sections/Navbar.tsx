@@ -10,6 +10,8 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [siteLogo, setSiteLogo] = useState('')
+  const [logoHeight, setLogoHeight] = useState(32)
+  const [logoFit, setLogoFit] = useState('contain')
   const { totalItems, openCart } = useCart()
   const location = useLocation()
   const navigate = useNavigate()
@@ -19,6 +21,8 @@ export default function Navbar() {
     var API = window.location.hostname === 'localhost' ? 'http://localhost:3001/api' : '/api'
     fetch(API + '/contenido').then(function(r) { return r.json() }).then(function(data) {
       if (data.site_logo) setSiteLogo(data.site_logo)
+      if (data.logo_height) setLogoHeight(parseInt(data.logo_height) || 32)
+      if (data.logo_fit) setLogoFit(data.logo_fit)
     }).catch(function() {})
   }, [])
 
@@ -74,7 +78,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group shrink-0">
             {siteLogo ? (
-              <img src={siteLogo} alt="Seiva" className="h-8 w-auto object-contain" />
+              <img src={siteLogo} alt="Seiva" style={{ height: logoHeight + 'px', width: 'auto', objectFit: logoFit as any }} />
             ) : (
               <span className="font-body font-semibold text-sm tracking-widest text-white">SEIVA</span>
             )}

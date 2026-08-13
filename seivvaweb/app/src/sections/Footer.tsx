@@ -18,11 +18,15 @@ export default function Footer() {
   const footerRef = useRef<HTMLElement>(null)
   const [email, setEmail] = useState('')
   const [siteLogo, setSiteLogo] = useState('')
+  const [logoHeight, setLogoHeight] = useState(40)
+  const [logoFit, setLogoFit] = useState('contain')
 
   useEffect(() => {
     var API = window.location.hostname === 'localhost' ? 'http://localhost:3001/api' : '/api'
     fetch(API + '/contenido').then(function(r) { return r.json() }).then(function(data) {
       if (data.site_logo) setSiteLogo(data.site_logo)
+      if (data.logo_height) setLogoHeight(parseInt(data.logo_height) || 40)
+      if (data.logo_fit) setLogoFit(data.logo_fit)
     }).catch(function() {})
   }, [])
 
@@ -107,7 +111,7 @@ export default function Footer() {
            {/* Brand */}
            <div className="lg:w-[30%]">
              {siteLogo ? (
-               <img src={siteLogo} alt="Seiva" className="h-10 w-auto object-contain mb-3" />
+               <img src={siteLogo} alt="Seiva" style={{ height: logoHeight + 'px', width: 'auto', objectFit: logoFit as any }} className="mb-3" />
              ) : (
                <span className="font-display font-semibold text-xl text-white">SEIVA</span>
              )}
