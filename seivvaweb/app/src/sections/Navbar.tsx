@@ -9,10 +9,18 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [siteLogo, setSiteLogo] = useState('')
   const { totalItems, openCart } = useCart()
   const location = useLocation()
   const navigate = useNavigate()
   const isOpaque = location.pathname !== '/'
+
+  useEffect(() => {
+    var API = window.location.hostname === 'localhost' ? 'http://localhost:3001/api' : '/api'
+    fetch(API + '/contenido').then(function(r) { return r.json() }).then(function(data) {
+      if (data.site_logo) setSiteLogo(data.site_logo)
+    }).catch(function() {})
+  }, [])
 
   useEffect(() => {
     const handler = () => setMobileOpen(true)
@@ -65,11 +73,11 @@ export default function Navbar() {
         <div className="container-main flex items-center justify-between h-16 gap-3">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group shrink-0">
-            <img
-              src="https://old.seiva.com.py/wp-content/uploads/seiva-logo-rectangulo.png"
-              alt="Seiva"
-              className="h-8 w-auto object-contain"
-            />
+            {siteLogo ? (
+              <img src={siteLogo} alt="Seiva" className="h-8 w-auto object-contain" />
+            ) : (
+              <span className="font-body font-semibold text-sm tracking-widest text-white">SEIVA</span>
+            )}
           </Link>
 
           {/* Desktop Links */}

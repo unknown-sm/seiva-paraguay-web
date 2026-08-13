@@ -17,8 +17,31 @@
     <meta name="twitter:image" content="https://server-seiva-web-latest.zwpkae.easypanel.host/images/hero-bottle.jpg" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  </head>
+     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+     <script>
+       (function() {
+         var API = location.hostname === 'localhost' ? 'http://localhost:3001/api' : '/api';
+         fetch(API + '/contenido').then(function(r) { return r.json() }).then(function(data) {
+           if (data.site_titulo) {
+             document.title = data.site_titulo;
+             document.querySelector('meta[property="og:title"]').content = data.site_titulo;
+             document.querySelector('meta[name="twitter:title"]').content = data.site_titulo;
+           }
+           if (data.site_descripcion) {
+             document.querySelector('meta[property="og:description"]').content = data.site_descripcion;
+             document.querySelector('meta[name="twitter:description"]').content = data.site_descripcion;
+           }
+           if (data.site_favicon) {
+             var link = document.createElement('link');
+             link.rel = 'icon';
+             link.type = 'image/png';
+             link.href = data.site_favicon;
+             document.head.appendChild(link);
+           }
+         }).catch(function() {});
+       })();
+     </script>
+   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

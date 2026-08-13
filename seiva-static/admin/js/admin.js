@@ -920,7 +920,7 @@ function loadContenido() {
  document.getElementById("contenido-form").addEventListener("submit", function(e) {
    e.preventDefault();
    var body = {};
-   var keys = ["hero_titulo", "hero_descripcion", "whatsapp_numero", "hero_imagen", "hero_imagenes", "site_titulo", "site_descripcion", "envio_minimo_gratis", "global_envios", "global_pagos", "global_garantia"];
+   var keys = ["hero_titulo", "hero_descripcion", "whatsapp_numero", "hero_imagen", "hero_imagenes", "site_titulo", "site_descripcion", "site_logo", "site_favicon", "envio_minimo_gratis", "global_envios", "global_pagos", "global_garantia"];
    for (var i = 0; i < keys.length; i++) {
      body[keys[i]] = document.getElementById("contenido-" + keys[i]).value;
    }
@@ -1007,6 +1007,48 @@ document.getElementById("hero-ingredients-upload").addEventListener("change", fu
       }
     });
   });
+});
+
+// Logo upload
+document.getElementById("logo-upload").addEventListener("change", function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var fd = new FormData();
+  fd.append("hero", file);
+  fetch(API + "/upload-hero", {
+    method: "POST",
+    headers: { "Authorization": "Bearer " + token },
+    body: fd
+  }).then(function(r) { return r.text(); }).then(function(text) {
+    try {
+      var data = JSON.parse(text);
+      if (data.url) {
+        document.getElementById("contenido-site_logo").value = data.url;
+        toast("Logo subido. Guarda para aplicar.");
+      } else { toast("Error: " + (data.error || "desconocido")); }
+    } catch(e) { toast("Error en respuesta"); }
+  }).catch(function(err) { toast("Error de red: " + err.message); });
+});
+
+// Favicon upload
+document.getElementById("favicon-upload").addEventListener("change", function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var fd = new FormData();
+  fd.append("hero", file);
+  fetch(API + "/upload-hero", {
+    method: "POST",
+    headers: { "Authorization": "Bearer " + token },
+    body: fd
+  }).then(function(r) { return r.text(); }).then(function(text) {
+    try {
+      var data = JSON.parse(text);
+      if (data.url) {
+        document.getElementById("contenido-site_favicon").value = data.url;
+        toast("Favicon subido. Guarda para aplicar.");
+      } else { toast("Error: " + (data.error || "desconocido")); }
+    } catch(e) { toast("Error en respuesta"); }
+  }).catch(function(err) { toast("Error de red: " + err.message); });
 });
 
 // ---------- HERO PRODUCT (ProductFeatured) ----------

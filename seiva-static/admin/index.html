@@ -307,75 +307,101 @@
     </div>
 
     <div id="tab-contenido" class="tab-content">
-      <div class="card" style="max-width:640px">
+      <div class="card" style="max-width:100%">
         <div class="card-header"><h3>Contenido del Sitio</h3></div>
         <div class="card-body">
           <form id="contenido-form">
-            <div class="form-group"><label>T&iacute;tulo Hero</label><input type="text" id="contenido-hero_titulo" class="form-input"></div>
-            <div class="form-group"><label>Descripci&oacute;n Hero</label><textarea id="contenido-hero_descripcion" rows="2" class="form-input"></textarea></div>
-            <div class="form-group"><label>WhatsApp N&uacute;mero</label><input type="text" id="contenido-whatsapp_numero" placeholder="595992120303" class="form-input"></div>
-            <div class="form-group"><label>T&iacute;tulo SEO</label><input type="text" id="contenido-site_titulo" class="form-input"></div>
-            <div class="form-group"><label>Descripci&oacute;n SEO</label><textarea id="contenido-site_descripcion" rows="2" class="form-input"></textarea></div>
-            <hr style="margin:16px 0;border:none;border-top:1px solid #e0d6cc">
-            <h4 style="margin-bottom:12px">Hero (Sección Principal)</h4>
-            <div class="form-group">
-              <label>Imagen principal (botella)</label>
-              <div style="display:flex;gap:8px;align-items:center">
-                <input type="text" id="contenido-hero_imagen" class="form-input" placeholder="/images/hero-bottle.jpg" style="flex:1">
-                <label for="hero-upload" class="btn btn-primary" style="margin:0;cursor:pointer;white-space:nowrap">Subir</label>
-                <input type="file" id="hero-upload" accept="image/*" style="display:none">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+              <!-- Columna 1 -->
+              <div>
+                <h4 style="margin-bottom:12px">General</h4>
+                <div class="form-group"><label>Titulo Hero</label><input type="text" id="contenido-hero_titulo" class="form-input"></div>
+                <div class="form-group"><label>Descripcion Hero</label><textarea id="contenido-hero_descripcion" rows="2" class="form-input"></textarea></div>
+                <div class="form-group"><label>WhatsApp Numero</label><input type="text" id="contenido-whatsapp_numero" placeholder="595992120303" class="form-input"></div>
+                <div class="form-group"><label>Titulo SEO</label><input type="text" id="contenido-site_titulo" class="form-input"></div>
+                <div class="form-group"><label>Descripcion SEO</label><textarea id="contenido-site_descripcion" rows="2" class="form-input"></textarea></div>
+                <div class="form-group"><label>Monto minimo delivery gratis (Gs.)</label><input type="number" id="contenido-envio_minimo_gratis" class="form-input"></div>
+                <hr style="margin:16px 0;border:none;border-top:1px solid #e0d6cc">
+                <h4 style="margin-bottom:12px">Logo y Favicon</h4>
+                <div class="form-group">
+                  <label>Logo (Navbar y Footer)</label>
+                  <div style="display:flex;gap:8px;align-items:center">
+                    <input type="text" id="contenido-site_logo" class="form-input" placeholder="/img/logo.png" style="flex:1">
+                    <label for="logo-upload" class="btn btn-primary" style="margin:0;cursor:pointer;white-space:nowrap">Subir</label>
+                    <input type="file" id="logo-upload" accept="image/*" style="display:none">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Favicon</label>
+                  <div style="display:flex;gap:8px;align-items:center">
+                    <input type="text" id="contenido-site_favicon" class="form-input" placeholder="/img/favicon.ico" style="flex:1">
+                    <label for="favicon-upload" class="btn btn-primary" style="margin:0;cursor:pointer;white-space:nowrap">Subir</label>
+                    <input type="file" id="favicon-upload" accept="image/*,.ico" style="display:none">
+                  </div>
+                </div>
+                <hr style="margin:16px 0;border:none;border-top:1px solid #e0d6cc">
+                <h4 style="margin-bottom:12px">Secciones globales</h4>
+                <div class="form-group"><label>Envios</label><textarea id="contenido-global_envios" rows="4" class="form-input"></textarea></div>
+                <div class="form-group"><label>Pagos</label><textarea id="contenido-global_pagos" rows="4" class="form-input"></textarea></div>
+                <div class="form-group"><label>Garantia y devoluciones</label><textarea id="contenido-global_garantia" rows="4" class="form-input"></textarea></div>
+              </div>
+
+              <!-- Columna 2 -->
+              <div>
+                <h4 style="margin-bottom:12px">Hero (Seccion Principal)</h4>
+                <div class="form-group">
+                  <label>Imagen principal</label>
+                  <div style="display:flex;gap:8px;align-items:center">
+                    <input type="text" id="contenido-hero_imagen" class="form-input" placeholder="/images/hero-bottle.jpg" style="flex:1">
+                    <label for="hero-upload" class="btn btn-primary" style="margin:0;cursor:pointer;white-space:nowrap">Subir</label>
+                    <input type="file" id="hero-upload" accept="image/*" style="display:none">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Imagenes flotantes (separadas por coma)</label>
+                  <div style="display:flex;gap:8px;align-items:center">
+                    <input type="text" id="contenido-hero_imagenes" class="form-input" placeholder="/images/floating-leaf.png, /images/floating-orange.png, ..." style="flex:1">
+                    <label for="hero-ingredients-upload" class="btn btn-primary" style="margin:0;cursor:pointer;white-space:nowrap">Subir</label>
+                    <input type="file" id="hero-ingredients-upload" accept="image/*" multiple style="display:none">
+                  </div>
+                </div>
+                <hr style="margin:16px 0;border:none;border-top:1px solid #e0d6cc">
+                <h4 style="margin-bottom:12px">Producto Destacado</h4>
+                <div class="form-group">
+                  <label>Buscar producto para mostrar como destacado</label>
+                  <input type="text" id="hero-producto-search" class="form-input" placeholder="Escribi el nombre del producto...">
+                  <div id="hero-producto-results" style="margin-top:8px;max-height:200px;overflow-y:auto"></div>
+                  <div id="hero-producto-selected" style="margin-top:8px;padding:10px;background:var(--bg-secondary);border-radius:8px;display:none">
+                    <span style="font-weight:600" id="hero-producto-name"></span>
+                    <button type="button" class="btn btn-sm" onclick="clearHeroProduct()" style="margin-left:8px;color:#c0392b">Quitar</button>
+                  </div>
+                </div>
+                <hr style="margin:16px 0;border:none;border-top:1px solid #e0d6cc">
+                <h4 style="margin-bottom:12px">Estadisticas (Stats Bar)</h4>
+                <div id="stats-bar-editor">
+                  <div class="form-group"><label>Icono 1</label><select id="stat-0-icon" class="form-input"><option value="Star">Star</option><option value="Truck">Truck</option><option value="ShieldCheck">ShieldCheck</option><option value="Leaf">Leaf</option><option value="Award">Award</option><option value="Heart">Heart</option><option value="Zap">Zap</option></select></div>
+                  <div class="form-group"><label>Valor 1</label><input type="text" id="stat-0-value" class="form-input" placeholder="4.9"></div>
+                  <div class="form-group"><label>Etiqueta 1</label><input type="text" id="stat-0-label" class="form-input" placeholder="Valoracion"></div>
+                  <div class="form-group"><label>Relleno 1</label><select id="stat-0-fill" class="form-input"><option value="true">Si</option><option value="false">No</option></select></div>
+                  <hr style="margin:12px 0;border:none;border-top:1px solid #e0d6cc">
+                  <div class="form-group"><label>Icono 2</label><select id="stat-1-icon" class="form-input"><option value="Star">Star</option><option value="Truck">Truck</option><option value="ShieldCheck">ShieldCheck</option><option value="Leaf">Leaf</option><option value="Award">Award</option><option value="Heart">Heart</option><option value="Zap">Zap</option></select></div>
+                  <div class="form-group"><label>Valor 2</label><input type="text" id="stat-1-value" class="form-input" placeholder="Envio Gratis"></div>
+                  <div class="form-group"><label>Etiqueta 2</label><input type="text" id="stat-1-label" class="form-input" placeholder="En pedidos +Gs.150000"></div>
+                  <div class="form-group"><label>Relleno 2</label><select id="stat-1-fill" class="form-input"><option value="false">No</option><option value="true">Si</option></select></div>
+                  <hr style="margin:12px 0;border:none;border-top:1px solid #e0d6cc">
+                  <div class="form-group"><label>Icono 3</label><select id="stat-2-icon" class="form-input"><option value="Star">Star</option><option value="Truck">Truck</option><option value="ShieldCheck">ShieldCheck</option><option value="Leaf">Leaf</option><option value="Award">Award</option><option value="Heart">Heart</option><option value="Zap">Zap</option></select></div>
+                  <div class="form-group"><label>Valor 3</label><input type="text" id="stat-2-value" class="form-input" placeholder="Garantia"></div>
+                  <div class="form-group"><label>Etiqueta 3</label><input type="text" id="stat-2-label" class="form-input" placeholder="30 dias de devolucion"></div>
+                  <div class="form-group"><label>Relleno 3</label><select id="stat-2-fill" class="form-input"><option value="false">No</option><option value="true">Si</option></select></div>
+                  <hr style="margin:12px 0;border:none;border-top:1px solid #e0d6cc">
+                  <div class="form-group"><label>Icono 4</label><select id="stat-3-icon" class="form-input"><option value="Star">Star</option><option value="Truck">Truck</option><option value="ShieldCheck">ShieldCheck</option><option value="Leaf">Leaf</option><option value="Award">Award</option><option value="Heart">Heart</option><option value="Zap">Zap</option></select></div>
+                  <div class="form-group"><label>Valor 4</label><input type="text" id="stat-3-value" class="form-input" placeholder="Calidad"></div>
+                  <div class="form-group"><label>Etiqueta 4</label><input type="text" id="stat-3-label" class="form-input" placeholder="Marcas certificadas"></div>
+                  <div class="form-group"><label>Relleno 4</label><select id="stat-3-fill" class="form-input"><option value="false">No</option><option value="true">Si</option></select></div>
+                </div>
               </div>
             </div>
-            <div class="form-group">
-              <label>Imágenes flotantes (separadas por coma)</label>
-              <div style="display:flex;gap:8px;align-items:center">
-                <input type="text" id="contenido-hero_imagenes" class="form-input" placeholder="/images/floating-leaf.png, /images/floating-orange.png, ..." style="flex:1">
-                <label for="hero-ingredients-upload" class="btn btn-primary" style="margin:0;cursor:pointer;white-space:nowrap">Subir</label>
-                <input type="file" id="hero-ingredients-upload" accept="image/*" multiple style="display:none">
-              </div>
-            </div>
-             <hr style="margin:16px 0;border:none;border-top:1px solid #e0d6cc">
-             <h4 style="margin-bottom:12px">Estadisticas (Stats Bar)</h4>
-             <div id="stats-bar-editor">
-               <div class="form-group"><label>Icono 1</label><select id="stat-0-icon" class="form-input"><option value="Star">Star</option><option value="Truck">Truck</option><option value="ShieldCheck">ShieldCheck</option><option value="Leaf">Leaf</option><option value="Award">Award</option><option value="Heart">Heart</option><option value="Zap">Zap</option></select></div>
-               <div class="form-group"><label>Valor 1</label><input type="text" id="stat-0-value" class="form-input" placeholder="4.9"></div>
-               <div class="form-group"><label>Etiqueta 1</label><input type="text" id="stat-0-label" class="form-input" placeholder="Valoracion"></div>
-               <div class="form-group"><label>Relleno 1</label><select id="stat-0-fill" class="form-input"><option value="true">Si</option><option value="false">No</option></select></div>
-               <hr style="margin:12px 0;border:none;border-top:1px solid #e0d6cc">
-               <div class="form-group"><label>Icono 2</label><select id="stat-1-icon" class="form-input"><option value="Star">Star</option><option value="Truck">Truck</option><option value="ShieldCheck">ShieldCheck</option><option value="Leaf">Leaf</option><option value="Award">Award</option><option value="Heart">Heart</option><option value="Zap">Zap</option></select></div>
-               <div class="form-group"><label>Valor 2</label><input type="text" id="stat-1-value" class="form-input" placeholder="Envio Gratis"></div>
-               <div class="form-group"><label>Etiqueta 2</label><input type="text" id="stat-1-label" class="form-input" placeholder="En pedidos +Gs.150000"></div>
-               <div class="form-group"><label>Relleno 2</label><select id="stat-1-fill" class="form-input"><option value="false">No</option><option value="true">Si</option></select></div>
-               <hr style="margin:12px 0;border:none;border-top:1px solid #e0d6cc">
-               <div class="form-group"><label>Icono 3</label><select id="stat-2-icon" class="form-input"><option value="Star">Star</option><option value="Truck">Truck</option><option value="ShieldCheck">ShieldCheck</option><option value="Leaf">Leaf</option><option value="Award">Award</option><option value="Heart">Heart</option><option value="Zap">Zap</option></select></div>
-               <div class="form-group"><label>Valor 3</label><input type="text" id="stat-2-value" class="form-input" placeholder="Garantia"></div>
-               <div class="form-group"><label>Etiqueta 3</label><input type="text" id="stat-2-label" class="form-input" placeholder="30 dias de devolucion"></div>
-               <div class="form-group"><label>Relleno 3</label><select id="stat-2-fill" class="form-input"><option value="false">No</option><option value="true">Si</option></select></div>
-               <hr style="margin:12px 0;border:none;border-top:1px solid #e0d6cc">
-               <div class="form-group"><label>Icono 4</label><select id="stat-3-icon" class="form-input"><option value="Star">Star</option><option value="Truck">Truck</option><option value="ShieldCheck">ShieldCheck</option><option value="Leaf">Leaf</option><option value="Award">Award</option><option value="Heart">Heart</option><option value="Zap">Zap</option></select></div>
-               <div class="form-group"><label>Valor 4</label><input type="text" id="stat-3-value" class="form-input" placeholder="Calidad"></div>
-               <div class="form-group"><label>Etiqueta 4</label><input type="text" id="stat-3-label" class="form-input" placeholder="Marcas certificadas"></div>
-               <div class="form-group"><label>Relleno 4</label><select id="stat-3-fill" class="form-input"><option value="false">No</option><option value="true">Si</option></select></div>
-             </div>
-             <hr style="margin:16px 0;border:none;border-top:1px solid #e0d6cc">
-             <h4 style="margin-bottom:12px">Producto Destacado (sección individual)</h4>
-            <div class="form-group">
-              <label>Buscar producto para mostrar como destacado</label>
-              <input type="text" id="hero-producto-search" class="form-input" placeholder="Escribí el nombre del producto...">
-              <div id="hero-producto-results" style="margin-top:8px;max-height:200px;overflow-y:auto"></div>
-              <div id="hero-producto-selected" style="margin-top:8px;padding:10px;background:var(--bg-secondary);border-radius:8px;display:none">
-                <span style="font-weight:600" id="hero-producto-name"></span>
-                <button type="button" class="btn btn-sm" onclick="clearHeroProduct()" style="margin-left:8px;color:#c0392b">Quitar</button>
-              </div>
-            </div>
             <hr style="margin:16px 0;border:none;border-top:1px solid #e0d6cc">
-            <h4 style="margin-bottom:12px">Env&iacute;os</h4>
-            <div class="form-group"><label>Monto m&iacute;nimo para delivery gratis (Gs.)</label><input type="number" id="contenido-envio_minimo_gratis" class="form-input"></div>
-            <hr style="margin:16px 0;border:none;border-top:1px solid #e0d6cc">
-            <h4 style="margin-bottom:12px">Secciones globales (visibles en página de producto)</h4>
-            <div class="form-group"><label>Envíos</label><textarea id="contenido-global_envios" rows="4" class="form-input"></textarea></div>
-            <div class="form-group"><label>Pagos</label><textarea id="contenido-global_pagos" rows="4" class="form-input"></textarea></div>
-            <div class="form-group"><label>Garantía y devoluciones</label><textarea id="contenido-global_garantia" rows="4" class="form-input"></textarea></div>
             <button type="submit" class="btn btn-primary">Guardar</button>
           </form>
           <p id="contenido-msg" class="msg hidden"></p>

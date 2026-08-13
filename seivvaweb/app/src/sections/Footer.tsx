@@ -17,6 +17,14 @@ const supportLinks = [
 export default function Footer() {
   const footerRef = useRef<HTMLElement>(null)
   const [email, setEmail] = useState('')
+  const [siteLogo, setSiteLogo] = useState('')
+
+  useEffect(() => {
+    var API = window.location.hostname === 'localhost' ? 'http://localhost:3001/api' : '/api'
+    fetch(API + '/contenido').then(function(r) { return r.json() }).then(function(data) {
+      if (data.site_logo) setSiteLogo(data.site_logo)
+    }).catch(function() {})
+  }, [])
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -98,11 +106,11 @@ export default function Footer() {
         <div className="animate-in flex flex-col lg:flex-row justify-between gap-12 mb-12">
            {/* Brand */}
            <div className="lg:w-[30%]">
-             <img
-               src="https://old.seiva.com.py/wp-content/uploads/seiva-logo-rectangulo.png"
-               alt="Seiva"
-               className="h-10 w-auto object-contain mb-3"
-             />
+             {siteLogo ? (
+               <img src={siteLogo} alt="Seiva" className="h-10 w-auto object-contain mb-3" />
+             ) : (
+               <span className="font-display font-semibold text-xl text-white">SEIVA</span>
+             )}
              <p className="font-body text-sm max-w-[240px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.7)' }}>
                Nutrición natural para una vida plena.
              </p>
