@@ -888,32 +888,57 @@ function renderHistorico() {
 
 // ---------- CONTENIDO ----------
 function loadContenido() {
-  api("/contenido").then(function(data) {
-    for (var key in data) {
-      var el = document.getElementById("contenido-" + key);
-      if (el) {
-        if (el.type === "checkbox") {
-          el.checked = data[key] === "1" || data[key] === "true";
-        } else {
-          el.value = data[key];
-        }
-      }
-    }
-  });
-  loadHeroProduct();
-}
+   api("/contenido").then(function(data) {
+     for (var key in data) {
+       var el = document.getElementById("contenido-" + key);
+       if (el) {
+         if (el.type === "checkbox") {
+           el.checked = data[key] === "1" || data[key] === "true";
+         } else {
+           el.value = data[key];
+         }
+       }
+     }
+   });
+   loadHeroProduct();
+   // Load stats bar
+   api("/stats-bar").then(function(stats) {
+     for (var i = 0; i < 4; i++) {
+       var s = stats[i] || {};
+       var iconEl = document.getElementById("stat-" + i + "-icon");
+       var valueEl = document.getElementById("stat-" + i + "-value");
+       var labelEl = document.getElementById("stat-" + i + "-label");
+       var fillEl = document.getElementById("stat-" + i + "-fill");
+       if (iconEl) iconEl.value = s.icon || "Star";
+       if (valueEl) valueEl.value = s.value || "";
+       if (labelEl) labelEl.value = s.label || "";
+       if (fillEl) fillEl.value = s.fill ? "true" : "false";
+     }
+   }).catch(function() {});
+ }
 
-document.getElementById("contenido-form").addEventListener("submit", function(e) {
-  e.preventDefault();
-  var body = {};
-  var keys = ["hero_titulo", "hero_descripcion", "whatsapp_numero", "hero_imagen", "hero_imagenes", "site_titulo", "site_descripcion", "envio_minimo_gratis", "global_envios", "global_pagos", "global_garantia"];
-  for (var i = 0; i < keys.length; i++) {
-    body[keys[i]] = document.getElementById("contenido-" + keys[i]).value;
-  }
-  api("/contenido", { method: "PUT", body: JSON.stringify(body) }).then(function() {
-    toast("Contenido guardado");
-  });
-});
+ document.getElementById("contenido-form").addEventListener("submit", function(e) {
+   e.preventDefault();
+   var body = {};
+   var keys = ["hero_titulo", "hero_descripcion", "whatsapp_numero", "hero_imagen", "hero_imagenes", "site_titulo", "site_descripcion", "envio_minimo_gratis", "global_envios", "global_pagos", "global_garantia"];
+   for (var i = 0; i < keys.length; i++) {
+     body[keys[i]] = document.getElementById("contenido-" + keys[i]).value;
+   }
+   // Save stats bar
+   var stats = [];
+   for (var j = 0; j < 4; j++) {
+     stats.push({
+       icon: document.getElementById("stat-" + j + "-icon").value,
+       value: document.getElementById("stat-" + j + "-value").value,
+       label: document.getElementById("stat-" + j + "-label").value,
+       fill: document.getElementById("stat-" + j + "-fill").value === "true"
+     });
+   }
+   api("/stats-bar", { method: "PUT", body: JSON.stringify({ stats: stats }) });
+   api("/contenido", { method: "PUT", body: JSON.stringify(body) }).then(function() {
+     toast("Contenido guardado");
+   });
+ });
 
 document.getElementById("hero-upload").addEventListener("change", function(e) {
   var file = e.target.files[0];

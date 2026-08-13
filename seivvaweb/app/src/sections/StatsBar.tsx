@@ -1,21 +1,27 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Star, Truck, ShieldCheck, Leaf } from 'lucide-react'
+import { Star, Truck, ShieldCheck, Leaf, Award, Heart, Zap } from 'lucide-react'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const stats = [
-  { icon: Star, value: '4.9', label: 'Valoración', fill: true },
-  { icon: Truck, value: 'Envío Gratis', label: 'En pedidos +$50', fill: false },
-  { icon: ShieldCheck, value: 'Garantía', label: '30 días de devolución', fill: false },
-  { icon: Leaf, value: 'Orgánico', label: 'Certificado USDA', fill: false },
-]
+const iconMap: any = { Star, Truck, ShieldCheck, Leaf, Award, Heart, Zap }
 
 export default function StatsBar() {
   const barRef = useRef<HTMLDivElement>(null)
+  const [stats, setStats] = useState<any[]>([])
 
   useEffect(() => {
+    fetch('/api/stats-bar')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) setStats(data)
+      })
+      .catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    if (!stats.length) return
     const ctx = gsap.context(() => {
       gsap.fromTo(barRef.current,
         { y: 40, opacity: 0 },
@@ -46,7 +52,9 @@ export default function StatsBar() {
     }, barRef)
 
     return () => ctx.revert()
-  }, [])
+  }, [stats])
+
+  if (!stats.length) return null
 
   return (
     <div
@@ -58,29 +66,32 @@ export default function StatsBar() {
       }}
     >
       <div className="grid grid-cols-2 sm:flex sm:flex-row items-center justify-around gap-3 sm:gap-4 py-4 sm:py-6 px-4 sm:px-8">
-        {stats.map((stat, i) => (
-          <div key={i} className="stat-item flex items-center gap-3">
-            <stat.icon
-              className="w-5 h-5 flex-shrink-0"
-              style={{ color: stat.fill ? 'var(--theme-accent, #D4A843)' : 'var(--theme-primary, #1B4332)' }}
-              fill={stat.fill ? '#D4A843' : 'none'}
-            />
-            <div>
-              <div className="font-body font-bold text-lg sm:text-xl" style={{ color: 'var(--theme-text, #3D2817)' }}>
-                {stat.value}
-              </div>
-              <div className="font-body text-sm" style={{ color: 'var(--theme-muted, #5C4033)' }}>
-                {stat.label}
-              </div>
-            </div>
-            {i < stats.length - 1 && (
-              <div
-                className="hidden lg:block w-px h-10 ml-4"
-                style={{ backgroundColor: 'rgba(61,40,23,0.15)' }}
+        {stats.map((stat, i) => {
+          const Icon = iconMap[stat.icon] || Star
+          return (
+            <div key={i} className="stat-item flex items-center gap-3">
+              <Icon
+                className="w-5 h-5 flex-shrink-0"
+                style={{ color: stat.fill ? 'var(--theme-accent, #D4A843)' : 'var(--theme-primary, #1B4332)' }}
+                fill={stat.fill ? '#D4A843' : 'none'}
               />
-            )}
-          </div>
-        ))}
+              <div>
+                <div className="font-body font-bold text-lg sm:text-xl" style={{ color: 'var(--theme-text, #3D2817)' }}>
+                  {stat.value}
+                </div>
+                <div className="font-body text-sm" style={{ color: 'var(--theme-muted, #5C4033)' }}>
+                  {stat.label}
+                </div>
+              </div>
+              {i < stats.length - 1 && (
+                <div
+                  className="hidden lg:block w-px h-10 ml-4"
+                  style={{ backgroundColor: 'rgba(61,40,23,0.15)' }}
+                />
+              )}
+            </div>
+          )
+        })}
 
         <a
           href="#featured"

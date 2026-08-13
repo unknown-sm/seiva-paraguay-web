@@ -345,13 +345,19 @@ db.exec(`
 `);
 
 const contenidoDefault = {
-  hero_titulo: "Frescura natural que se siente",
-  hero_descripcion: "Suplementos y frutos secos premium. Directo a tu puerta. Sin vueltas.",
-  hero_imagen: "/img/logo/seiva-logo.png",
-  hero_imagenes: "",
-  whatsapp_numero: "595992120303",
-  site_titulo: "Seiva Paraguay — Snacks Saludables y Suplementos Naturales",
-  site_descripcion: "Almendras con chocolate, frutos secos, snacks saludables y suplementos naturales. Envios a todo Paraguay. Pedi por WhatsApp.",
+   hero_titulo: "Suplementos Premium para tu Salud y Rendimiento",
+   hero_descripcion: "Las mejores marcas de suplementos, vitaminas y proteinas. Envio rapido a todo Paraguay.",
+   hero_imagen: "/img/logo/seiva-logo.png",
+   hero_imagenes: "",
+   stats_bar: JSON.stringify([
+     { icon: "Star", value: "4.9", label: "Valoracion", fill: true },
+     { icon: "Truck", value: "Envio Gratis", label: "En pedidos +Gs.150000", fill: false },
+     { icon: "ShieldCheck", value: "Garantia", label: "30 dias de devolucion", fill: false },
+     { icon: "Leaf", value: "Calidad", label: "Marcas certificadas", fill: false }
+   ]),
+   whatsapp_numero: "595992120303",
+   site_titulo: "Seiva Paraguay — Suplementos, Vitaminas y Proteinas",
+   site_descripcion: "Suplementos deportivos, vitaminas, proteinas y mas. Las mejores marcas con envio a todo Paraguay. Pedi por WhatsApp.",
   qr_activo: "",
   qr_imagen: "",
   qr_instrucciones: "Pagá con QR y envianos el comprobante por WhatsApp",
@@ -1780,6 +1786,22 @@ app.put("/api/hero-producto", auth, (req, res) => {
   const { producto_id } = req.body;
   const update = db.prepare("INSERT OR REPLACE INTO contenido (key, value) VALUES (?, ?)");
   update.run("hero_producto_id", String(producto_id || ""));
+  res.json({ ok: true });
+});
+
+// ---------- STATS BAR ----------
+app.get("/api/stats-bar", (req, res) => {
+  const row = db.prepare("SELECT value FROM contenido WHERE key = ?").get("stats_bar");
+  if (row?.value) {
+    try { res.json(JSON.parse(row.value)); }
+    catch { res.json([]); }
+  } else {
+    res.json([]);
+  }
+});
+app.put("/api/stats-bar", auth, (req, res) => {
+  const upd = db.prepare("INSERT OR REPLACE INTO contenido (key, value) VALUES (?, ?)");
+  upd.run("stats_bar", JSON.stringify(req.body.stats || []));
   res.json({ ok: true });
 });
 
