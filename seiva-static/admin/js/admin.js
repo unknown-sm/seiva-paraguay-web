@@ -11,7 +11,14 @@ function api(url, opts) {
   return fetch(API + url, opts).then(function(r) {
     if (r.status === 401) { logout(); throw new Error("Sesion expirada"); }
     if (!r.ok) {
-      return r.json().then(function(err) { throw new Error(err.error || "Error " + r.status); }).catch(function(e) { throw e; });
+      return r.text().then(function(text) {
+        try {
+          var err = JSON.parse(text);
+          throw new Error(err.error || "Error " + r.status);
+        } catch(e) {
+          throw new Error("Error " + r.status + ": " + text.substring(0, 100));
+        }
+      });
     }
     return r.json();
   });

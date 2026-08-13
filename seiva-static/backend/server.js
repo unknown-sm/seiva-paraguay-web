@@ -952,11 +952,23 @@ app.get("/api/ping", (req, res) => res.json({ pong: true, ts: Date.now() }));
 app.post("/api/upload-qr", auth, qrUpload.single("qr"), (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No se subió imagen" });
   res.json({ url: "/img/productos/" + req.file.filename });
+}, (err, req, res, next) => {
+  // Multer error handler for QR upload
+  const msg = err.code === 'LIMIT_FILE_SIZE' ? "Imagen muy grande (max 5MB)" :
+              err.message?.startsWith("FormFileError") || err.message?.includes("image") ? "Formato no permitido" :
+              "Error al subir imagen";
+  res.status(400).json({ error: msg });
 });
 
 app.post("/api/upload-hero", auth, heroUpload.single("hero"), (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No se subió imagen" });
   res.json({ url: "/img/productos/" + req.file.filename });
+}, (err, req, res, next) => {
+  // Multer error handler for hero upload
+  const msg = err.code === 'LIMIT_FILE_SIZE' ? "Imagen muy grande (max 10MB)" :
+              err.message?.startsWith("FormFileError") || err.message?.includes("image") ? "Formato no permitido" :
+              "Error al subir imagen";
+  res.status(400).json({ error: msg });
 });
 
 // ---------- PRODUCTOS ----------
