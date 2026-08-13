@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Home, Store, MessageCircle, ShoppingCart, Menu } from 'lucide-react'
 import { useCart } from '../context/CartContext'
@@ -5,6 +6,19 @@ import { useCart } from '../context/CartContext'
 export default function MobileTabBar() {
   const location = useLocation()
   const { totalItems, openCart } = useCart()
+  const [whatsappNumero, setWhatsappNumero] = useState('595992120303')
+  const [whatsappMensaje, setWhatsappMensaje] = useState('')
+
+  useEffect(() => {
+    var API = window.location.hostname === 'localhost' ? 'http://localhost:3001/api' : '/api'
+    fetch(API + '/contenido').then(function(r) { return r.json() }).then(function(data) {
+      if (data.whatsapp_numero) setWhatsappNumero(data.whatsapp_numero)
+      if (data.whatsapp_mensaje) setWhatsappMensaje(data.whatsapp_mensaje)
+    }).catch(function() {})
+  }, [])
+
+  // Hide on checkout page
+  if (location.pathname === '/checkout') return null
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/'
@@ -22,7 +36,7 @@ export default function MobileTabBar() {
       icon: MessageCircle,
       label: 'WhatsApp',
       to: null,
-      action: () => window.open('https://wa.me/595992120303', '_blank'),
+      action: () => window.open('https://wa.me/' + whatsappNumero + '?text=' + encodeURIComponent(whatsappMensaje), '_blank'),
       isCenter: true,
     },
     {

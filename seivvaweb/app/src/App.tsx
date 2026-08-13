@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { CartProvider } from './context/CartContext'
 import { ThemeProvider } from './context/ThemeContext'
 import CartDrawer from './components/CartDrawer'
@@ -20,13 +20,18 @@ import PromosPage from './pages/PromosPage'
 import DynamicPage from './pages/DynamicPage'
 
 function Layout({ children }: { children: React.ReactNode }) {
+  const location = useLocation()
+  const isCheckout = location.pathname === '/checkout'
+
   return (
     <>
       <Navbar />
-      <div className="pb-[76px] md:pb-0">{children}</div>
-      <Suspense fallback={<div className="min-h-[30vh]" />}>
-        <Footer />
-      </Suspense>
+      <div className={isCheckout ? '' : 'pb-[76px] md:pb-0'}>{children}</div>
+      {!isCheckout && (
+        <Suspense fallback={<div className="min-h-[30vh]" />}>
+          <Footer />
+        </Suspense>
+      )}
       <CartDrawer />
       <MobileTabBar />
     </>

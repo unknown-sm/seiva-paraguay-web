@@ -356,6 +356,7 @@ const contenidoDefault = {
      { icon: "Leaf", value: "Calidad", label: "Marcas certificadas", fill: false }
    ]),
    whatsapp_numero: "595992120303",
+   whatsapp_mensaje: "Hola! Hice un pedido en la web y quiero confirmar mi compra.",
    site_titulo: "Seiva Paraguay — Suplementos, Vitaminas y Proteinas",
    site_descripcion: "Suplementos deportivos, vitaminas, proteinas y mas. Las mejores marcas con envio a todo Paraguay. Pedi por WhatsApp.",
    site_logo: "https://old.seiva.com.py/wp-content/uploads/seiva-logo-rectangulo.png",
