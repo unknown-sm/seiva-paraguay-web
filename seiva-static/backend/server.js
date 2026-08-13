@@ -59,11 +59,11 @@ app.use(cors({
   origin: function(origin, cb) {
     const allowed = process.env.CORS_ORIGIN
       ? process.env.CORS_ORIGIN.split(",")
-      : ["https://seiva.com.py", "https://www.seiva.com.py"];
+      : ["https://seiva.com.py", "https://www.seiva.com.py", "http://localhost:3000", "http://127.0.0.1:3000"];
     if (!origin || allowed.indexOf(origin) !== -1) {
       cb(null, true);
     } else {
-      cb(null, true);
+      cb(new Error("Not allowed by CORS: " + origin));
     }
   },
   credentials: true
@@ -79,6 +79,19 @@ const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
   message: { error: "Demasiados intentos. Espera 15 minutos." },
+});
+
+// Rate limiters para endpoints públicos de escritura
+const pedidoLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hora
+  max: 20,
+  message: { error: "Demasiados pedidos. Esperá un momento." },
+  keyGenerator: (req) => req.ip + ":" + (req.body?.whatsapp || "anon"),
+});
+const carritoLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  message: { error: "Demasiadas actualizaciones. Esperá un momento." },
 });
 
 // Error log — persisted in SQLite
@@ -613,9 +626,13 @@ async function importFromWooCommerce() {
   if (existing > 10) { console.log("[Import] DB has " + existing + " products, skipping"); return; }
 
   console.log("[Import] Fetching from WooCommerce...");
-  const WC_URL = "https://seiva.com.py/wp-json/wc/v3";
-  const WC_KEY = "ck_2d4eeb0b2a526a6e3b37e579f9cc5ff46d872e10";
-  const WC_SECRET = "cs_eb55bc48f54f791676760c60287da71f1be7b78a";
+  const WC_URL = process.env.WC_URL || "https://seiva.com.py/wp-json/wc/v3";
+  const WC_KEY = process.env.WC_KEY || "";
+  const WC_SECRET = process.env.WC_SECRET || "";
+  if (!WC_KEY || !WC_SECRET) {
+    console.warn("[Import] WC_KEY/WC_SECRET not set in env vars. Skipping WooCommerce import.");
+    return;
+  }
   const auth = Buffer.from(WC_KEY + ":" + WC_SECRET).toString("base64");
 
   let products = [];
@@ -684,8 +701,18 @@ async function importFromWooCommerce() {
   console.log("[Import] Done — imported " + imported + " products");
 }
 
-// Launch import async — don't block server
-importFromWooCommerce().catch(e => console.warn("[Import] failed:", e.message));
+// Launch import async — only if explicitly requested via env var or DB is empty
+if (process.env.IMPORT_FROM_WC === "true") {
+  importFromWooCommerce().catch(e => console.warn("[Import] failed:", e.message));
+} else {
+  const _prodCount = db.prepare("SELECT COUNT(*) as c FROM productos").get();
+  if (_prodCount.c === 0) {
+    console.log("[Import] DB empty, importing from WooCommerce...");
+    importFromWooCommerce().catch(e => console.warn("[Import] failed:", e.message));
+  } else {
+    console.log("[Import] Skipped (set IMPORT_FROM_WC=true to force import)");
+  }
+}
 
 // Seed default admin user
 const userCount = db.prepare("SELECT COUNT(*) as c FROM usuarios").get();
@@ -1835,7 +1862,7 @@ app.delete("/api/envios/:id", auth, (req, res) => {
 });
 
 // ---------- PEDIDOS (publico: crear) ----------
-app.post("/api/pedidos", (req, res) => {
+app.post("/api/pedidos", pedidoLimiter, (req, res) => {
   const { cliente, whatsapp, direccion, productos, total, metodo_pago, notas } = req.body;
   if (!cliente || !whatsapp || !productos || !productos.length) {
     return res.status(400).json({ error: "Cliente, whatsapp y productos requeridos" });
@@ -1861,7 +1888,7 @@ function generateToken() {
   return 'cart_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 10);
 }
 
-app.post("/api/carritos", (req, res) => {
+app.post("/api/carritos", carritoLimiter, (req, res) => {
   const { session_token, productos, whatsapp } = req.body;
   if (!productos || !productos.length) return res.status(400).json({ error: "Productos requeridos" });
   

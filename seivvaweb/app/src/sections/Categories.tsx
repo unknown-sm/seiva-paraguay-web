@@ -143,6 +143,16 @@ export default function Categories() {
                       OFERTA
                     </span>
                   )}
+                  {product.stock <= 0 && (
+                    <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.45)', zIndex: 5 }}>
+                      <span
+                        className="font-body font-black text-xl sm:text-2xl px-6 py-3 rounded-xl tracking-widest"
+                        style={{ backgroundColor: '#DC2626', color: '#FFFFFF', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
+                      >
+                        AGOTADO
+                      </span>
+                    </div>
+                  )}
                   {(() => {
                     const badges = getProductBadges(product)
                     if (!badges.length) return null

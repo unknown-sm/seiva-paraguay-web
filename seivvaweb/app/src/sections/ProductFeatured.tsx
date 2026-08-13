@@ -116,6 +116,14 @@ export default function ProductFeatured() {
                 className="relative w-72 h-72 lg:w-96 lg:h-96 object-contain drop-shadow-2xl"
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
               />
+              {product.stock <= 0 && (
+                <span
+                  className="absolute top-4 left-4 font-body font-black text-sm px-4 py-2 rounded-lg tracking-widest"
+                  style={{ backgroundColor: '#DC2626', color: '#FFFFFF', boxShadow: '0 4px 16px rgba(0,0,0,0.4)', zIndex: 10 }}
+                >
+                  AGOTADO
+                </span>
+              )}
             </div>
           </div>
 

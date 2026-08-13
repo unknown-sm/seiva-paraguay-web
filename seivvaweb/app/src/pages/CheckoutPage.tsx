@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Lock, Check, MapPin, CreditCard, MessageCircle, Package } from 'lucide-react'
+import { Lock, Check, MapPin, CreditCard, MessageCircle, Package, ShoppingCart } from 'lucide-react'
 import { useCart } from '../context/CartContext'
-import { formatPrice, createPedido } from '../services/api'
+import { formatPrice, createPedido, fetchProducts, type Product } from '../services/api'
+import type { CartItem } from '../context/CartContext'
 import { ciudadesParaguay, parseCiudadSeleccionada } from '../data/ciudades'
 
 export default function CheckoutPage() {
   const navigate = useNavigate()
-  const { items, clearCart, totalPrice, getEffectiveUnitPrice } = useCart()
+  const { items, clearCart, totalPrice, totalSavings, getEffectiveUnitPrice } = useCart()
 
   // Redirect if cart is empty
   useEffect(() => {
@@ -29,6 +30,23 @@ export default function CheckoutPage() {
   const [metodoPago, setMetodoPago] = useState('whatsapp')
   const [sending, setSending] = useState(false)
   const [pedidoId, setPedidoId] = useState<number | null>(null)
+  const [pedidoCompletado, setPedidoCompletado] = useState<{
+    items: CartItem[]
+    envioCosto: number
+    envioTipo: 'delivery' | 'encomienda'
+    envioGratis: boolean
+    totalConEnvio: number
+    ciudad: string
+    departamento: string
+    direccion: string
+    ruc: string
+    nombre: string
+    apellido: string
+    telefono: string
+    codigoPais: string
+    metodoPago: string
+  } | null>(null)
+  const [crossSell, setCrossSell] = useState<Product[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [envioCosto, setEnvioCosto] = useState(0)
   const [envioCiudad, setEnvioCiudad] = useState('')
@@ -124,12 +142,15 @@ export default function CheckoutPage() {
     if (!validate()) return
     setSending(true)
     try {
-      const productos = items.map(i => ({
-        id: i.product.id,
-        nombre: i.product.nombre,
-        precio: i.product.precio,
-        cantidad: i.quantity
-      }))
+      const productos = items.map(i => {
+        const unit = getEffectiveUnitPrice(i)
+        return {
+          id: i.product.id,
+          nombre: i.product.nombre,
+          precio: unit,
+          cantidad: i.quantity
+        }
+      })
       const { departamento, ciudad } = parseCiudadSeleccionada(ciudadSeleccionada)
       const result = await createPedido({
         cliente: `${nombre} ${apellido}`,
@@ -140,26 +161,73 @@ export default function CheckoutPage() {
         metodo_pago: metodoPago,
       })
       setPedidoId(result.id)
+      // Snapshot del pedido ANTES de limpiar el carrito
+      setPedidoCompletado({
+        items: [...items],
+        envioCosto,
+        envioTipo,
+        envioGratis: envioGratis || false,
+        totalConEnvio,
+        ciudad,
+        departamento,
+        direccion,
+        ruc,
+        nombre,
+        apellido,
+        telefono,
+        codigoPais,
+        metodoPago,
+      })
+
+      // Cargar cross-sell basado en marcas del carrito
+      try {
+        const allProducts = await fetchProducts()
+        const marcasCompradas = new Set(items.map(i => i.product.marca).filter(Boolean))
+        const categoriasCompradas = new Set(items.map(i => i.product.categoria).filter(Boolean))
+        const idsComprados = new Set(items.map(i => i.product.id))
+        const candidatos = allProducts
+          .filter(p => p.activo && p.stock > 0 && !idsComprados.has(p.id))
+          .map(p => {
+            let score = 0
+            if (p.marca && marcasCompradas.has(p.marca)) score += 3
+            if (p.categoria && categoriasCompradas.has(p.categoria)) score += 2
+            return { product: p, score }
+          })
+          .filter(c => c.score > 0)
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 4)
+          .map(c => c.product)
+        setCrossSell(candidatos)
+      } catch {
+        setCrossSell([])
+      }
+
+      // Precomputar mensaje ANTES de clearCart (captura items en closure seguro)
+      const lines = items.map(i => {
+        const unit = getEffectiveUnitPrice(i)
+        const lineTotal = unit * i.quantity
+        const ahorro = (i.product.precio - unit) * i.quantity
+        let s = `• ${i.product.nombre} x${i.quantity} = ${formatPrice(lineTotal)}`
+        if (ahorro > 0) s += ` (ahorra ${formatPrice(ahorro)})`
+        return s
+      })
+      const envioLine = envioTipo === 'delivery'
+        ? (envioGratis ? '\n*Delivery:* Gratis' : `\n*Delivery:* ${formatPrice(envioCosto)}`)
+        : '\n*Envío:* Encomienda (a consultar)'
+      const metodoPagoLabel: Record<string, string> = {
+        whatsapp: 'WhatsApp (a coordinar)',
+        efectivo: 'Efectivo al recibir',
+        transferencia: 'Transferencia bancaria',
+        qr: 'Pago QR',
+      }
+      const rucLine = ruc ? `\n*RUC:* ${ruc}` : ''
+      const msg = encodeURIComponent(
+        `Hola Seiva! Acabo de hacer el pedido #${result.id}:\n\n${lines.join('\n')}${envioLine}\n\n*Total: ${formatPrice(totalConEnvio)}*\n\n*Cliente:*\n${nombre} ${apellido}\n*Teléfono:* ${codigoPais} ${telefono}${rucLine}\n\n*Ciudad:* ${ciudad}\n*Departamento:* ${departamento}\n*Dirección:* ${direccion}\n\n*Pago:* ${metodoPagoLabel[metodoPago] || metodoPago}`
+      )
+
       clearCart()
 
       setTimeout(() => {
-        const lines = items.map(i => {
-          const unit = getEffectiveUnitPrice(i)
-          const lineTotal = unit * i.quantity
-          const ahorro = (i.product.precio - unit) * i.quantity
-          let s = `• ${i.product.nombre} x${i.quantity} = ${formatPrice(lineTotal)}`
-          if (ahorro > 0) s += ` (ahorra ${formatPrice(ahorro)})`
-          return s
-        })
-        let envioLine = ''
-        if (envioTipo === 'delivery') {
-          envioLine = envioGratis ? '\n*Delivery:* Gratis' : `\n*Delivery:* ${formatPrice(envioCosto)}`
-        } else {
-          envioLine = '\n*Envío:* Encomienda (a consultar)'
-        }
-        const msg = encodeURIComponent(
-          `Hola Seiva! Acabo de hacer el pedido #${result.id}:\n\n${lines.join('\n')}${envioLine}\n\n*Total: ${formatPrice(totalConEnvio)}*\n\nNombre: ${nombre} ${apellido}\nDirección: ${direccion}, ${ciudad}, ${departamento}`
-        )
         window.open(`https://wa.me/595992120303?text=${msg}`, '_blank')
       }, 1500)
     } catch (e) {
@@ -169,29 +237,163 @@ export default function CheckoutPage() {
     }
   }
 
-  if (pedidoId) {
+  if (pedidoId && pedidoCompletado) {
+    const { items: pedidoItems, totalConEnvio: totalFinal, envioTipo: eTipo, envioCosto: eCosto, envioGratis: eGratis, ciudad: eCiudad, departamento: eDepto, direccion: eDir, ruc: eRuc, nombre: eNom, apellido: eApe, telefono: eTel, codigoPais: eCod, metodoPago: eMet } = pedidoCompletado
+    const metodoPagoLabel: Record<string, string> = {
+      whatsapp: 'WhatsApp (a coordinar)',
+      efectivo: 'Efectivo al recibir',
+      transferencia: 'Transferencia bancaria',
+      qr: 'Pago QR',
+    }
     return (
       <main className="min-h-screen" style={{ backgroundColor: 'var(--theme-bg, #FAF3E8)' }}>
-        <div className="container-main max-w-2xl mx-auto pt-20 pb-20 px-4">
-          <div className="text-center py-16">
+        <div className="container-main max-w-3xl mx-auto pt-20 pb-20 px-4">
+          {/* Hero success */}
+          <div className="text-center py-8">
             <div className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center" style={{ backgroundColor: '#d1fae5' }}>
               <Check className="w-10 h-10" style={{ color: '#065f46' }} />
             </div>
-            <h1 className="font-body font-bold text-2xl mb-3" style={{ color: 'var(--theme-text, #3D2817)' }}>
-              ¡Pedido confirmado!
+            <h1 className="font-body font-bold text-2xl sm:text-3xl mb-3" style={{ color: 'var(--theme-text, #3D2817)' }}>
+              ¡Gracias por tu compra!
             </h1>
             <p className="font-body mb-2" style={{ color: 'var(--theme-muted, #5C4033)' }}>
-              Pedido #{pedidoId} enviado correctamente.
+              Tu pedido <strong>#{pedidoId}</strong> fue enviado correctamente.
             </p>
-            <p className="font-body mb-8" style={{ color: 'var(--theme-muted, #5C4033)' }}>
-              Te abrimos WhatsApp para que confirmés tu pedido.
+            <p className="font-body mb-6" style={{ color: 'var(--theme-muted, #5C4033)' }}>
+              Te abrimos WhatsApp para que confirmes el pago y la entrega.
             </p>
+            <a
+              href={`https://wa.me/595992120303?text=${encodeURIComponent(`Hola Seiva! Quiero confirmar mi pedido #${pedidoId}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 font-body font-semibold text-sm px-6 py-3 rounded-full"
+              style={{ backgroundColor: '#25D366', color: '#FFFFFF' }}
+            >
+              <MessageCircle className="w-4 h-4" />
+              Confirmar por WhatsApp
+            </a>
+          </div>
+
+          {/* Resumen del pedido */}
+          <div className="mt-8 rounded-xl p-6" style={{ backgroundColor: '#FFFFFF', boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}>
+            <h2 className="font-body font-bold text-lg mb-4" style={{ color: 'var(--theme-text, #3D2817)' }}>
+              Resumen del pedido #{pedidoId}
+            </h2>
+
+            {/* Items */}
+            <div className="space-y-3 mb-5">
+              {pedidoItems.map(({ product, quantity }) => {
+                const unit = getEffectiveUnitPrice({ product, quantity })
+                return (
+                  <div key={product.id} className="flex items-center gap-3 pb-3" style={{ borderBottom: '1px solid rgba(61,40,23,0.08)' }}>
+                    <img src={product.imagen} alt={product.nombre} className="w-14 h-14 object-contain rounded-lg" style={{ backgroundColor: 'var(--theme-bg, #FAF3E8)' }} />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-body text-sm font-medium truncate" style={{ color: 'var(--theme-text, #3D2817)' }}>
+                        {product.nombre}
+                      </p>
+                      <p className="font-body text-xs" style={{ color: 'var(--theme-muted, #5C4033)' }}>
+                        {quantity} × {formatPrice(unit)}
+                      </p>
+                    </div>
+                    <span className="font-body font-semibold text-sm" style={{ color: 'var(--theme-text, #3D2817)' }}>
+                      {formatPrice(unit * quantity)}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Datos del cliente */}
+            <div className="space-y-2 mb-5 text-sm font-body" style={{ color: 'var(--theme-muted, #5C4033)' }}>
+              <div className="flex items-start gap-2">
+                <MapPin className="w-4 h-4 mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-semibold" style={{ color: 'var(--theme-text, #3D2817)' }}>{eNom} {eApe}</p>
+                  <p>{eDir}</p>
+                  <p>{eCiudad}, {eDepto}</p>
+                  {eRuc && <p>RUC: {eRuc}</p>}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 pt-2">
+                <MessageCircle className="w-4 h-4" />
+                <span>{eCod} {eTel}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CreditCard className="w-4 h-4" />
+                <span>{metodoPagoLabel[eMet] || eMet}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Package className="w-4 h-4" />
+                <span>
+                  {eTipo === 'delivery' ? `Delivery${eGratis ? ' (Gratis)' : ` (${formatPrice(eCosto)})`}` : 'Encomienda (a consultar)'}
+                </span>
+              </div>
+            </div>
+
+            {/* Total */}
+            <div className="pt-4 flex justify-between items-center" style={{ borderTop: '2px solid rgba(61,40,23,0.1)' }}>
+              <span className="font-body font-bold text-base" style={{ color: 'var(--theme-text, #3D2817)' }}>Total</span>
+              <span className="font-body font-bold text-xl" style={{ color: 'var(--theme-primary, #1B4332)' }}>{formatPrice(totalFinal)}</span>
+            </div>
+          </div>
+
+          {/* Cross-sell */}
+          {crossSell.length > 0 && (
+            <div className="mt-10">
+              <div className="text-center mb-6">
+                <div className="font-body font-semibold text-xs tracking-[0.1em] mb-2" style={{ color: 'var(--theme-accent, #D4A843)' }}>
+                  TAMBIÉN TE PUEDE INTERESAR
+                </div>
+                <h2 className="font-display font-bold text-2xl" style={{ color: 'var(--theme-text, #3D2817)' }}>
+                  Complementa tu compra
+                </h2>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {crossSell.map((product) => (
+                  <Link
+                    key={product.id}
+                    to={`/producto/${product.slug || product.id}`}
+                    className="group rounded-2xl p-4 transition-all duration-300 hover:-translate-y-1 flex flex-col"
+                    style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 12px rgba(45, 106, 79, 0.10)' }}
+                  >
+                    <div className="relative rounded-xl overflow-hidden mb-3" style={{ backgroundColor: 'var(--theme-bg, #FAF3E8)', border: '1px solid var(--theme-border, #F0EDE8)', height: '160px' }}>
+                      <img
+                        src={product.imagen}
+                        alt={product.nombre}
+                        className="absolute inset-0 w-full h-full object-contain p-3 transition-transform duration-300 group-hover:scale-105"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                      />
+                    </div>
+                    <h3 className="font-body font-semibold text-sm leading-snug line-clamp-2" style={{ color: 'var(--theme-text, #1A1A1A)' }}>
+                      {product.nombre}
+                    </h3>
+                    <div className="mt-auto pt-2">
+                      <span className="font-body font-bold text-base" style={{ color: 'var(--theme-primary, #1B4332)' }}>
+                        {formatPrice(product.precio)}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Botones finales */}
+          <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               to="/tienda"
-              className="inline-flex items-center gap-2 font-body font-semibold text-sm px-8 py-3 rounded-full"
+              className="inline-flex items-center justify-center gap-2 font-body font-semibold text-sm px-6 py-3 rounded-full"
               style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: 'var(--theme-text-on-primary, #FFFFFF)' }}
             >
+              <ShoppingCart className="w-4 h-4" />
               Seguir comprando
+            </Link>
+            <Link
+              to="/"
+              className="inline-flex items-center justify-center gap-2 font-body font-semibold text-sm px-6 py-3 rounded-full"
+              style={{ backgroundColor: '#FFFFFF', color: 'var(--theme-primary, #1B4332)', border: '2px solid var(--theme-primary, #1B4332)' }}
+            >
+              Volver al inicio
             </Link>
           </div>
         </div>
@@ -453,32 +655,46 @@ export default function CheckoutPage() {
 
               {/* Products */}
               <div className="space-y-4 mb-6 max-h-64 overflow-y-visible">
-                {items.map(({ product, quantity }) => (
-                  <div key={product.id} className="flex gap-3">
+                {items.map((item) => {
+                  const unit = getEffectiveUnitPrice(item)
+                  const lineTotal = unit * item.quantity
+                  const originalLineTotal = item.product.precio * item.quantity
+                  const hasDiscount = lineTotal < originalLineTotal
+                  return (
+                  <div key={item.product.id} className="flex gap-3">
                     <div className="relative shrink-0" style={{ overflow: 'visible' }}>
                       <img
-                        src={product.imagen}
-                        alt={product.nombre}
+                        src={item.product.imagen}
+                        alt={item.product.nombre}
                         className="w-16 h-16 object-contain rounded-lg"
                         style={{ backgroundColor: 'var(--theme-bg, #FAF3E8)' }}
                       />
                       <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: 'var(--theme-text-on-primary, #FFFFFF)', zIndex: 10 }}>
-                        {quantity}
+                        {item.quantity}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-body text-sm font-medium truncate" style={{ color: 'var(--theme-text, #3D2817)' }}>
-                        {product.nombre}
+                        {item.product.nombre}
                       </p>
                       <p className="font-body text-sm mt-1" style={{ color: 'var(--theme-muted, #5C4033)' }}>
-                        {formatPrice(product.precio)}
+                        {hasDiscount ? (
+                          <>
+                            <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>{formatPrice(item.product.precio)}</span>
+                            {' '}
+                            <span style={{ color: 'var(--theme-primary, #1B4332)', fontWeight: 600 }}>{formatPrice(unit)}</span>
+                          </>
+                        ) : (
+                          formatPrice(item.product.precio)
+                        )}
                       </p>
                     </div>
                     <div className="font-body text-sm font-semibold" style={{ color: 'var(--theme-text, #3D2817)' }}>
-                      {formatPrice(product.precio * quantity)}
+                      {formatPrice(lineTotal)}
                     </div>
                   </div>
-                ))}
+                  )
+                })}
               </div>
 
               {/* Totals */}
@@ -487,6 +703,12 @@ export default function CheckoutPage() {
                   <span>Subtotal</span>
                   <span>{formatPrice(totalPrice)}</span>
                 </div>
+                {totalSavings > 0 && (
+                  <div className="flex justify-between font-body text-sm" style={{ color: 'var(--theme-primary, #1B4332)' }}>
+                    <span>Ahorrás</span>
+                    <span>−{formatPrice(totalSavings)}</span>
+                  </div>
+                )}
                 {envioTipo === 'delivery' ? (
                   <div className="flex justify-between font-body text-sm" style={{ color: 'var(--theme-muted, #5C4033)' }}>
                     <span>Delivery ({envioCiudad})</span>

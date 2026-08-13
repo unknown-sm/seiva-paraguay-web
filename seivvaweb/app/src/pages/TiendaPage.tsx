@@ -70,6 +70,12 @@ export default function TiendaPage() {
         (p.descripcion && p.descripcion.toLowerCase().includes(q))
       )
     }
+    // Productos con stock primero, agotados al final
+    result = [...result].sort((a, b) => {
+      const aHas = a.stock > 0 ? 0 : 1
+      const bHas = b.stock > 0 ? 0 : 1
+      return aHas - bHas
+    })
     return result
   }, [products, activeCat, filterSubcat, filterEtiqueta, filterMarca, search])
 
@@ -244,12 +250,14 @@ export default function TiendaPage() {
                       </span>
                     )}
                     {!product.stock && (
-                      <span
-                        className="absolute bottom-2 left-2 font-body font-bold text-[9px] px-2 py-0.5 rounded-full z-10"
-                        style={{ backgroundColor: '#E63946', color: '#FFF' }}
-                      >
-                        AGOTADO
-                      </span>
+                      <div className="absolute inset-0 flex items-center justify-center z-[5]" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}>
+                        <span
+                          className="font-body font-black text-xl sm:text-2xl px-6 py-3 rounded-xl tracking-widest"
+                          style={{ backgroundColor: '#DC2626', color: '#FFFFFF', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
+                        >
+                          AGOTADO
+                        </span>
+                      </div>
                     )}
                     {product.stock > 0 && (() => {
                       const badges = getProductBadges(product)

@@ -15,7 +15,13 @@ export default function LatestProducts() {
   useEffect(() => {
     fetchProducts()
       .then(data => {
-        setProducts(data.slice(0, 8))
+        // Stock primero, agotados al final (no ocultarlos)
+        const sorted = [...data].sort((a, b) => {
+          const aHas = a.stock > 0 ? 0 : 1
+          const bHas = b.stock > 0 ? 0 : 1
+          return aHas - bHas
+        })
+        setProducts(sorted.slice(0, 8))
         setLoading(false)
       })
       .catch(() => {
@@ -108,9 +114,16 @@ export default function LatestProducts() {
                   </span>
                 )}
                 {product.stock <= 0 && (
-                  <span className="absolute bottom-2.5 left-2.5 font-body font-bold text-[10px] px-2.5 py-1 rounded-full" style={{ backgroundColor: '#6B7280', color: '#fff', zIndex: 10 }}>
-                    AGOTADO
-                  </span>
+                  <>
+                    <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.45)', zIndex: 5 }}>
+                      <span
+                        className="font-body font-black text-xl sm:text-2xl px-6 py-3 rounded-xl tracking-widest"
+                        style={{ backgroundColor: '#DC2626', color: '#FFFFFF', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
+                      >
+                        AGOTADO
+                      </span>
+                    </div>
+                  </>
                 )}
                 {product.stock > 0 && (() => {
                   const badges = getProductBadges(product)

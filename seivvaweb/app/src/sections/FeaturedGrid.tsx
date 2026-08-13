@@ -20,7 +20,13 @@ export default function FeaturedGrid() {
   useEffect(() => {
     fetchFeatured()
       .then(data => {
-        setProducts(data.slice(0, 8))
+        // Productos con stock primero, agotados al final
+        const sorted = [...data].sort((a, b) => {
+          const aHas = a.stock > 0 ? 0 : 1
+          const bHas = b.stock > 0 ? 0 : 1
+          return aHas - bHas
+        })
+        setProducts(sorted.slice(0, 8))
         setLoading(false)
       })
       .catch(() => {
@@ -140,7 +146,17 @@ export default function FeaturedGrid() {
                     OFERTA
                   </span>
                 )}
-                {(() => {
+                {product.stock <= 0 && (
+                  <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.45)', zIndex: 5 }}>
+                    <span
+                      className="font-body font-black text-xl sm:text-2xl px-6 py-3 rounded-xl tracking-widest"
+                      style={{ backgroundColor: '#DC2626', color: '#FFFFFF', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
+                    >
+                      AGOTADO
+                    </span>
+                  </div>
+                )}
+                {product.stock > 0 && (() => {
                   const badges = getProductBadges(product)
                   if (!badges.length) return null
                   return (
@@ -190,17 +206,19 @@ export default function FeaturedGrid() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
-                      addItem(product, 1)
+                      if (product.stock > 0) addItem(product, 1)
                     }}
+                    disabled={product.stock <= 0}
                     className="font-body font-semibold text-xs px-5 py-2.5 rounded-full transition-all duration-300 hover:scale-105 inline-flex items-center justify-center gap-1.5 w-full"
                     style={{
-                      backgroundColor: 'var(--theme-primary, #1B4332)',
+                      backgroundColor: product.stock <= 0 ? '#9CA3AF' : 'var(--theme-primary, #1B4332)',
                       color: 'var(--theme-text-on-primary, #FFFFFF)',
                       letterSpacing: '0.04em',
+                      cursor: product.stock <= 0 ? 'not-allowed' : 'pointer',
                     }}
                   >
                     <ShoppingCart className="w-3.5 h-3.5" />
-                    Agregar
+                    {product.stock <= 0 ? 'Agotado' : 'Agregar'}
                   </button>
                 </div>
               </div>
