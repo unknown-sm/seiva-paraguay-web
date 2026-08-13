@@ -59,7 +59,7 @@ app.use(cors({
   origin: function(origin, cb) {
     const allowed = process.env.CORS_ORIGIN
       ? process.env.CORS_ORIGIN.split(",")
-      : ["https://seiva.com.py", "https://www.seiva.com.py", "https://webseiva-seiva-web20-af1lyl-48df1d-85-239-246-177.sslip.io", "http://localhost:3000", "http://127.0.0.1:3000"];
+      : ["https://seiva.com.py", "https://www.seiva.com.py", "https://old.seiva.com.py", "https://webseiva-seiva-web20-af1lyl-48df1d-85-239-246-177.sslip.io", "http://localhost:3000", "http://127.0.0.1:3000"];
     if (!origin || allowed.indexOf(origin) !== -1) {
       cb(null, true);
     } else {
