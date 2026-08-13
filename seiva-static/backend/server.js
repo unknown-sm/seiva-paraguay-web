@@ -505,10 +505,15 @@ if (envCount.c === 0) {
     ["Coronel Oviedo", "Caaguazú", 0],
     ["Caaguazú", "Caaguazú", 0],
     ["Villarrica", "Guairá", 0],
-    ["Pedro Juan Caballero", "Amambay", 0],
-    ["Concepción", "Concepción", 0],
-    ["Salto del Guairá", "Canindeyú", 0],
-    ["Otra ciudad", "", 0],
+   ["Pedro Juan Caballero", "Amambay", 0],
+     ["Concepción", "Concepción", 0],
+     ["Salto del Guairá", "Canindeyú", 0],
+     ["Neuland", "Chaco", 0],
+     ["Filadelfia", "Chaco", 0],
+     ["Fuerte Olimpo", "Chaco", 0],
+     ["Loma Plata", "Chaco", 0],
+     ["Lolita", "Chaco", 0],
+     ["Otra ciudad", "", 0],
   ];
   const insDelivery = db.prepare("INSERT INTO envios (ciudad, departamento, costo, tipo) VALUES (?, ?, ?, 'delivery')");
   for (const e of deliveryCiudades) insDelivery.run(e[0], e[1], e[2]);
