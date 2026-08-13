@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Leaf, Menu, X, ShoppingCart, Search } from 'lucide-react'
+import { Menu, X, ShoppingCart, Search } from 'lucide-react'
 import gsap from 'gsap'
 import { useCart } from '../context/CartContext'
 
@@ -65,10 +65,11 @@ export default function Navbar() {
         <div className="container-main flex items-center justify-between h-16 gap-3">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group shrink-0">
-            <Leaf className="w-6 h-6" style={{ color: 'var(--theme-accent, #D4A843)' }} />
-            <span className="font-body font-semibold text-sm tracking-widest text-white">
-              SEIVA
-            </span>
+            <img
+              src="https://old.seiva.com.py/wp-content/uploads/seiva-logo-rectangulo.png"
+              alt="Seiva"
+              className="h-8 w-auto object-contain"
+            />
           </Link>
 
           {/* Desktop Links */}

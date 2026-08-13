@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Leaf, Instagram, Facebook, Twitter } from 'lucide-react'
+import { Instagram, Facebook, Twitter } from 'lucide-react'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -96,17 +96,16 @@ export default function Footer() {
 
         {/* Main Footer Content */}
         <div className="animate-in flex flex-col lg:flex-row justify-between gap-12 mb-12">
-          {/* Brand */}
-          <div className="lg:w-[30%]">
-            <div className="flex items-center gap-2">
-              <Leaf className="w-6 h-6" style={{ color: 'var(--theme-accent, #D4A843)' }} />
-              <span className="font-display font-semibold text-xl text-white">
-                SEIVA
-              </span>
-            </div>
-            <p className="font-body text-sm mt-3 max-w-[240px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.7)' }}>
-              Nutrición natural para una vida plena.
-            </p>
+           {/* Brand */}
+           <div className="lg:w-[30%]">
+             <img
+               src="https://old.seiva.com.py/wp-content/uploads/seiva-logo-rectangulo.png"
+               alt="Seiva"
+               className="h-10 w-auto object-contain mb-3"
+             />
+             <p className="font-body text-sm max-w-[240px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.7)' }}>
+               Nutrición natural para una vida plena.
+             </p>
             <div className="flex items-center gap-4 mt-5">
               {[Instagram, Facebook, Twitter].map((Icon, i) => (
                 <a
