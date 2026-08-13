@@ -1933,8 +1933,9 @@ document.addEventListener("DOMContentLoaded", function() {
         whatsapp_numero: document.getElementById("pagos-whatsapp-numero").value,
         efectivo_activo: document.getElementById("pagos-efectivo").checked ? "1" : "0",
         efectivo_desc: document.getElementById("pagos-efectivo-desc").value,
-        transferencia_activo: document.getElementById("pagos-transferencia").checked ? "1" : "0",
-        transferencia_desc: document.getElementById("pagos-transferencia-desc").value,
+         transferencia_activo: document.getElementById("pagos-transferencia").checked ? "1" : "0",
+         transferencia_desc: document.getElementById("pagos-transferencia-desc").value,
+         transferencia_instrucciones: document.getElementById("pagos-transferencia-instrucciones").value,
         qr_activo: document.getElementById("pagos-qr").checked ? "1" : "0",
         qr_imagen: document.getElementById("pagos-qr-imagen").value,
         qr_instrucciones: document.getElementById("pagos-qr-instrucciones").value
@@ -2728,8 +2729,9 @@ function loadPagos() {
     setPagoVal("pagos-whatsapp-numero", data.whatsapp_numero || "595992120303");
     setPagoVal("pagos-efectivo", data.efectivo_activo !== "0");
     setPagoVal("pagos-efectivo-desc", data.efectivo_desc || "");
-    setPagoVal("pagos-transferencia", data.transferencia_activo !== "0");
-    setPagoVal("pagos-transferencia-desc", data.transferencia_desc || "");
+     setPagoVal("pagos-transferencia", data.transferencia_activo !== "0");
+     setPagoVal("pagos-transferencia-desc", data.transferencia_desc || "");
+     setPagoVal("pagos-transferencia-instrucciones", data.transferencia_instrucciones || "");
     setPagoVal("pagos-qr", data.qr_activo === "1");
     setPagoVal("pagos-qr-imagen", data.qr_imagen || "");
     setPagoVal("pagos-qr-instrucciones", data.qr_instrucciones || "");

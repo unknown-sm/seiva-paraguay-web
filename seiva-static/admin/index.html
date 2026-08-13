@@ -283,7 +283,12 @@
               </div>
               <div style="padding:12px;border:1px solid var(--border);border-radius:8px">
                 <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer"><input type="checkbox" id="pagos-transferencia" checked> Transferencia</label>
-                <div id="pagos-section-transferencia" style="margin-top:8px"><label style="color:var(--muted);font-size:0.8rem">Descripción</label><input type="text" id="pagos-transferencia-desc" class="form-input"></div>
+                 <div id="pagos-section-transferencia" style="margin-top:8px">
+                   <label style="color:var(--muted);font-size:0.8rem">Descripción</label>
+                   <input type="text" id="pagos-transferencia-desc" class="form-input">
+                   <label style="color:var(--muted);font-size:0.8rem;margin-top:8px;display:block">Instrucciones para el cliente</label>
+                   <textarea id="pagos-transferencia-instrucciones" rows="3" class="form-input" placeholder="Datos bancarios, pasos para transferir, etc."></textarea>
+                 </div>
               </div>
               <div style="padding:12px;border:1px solid var(--border);border-radius:8px">
                 <label style="display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer"><input type="checkbox" id="pagos-qr"> Pago QR</label>

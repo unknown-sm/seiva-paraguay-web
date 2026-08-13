@@ -362,7 +362,14 @@ const contenidoDefault = {
    site_favicon: "https://old.seiva.com.py/wp-content/uploads/seiva-logo-rectangulo.png",
   qr_activo: "",
   qr_imagen: "",
-  qr_instrucciones: "Pagá con QR y envianos el comprobante por WhatsApp",
+   transferencia_instrucciones: `<p><strong>Datos para transferencia:</strong></p>
+<ul>
+  <li><strong>Banco:</strong> [Tu banco]</li>
+  <li><strong>Número de cuenta:</strong> [Tu número]</li>
+  <li><strong>Titular:</strong> [Tu nombre/empresa]</li>
+  <li><strong>RUC:</strong> [Tu RUC]</li>
+</ul>
+<p>Enviar comprobante por WhatsApp al <strong>0992 120 303</strong></p>`,
    envio_minimo_gratis: "150000",
    pagos_instrucciones: `<p>Realizamos envíos a <strong>todo Paraguay</strong>.</p>
 <p>Coordinamos el pago por WhatsApp al <strong>0992 120 303</strong>.</p>`,
