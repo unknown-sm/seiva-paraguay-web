@@ -363,7 +363,9 @@ const contenidoDefault = {
   qr_activo: "",
   qr_imagen: "",
   qr_instrucciones: "Pagá con QR y envianos el comprobante por WhatsApp",
-  envio_minimo_gratis: "150000",
+   envio_minimo_gratis: "150000",
+   pagos_instrucciones: `<p>Realizamos envíos a <strong>todo Paraguay</strong>.</p>
+<p>Coordinamos el pago por WhatsApp al <strong>0992 120 303</strong>.</p>`,
   global_envios: `<p>Realizamos envíos a <strong>todo Paraguay</strong>.</p>
 <ul>
   <li><strong>Asunción y Central:</strong> Delivery en 24-48h hábiles. Costo: Gs. 15.000</li>

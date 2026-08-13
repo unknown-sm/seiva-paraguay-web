@@ -53,6 +53,7 @@ export default function CheckoutPage() {
   const [envioTipo, setEnvioTipo] = useState<'delivery' | 'encomienda'>('delivery')
   const [envioMinimoGratis, setEnvioMinimoGratis] = useState(0)
   const [qrInfo, setQrInfo] = useState<{ activo: boolean; imagen: string; instrucciones: string }>({ activo: false, imagen: '', instrucciones: '' })
+  const [pagosInstrucciones, setPagosInstrucciones] = useState('')
 
   useEffect(() => {
     if (!ciudadSeleccionada) { setEnvioCosto(0); setEnvioCiudad(''); setEnvioTipo('delivery'); return }
@@ -71,14 +72,15 @@ export default function CheckoutPage() {
     }).catch(() => {})
   }, [ciudadSeleccionada])
 
-  useEffect(() => {
-    fetch('/api/contenido').then(r => r.json()).then((data) => {
-      if (data.qr_activo === '1' || data.qr_activo === 'true') {
-        setQrInfo({ activo: true, imagen: data.qr_imagen || '', instrucciones: data.qr_instrucciones || '' })
-      }
-      setEnvioMinimoGratis(parseInt(data.envio_minimo_gratis) || 0)
-    }).catch(() => {})
-  }, [])
+   useEffect(() => {
+     fetch('/api/contenido').then(r => r.json()).then((data) => {
+       if (data.qr_activo === '1' || data.qr_activo === 'true') {
+         setQrInfo({ activo: true, imagen: data.qr_imagen || '', instrucciones: data.qr_instrucciones || '' })
+       }
+       setEnvioMinimoGratis(parseInt(data.envio_minimo_gratis) || 0)
+       if (data.pagos_instrucciones) setPagosInstrucciones(data.pagos_instrucciones)
+     }).catch(() => {})
+   }, [])
 
   const ciudadRef = useRef<HTMLDivElement>(null)
 
@@ -576,8 +578,14 @@ export default function CheckoutPage() {
                       className="w-full px-4 py-3 rounded-lg font-body text-sm border transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--theme-primary,#1B4332)] focus:border-[var(--theme-primary,#1B4332)]"
                       style={{ borderColor: 'rgba(0,0,0,0.18)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)' }}
                     />
-                  </div>
-                </div>
+                 </div>
+                 {pagosInstrucciones && (
+                   <div className="mt-4 p-4 rounded-lg" style={{ backgroundColor: 'rgba(27,67,50,0.04)', border: '1px solid rgba(27,67,50,0.15)' }}>
+                     <p className="font-body font-semibold text-xs mb-1" style={{ color: 'var(--theme-primary, #1B4332)' }}>Instrucciones de pago</p>
+                     <div className="font-body text-xs prose prose-sm" style={{ color: 'var(--theme-muted, #5C4033)' }} dangerouslySetInnerHTML={{ __html: pagosInstrucciones }} />
+                   </div>
+                 )}
+               </div>
               </div>
 
               {/* Payment Method */}
