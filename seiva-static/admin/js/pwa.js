@@ -19,7 +19,7 @@ var PWA = (function() {
     }).catch(function() {});
 
     // Registrar service worker
-    navigator.serviceWorker.register("/admin/sw.js", { scope: "/admin/" })
+    navigator.serviceWorker.register("/bd-backpanel/sw.js", { scope: "/bd-backpanel/" })
       .then(function(reg) {
         console.log("SW registrado:", reg.scope);
         return subscribeUser(reg);

@@ -72,13 +72,37 @@ app.set("trust proxy", 1);
 app.use(express.json({ limit: "5mb" }));
 
 app.use(helmet({
-  contentSecurityPolicy: false
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https:"],
+      scriptSrc: ["'self'"],
+      connectSrc: ["'self'", "https://old.seiva.com.py"],
+    }
+  }
 }));
 
+// Rate limiter for login - progressive delay
+const loginAttempts = new Map();
+function getLoginDelay(ip) {
+  const attempts = loginAttempts.get(ip) || 0;
+  return Math.min(30 * 1000 * Math.pow(1.5, attempts), 300 * 1000); // Max 5 min
+}
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  message: { error: "Demasiados intentos. Espera 15 minutos." },
+  windowMs: 60 * 60 * 1000,
+  max: 50,
+  message: function(req, res) {
+    const ip = req.ip || "unknown";
+    const attempts = (loginAttempts.get(ip) || 0) + 1;
+    loginAttempts.set(ip, attempts);
+    const delay = getLoginDelay(ip);
+    return { error: "Contraseña incorrecta", retryAfter: Math.ceil(delay / 1000) };
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.ip || "unknown",
 });
 
 // Rate limiters para endpoints públicos de escritura
@@ -2225,7 +2249,7 @@ if (!fs.existsSync(adminPath)) {
   adminPath = path.join(__dirname, "..", "admin");
 }
 console.log("adminPath: " + adminPath + " exists: " + fs.existsSync(adminPath));
-app.use("/admin", express.static(adminPath));
+app.use("/bd-backpanel", express.static(adminPath));
 
 let distPath = path.join(__dirname, "dist");
 if (fs.existsSync(distPath)) {

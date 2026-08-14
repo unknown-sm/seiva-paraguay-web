@@ -475,9 +475,9 @@ window.addVarianteRow = function(nombre, precio, stock) {
   var row = document.createElement("div");
   row.className = "variante-row";
   row.style.cssText = "display:flex;gap:8px;align-items:center;margin-top:8px;padding:8px;background:var(--bg);border-radius:8px";
-  row.innerHTML = '<input type="text" class="variante-nombre form-input" style="flex:1" placeholder="Ej: 60 cápsulas" value="' + (nombre || "") + '">' +
-    '<input type="number" class="variante-precio form-input" style="width:100px" placeholder="Precio" value="' + (precio || "") + '">' +
-    '<input type="number" class="variante-stock form-input" style="width:70px" placeholder="Stock" value="' + (stock || "") + '">' +
+  row.innerHTML = '<input type="text" class="variante-nombre form-input" style="flex:1" placeholder="Ej: 60 cápsulas" value="' + xt(nombre || "") + '">' +
+    '<input type="number" class="variante-precio form-input" style="width:100px" placeholder="Precio" value="' + xt(precio || "") + '">' +
+    '<input type="number" class="variante-stock form-input" style="width:70px" placeholder="Stock" value="' + xt(stock || "") + '">' +
     '<button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()">×</button>';
   container.appendChild(row);
 };
@@ -1750,11 +1750,11 @@ document.addEventListener("DOMContentLoaded", function() {
     var row = document.createElement("div");
     row.className = "tier-row";
     row.style.cssText = "display:flex;gap:8px;align-items:center;margin-top:8px;padding:8px;background:var(--bg);border-radius:8px";
-    row.innerHTML = '<input type="number" class="tier-min form-input" style="width:80px" placeholder="Min" value="' + (min || '') + '">' +
+    row.innerHTML = '<input type="number" class="tier-min form-input" style="width:80px" placeholder="Min" value="' + xt(min || '') + '">' +
       '<span>-</span>' +
-      '<input type="number" class="tier-max form-input" style="width:80px" placeholder="Max (vacío=∞)" value="' + (max || '') + '">' +
+      '<input type="number" class="tier-max form-input" style="width:80px" placeholder="Max (vacío=∞)" value="' + xt(max || '') + '">' +
       '<span>unid. →</span>' +
-      '<input type="number" class="tier-desc form-input" style="width:100px" placeholder="Descuento" value="' + (desc || '') + '">' +
+      '<input type="number" class="tier-desc form-input" style="width:100px" placeholder="Descuento" value="' + xt(desc || '') + '">' +
       '<span>Gs. menos</span>' +
       '<button type="button" class="btn btn-sm btn-danger" onclick="this.parentElement.remove()" style="padding:4px 8px">×</button>';
     container.appendChild(row);
