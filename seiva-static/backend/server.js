@@ -373,6 +373,12 @@ const contenidoDefault = {
   <li><strong>RUC:</strong> [Tu RUC]</li>
 </ul>
 <p>Enviar comprobante por WhatsApp al <strong>0992 120 303</strong></p>`,
+   efectivo_instrucciones: `<p><strong>Pago contra entrega:</strong></p>
+<ul>
+  <li>Pagás cuando recibís el producto</li>
+  <li>Ten el monto exacto listo</li>
+  <li>Verificá el pedido antes de pagar</li>
+</ul>`,
    envio_minimo_gratis: "150000",
    pagos_instrucciones: `<p>Realizamos envíos a <strong>todo Paraguay</strong>.</p>
 <p>Coordinamos el pago por WhatsApp al <strong>0992 120 303</strong>.</p>`,

@@ -55,6 +55,7 @@ export default function CheckoutPage() {
   const [qrInfo, setQrInfo] = useState<{ activo: boolean; imagen: string; instrucciones: string }>({ activo: false, imagen: '', instrucciones: '' })
   const [pagosInstrucciones, setPagosInstrucciones] = useState('')
   const [transferenciaInstrucciones, setTransferenciaInstrucciones] = useState('')
+  const [efectivoInstrucciones, setEfectivoInstrucciones] = useState('')
 
   useEffect(() => {
     if (!ciudadSeleccionada) { setEnvioCosto(0); setEnvioCiudad(''); setEnvioTipo('delivery'); return }
@@ -81,6 +82,7 @@ export default function CheckoutPage() {
        setEnvioMinimoGratis(parseInt(data.envio_minimo_gratis) || 0)
        if (data.pagos_instrucciones) setPagosInstrucciones(data.pagos_instrucciones)
        if (data.transferencia_instrucciones) setTransferenciaInstrucciones(data.transferencia_instrucciones)
+       if (data.efectivo_instrucciones) setEfectivoInstrucciones(data.efectivo_instrucciones)
      }).catch(() => {})
    }, [])
 
@@ -642,6 +644,14 @@ export default function CheckoutPage() {
                    <div className="font-body text-xs prose prose-sm" style={{ color: 'var(--theme-muted, #5C4033)' }} dangerouslySetInnerHTML={{ __html: transferenciaInstrucciones }} />
                  </div>
                )}
+                {metodoPago === 'efectivo' && efectivoInstrucciones && (
+                  <div className="rounded-xl p-6" style={{ backgroundColor: '#FFFFFF', boxShadow: '0 2px 12px rgba(27,67,50,0.06)' }}>
+                    <h3 className="font-body font-semibold text-sm mb-2" style={{ color: 'var(--theme-text, #3D2817)' }}>Pago contra entrega</h3>
+                    <div className="font-body text-xs prose prose-sm" style={{ color: 'var(--theme-muted, #5C4033)' }} dangerouslySetInnerHTML={{ __html: efectivoInstrucciones }} />
+                  </div>
+                )}
+
+
 
               {/* Submit */}
               <button
