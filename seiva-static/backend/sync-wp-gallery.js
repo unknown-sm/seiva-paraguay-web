@@ -26,15 +26,20 @@ function fetchJson(url) {
   });
 }
 
-// Download file
+// Download file (follows redirects)
 function downloadFile(url, dest) {
   return new Promise((resolve, reject) => {
     const mod = url.startsWith("https") ? https : http;
-    mod.get(url, { headers: { "User-Agent": "Mozilla/5.0" } }, (res) => {
+    const opts = { headers: { "User-Agent": "Mozilla/5.0" } };
+    // Handle both old.seiva and seiva domains
+    if (url.includes("seiva.com.py/wp-content")) {
+      url = url.replace("seiva.com.py", "old.seiva.com.py");
+    }
+    mod.get(url, opts, (res) => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
         return downloadFile(res.headers.location, dest).then(resolve).catch(reject);
       }
-      if (res.statusCode !== 200) return reject(new Error("HTTP " + res.statusCode));
+      if (res.statusCode !== 200) return reject(new Error("HTTP " + res.statusCode + " for " + url));
       const file = fs.createWriteStream(dest);
       res.pipe(file);
       file.on("finish", () => { file.close(); resolve(); });
