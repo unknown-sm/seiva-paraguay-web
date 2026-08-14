@@ -13,9 +13,10 @@ const WC_SECRET = "cs_97b9d6f47e305f88b8fa19e91ee3e33dd6815296";
 const WC_URL = "https://old.seiva.com.py/wp-json/wc/v3";
 const AUTH = Buffer.from(`${WC_KEY}:${WC_SECRET}`).toString("base64");
 
-function fetchWC(endpoint, timeout = 15000) {
+function fetchWC(endpoint, timeout = 30000) {
   return new Promise((resolve, reject) => {
     const url = `${WC_URL}${endpoint}`;
+    console.log(`  Fetching: ${endpoint}`);
     const req = https.get(url, {
       headers: {
         "Authorization": `Basic ${AUTH}`,
@@ -23,6 +24,7 @@ function fetchWC(endpoint, timeout = 15000) {
         "Accept": "application/json",
       },
     }, (res) => {
+      console.log(`  Status: ${res.statusCode}`);
       if (res.statusCode !== 200) {
         let body = "";
         res.on("data", c => body += c);
