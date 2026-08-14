@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { fetchProducts, type Product, formatPrice, getDiscountedPrice, getActiveTier, fixImageUrl, cleanHtml } from '../services/api'
+import { fetchProducts, type Product, formatPrice, getDiscountedPrice, getActiveTier, fixImageUrl } from '../services/api'
 import { useCart } from '../context/CartContext'
 import { ShoppingCart, Minus, Plus, ChevronLeft, ChevronRight, Tag, Box, Info, Package, ChevronDown } from 'lucide-react'
 import GlobalSections from '../components/GlobalSections'
@@ -262,9 +262,9 @@ export default function ProductoPage() {
 
             <div className="relative">
               <div 
-                className={`font-body text-base leading-relaxed mt-4 product-description ${!showShort ? 'line-clamp-4' : ''}`} 
+                className={`font-body text-base leading-relaxed mt-4 [&_ul]:list-disc [&_ul]:pl-5 [&_li]:my-1 [&_p]:mb-2 ${!showShort ? 'line-clamp-4' : ''}`} 
                 style={{ color: 'var(--theme-text, #3D2817)' }}
-                dangerouslySetInnerHTML={{ __html: cleanHtml(product.descripcion) || 'Producto natural de alta calidad.' }}
+                dangerouslySetInnerHTML={{ __html: product.descripcion || 'Producto natural de alta calidad.' }}
               />
               <button
                 onClick={() => setShowShort(!showShort)}
@@ -275,20 +275,6 @@ export default function ProductoPage() {
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showShort ? 'rotate-180' : ''}`} />
               </button>
             </div>
-
-            {/* Long description */}
-            {product.descripcion_larga && (
-              <div className="mt-6 pt-6" style={{ borderTop: '1px solid var(--theme-border, #E8E0D5)' }}>
-                <h3 className="font-body font-semibold text-lg mb-3" style={{ color: 'var(--theme-text, #3D2817)' }}>
-                  Descripción detallada
-                </h3>
-                <div
-                  className="font-body text-base leading-relaxed product-description"
-                  style={{ color: 'var(--theme-text, #3D2817)' }}
-                  dangerouslySetInnerHTML={{ __html: cleanHtml(product.descripcion_larga) }}
-                />
-              </div>
-            )}
 
             {/* Price */}
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mt-6">

@@ -126,21 +126,6 @@ export function stripHtml(html: string): string {
   return doc.body.textContent || ''
 }
 
-// Clean WooCommerce HTML: remove inline styles, data attributes, but keep structure
-export function cleanHtml(html: string): string {
-  if (!html) return '';
-  return html
-    .replace(/data-[^=]*="[^"]*"/g, '') // Remove data attributes
-    .replace(/class="[^"]*"/g, '') // Remove classes
-    .replace(/style="[^"]*"/g, '') // Remove inline styles
-    .replace(/<span[^>]*>/g, '') // Remove span tags
-    .replace(/<\/span>/g, '')
-    .replace(/<p[^>]*>/g, '<p>') // Clean p tags
-    .replace(/<li[^>]*>/g, '<li>') // Clean li tags
-    .replace(/\s+/g, ' ') // Normalize whitespace
-    .trim();
-}
-
 export function getProductBadges(product: Product): { label: string; color: string }[] {
   const badgeMap: Record<string, { label: string; color: string }> = {
     nuevo: { label: 'Nuevo', color: '#3B82F6' },

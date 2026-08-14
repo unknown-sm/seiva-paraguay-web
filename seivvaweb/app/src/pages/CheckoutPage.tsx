@@ -379,6 +379,28 @@ export default function CheckoutPage() {
             </div>
           </div>
 
+          {/* Payment Instructions on confirmation */}
+          {(eMet === 'transferencia' && transferenciaInstrucciones) && (
+            <div className="mt-8 rounded-xl p-6" style={{ backgroundColor: '#FFFFFF', boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}>
+              <h2 className="font-body font-bold text-lg mb-4" style={{ color: 'var(--theme-text, #3D2817)' }}>
+                Datos para transferencia
+              </h2>
+              <div className="font-body text-sm prose prose-sm" style={{ color: 'var(--theme-muted, #5C4033)' }} dangerouslySetInnerHTML={{ __html: transferenciaInstrucciones }} />
+            </div>
+          )}
+
+          {(eMet === 'qr' && qrInfo.imagen) && (
+            <div className="mt-8 rounded-xl p-6 text-center" style={{ backgroundColor: '#FFFFFF', boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}>
+              <h2 className="font-body font-bold text-lg mb-4" style={{ color: 'var(--theme-text, #3D2817)' }}>
+                Escaneá el QR para pagar
+              </h2>
+              <img src={qrInfo.imagen} alt="QR de pago" className="mx-auto rounded-lg" style={{ maxWidth: 200, maxHeight: 200 }} />
+              {qrInfo.instrucciones && (
+                <p className="font-body text-sm mt-3" style={{ color: 'var(--theme-muted, #5C4033)' }}>{qrInfo.instrucciones}</p>
+              )}
+            </div>
+          )}
+
           {/* Cross-sell */}
           {crossSell.length > 0 && (
             <div className="mt-10">
