@@ -77,9 +77,9 @@ async function main() {
   console.log("Fetching from WooCommerce...");
   let wcProducts = [];
   try {
-    wcProducts = await fetchWC("/products?per_page=100");
+    wcProducts = await fetchWC("/products?per_page=10");
     if (wcProducts.length === 100) {
-      const page2 = await fetchWC("/products?per_page=100&page=2");
+      const page2 = await fetchWC("/products?per_page=10&page=2");
       wcProducts = wcProducts.concat(page2);
     }
     console.log(`Got ${wcProducts.length} products`);
