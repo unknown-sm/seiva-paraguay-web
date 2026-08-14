@@ -920,7 +920,7 @@ function loadContenido() {
  document.getElementById("contenido-form").addEventListener("submit", function(e) {
    e.preventDefault();
    var body = {};
-   var keys = ["hero_titulo", "hero_descripcion", "whatsapp_numero", "whatsapp_mensaje", "hero_imagen", "hero_imagenes", "site_titulo", "site_descripcion", "site_logo", "site_favicon", "logo_height", "logo_fit", "envio_minimo_gratis", "pagos_instrucciones", "efectivo_instrucciones", "global_envios", "global_pagos", "global_garantia"];
+   var keys = ["hero_titulo", "hero_descripcion", "whatsapp_numero", "whatsapp_mensaje", "hero_imagen", "hero_imagenes", "site_titulo", "site_descripcion", "site_logo", "site_favicon", "logo_height", "logo_fit", "envio_minimo_gratis", "pagos_instrucciones", "efectivo_instrucciones", "notification_sound", "global_envios", "global_pagos", "global_garantia"];
    for (var i = 0; i < keys.length; i++) {
      body[keys[i]] = document.getElementById("contenido-" + keys[i]).value;
    }

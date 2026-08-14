@@ -379,6 +379,7 @@ const contenidoDefault = {
   <li>Ten el monto exacto listo</li>
   <li>Verificá el pedido antes de pagar</li>
 </ul>`,
+   notification_sound: "",
    envio_minimo_gratis: "150000",
    pagos_instrucciones: `<p>Realizamos envíos a <strong>todo Paraguay</strong>.</p>
 <p>Coordinamos el pago por WhatsApp al <strong>0992 120 303</strong>.</p>`,

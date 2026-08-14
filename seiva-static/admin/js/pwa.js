@@ -1,4 +1,59 @@
-function playCashSound() {
+var PWA = (function() {
+  "use strict";
+
+  var API = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    ? "http://localhost:3001/api"
+    : "/api";
+
+  var customSoundUrl = null;
+
+  function init() {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+      console.log("Push no soportado en este navegador");
+      return;
+    }
+
+    // Load custom sound URL from contenido
+    fetch(API + "/contenido").then(function(r) { return r.json() }).then(function(data) {
+      if (data.notification_sound) customSoundUrl = data.notification_sound;
+    }).catch(function() {});
+
+    // Registrar service worker
+    navigator.serviceWorker.register("/admin/sw.js", { scope: "/admin/" })
+      .then(function(reg) {
+        console.log("SW registrado:", reg.scope);
+        return subscribeUser(reg);
+      })
+      .catch(function(err) {
+        console.error("Error registrando SW:", err);
+      });
+
+    // Escuchar mensajes del SW (para sonido)
+    navigator.serviceWorker.addEventListener("message", function(e) {
+      if (e.data && e.data.type === "play-sound") {
+        playCashSound();
+      }
+      if (e.data && e.data.type === "navigate" && e.data.url) {
+        window.location.href = e.data.url;
+      }
+    });
+  }
+
+  function playCashSound() {
+    // If custom sound exists, use it
+    if (customSoundUrl) {
+      try {
+        var audio = new Audio(customSoundUrl);
+        audio.volume = 0.5;
+        audio.play().catch(function() {});
+        return;
+      } catch(e) {}
+    }
+    // Fallback to synthesized sound
+    playSynthesizedSound();
+  }
+
+  function playSynthesizedSound() {
     try {
       var ctx = new (window.AudioContext || window.webkitAudioContext)();
       var now = ctx.currentTime;
