@@ -17,9 +17,6 @@ function loadCheckoutForm(): Record<string, string> {
     return raw ? JSON.parse(raw) : {}
   } catch(e) { return {} }
 }
-function clearCheckoutForm() {
-  try { localStorage.removeItem(CHECKOUT_STORAGE_KEY) } catch(e) {}
-}
 
 export default function CheckoutPage() {
   const navigate = useNavigate()
