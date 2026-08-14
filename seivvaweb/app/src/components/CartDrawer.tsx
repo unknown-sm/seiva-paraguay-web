@@ -161,17 +161,25 @@ export default function CartDrawer() {
               </div>
             )}
 
-            {totalPrice < 150000 && (
-              <div className="mb-3">
-                <div className="flex justify-between font-body text-xs mb-1" style={{ color: 'var(--theme-muted, #5C4033)' }}>
-                  <span>Te faltan {formatPrice(150000 - totalPrice)} para delivery gratis</span>
-                  <span>{Math.round(totalPrice / 1500)}%</span>
-                </div>
-                <div className="h-1.5 rounded-full" style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}>
-                  <div className="h-1.5 rounded-full transition-all" style={{ width: Math.min(100, Math.round(totalPrice / 1500)) + '%', backgroundColor: 'var(--theme-primary, #1B4332)' }} />
-                </div>
-              </div>
-            )}
+            {(() => {
+              const minimo = 150000; // Default minimum
+              const hasFreeDelivery = items.some(i => i.product.delivery_gratis);
+              if (hasFreeDelivery) return null; // Don't show if any product has free delivery
+              if (totalPrice < minimo) {
+                return (
+                  <div className="mb-3">
+                    <div className="flex justify-between font-body text-xs mb-1" style={{ color: 'var(--theme-muted, #5C4033)' }}>
+                      <span>Te faltan {formatPrice(minimo - totalPrice)} para delivery gratis</span>
+                      <span>{Math.round(totalPrice / (minimo / 100))}%</span>
+                    </div>
+                    <div className="h-1.5 rounded-full" style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}>
+                      <div className="h-1.5 rounded-full transition-all" style={{ width: Math.min(100, Math.round(totalPrice / (minimo / 100))) + '%', backgroundColor: 'var(--theme-primary, #1B4332)' }} />
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
 
             <div className="flex justify-between items-center mb-4">
               <span className="font-body font-medium" style={{ color: 'var(--theme-muted, #5C4033)' }}>
