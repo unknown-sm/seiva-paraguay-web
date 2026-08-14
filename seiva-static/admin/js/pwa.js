@@ -39,19 +39,26 @@ var PWA = (function() {
     });
   }
 
-  function playCashSound() {
-    // If custom sound exists, use it
-    if (customSoundUrl) {
-      try {
-        var audio = new Audio(customSoundUrl);
-        audio.volume = 0.5;
-        audio.play().catch(function() {});
-        return;
-      } catch(e) {}
-    }
-    // Fallback to synthesized sound
-    playSynthesizedSound();
-  }
+   function playCashSound() {
+     // If custom sound exists, use it
+     if (customSoundUrl) {
+       try {
+         var audio = new Audio(customSoundUrl);
+         audio.volume = 0.5;
+         audio.play().then(function() {
+           console.log("[PWA] Custom sound played");
+         }).catch(function(e) {
+           console.log("[PWA] Custom sound failed, using synthesized:", e.message);
+           playSynthesizedSound();
+         });
+         return;
+       } catch(e) {
+         console.log("[PWA] Audio error:", e.message);
+       }
+     }
+     // Fallback to synthesized sound
+     playSynthesizedSound();
+   }
 
   function playSynthesizedSound() {
     try {
