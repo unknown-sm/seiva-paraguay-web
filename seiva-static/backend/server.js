@@ -79,7 +79,7 @@ app.use(helmet({
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "https:"],
       scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://static.cloudflareinsights.com", "https://www.googletagmanager.com"],
-      connectSrc: ["'self'", "https://old.seiva.com.py", "https://region1.google-analytics.com"],
+      connectSrc: ["'self'", "https://old.seiva.com.py", "https://www.google-analytics.com", "https://www.google.com", "https://region1.google-analytics.com"],
     }
   }
 }));
