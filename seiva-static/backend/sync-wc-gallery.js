@@ -43,6 +43,10 @@ function fetchWC(endpoint, timeout = 15000) {
 
 function downloadFile(url, dest, timeout = 30000) {
   return new Promise((resolve, reject) => {
+    // Fix domain: WC returns seiva.com.py but images are on old.seiva.com.py
+    if (url.includes("seiva.com.py") && !url.includes("old.seiva.com.py")) {
+      url = url.replace("seiva.com.py", "old.seiva.com.py");
+    }
     const mod = url.startsWith("https") ? https : http;
     const req = mod.get(url, { headers: { "User-Agent": "Mozilla/5.0" } }, (res) => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
@@ -88,6 +92,16 @@ async function main() {
 
   let updated = 0;
   let noImage = 0;
+
+  // Clean up previously broken downloads
+  const existingFiles = fs.readdirSync(IMG_DIR).filter(f => f.startsWith("wc-"));
+  for (const f of existingFiles) {
+    const fp = path.join(IMG_DIR, f);
+    const stats = fs.statSync(fp);
+    if (stats.size < 1000) { // Less than 1KB = probably broken
+      fs.unlinkSync(fp);
+    }
+  }
 
   for (const prod of products) {
     const slug = prod.slug || prod.nombre.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
