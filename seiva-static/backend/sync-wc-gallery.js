@@ -88,9 +88,19 @@ async function main() {
     process.exit(1);
   }
 
-  // Build slug -> WC product map
+  // Build slug -> WC product map AND name -> WC product map
   const wcBySlug = {};
-  wcProducts.forEach(p => { wcBySlug[p.slug] = p; });
+  const wcByName = {};
+  wcProducts.forEach(p => {
+    wcBySlug[p.slug] = p;
+    // Normalize name for matching: lowercase, remove accents, special chars
+    const normName = p.name.toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9\s]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    wcByName[normName] = p;
+  });
 
   let updated = 0;
   let noImage = 0;
@@ -100,14 +110,22 @@ async function main() {
   for (const f of existingFiles) {
     const fp = path.join(IMG_DIR, f);
     const stats = fs.statSync(fp);
-    if (stats.size < 1000) { // Less than 1KB = probably broken
+    if (stats.size < 1000) {
       fs.unlinkSync(fp);
     }
   }
 
   for (const prod of products) {
     const slug = prod.slug || prod.nombre.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    const wcProd = wcBySlug[slug];
+    // Normalize local product name for matching
+    const normNombre = prod.nombre.toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9\s]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    // Try slug first, then name
+    const wcProd = wcBySlug[slug] || wcByName[normNombre];
 
     if (!wcProd) {
       console.log(`  #${prod.id} ${prod.nombre}: no WC match`);
