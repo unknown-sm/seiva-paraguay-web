@@ -126,7 +126,7 @@ export default function ProductoPage() {
 
   const crosssell = getCrosssell()
   const allImages = product?.galeria?.length
-    ? product.galeria
+    ? product.galeria.map((img: string) => fixImageUrl(img))
     : product?.imagen ? [product.imagen] : []
 
   const prevImage = () => setSelectedImage(i => (i > 0 ? i - 1 : allImages.length - 1))
