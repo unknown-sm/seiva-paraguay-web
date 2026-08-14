@@ -5,7 +5,10 @@ const path = require("path");
 const { DatabaseSync } = require("node:sqlite");
 
 const DB_PATH = path.join(__dirname, "data", "database.sqlite");
-const IMG_DIR = path.join(__dirname, "..", "img", "productos");
+const IMG_DIR = path.join(__dirname, "img", "productos");
+
+// Ensure directories exist
+fs.mkdirSync(IMG_DIR, { recursive: true });
 const WP_API = "https://old.seiva.com.py/wp-json/wp/v2";
 
 // Fetch URL helper
