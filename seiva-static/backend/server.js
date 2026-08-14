@@ -164,6 +164,10 @@ setInterval(dailyBackup, 24 * 60 * 60 * 1000);
 
 const db = new DatabaseSync(DB_PATH);
 
+// Initialize Telegram Bot
+const telegramBot = require("./telegram-bot");
+telegramBot.init(db);
+
 db.exec("PRAGMA journal_mode = WAL");
 db.exec("PRAGMA foreign_keys = ON");
 
@@ -2185,6 +2189,17 @@ app.delete("/api/error-logs", auth, (req, res) => {
   res.json({ ok: true });
 });
 
+// ---------- TELEGRAM BOT WEBHOOK ----------
+app.post("/api/telegram/webhook", (req, res) => {
+  // Verify secret token
+  const secret = req.headers["x-telegram-bot-api-secret-token"];
+  if (secret !== process.env.TELEGRAM_WEBHOOK_SECRET) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+  telegramBot.handleWebhook(req.body);
+  res.json({ ok: true });
+});
+
 // Request error logger
 app.use(function(err, req, res, next) {
   console.error("[ERROR]", req.method, req.url, err.message);
@@ -2235,4 +2250,9 @@ backfillSlugs();
 app.listen(PORT, () => {
   console.log("Seiva backend running on http://localhost:" + PORT);
   console.log("Admin: http://localhost:" + PORT + "/admin");
+
+  // Setup Telegram webhook if configured
+  if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_WEBHOOK_URL) {
+    telegramBot.setWebhook(process.env.TELEGRAM_WEBHOOK_URL);
+  }
 });
