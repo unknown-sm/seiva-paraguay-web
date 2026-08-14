@@ -32,7 +32,7 @@ function downloadFile(url, dest) {
     const mod = url.startsWith("https") ? https : http;
     const opts = { headers: { "User-Agent": "Mozilla/5.0" } };
     // Handle both old.seiva and seiva domains
-    if (url.includes("seiva.com.py/wp-content")) {
+    if (url.includes("seiva.com.py/wp-content") && !url.includes("old.seiva.com.py")) {
       url = url.replace("seiva.com.py", "old.seiva.com.py");
     }
     mod.get(url, opts, (res) => {
