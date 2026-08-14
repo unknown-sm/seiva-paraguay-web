@@ -44,7 +44,6 @@ export const ciudadesParaguay: CiudadData[] = [
   { departamento: 'Amambay', ciudad: 'Loma Plata', value: 'Amambay - Loma Plata' },
   // Chaco
   { departamento: 'Chaco', ciudad: 'Neuland', value: 'Chaco - Neuland' },
-  { departamento: 'Chaco', ciudad: 'Fuerte Olimpo', value: 'Chaco - Fuerte Olimpo' },
   { departamento: 'Chaco', ciudad: 'Lolita', value: 'Chaco - Lolita' },
   // Asunción
   { departamento: 'Asunción', ciudad: 'Asunción', value: 'Asunción - Asunción' },
