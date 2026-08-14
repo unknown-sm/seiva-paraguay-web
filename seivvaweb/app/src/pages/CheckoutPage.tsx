@@ -55,6 +55,7 @@ export default function CheckoutPage() {
   const [qrInfo, setQrInfo] = useState<{ activo: boolean; imagen: string; instrucciones: string }>({ activo: false, imagen: '', instrucciones: '' })
   const [pagosInstrucciones, setPagosInstrucciones] = useState('')
   const [transferenciaInstrucciones, setTransferenciaInstrucciones] = useState('')
+  const [metodosPago, setMetodosPago] = useState<{ whatsapp: boolean; efectivo: boolean; transferencia: boolean }>({ whatsapp: true, efectivo: true, transferencia: true })
 
   useEffect(() => {
     if (!ciudadSeleccionada) { setEnvioCosto(0); setEnvioCiudad(''); setEnvioTipo('delivery'); return }
@@ -81,6 +82,11 @@ export default function CheckoutPage() {
        setEnvioMinimoGratis(parseInt(data.envio_minimo_gratis) || 0)
        if (data.pagos_instrucciones) setPagosInstrucciones(data.pagos_instrucciones)
        if (data.transferencia_instrucciones) setTransferenciaInstrucciones(data.transferencia_instrucciones)
+       setMetodosPago({
+         whatsapp: data.whatsapp_activo !== '0',
+         efectivo: data.efectivo_activo !== '0',
+         transferencia: data.transferencia_activo !== '0'
+       })
      }).catch(() => {})
    }, [])
 
@@ -597,10 +603,10 @@ export default function CheckoutPage() {
                 </h2>
                 <div className="space-y-3">
                   {[
-                    { value: 'whatsapp', label: 'WhatsApp (pago a coordinar)', icon: MessageCircle, desc: 'Te contactaremos por WhatsApp para coordinar el pago' },
-                    { value: 'efectivo', label: 'Efectivo al recibir', icon: CreditCard, desc: 'Pagás cuando recibís el producto' },
-                    { value: 'transferencia', label: 'Transferencia bancaria', icon: Package, desc: 'Te enviamos los datos para transferir' },
-                    ...(qrInfo.activo ? [{ value: 'qr', label: 'Pago QR', icon: CreditCard, desc: qrInfo.instrucciones }] : []),
+                    ...(metodosPago.whatsapp ? [{ value: 'whatsapp', label: 'WhatsApp (pago a coordinar)', icon: MessageCircle, desc: 'Te contactaremos por WhatsApp para coordinar el pago' }] : []),
+                    ...(metodosPago.efectivo && envioTipo !== 'encomienda' ? [{ value: 'efectivo', label: 'Efectivo al recibir', icon: CreditCard, desc: 'Pagás cuando recibís el producto' }] : []),
+                    ...(metodosPago.transferencia ? [{ value: 'transferencia', label: 'Transferencia bancaria', icon: Package, desc: 'Te enviamos los datos para transferir' }] : []),
+                    ...(qrInfo.activo ? [{ value: 'qr', label: 'Pago QR', icon: CreditCard, desc: qrInfo.instrucciones || 'Escaneá y pagá' }] : []),
                   ].map(option => (
                     <button
                       key={option.value}
