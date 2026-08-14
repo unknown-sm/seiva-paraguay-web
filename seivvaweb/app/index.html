@@ -6,15 +6,15 @@
     <title>Seiva Paraguay — Frescura Natural</title>
     <meta property="og:title" content="Seiva Paraguay — Frescura Natural" />
     <meta property="og:description" content="Snacks saludables y suplementos naturales. Envíos a todo Paraguay." />
-    <meta property="og:image" content="https://server-seiva-web-latest.zwpkae.easypanel.host/images/hero-bottle.jpg" />
+    <meta property="og:image" content="https://seiva.com.py/images/hero-bottle.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:url" content="https://server-seiva-web-latest.zwpkae.easypanel.host/" />
+    <meta property="og:url" content="https://seiva.com.py/" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Seiva Paraguay — Frescura Natural" />
-    <meta name="twitter:description" content="Snacks saludables y suplementos naturales. Envíos a todo Paraguay." />
-    <meta name="twitter:image" content="https://server-seiva-web-latest.zwpkae.easypanel.host/images/hero-bottle.jpg" />
+    <meta name="twitter:title" content="Seiva Paraguay — Suplementos, Vitaminas y Proteínas" />
+    <meta name="twitter:description" content="Suplementos deportivos, vitaminas, proteínas y más. Las mejores marcas con envío a todo Paraguay. Pedí por WhatsApp." />
+    <meta name="twitter:image" content="https://seiva.com.py/images/hero-bottle.jpg" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -31,13 +31,17 @@
              document.querySelector('meta[property="og:description"]').content = data.site_descripcion;
              document.querySelector('meta[name="twitter:description"]').content = data.site_descripcion;
            }
-           if (data.site_favicon) {
-             var link = document.createElement('link');
-             link.rel = 'icon';
-             link.type = 'image/png';
-             link.href = data.site_favicon;
-             document.head.appendChild(link);
-           }
+            if (data.site_favicon) {
+              var link = document.createElement('link');
+              link.rel = 'icon';
+              link.type = 'image/png';
+              link.href = data.site_favicon;
+              document.head.appendChild(link);
+            }
+            if (data.site_logo) {
+              document.querySelector('meta[property="og:image"]').content = data.site_logo;
+              document.querySelector('meta[name="twitter:image"]').content = data.site_logo;
+            }
          }).catch(function() {});
        })();
      </script>
