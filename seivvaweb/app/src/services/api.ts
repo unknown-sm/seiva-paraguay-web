@@ -59,7 +59,7 @@ const IMAGE_BASE = window.location.hostname === 'localhost' || window.location.h
   ? 'http://localhost:3001'
   : '';
 
-function fixImageUrl(imagen: string): string {
+export function fixImageUrl(imagen: string): string {
   if (!imagen) return '';
   if (imagen.startsWith('http')) return imagen;
   const base = IMAGE_BASE || '/img/productos';
