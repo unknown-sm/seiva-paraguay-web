@@ -6,6 +6,21 @@ import { formatPrice, createPedido, fetchProducts, type Product } from '../servi
 import type { CartItem } from '../context/CartContext'
 import { ciudadesParaguay, parseCiudadSeleccionada } from '../data/ciudades'
 
+// LocalStorage helpers for persisting checkout form
+const CHECKOUT_STORAGE_KEY = 'seiva_checkout_form'
+function saveCheckoutForm(data: Record<string, string>) {
+  try { localStorage.setItem(CHECKOUT_STORAGE_KEY, JSON.stringify(data)) } catch(e) {}
+}
+function loadCheckoutForm(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem(CHECKOUT_STORAGE_KEY)
+    return raw ? JSON.parse(raw) : {}
+  } catch(e) { return {} }
+}
+function clearCheckoutForm() {
+  try { localStorage.removeItem(CHECKOUT_STORAGE_KEY) } catch(e) {}
+}
+
 export default function CheckoutPage() {
   const navigate = useNavigate()
   const { items, clearCart, totalPrice, totalSavings, getEffectiveUnitPrice } = useCart()
@@ -56,6 +71,23 @@ export default function CheckoutPage() {
   const [pagosInstrucciones, setPagosInstrucciones] = useState('')
   const [transferenciaInstrucciones, setTransferenciaInstrucciones] = useState('')
   const [metodosPago, setMetodosPago] = useState<{ whatsapp: boolean; efectivo: boolean; transferencia: boolean }>({ whatsapp: true, efectivo: true, transferencia: true })
+
+  // Load saved form data from localStorage on mount
+  useEffect(() => {
+    const saved = loadCheckoutForm()
+    if (saved.nombre) setNombre(saved.nombre)
+    if (saved.apellido) setApellido(saved.apellido)
+    if (saved.telefono) setTelefono(saved.telefono)
+    if (saved.ruc) setRuc(saved.ruc)
+    if (saved.direccion) setDireccion(saved.direccion)
+    if (saved.ciudadSeleccionada) setCiudadSeleccionada(saved.ciudadSeleccionada)
+    if (saved.metodoPago) setMetodoPago(saved.metodoPago)
+  }, [])
+
+  // Save form data to localStorage on changes
+  useEffect(() => {
+    saveCheckoutForm({ nombre, apellido, telefono, ruc, direccion, ciudadSeleccionada, metodoPago })
+  }, [nombre, apellido, telefono, ruc, direccion, ciudadSeleccionada, metodoPago])
 
   useEffect(() => {
     if (!ciudadSeleccionada) { setEnvioCosto(0); setEnvioCiudad(''); setEnvioTipo('delivery'); return }
@@ -235,7 +267,7 @@ export default function CheckoutPage() {
         `Hola Seiva! Acabo de hacer el pedido #${result.id}:\n\n${lines.join('\n')}${envioLine}\n\n*Total: ${formatPrice(totalConEnvio)}*\n\n*Cliente:*\n${nombre} ${apellido}\n*Teléfono:* ${codigoPais} ${telefono}${rucLine}\n\n*Ciudad:* ${ciudad}\n*Departamento:* ${departamento}\n*Dirección:* ${direccion}\n\n*Pago:* ${metodoPagoLabel[metodoPago] || metodoPago}`
       )
 
-      clearCart()
+      clearCart(); clearCheckoutForm()
 
       setTimeout(() => {
         window.open(`https://wa.me/595992120303?text=${msg}`, '_blank')
