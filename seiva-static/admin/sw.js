@@ -16,7 +16,7 @@ self.addEventListener("push", function(e) {
       badge: "https://old.seiva.com.py/wp-content/uploads/seiva-logo-rectangulo.png",
       vibrate: [200, 100, 200, 100, 200],
       tag: "seiva-notif",
-      data: { url: data.url || "/admin" },
+      data: { url: data.url || "/bd-backpanel" },
       requireInteraction: true
     };
     e.waitUntil(
@@ -42,12 +42,12 @@ self.addEventListener("push", function(e) {
 
 self.addEventListener("notificationclick", function(e) {
   e.notification.close();
-  var url = e.notification.data && e.notification.data.url ? e.notification.data.url : "/admin";
+  var url = e.notification.data && e.notification.data.url ? e.notification.data.url : "/bd-backpanel";
   e.waitUntil(
     self.clients.matchAll({ type: "window" }).then(function(clients) {
       var found = null;
       for (var i = 0; i < clients.length; i++) {
-        if (clients[i].url.indexOf("/admin") !== -1) {
+        if (clients[i].url.indexOf("/bd-backpanel") !== -1) {
           found = clients[i];
           break;
         }
