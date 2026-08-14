@@ -267,7 +267,7 @@ export default function CheckoutPage() {
         `Hola Seiva! Acabo de hacer el pedido #${result.id}:\n\n${lines.join('\n')}${envioLine}\n\n*Total: ${formatPrice(totalConEnvio)}*\n\n*Cliente:*\n${nombre} ${apellido}\n*Teléfono:* ${codigoPais} ${telefono}${rucLine}\n\n*Ciudad:* ${ciudad}\n*Departamento:* ${departamento}\n*Dirección:* ${direccion}\n\n*Pago:* ${metodoPagoLabel[metodoPago] || metodoPago}`
       )
 
-      clearCart(); clearCheckoutForm()
+      clearCart()
 
       setTimeout(() => {
         window.open(`https://wa.me/595992120303?text=${msg}`, '_blank')
