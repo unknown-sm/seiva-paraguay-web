@@ -16,7 +16,6 @@ export default function Navbar() {
   const location = useLocation()
   const navigate = useNavigate()
   const isOpaque = location.pathname !== '/'
-  const isCheckout = location.pathname === '/checkout'
 
   useEffect(() => {
     var API = window.location.hostname === 'localhost' ? 'http://localhost:3001/api' : '/api'
@@ -76,16 +75,14 @@ export default function Navbar() {
         }}
       >
         <div className="container-main flex items-center justify-between h-16 gap-3">
-          {/* Logo - hidden on checkout */}
-          {!isCheckout && (
-            <Link to="/" className="flex items-center gap-2 group shrink-0">
-              {siteLogo ? (
-                <img src={siteLogo} alt="Seiva" style={{ height: logoHeight + 'px', width: 'auto', objectFit: logoFit as any }} />
-              ) : (
-                <span className="font-body font-semibold text-sm tracking-widest text-white">SEIVA</span>
-              )}
-            </Link>
-          )}
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2 group shrink-0">
+            {siteLogo ? (
+              <img src={siteLogo} alt="Seiva" style={{ height: logoHeight + 'px', width: 'auto', objectFit: logoFit as any }} />
+            ) : (
+              <span className="font-body font-semibold text-sm tracking-widest text-white">SEIVA</span>
+            )}
+          </Link>
 
           {/* Desktop Links */}
           <div className="hidden md:flex items-center gap-8">
