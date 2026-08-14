@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { fetchProducts, type Product, formatPrice, getDiscountedPrice, getActiveTier } from '../services/api'
+import { fetchProducts, type Product, formatPrice, getDiscountedPrice, getActiveTier, fixImageUrl } from '../services/api'
 import { useCart } from '../context/CartContext'
 import { ShoppingCart, Minus, Plus, ChevronLeft, ChevronRight, Tag, Box, Info, Package, ChevronDown } from 'lucide-react'
 import GlobalSections from '../components/GlobalSections'
