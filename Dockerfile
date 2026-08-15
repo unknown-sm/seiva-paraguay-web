@@ -12,7 +12,7 @@ RUN npm ci --production
 COPY seiva-static/backend/ ./
 COPY --from=build-react /react/dist ./dist
 COPY seiva-static/admin ./admin
-COPY seiva-static/img ./img
+COPY seiva-static/img/productos ./img/productos
 EXPOSE 3001
 ENV PORT=3001
 ENV NODE_ENV=production
