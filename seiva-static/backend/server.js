@@ -103,7 +103,7 @@ const loginLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.ip || "unknown",
+  keyGenerator: (req) => ipKeyGenerator(req.ip) || "unknown",
 });
 
 // Rate limiters para endpoints públicos de escritura
