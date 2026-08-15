@@ -17,7 +17,7 @@
     <p class="login-sub">Panel de administraci&oacute;n</p>
       <form id="login-form">
         <input type="text" id="login-username" placeholder="Usuario" class="login-input" value="admin">
-        <input type="password" id="login-password" placeholder="Contrase&ntilde;a" class="login-input" autofocus>
+        <input type="password" id="login-password" placeholder="Contrase&ntilde;a" class="login-input" autofocus autocomplete="current-password">
         <button type="submit" class="login-btn">Ingresar</button>
         <p id="login-error" class="login-error hidden">Usuario o contrase&ntilde;a incorrecta</p>
       </form>
@@ -1039,7 +1039,7 @@
     <form id="usuario-form">
       <input type="hidden" id="usuario-id" value="">
       <div class="form-group"><label>Username *</label><input type="text" id="usuario-username" required class="form-input" autocomplete="off"></div>
-      <div class="form-group"><label>Nombre</label><input type="text" id="usuario-nombre" class="form-input"></div>
+      <div class="form-group"><label>Nombre</label><input type="text" id="usuario-nombre" class="form-input" autocomplete="username"></div>
       <div class="form-group"><label>Password <span id="usuario-pass-label" style="color:var(--muted);font-weight:normal"></span></label><input type="password" id="usuario-password" class="form-input" autocomplete="new-password"></div>
       <div class="form-group"><label><input type="checkbox" id="usuario-activo" checked> Activo</label></div>
       <button type="submit" class="btn btn-primary">Guardar</button>
@@ -1089,6 +1089,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 <script src="js/admin.js"></script>
-<script src="js/pwa.js"></script>
+<script src="js/pwa.js?v=2"></script>
 </body>
 </html>
