@@ -123,6 +123,7 @@ export default function Categories() {
                   (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 12px rgba(45, 106, 79, 0.10), 0 0 0 1px rgba(45, 106, 79, 0.08)'
                 }}
               >
+                <div className="relative">
                 <div
                   className="aspect-square overflow-hidden"
                   style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}
@@ -135,38 +136,30 @@ export default function Categories() {
                       (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="%23f0f0f0" width="100" height="100"/><text x="50" y="50" text-anchor="middle" dy=".3em" fill="%23999" font-size="12">Sin imagen</text></svg>'
                     }}
                   />
+                </div>
+                {/* Badges - outside overflow-hidden */}
+                <div className="absolute top-2 left-2 right-2 flex flex-wrap gap-1 z-10 pointer-events-none">
                   {product.precio_anterior && (
-                    <span
-                      className="absolute top-3 right-3 font-body font-semibold text-[10px] px-2.5 py-1 rounded-full"
-                      style={{ backgroundColor: '#E63946', color: '#FFFFFF', zIndex: 10 }}
-                    >
+                    <span className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#E63946', color: '#FFFFFF' }}>
                       OFERTA
                     </span>
                   )}
                   {product.stock <= 0 && (
-                    <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.45)', zIndex: 5 }}>
-                      <span
-                        className="font-body font-black text-xl sm:text-2xl px-6 py-3 rounded-xl tracking-widest"
-                        style={{ backgroundColor: '#DC2626', color: '#FFFFFF', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
-                      >
-                        AGOTADO
-                      </span>
-                    </div>
+                    <span className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}>
+                      AGOTADO
+                    </span>
                   )}
                   {(() => {
                     const badges = getProductBadges(product)
                     if (!badges.length) return null
-                    return (
-                      <div className="absolute bottom-2 left-2 flex flex-wrap gap-1" style={{ zIndex: 10 }}>
-                        {badges.map(b => (
-                          <span key={b.label} className="font-body font-semibold text-[9px] px-2 py-0.5 rounded-full" style={{ backgroundColor: b.color, color: '#fff' }}>
-                            {b.label}
-                          </span>
-                        ))}
-                      </div>
-                    )
+                    return badges.map(b => (
+                      <span key={b.label} className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: b.color, color: '#fff' }}>
+                        {b.label}
+                      </span>
+                    ))
                   })()}
                 </div>
+              </div>
 
                 <h3
                   className="font-body font-semibold text-sm sm:text-base mt-4 leading-snug"

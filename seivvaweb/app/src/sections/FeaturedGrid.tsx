@@ -126,49 +126,42 @@ export default function FeaturedGrid() {
                 (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 12px rgba(45, 106, 79, 0.10), 0 0 0 1px rgba(45, 106, 79, 0.08)'
               }}
             >
-              <div
-                className="aspect-square overflow-hidden"
-                style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}
-              >
-                <img
-                  src={product.imagen}
-                  alt={product.nombre}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="%23f0f0f0" width="100" height="100"/><text x="50" y="50" text-anchor="middle" dy=".3em" fill="%23999" font-size="12">Sin imagen</text></svg>'
-                  }}
-                />
-                {product.precio_anterior && (
-                  <span
-                    className="absolute top-2.5 right-2.5 font-body font-semibold text-[10px] px-2.5 py-1 rounded-full"
-                    style={{ backgroundColor: '#E63946', color: '#FFFFFF', zIndex: 10 }}
-                  >
-                    OFERTA
-                  </span>
-                )}
-                {product.stock <= 0 && (
-                  <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.45)', zIndex: 5 }}>
-                    <span
-                      className="font-body font-black text-xl sm:text-2xl px-6 py-3 rounded-xl tracking-widest"
-                      style={{ backgroundColor: '#DC2626', color: '#FFFFFF', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
-                    >
+              <div className="relative">
+                <div
+                  className="aspect-square overflow-hidden"
+                  style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}
+                >
+                  <img
+                    src={product.imagen}
+                    alt={product.nombre}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="%23f0f0f0" width="100" height="100"/><text x="50" y="50" text-anchor="middle" dy=".3em" fill="%23999" font-size="12">Sin imagen</text></svg>'
+                    }}
+                  />
+                </div>
+                {/* Badges - outside overflow-hidden */}
+                <div className="absolute top-2 left-2 right-2 flex flex-wrap gap-1 z-10 pointer-events-none">
+                  {product.precio_anterior && product.precio_anterior > product.precio && (
+                    <span className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#E63946', color: '#FFFFFF' }}>
+                      OFERTA
+                    </span>
+                  )}
+                  {product.stock <= 0 && (
+                    <span className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}>
                       AGOTADO
                     </span>
-                  </div>
-                )}
-                {product.stock > 0 && (() => {
-                  const badges = getProductBadges(product)
-                  if (!badges.length) return null
-                  return (
-                    <div className="absolute bottom-2 left-2 flex flex-wrap gap-1" style={{ zIndex: 10 }}>
-                      {badges.map(b => (
-                        <span key={b.label} className="font-body font-semibold text-[9px] px-2 py-0.5 rounded-full" style={{ backgroundColor: b.color, color: '#fff' }}>
-                          {b.label}
-                        </span>
-                      ))}
-                    </div>
-                  )
-                })()}
+                  )}
+                  {product.stock > 0 && (() => {
+                    const badges = getProductBadges(product)
+                    if (!badges.length) return null
+                    return badges.map(b => (
+                      <span key={b.label} className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: b.color, color: '#fff' }}>
+                        {b.label}
+                      </span>
+                    ))
+                  })()}
+                </div>
               </div>
 
               <div className="flex flex-col flex-1 mt-3">
