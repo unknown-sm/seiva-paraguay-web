@@ -127,13 +127,13 @@ export default function FeaturedGrid() {
               }}
             >
               <div
-                className="relative rounded-xl overflow-hidden"
-                style={{ backgroundColor: 'var(--theme-surface, #FFFFFF)', border: '1px solid var(--theme-border, #F0EDE8)', height: '200px' }}
+                className="aspect-square overflow-hidden"
+                style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}
               >
                 <img
                   src={product.imagen}
                   alt={product.nombre}
-                  className="absolute inset-0 w-full h-full object-contain p-4 transition-transform duration-300 group-hover:scale-105"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="%23f0f0f0" width="100" height="100"/><text x="50" y="50" text-anchor="middle" dy=".3em" fill="%23999" font-size="12">Sin imagen</text></svg>'
                   }}

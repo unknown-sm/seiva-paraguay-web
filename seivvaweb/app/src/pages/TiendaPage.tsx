@@ -231,14 +231,14 @@ export default function TiendaPage() {
                 >
                   {/* Image - clickable */}
                     <div
-                    className="relative aspect-[4/3] overflow-hidden cursor-pointer"
+                    className="aspect-square overflow-hidden cursor-pointer"
                     style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}
                     onClick={() => navigate(`/producto/${product.slug || product.id}`)}
                   >
                     <img
                       src={product.imagen}
                       alt={product.nombre}
-                      className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105 p-2"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="%23f0f0f0" width="100" height="100"/><text x="50" y="50" text-anchor="middle" dy=".3em" fill="%23999" font-size="12">Sin imagen</text></svg>'
