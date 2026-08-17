@@ -132,15 +132,26 @@ function logError(level, message, details) {
 // Capture uncaught errors
 process.on("uncaughtException", (err) => { console.error("[FATAL]", err); logError("fatal", err.message, err.stack); });
 process.on("unhandledRejection", (err) => { console.error("[UNHANDLED]", err); logError("error", String(err)); });
-let imgPath = path.join(__dirname, "public", "productos");
-if (!fs.existsSync(imgPath)) {
-  imgPath = path.join(__dirname, "img", "productos");
-}
+// Serve images from both build images and uploads volume
+var imgBuildPath = path.join(__dirname, "img-build");
+var imgPath = path.join(__dirname, "img", "productos");
 if (!fs.existsSync(imgPath)) {
   fs.mkdirSync(imgPath, { recursive: true });
 }
 console.log("imgPath: " + imgPath + " exists: " + fs.existsSync(imgPath));
-app.use("/img/productos", express.static(imgPath));
+console.log("imgBuildPath: " + imgBuildPath + " exists: " + fs.existsSync(imgBuildPath));
+// Custom static middleware: check build first, then uploads
+app.use("/img/productos", function(req, res, next) {
+  var buildFile = path.join(imgBuildPath, req.path);
+  var uploadFile = path.join(imgPath, req.path);
+  if (fs.existsSync(buildFile)) {
+    res.sendFile(buildFile);
+  } else if (fs.existsSync(uploadFile)) {
+    res.sendFile(uploadFile);
+  } else {
+    next();
+  }
+});
 
 const qrUpload = multer({
   storage: multer.diskStorage({
