@@ -135,3 +135,6 @@ var PWA = (function() {
       osc5.stop(now + 0.5);
     } catch(e) {}
   }
+
+  return { init: init, playCashSound: playCashSound };
+})();

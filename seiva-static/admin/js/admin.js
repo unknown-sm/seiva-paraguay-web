@@ -1302,10 +1302,6 @@ function verPedido(id) {
     modal.classList.remove("hidden");
   });
 }
-    modal.querySelector(".modal-content").innerHTML = html;
-    modal.classList.remove("hidden");
-  });
-}
 
 function renderPaginationFooter(tbodyId, total, totalPages, pageVarName, renderFn) {
   var tbody = document.getElementById(tbodyId);
