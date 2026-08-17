@@ -1302,10 +1302,6 @@ function formatDescriptionLarga(rawText) {
   return html;
 }
 
-async function downloadImage(imgUrl, nombre) {
-  if (!isValidScrapeUrl(imgUrl)) throw new Error('URL no permitida');
-  try {
-
 function isValidScrapeUrl(url) {
   try {
     const parsed = new URL(url);
@@ -1316,6 +1312,10 @@ function isValidScrapeUrl(url) {
     return true;
   } catch { return false; }
 }
+
+async function downloadImage(imgUrl, nombre) {
+  if (!isValidScrapeUrl(imgUrl)) throw new Error('URL no permitida');
+  try {
     const response = await fetch(imgUrl);
     if (!response.ok) throw new Error('No se pudo descargar imagen');
     
@@ -1341,13 +1341,17 @@ function isValidScrapeUrl(url) {
 }
 
 async function scrapeProductData(url) {
-  try {
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      }
-    });
-    const html = await response.text();
+   try {
+     const controller = new AbortController();
+     const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
+     const response = await fetch(url, {
+       headers: {
+         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+       },
+       signal: controller.signal
+     });
+     clearTimeout(timeout);
+     const html = await response.text();
     const $ = cheerio.load(html);
 
     // Extraer titulo

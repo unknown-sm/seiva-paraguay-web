@@ -615,10 +615,13 @@ document.getElementById("btn-scrape-url").addEventListener("click", async functi
   if (statusEl) { statusEl.textContent = "⏳ Conectando..."; statusEl.style.color = "var(--muted)"; }
 
   try {
-    if (barEl) barEl.style.width = "50%";
-    if (statusEl) statusEl.textContent = "⏳ Extrayendo datos...";
-    const res = await api("/scrape-product", { method: "POST", body: JSON.stringify({ url }) });
-    if (res.error) throw new Error(res.error);
+     if (barEl) barEl.style.width = "50%";
+     if (statusEl) statusEl.textContent = "⏳ Extrayendo datos...";
+     const controller = new AbortController();
+     const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s timeout
+     const res = await api("/scrape-product", { method: "POST", body: JSON.stringify({ url }), signal: controller.signal });
+     clearTimeout(timeoutId);
+     if (res.error) throw new Error(res.error);
 
     if (barEl) barEl.style.width = "80%";
     if (statusEl) statusEl.textContent = "⏳ Procesando imagen...";
