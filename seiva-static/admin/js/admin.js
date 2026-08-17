@@ -1227,7 +1227,6 @@ function renderPedidos() {
           '<option value="entregado"' + (p.estado === 'entregado' ? ' selected' : '') + '>Entregado</option>' +
           '<option value="cancelado"' + (p.estado === 'cancelado' ? ' selected' : '') + '>Cancelado</option>' +
         '</select>' +
-        '<button class="btn-icon" onclick="event.stopPropagation(); eliminarPedido(' + p.id + ')" title="Eliminar">🗑</button>' +
       '</td>' +
     '</tr>';
   }).join("");
