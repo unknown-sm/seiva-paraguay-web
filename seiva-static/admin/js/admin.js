@@ -1243,7 +1243,7 @@ function verPedido(id) {
     var estadoColor = { pendiente: '#F59E0B', confirmado: '#3B82F6', enviado: '#8B5CF6', entregado: '#10B981', cancelado: '#EF4444' }[p.estado] || '#6B7280';
     var estadoBg = { pendiente: 'rgba(245,158,11,0.15)', confirmado: 'rgba(59,130,246,0.15)', enviado: 'rgba(139,92,246,0.15)', entregado: 'rgba(16,185,129,0.15)', cancelado: 'rgba(239,68,68,0.15)' }[p.estado] || 'rgba(107,114,128,0.15)';
     
-    var html = '<div style="max-height:75vh;overflow-y:auto;padding:4px">' +
+    var html = '<div style="max-height:75vh;overflow-y:auto;padding:24px">' +
       // Header
       '<div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;margin-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.08)">' +
         '<div>' +
@@ -1331,7 +1331,7 @@ function renderPaginationFooter(tbodyId, total, totalPages, pageVarName, renderF
 function cambiarEstadoPedido(id, estado) {
   api("/pedidos/" + id + "/estado", { method: "PATCH", body: JSON.stringify({ estado: estado }) }).then(function() {
     toast("Estado actualizado a " + estado);
-    renderPedidos();
+    loadPedidos();
   });
 }
 
