@@ -28,7 +28,11 @@
       "E:\\Pagina_seiva\\seiva-static\\backend\\import-products.js",
       "E:\\Pagina_seiva\\seiva-static\\backend\\package.json",
       "E:\\Pagina_seiva\\seiva-static\\backend\\server.js",
+      "E:\\Pagina_seiva\\seiva-static\\backend\\sync-gallery-images.js",
       "E:\\Pagina_seiva\\seiva-static\\backend\\sync-stock.js",
+      "E:\\Pagina_seiva\\seiva-static\\backend\\sync-wc-gallery.js",
+      "E:\\Pagina_seiva\\seiva-static\\backend\\sync-wp-gallery.js",
+      "E:\\Pagina_seiva\\seiva-static\\backend\\telegram-bot.js",
       "E:\\Pagina_seiva\\seiva-static\\js\\main.js",
       "E:\\Pagina_seiva\\seiva-static\\js\\producto-detail.js",
       "E:\\Pagina_seiva\\seiva-static\\js\\productos.js",
@@ -351,6 +355,7 @@
       "E:\\Pagina_seiva\\seiva-static\\img\\productos\\zeolita-60-capsulas-500mg-ue.png",
       "E:\\Pagina_seiva\\seiva-static\\img\\productos\\zinc-60-capsulas-28mg-mx.webp",
       "E:\\Pagina_seiva\\seiva-static\\img\\productos\\zinc-60-capsulas-500mg-rei.png",
+      "E:\\Pagina_seiva\\seivvaweb\\app\\public\\logo.png",
       "E:\\Pagina_seiva\\seivvaweb\\app\\public\\images\\floating-berries.png",
       "E:\\Pagina_seiva\\seivvaweb\\app\\public\\images\\floating-ginger.png",
       "E:\\Pagina_seiva\\seivvaweb\\app\\public\\images\\floating-leaf.png",
@@ -366,10 +371,10 @@
       "E:\\Pagina_seiva\\seivvaweb\\app\\public\\videos\\hero-video.mp4"
     ]
   },
-  "total_files": 356,
-  "total_words": 1198012,
+  "total_files": 361,
+  "total_words": 1203026,
   "needs_graph": true,
-  "warning": "Large corpus: 356 files \u00b7 ~1,198,012 words. Semantic extraction will be expensive (many Claude tokens). Consider running on a subfolder.",
+  "warning": "Large corpus: 361 files \u00b7 ~1,203,026 words. Semantic extraction will be expensive (many Claude tokens). Consider running on a subfolder.",
   "skipped_sensitive": [],
   "graphifyignore_patterns": 17,
   "scan_root": "E:\\Pagina_seiva"
