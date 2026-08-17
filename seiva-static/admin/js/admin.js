@@ -1236,22 +1236,59 @@ function renderPedidos() {
 function verPedido(id) {
   api("/pedidos/" + id).then(function(p) {
     var prods = p.productos.map(function(pr) {
-      return '<tr><td>' + (pr.nombre || "—") + '</td><td>' + pr.cantidad + '</td><td>' + formatGs(pr.precio || 0) + '</td><td>' + formatGs((pr.precio || 0) * pr.cantidad) + '</td></tr>';
+      return '<tr><td style="padding:10px 8px;border-bottom:1px solid rgba(255,255,255,0.06)">' + (pr.nombre || "—") + '</td><td style="padding:10px 8px;text-align:center">' + pr.cantidad + '</td><td style="padding:10px 8px;text-align:right">' + formatGs(pr.precio || 0) + '</td><td style="padding:10px 8px;text-align:right;font-weight:600">' + formatGs((pr.precio || 0) * pr.cantidad) + '</td></tr>';
     }).join("");
-    var html = '<div style="max-height:70vh;overflow-y:auto">' +
-      '<h3>Pedido #' + p.id + '</h3>' +
-      '<p><strong>Fecha:</strong> ' + formatDate(p.fecha) + '</p>' +
-      '<p><strong>Cliente:</strong> ' + (p.cliente || "—") + '</p>' +
-      '<p><strong>WhatsApp:</strong> ' + (p.whatsapp || "—") + '</p>' +
-      '<p><strong>Dirección:</strong> ' + (p.direccion || "—") + '</p>' +
-      '<p><strong>Método de pago:</strong> ' + (p.metodo_pago || "—") + '</p>' +
-      '<p><strong>Estado:</strong> ' + (p.estado || "—") + '</p>' +
-      '<p><strong>Notas:</strong> ' + (p.notas || "—") + '</p>' +
-      '<h4 style="margin-top:16px">Productos</h4>' +
-      '<table class="admin-table"><thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr></thead><tbody>' + prods + '</tbody></table>' +
-      '<h4 style="margin-top:16px">Total: ' + formatGs(p.total) + '</h4>' +
-      '<button class="btn btn-primary" style="margin-top:16px" onclick="document.getElementById(\'modal-pedido\').classList.add(\'hidden\')">Cerrar</button>' +
+    
+    var estadoColor = { pendiente: '#F59E0B', confirmado: '#3B82F6', enviado: '#8B5CF6', entregado: '#10B981', cancelado: '#EF4444' }[p.estado] || '#6B7280';
+    var estadoBg = { pendiente: 'rgba(245,158,11,0.15)', confirmado: 'rgba(59,130,246,0.15)', enviado: 'rgba(139,92,246,0.15)', entregado: 'rgba(16,185,129,0.15)', cancelado: 'rgba(239,68,68,0.15)' }[p.estado] || 'rgba(107,114,128,0.15)';
+    
+    var html = '<div style="max-height:75vh;overflow-y:auto;padding:4px">' +
+      // Header
+      '<div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;margin-bottom:20px;border-bottom:1px solid rgba(255,255,255,0.08)">' +
+        '<div>' +
+          '<h2 style="font-size:1.4rem;font-weight:700;margin:0;color:#E8E0D5">Pedido #' + p.id + '</h2>' +
+          '<p style="margin:4px 0 0;font-size:0.85rem;color:var(--muted)">' + formatDate(p.fecha) + '</p>' +
+        '</div>' +
+        '<span style="display:inline-block;padding:6px 14px;border-radius:20px;font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:' + estadoColor + ';background:' + estadoBg + '">' + (p.estado || 'sin estado') + '</span>' +
+      '</div>' +
+      
+      // Datos del cliente
+      '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:16px;margin-bottom:16px">' +
+        '<h4 style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#10B981;margin:0 0 12px">Datos del cliente</h4>' +
+        '<div style="display:flex;flex-direction:column;gap:10px">' +
+          '<div style="display:flex;align-items:center;gap:10px"><span style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:rgba(16,185,129,0.1);color:#10B981;font-size:0.9rem">👤</span><div><div style="font-size:0.7rem;color:var(--muted)">Cliente</div><div style="font-weight:500">' + (p.cliente || '—') + '</div></div></div>' +
+          '<div style="display:flex;align-items:center;gap:10px"><span style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:rgba(16,185,129,0.1);color:#10B981;font-size:0.9rem">📱</span><div><div style="font-size:0.7rem;color:var(--muted)">WhatsApp</div><div style="font-weight:500">' + (p.whatsapp || '—') + '</div></div></div>' +
+          '<div style="display:flex;align-items:center;gap:10px"><span style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:rgba(16,185,129,0.1);color:#10B981;font-size:0.9rem">📍</span><div><div style="font-size:0.7rem;color:var(--muted)">Dirección</div><div style="font-weight:500">' + (p.direccion || '—') + '</div></div></div>' +
+        '</div>' +
+      '</div>' +
+      
+      // Detalles del pedido
+      '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:16px;margin-bottom:16px">' +
+        '<h4 style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#10B981;margin:0 0 12px">Detalles del pedido</h4>' +
+        '<div style="display:flex;flex-direction:column;gap:10px">' +
+          '<div style="display:flex;align-items:center;gap:10px"><span style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:rgba(16,185,129,0.1);color:#10B981;font-size:0.9rem">💳</span><div><div style="font-size:0.7rem;color:var(--muted)">Método de pago</div><div style="font-weight:500">' + (p.metodo_pago || '—') + '</div></div></div>' +
+          (p.notas ? '<div style="display:flex;align-items:center;gap:10px"><span style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:rgba(16,185,129,0.1);color:#10B981;font-size:0.9rem">📝</span><div><div style="font-size:0.7rem;color:var(--muted)">Notas</div><div style="font-weight:500">' + p.notas + '</div></div></div>' : '') +
+        '</div>' +
+      '</div>' +
+      
+      // Productos
+      '<div style="margin-bottom:16px">' +
+        '<h4 style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#10B981;margin:0 0 12px">Productos</h4>' +
+        '<div style="border:1px solid rgba(255,255,255,0.06);border-radius:10px;overflow:hidden">' +
+          '<table class="admin-table" style="width:100%;border-collapse:collapse"><thead><tr style="background:rgba(255,255,255,0.03)"><th style="padding:12px 8px;text-align:left;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted)">Producto</th><th style="padding:12px 8px;text-align:center;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted)">Cant.</th><th style="padding:12px 8px;text-align:right;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted)">Precio</th><th style="padding:12px 8px;text-align:right;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted)">Subtotal</th></tr></thead><tbody>' + prods + '</tbody></table>' +
+        '</div>' +
+      '</div>' +
+      
+      // Total
+      '<div style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:10px;margin-bottom:20px">' +
+        '<span style="font-size:0.85rem;color:var(--muted)">Total</span>' +
+        '<span style="font-size:1.5rem;font-weight:700;color:#10B981">' + formatGs(p.total) + '</span>' +
+      '</div>' +
+      
+      // Cerrar
+      '<button class="btn btn-primary" style="width:100%;padding:12px;font-weight:600" onclick="document.getElementById(\'modal-pedido\').classList.add(\'hidden\')">Cerrar</button>' +
     '</div>';
+    
     var modal = document.getElementById("modal-pedido");
     if (!modal) {
       modal = document.createElement("div");
@@ -1260,6 +1297,10 @@ function verPedido(id) {
       modal.innerHTML = '<div class="modal-overlay" onclick="this.parentElement.classList.add(\'hidden\')"></div><div class="modal-content" style="max-width:600px"></div>';
       document.body.appendChild(modal);
     }
+    modal.querySelector(".modal-content").innerHTML = html;
+    modal.classList.remove("hidden");
+  });
+}
     modal.querySelector(".modal-content").innerHTML = html;
     modal.classList.remove("hidden");
   });
