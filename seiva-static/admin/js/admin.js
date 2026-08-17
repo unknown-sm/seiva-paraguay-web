@@ -1209,9 +1209,9 @@ function renderPedidos() {
 
   document.getElementById("pedidos-tbody").innerHTML = paginated.map(function(p) {
     var prods = p.productos.map(function(pr) { return pr.cantidad + "x " + pr.nombre; }).join(", ");
-    // Extract ciudad from direccion (format: "direccion, ciudad, departamento")
-    var dirParts = (p.direccion || "").split(",").map(function(s) { return s.trim(); }).filter(Boolean);
-    var ciudad = dirParts.length >= 2 ? dirParts.slice(1).join(", ") : (dirParts[0] || "—");
+    // Extract ciudad/departamento from direccion (last 2 parts, excluding RUC)
+    var dirParts = (p.direccion || "").split(",").map(function(s) { return s.trim(); }).filter(function(s) { return s && !s.match(/^RUC:/i); });
+    var ciudad = dirParts.length >= 2 ? dirParts.slice(-2).join(", ") : (dirParts[0] || "—");
     return '<tr style="cursor:pointer" onclick="verPedido(' + p.id + ')">' +
       '<td>#' + p.id + '</td>' +
       '<td>' + formatDate(p.fecha) + '</td>' +
