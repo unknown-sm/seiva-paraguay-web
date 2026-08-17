@@ -1209,15 +1209,14 @@ function renderPedidos() {
 
   document.getElementById("pedidos-tbody").innerHTML = paginated.map(function(p) {
     var prods = p.productos.map(function(pr) { return pr.cantidad + "x " + pr.nombre; }).join(", ");
-    var badgeClass = "badge-" + p.estado;
+    var ciudad = [p.envio_ciudad, p.envio_departemento].filter(Boolean).join(", ") || "—";
     return '<tr style="cursor:pointer" onclick="verPedido(' + p.id + ')">' +
       '<td>#' + p.id + '</td>' +
       '<td>' + formatDate(p.fecha) + '</td>' +
       '<td>' + (p.cliente || "—") + '</td>' +
-      '<td>' + (p.ciudad || p.direccion || "—") + '</td>' +
+      '<td>' + ciudad + '</td>' +
       '<td>' + prods + '</td>' +
       '<td><strong>' + formatGs(p.total) + '</strong></td>' +
-      '<td><span class="badge ' + badgeClass + '">' + p.estado + '</span></td>' +
       '<td>' +
         '<select onchange="cambiarEstadoPedido(' + p.id + ', this.value)" class="estado-select" onclick="event.stopPropagation()">' +
           '<option value="pendiente"' + (p.estado === 'pendiente' ? ' selected' : '') + '>Pendiente</option>' +
