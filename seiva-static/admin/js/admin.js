@@ -1210,27 +1210,59 @@ function renderPedidos() {
   document.getElementById("pedidos-tbody").innerHTML = paginated.map(function(p) {
     var prods = p.productos.map(function(pr) { return pr.cantidad + "x " + pr.nombre; }).join(", ");
     var badgeClass = "badge-" + p.estado;
-    return '<tr>' +
+    return '<tr style="cursor:pointer" onclick="verPedido(' + p.id + ')">' +
       '<td>#' + p.id + '</td>' +
       '<td>' + formatDate(p.fecha) + '</td>' +
       '<td>' + (p.cliente || "—") + '</td>' +
-      '<td>' + (p.whatsapp || "—") + '</td>' +
+      '<td>' + (p.ciudad || p.direccion || "—") + '</td>' +
       '<td>' + prods + '</td>' +
       '<td><strong>' + formatGs(p.total) + '</strong></td>' +
       '<td><span class="badge ' + badgeClass + '">' + p.estado + '</span></td>' +
       '<td>' +
-        '<select onchange="cambiarEstadoPedido(' + p.id + ', this.value)" class="estado-select">' +
+        '<select onchange="cambiarEstadoPedido(' + p.id + ', this.value)" class="estado-select" onclick="event.stopPropagation()">' +
           '<option value="pendiente"' + (p.estado === 'pendiente' ? ' selected' : '') + '>Pendiente</option>' +
           '<option value="confirmado"' + (p.estado === 'confirmado' ? ' selected' : '') + '>Confirmado</option>' +
           '<option value="enviado"' + (p.estado === 'enviado' ? ' selected' : '') + '>Enviado</option>' +
           '<option value="entregado"' + (p.estado === 'entregado' ? ' selected' : '') + '>Entregado</option>' +
           '<option value="cancelado"' + (p.estado === 'cancelado' ? ' selected' : '') + '>Cancelado</option>' +
         '</select>' +
-        '<button class="btn-icon" onclick="eliminarPedido(' + p.id + ')" title="Eliminar">🗑</button>' +
+        '<button class="btn-icon" onclick="event.stopPropagation(); eliminarPedido(' + p.id + ')" title="Eliminar">🗑</button>' +
       '</td>' +
     '</tr>';
   }).join("");
   renderPaginationFooter("pedidos-tbody", total, totalPages, "pedidosPage", "renderPedidos()");
+}
+
+function verPedido(id) {
+  api("/pedidos/" + id).then(function(p) {
+    var prods = p.productos.map(function(pr) {
+      return '<tr><td>' + (pr.nombre || "—") + '</td><td>' + pr.cantidad + '</td><td>' + formatGs(pr.precio || 0) + '</td><td>' + formatGs((pr.precio || 0) * pr.cantidad) + '</td></tr>';
+    }).join("");
+    var html = '<div style="max-height:70vh;overflow-y:auto">' +
+      '<h3>Pedido #' + p.id + '</h3>' +
+      '<p><strong>Fecha:</strong> ' + formatDate(p.fecha) + '</p>' +
+      '<p><strong>Cliente:</strong> ' + (p.cliente || "—") + '</p>' +
+      '<p><strong>WhatsApp:</strong> ' + (p.whatsapp || "—") + '</p>' +
+      '<p><strong>Dirección:</strong> ' + (p.direccion || "—") + '</p>' +
+      '<p><strong>Método de pago:</strong> ' + (p.metodo_pago || "—") + '</p>' +
+      '<p><strong>Estado:</strong> ' + (p.estado || "—") + '</p>' +
+      '<p><strong>Notas:</strong> ' + (p.notas || "—") + '</p>' +
+      '<h4 style="margin-top:16px">Productos</h4>' +
+      '<table class="admin-table"><thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr></thead><tbody>' + prods + '</tbody></table>' +
+      '<h4 style="margin-top:16px">Total: ' + formatGs(p.total) + '</h4>' +
+      '<button class="btn btn-primary" style="margin-top:16px" onclick="document.getElementById(\'modal-pedido\').classList.add(\'hidden\')">Cerrar</button>' +
+    '</div>';
+    var modal = document.getElementById("modal-pedido");
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "modal-pedido";
+      modal.className = "modal hidden";
+      modal.innerHTML = '<div class="modal-overlay" onclick="this.parentElement.classList.add(\'hidden\')"></div><div class="modal-content" style="max-width:600px"></div>';
+      document.body.appendChild(modal);
+    }
+    modal.querySelector(".modal-content").innerHTML = html;
+    modal.classList.remove("hidden");
+  });
 }
 
 function renderPaginationFooter(tbodyId, total, totalPages, pageVarName, renderFn) {
