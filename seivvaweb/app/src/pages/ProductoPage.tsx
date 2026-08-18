@@ -211,7 +211,7 @@ export default function ProductoPage() {
                 sizes={imageSrcSet(allImages[selectedImage]).sizes}
                 alt={product.nombre}
                 className="w-full aspect-square object-contain"
-                fetchpriority="high"
+                fetchPriority="high"
               />
               {allImages.length > 1 && (
                 <>

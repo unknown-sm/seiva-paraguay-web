@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { fetchProducts, type Product, formatPrice, getProductBadges, getTierLabel, fixImageUrl, imageSrcSet, stripHtml } from '../services/api'
+import { fetchProducts, type Product, formatPrice, getProductBadges, getTierLabel, imageSrcSet, stripHtml } from '../services/api'
 import { useCart } from '../context/CartContext'
 import { Search, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react'
 import ProductSkeleton from '../components/ProductSkeleton'
