@@ -113,7 +113,7 @@ export default function FeaturedGrid() {
             <div
               key={product.id}
               ref={(el) => { cardsRef.current[i] = el }}
-              className="group rounded-2xl p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1.5 cursor-pointer flex flex-col"
+              className="group rounded-2xl p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1.5 cursor-pointer flex flex-col relative"
               style={{
                 backgroundColor: 'var(--theme-surface, #FFFFFF)',
                 boxShadow: '0 2px 12px rgba(45, 106, 79, 0.10), 0 0 0 1px var(--theme-border, rgba(45, 106, 79, 0.08))',
@@ -144,8 +144,8 @@ export default function FeaturedGrid() {
                     }}
                   />
                 </div>
-                {/* Badges - outside overflow-hidden */}
-                <div className="absolute top-2 left-2 right-2 flex flex-wrap gap-1 z-10 pointer-events-none">
+                {/* Badges - positioned at top-left of image */}
+                <div className="absolute top-3 left-3 flex flex-wrap gap-1 z-10 pointer-events-none">
                   {product.precio_anterior && product.precio_anterior > product.precio && (
                     <span className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#E63946', color: '#FFFFFF' }}>
                       OFERTA

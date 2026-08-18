@@ -80,7 +80,7 @@ app.use(helmet({
       imgSrc: ["'self'", "data:", "https:"],
       scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://static.cloudflareinsights.com", "https://www.googletagmanager.com"],
       scriptSrcAttr: ["'unsafe-inline'"],
-      connectSrc: ["'self'", "https://old.seiva.com.py", "https://static.cloudflareinsights.com", "https://www.google-analytics.com", "https://www.google.com", "https://region1.google-analytics.com"],
+      connectSrc: ["'self'", "https://old.seiva.com.py", "https://static.cloudflareinsights.com", "https://www.google-analytics.com", "https://www.google.com", "https://region1.google-analytics.com", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com", "https://www.googletagmanager.com"],
     }
   }
 }));
@@ -142,8 +142,9 @@ console.log("imgPath: " + imgPath + " exists: " + fs.existsSync(imgPath));
 console.log("imgBuildPath: " + imgBuildPath + " exists: " + fs.existsSync(imgBuildPath));
 // Custom static middleware: check build first, then uploads
 app.use("/img/productos", function(req, res, next) {
-  var buildFile = path.join(imgBuildPath, req.path);
-  var uploadFile = path.join(imgPath, req.path);
+  var relPath = req.path.startsWith("/") ? req.path.slice(1) : req.path;
+  var buildFile = path.join(imgBuildPath, relPath);
+  var uploadFile = path.join(imgPath, relPath);
   if (fs.existsSync(buildFile)) {
     res.sendFile(buildFile);
   } else if (fs.existsSync(uploadFile)) {
