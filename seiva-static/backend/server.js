@@ -2298,7 +2298,16 @@ if (!fs.existsSync(adminPath)) {
   adminPath = path.join(__dirname, "..", "admin");
 }
 console.log("adminPath: " + adminPath + " exists: " + fs.existsSync(adminPath));
-app.use("/bd-backpanel", express.static(adminPath));
+// No cachear el SW ni el JS del admin: un SW obsoleto (que fetched recursos
+// externos) no debe quedar cacheado en el edge (Cloudflare lo guardaba 4h).
+app.use("/bd-backpanel", express.static(adminPath, {
+  maxAge: 0,
+  setHeaders: function (res, filePath) {
+    if (/[\\/](sw\.js|pwa\.js|admin\.js)$/.test(filePath)) {
+      res.setHeader("Cache-Control", "no-cache");
+    }
+  }
+}));
 
 let distPath = path.join(__dirname, "dist");
 if (fs.existsSync(distPath)) {
