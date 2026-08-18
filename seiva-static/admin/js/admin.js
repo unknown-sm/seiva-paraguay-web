@@ -379,6 +379,7 @@ function renderProductos(searchVal, filterCat, filterActivo) {
       '<td>' + (p.activo ? '&#9989;' : '&#10060;') + '</td>' +
       '<td>' +
         '<button class="btn-icon" onclick="editarProducto(' + p.id + ')" title="Editar">&#9999;</button>' +
+        '<button class="btn-icon" onclick="duplicarProducto(' + p.id + ')" title="Duplicar (copia inactiva)">&#128203;</button>' +
         '<button class="btn-icon" onclick="toggleProducto(' + p.id + ')" title="Activar/Desactivar">' + (p.activo ? '&#128065;' : '&#128065;&#8205;&#128488;') + '</button>' +
         '<button class="btn-icon" onclick="eliminarProducto(' + p.id + ')" title="Eliminar">&#128465;</button>' +
         (p.activo ? '<a href="/producto/' + p.id + '" target="_blank" class="btn-icon" title="Ver en web">&#128269;</a>' : '') +
@@ -599,6 +600,49 @@ function eliminarProducto(id) {
     toast("Producto eliminado");
   });
 }
+
+window.duplicarProducto = function(id) {
+  if (!confirm("¿Duplicar este producto? Se creará una copia NO publicada (inactiva).")) return;
+  api("/productos/all").then(function(list) {
+    var p = (list || []).filter(function(x) { return x.id === id; })[0];
+    if (!p) { toast("Producto no encontrado", "error"); return; }
+    var galeria = p.imagen ? [p.imagen] : [];
+    var variantes = p.variantes || (p.presentaciones || []).map(function(n) { return { nombre: n }; });
+    var body = {
+      nombre: (p.nombre || "Producto") + " (copia)",
+      precio: parseInt(p.precio) || 0,
+      precio_anterior: parseInt(p.precio_anterior) || null,
+      categoria_id: p.categoria_id || null,
+      subcategoria: p.subcategoria || "chocolate",
+      marca: p.marca || "",
+      sku: "",
+      slug: "",
+      seo_descripcion: p.seo_descripcion || "",
+      descripcion: p.descripcion || "",
+      descripcion_larga: p.descripcion_larga || "",
+      galeria: galeria,
+      imagen: p.imagen || "",
+      stock: parseInt(p.stock) || 0,
+      destacado: false,
+      activo: false,
+      etiquetas: p.etiquetas || [],
+      crosssell: p.crosssell || [],
+      upsell: p.upsell || [],
+      featured_order: 0,
+      precio_proveedor: parseInt(p.precio_proveedor) || null,
+      delivery_gratis: !!p.delivery_gratis,
+      variantes: variantes
+    };
+    return api("/productos", { method: "POST", body: JSON.stringify(body) });
+  }).then(function(r) {
+    if (!r) return;
+    if (r.error) { toast(r.error, "error"); return; }
+    loadProductos();
+    toast("Copia creada (inactiva)");
+  }).catch(function(err) {
+    toast("Error: " + err.message, "error");
+  });
+};
 
 function nuevoProducto() {
   loadCategoriasSelect("prod-categoria");
