@@ -2020,26 +2020,32 @@ function generateToken() {
 app.post("/api/carritos", carritoLimiter, (req, res) => {
   const { session_token, productos, whatsapp } = req.body;
   if (!productos || !productos.length) return res.status(400).json({ error: "Productos requeridos" });
-  
+
+  var phone = (whatsapp || '').toString().trim();
+  // Solo registrar en el panel si hay número de teléfono (para poder recuperar el carrito)
+  if (!phone) {
+    return res.json({ token: session_token || generateToken(), saved: false, reason: "no_phone" });
+  }
+
   var token = session_token || generateToken();
-  
+
   // Actualizar si ya existe este token
   var existing = db.prepare("SELECT id FROM carritos WHERE session_token = ?").get(token);
   if (existing) {
     db.prepare("UPDATE carritos SET productos = ?, whatsapp = ?, creado = datetime('now'), notificado = 0 WHERE id = ?").run(
       JSON.stringify(productos),
-      whatsapp || '',
+      phone,
       existing.id
     );
   } else {
     db.prepare("INSERT INTO carritos (session_token, productos, whatsapp) VALUES (?, ?, ?)").run(
       token,
       JSON.stringify(productos),
-      whatsapp || ''
+      phone
     );
   }
-  
-  res.json({ token });
+
+  res.json({ token, saved: true });
 });
 
 app.get("/api/carritos", auth, (req, res) => {

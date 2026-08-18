@@ -26,6 +26,7 @@ interface CartContextValue {
   appliedCoupon: Promo | null
   applyCoupon: (codigo: string) => Promise<boolean>
   removeCoupon: () => void
+  trackAbandonedCart: (phone?: string) => void
 }
 
 const CartContext = createContext<CartContextValue | null>(null)
@@ -52,7 +53,24 @@ function getSessionToken(): string {
   return token
 }
 
-function trackCart(items: CartItem[]) {
+const CHECKOUT_STORAGE_KEY = 'seiva_checkout_form'
+
+function getPhoneFromStorage(): string {
+  try {
+    const raw = localStorage.getItem(CHECKOUT_STORAGE_KEY)
+    if (!raw) return ''
+    const saved = JSON.parse(raw) as Record<string, string>
+    if (saved && saved.telefono) {
+      const cod = saved.codigoPais || '+595'
+      return cod + saved.telefono
+    }
+  } catch {
+    // ignore
+  }
+  return ''
+}
+
+function trackCart(items: CartItem[], phoneOverride?: string) {
   const token = getSessionToken()
   const productos = items.map(i => ({
     id: i.product.id,
@@ -60,13 +78,14 @@ function trackCart(items: CartItem[]) {
     precio: i.product.precio,
     cantidad: i.quantity
   }))
+  const whatsapp = (phoneOverride && phoneOverride.trim()) ? phoneOverride : getPhoneFromStorage()
   const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:3001/api'
     : '/api'
   fetch(`${API_BASE}/carritos`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ session_token: token, productos }),
+    body: JSON.stringify({ session_token: token, productos, whatsapp }),
     keepalive: true
   }).catch(() => {})
 }
@@ -220,8 +239,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setAppliedCoupon(null)
   }, [])
 
+  const trackAbandonedCart = useCallback((phone?: string) => {
+    trackCart(items, phone)
+  }, [items])
+
   return (
-    <CartContext.Provider value={{ items, isOpen, addItem, removeItem, updateQuantity, clearCart, openCart, closeCart, totalItems, totalPrice, totalSavings, getEffectiveUnitPrice, activePromos, promoDiscount, appliedCoupon, applyCoupon, removeCoupon }}>
+    <CartContext.Provider value={{ items, isOpen, addItem, removeItem, updateQuantity, clearCart, openCart, closeCart, totalItems, totalPrice, totalSavings, getEffectiveUnitPrice, activePromos, promoDiscount, appliedCoupon, applyCoupon, removeCoupon, trackAbandonedCart }}>
       {children}
     </CartContext.Provider>
   )

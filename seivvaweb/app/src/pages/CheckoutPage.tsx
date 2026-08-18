@@ -20,7 +20,7 @@ function loadCheckoutForm(): Record<string, string> {
 
 export default function CheckoutPage() {
   const navigate = useNavigate()
-  const { items, clearCart, totalPrice, totalSavings, getEffectiveUnitPrice } = useCart()
+  const { items, clearCart, totalPrice, totalSavings, getEffectiveUnitPrice, trackAbandonedCart } = useCart()
 
   // Redirect if cart is empty
   useEffect(() => {
@@ -83,8 +83,16 @@ export default function CheckoutPage() {
 
   // Save form data to localStorage on changes
   useEffect(() => {
-    saveCheckoutForm({ nombre, apellido, telefono, ruc, direccion, ciudadSeleccionada, metodoPago })
-  }, [nombre, apellido, telefono, ruc, direccion, ciudadSeleccionada, metodoPago])
+    saveCheckoutForm({ nombre, apellido, telefono, codigoPais, ruc, direccion, ciudadSeleccionada, metodoPago })
+  }, [nombre, apellido, telefono, codigoPais, ruc, direccion, ciudadSeleccionada, metodoPago])
+
+  // Registrar carrito abandonado en el panel SOLO cuando hay teléfono (para poder recuperarlo)
+  useEffect(() => {
+    const tel = telefono.trim()
+    if (tel && /^[0-9]{6,}$/.test(tel) && items.length > 0) {
+      trackAbandonedCart(codigoPais + tel)
+    }
+  }, [telefono, codigoPais, items, trackAbandonedCart])
 
   useEffect(() => {
     if (!ciudadSeleccionada) { setEnvioCosto(0); setEnvioCiudad(''); setEnvioTipo('delivery'); return }
