@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ShoppingCart } from 'lucide-react'
-import { fetchProducts, formatPrice, stripHtml, getProductBadges, getTierLabel, type Product } from '../services/api'
+import { fetchProducts, formatPrice, stripHtml, getProductBadges, getTierLabel, imageSrcSet, type Product } from '../services/api'
 import { useCart } from '../context/CartContext'
 
 export default function LatestProducts() {
@@ -99,9 +99,12 @@ export default function LatestProducts() {
                   style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}
                 >
                   <img
-                    src={product.imagen}
+                    src={imageSrcSet(product.imagen).src}
+                    srcSet={imageSrcSet(product.imagen).srcset}
+                    sizes={imageSrcSet(product.imagen).sizes}
                     alt={product.nombre}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
                     onError={(e) => {
                       const t = e.target as HTMLImageElement
                       if (!t.dataset.fallback) {

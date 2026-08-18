@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { X, Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react'
 import { useCart } from '../context/CartContext'
-import { formatPrice, getDiscountedPrice, getNextTier } from '../services/api'
+import { formatPrice, getDiscountedPrice, getNextTier, imageSrcSet } from '../services/api'
 
 export default function CartDrawer() {
   const { items, isOpen, removeItem, updateQuantity, closeCart, totalItems, totalPrice, totalSavings } = useCart()
@@ -71,12 +71,14 @@ export default function CartDrawer() {
                   style={{ backgroundColor: 'var(--theme-bg, #FAF3E8)' }}
                 >
                   <Link to={`/producto/${product.slug || product.id}`} onClick={closeCart} className="shrink-0">
-                    <img
-                      src={product.imagen}
-                      alt={product.nombre}
-                      className="w-16 h-16 object-contain rounded-lg"
-                      style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}
-                    />
+                  <img
+                    src={imageSrcSet(product.imagen).src}
+                    srcSet={imageSrcSet(product.imagen).srcset}
+                    sizes={imageSrcSet(product.imagen).sizes}
+                    alt={product.nombre}
+                    className="w-16 h-16 object-contain rounded-lg"
+                    style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}
+                  />
                   </Link>
 
                   <div className="flex-1 min-w-0">

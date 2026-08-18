@@ -3,7 +3,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Star, Check, Shield, Minus, Plus } from 'lucide-react'
 import { useCart } from '../context/CartContext'
-import { fetchHeroProduct, formatPrice, stripHtml, type Product } from '../services/api'
+import { fetchHeroProduct, formatPrice, stripHtml, imageSrcSet, type Product } from '../services/api'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -111,7 +111,9 @@ export default function ProductFeatured() {
                 style={{ backgroundColor: 'var(--theme-accent, #D4A843)' }}
               />
               <img
-                src={product.imagen}
+                src={imageSrcSet(product.imagen).src}
+                srcSet={imageSrcSet(product.imagen).srcset}
+                sizes={imageSrcSet(product.imagen).sizes}
                 alt={product.nombre}
                 className="relative w-72 h-72 lg:w-96 lg:h-96 object-contain drop-shadow-2xl"
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}

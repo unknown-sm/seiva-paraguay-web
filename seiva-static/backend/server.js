@@ -10,6 +10,7 @@ const webpush = require("web-push");
 const helmet = require("helmet");
 const { rateLimit, ipKeyGenerator } = require("express-rate-limit");
 const multer = require("multer");
+const imageService = require("./image-service");
 require("dotenv").config();
 
 const app = express();
@@ -146,8 +147,10 @@ app.use("/img/productos", function(req, res, next) {
   var buildFile = path.join(imgBuildPath, relPath);
   var uploadFile = path.join(imgPath, relPath);
   if (fs.existsSync(buildFile)) {
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     res.sendFile(buildFile);
   } else if (fs.existsSync(uploadFile)) {
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     res.sendFile(uploadFile);
   } else {
     next();
@@ -166,7 +169,7 @@ const qrUpload = multer({
 const heroUpload = multer({
   storage: multer.diskStorage({
     destination: imgPath,
-    filename: (req, file, cb) => cb(null, "hero-" + Date.now() + "." + (file.originalname.split(".").pop() || "png"))
+    filename: (req, file, cb) => cb(null, "tmp-" + Date.now() + "." + (file.originalname.split(".").pop() || "png"))
   }),
   limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => cb(null, file.mimetype.startsWith("image/"))
@@ -1031,9 +1034,15 @@ app.post("/api/upload-qr", auth, qrUpload.single("qr"), (req, res) => {
   res.status(400).json({ error: msg });
 });
 
-app.post("/api/upload-hero", auth, heroUpload.single("hero"), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "No se subió imagen" });
-  res.json({ url: "/img/productos/" + req.file.filename });
+app.post("/api/upload-hero", auth, heroUpload.single("hero"), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "No se subió imagen" });
+    const url = await imageService.processUploadImage(req.file.path);
+    res.json({ url, variants: imageService.SIZES });
+  } catch (err) {
+    const status = err.status || 500;
+    res.status(status).json({ error: err.message || "Error al procesar imagen" });
+  }
 }, (err, req, res, next) => {
   // Multer error handler for hero upload
   const msg = err.code === 'LIMIT_FILE_SIZE' ? "Imagen muy grande (max 10MB)" :

@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { Trash2, Minus, Plus, ShoppingBag, ArrowLeft, Send } from 'lucide-react'
 import { useCart } from '../context/CartContext'
-import { formatPrice, getDiscountedPrice } from '../services/api'
+import { formatPrice, getDiscountedPrice, imageSrcSet } from '../services/api'
 
 export default function CartPage() {
   const navigate = useNavigate()
@@ -48,7 +48,9 @@ export default function CartPage() {
               >
                 <Link to={`/producto/${product.slug || product.id}`} className="shrink-0">
                   <img
-                    src={product.imagen}
+                    src={imageSrcSet(product.imagen).src}
+                    srcSet={imageSrcSet(product.imagen).srcset}
+                    sizes={imageSrcSet(product.imagen).sizes}
                     alt={product.nombre}
                     className="w-24 h-24 object-contain rounded-xl"
                     style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}

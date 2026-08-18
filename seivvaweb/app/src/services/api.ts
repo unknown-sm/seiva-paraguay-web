@@ -68,6 +68,22 @@ export function fixImageUrl(imagen: string): string {
   return base + '/' + imagen.replace(/^\//, '');
 }
 
+const RESPONSIVE_SIZES = [150, 300, 600, 1000, 1600];
+
+// Build responsive srcset/sizes from a product image URL.
+// Backend generates WebP variants named `<base>-<size>w.webp`.
+// `src` keeps the original (JPEG/PNG) as fallback for browsers without WebP.
+export function imageSrcSet(imagen: string): { src: string; srcset: string; sizes: string } {
+  const src = fixImageUrl(imagen);
+  if (!src) return { src: '', srcset: '', sizes: '' };
+  const base = src.replace(/\.[^.]+$/, '');
+  const srcset = RESPONSIVE_SIZES
+    .map(s => `${base}-${s}w.webp ${s}w`)
+    .join(', ');
+  const sizes = '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px';
+  return { src, srcset, sizes };
+}
+
 export async function fetchProducts(): Promise<Product[]> {
   const res = await fetch(`${API_BASE}/productos`);
   if (!res.ok) throw new Error('Failed to fetch products');

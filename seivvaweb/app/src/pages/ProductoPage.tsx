@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { fetchProducts, type Product, formatPrice, getDiscountedPrice, getActiveTier, fixImageUrl } from '../services/api'
+import { fetchProducts, type Product, formatPrice, getDiscountedPrice, getActiveTier, fixImageUrl, imageSrcSet } from '../services/api'
 import { useCart } from '../context/CartContext'
 import { ShoppingCart, Minus, Plus, ChevronLeft, ChevronRight, Tag, Box, Info, Package, ChevronDown } from 'lucide-react'
 import GlobalSections from '../components/GlobalSections'
@@ -206,9 +206,12 @@ export default function ProductoPage() {
           <div>
             <div className="relative rounded-3xl overflow-hidden group" style={{ backgroundColor: 'var(--theme-border, #E8E0D5)', boxShadow: '0 8px 32px rgba(27,67,50,0.12)' }}>
               <img
-                src={allImages[selectedImage]}
+                src={imageSrcSet(allImages[selectedImage]).src}
+                srcSet={imageSrcSet(allImages[selectedImage]).srcset}
+                sizes={imageSrcSet(allImages[selectedImage]).sizes}
                 alt={product.nombre}
-                className="w-full aspect-square object-cover"
+                className="w-full aspect-square object-contain"
+                fetchpriority="high"
               />
               {allImages.length > 1 && (
                 <>
@@ -227,7 +230,7 @@ export default function ProductoPage() {
                   <button key={i} onClick={() => setSelectedImage(i)}
                     className="shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all"
                     style={{ borderColor: selectedImage === i ? 'var(--theme-primary, #1B4332)' : 'transparent', opacity: selectedImage === i ? 1 : 0.6 }}>
-                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <img src={imageSrcSet(img).src} srcSet={imageSrcSet(img).srcset} sizes={imageSrcSet(img).sizes} alt="" className="w-full h-full object-contain" loading="lazy" />
                   </button>
                 ))}
               </div>
@@ -493,7 +496,7 @@ export default function ProductoPage() {
                   className="group rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02]"
                   style={{ backgroundColor: 'var(--theme-surface, #FFF)', boxShadow: '0 2px 12px rgba(27,67,50,0.06)' }}>
                   <div className="aspect-square overflow-hidden" style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}>
-                    <img src={p.imagen} alt={p.nombre} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img src={imageSrcSet(p.imagen).src} srcSet={imageSrcSet(p.imagen).srcset} sizes={imageSrcSet(p.imagen).sizes} alt={p.nombre} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                   </div>
                   <div className="p-4">
                     <p className="font-body text-xs mb-1" style={{ color: 'var(--theme-primary, #1B4332)' }}>{p.categoria}</p>

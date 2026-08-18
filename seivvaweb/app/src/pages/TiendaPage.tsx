@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { fetchProducts, type Product, formatPrice, getProductBadges, getTierLabel, fixImageUrl, stripHtml } from '../services/api'
+import { fetchProducts, type Product, formatPrice, getProductBadges, getTierLabel, fixImageUrl, imageSrcSet, stripHtml } from '../services/api'
 import { useCart } from '../context/CartContext'
 import { Search, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react'
 import ProductSkeleton from '../components/ProductSkeleton'
@@ -238,9 +238,11 @@ export default function TiendaPage() {
                   <div className="relative">
                     <div className="aspect-square overflow-hidden" style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}>
                       <img
-                        src={fixImageUrl(product.imagen)}
+                        src={imageSrcSet(product.imagen).src}
+                        srcSet={imageSrcSet(product.imagen).srcset}
+                        sizes={imageSrcSet(product.imagen).sizes}
                         alt={product.nombre}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                         loading="lazy"
                         onError={(e) => {
                           const t = e.target as HTMLImageElement

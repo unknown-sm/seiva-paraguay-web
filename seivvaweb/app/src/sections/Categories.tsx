@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ShoppingCart } from 'lucide-react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { fetchProducts, formatPrice, stripHtml, getProductBadges, getTierLabel, type Product } from '../services/api'
+import { fetchProducts, formatPrice, stripHtml, getProductBadges, getTierLabel, imageSrcSet, type Product } from '../services/api'
 
 gsap.registerPlugin(ScrollTrigger)
 import { useCart } from '../context/CartContext'
@@ -129,9 +129,12 @@ export default function Categories() {
                   style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}
                 >
                   <img
-                    src={product.imagen}
+                    src={imageSrcSet(product.imagen).src}
+                    srcSet={imageSrcSet(product.imagen).srcset}
+                    sizes={imageSrcSet(product.imagen).sizes}
                     alt={product.nombre}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
                     onError={(e) => {
                       const t = e.target as HTMLImageElement
                       if (!t.dataset.fallback) {
