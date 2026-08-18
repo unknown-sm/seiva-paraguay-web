@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { fetchProducts, type Product, formatPrice, getProductBadges, getTierLabel, fixImageUrl } from '../services/api'
+import { fetchProducts, type Product, formatPrice, getProductBadges, getTierLabel, fixImageUrl, stripHtml } from '../services/api'
 import { useCart } from '../context/CartContext'
 import { Search, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react'
 import ProductSkeleton from '../components/ProductSkeleton'
@@ -222,39 +222,20 @@ export default function TiendaPage() {
               {paginated.map(product => (
                 <div
                   key={product.id}
-                  className="group rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5 flex flex-col"
+                  className="group rounded-2xl p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1.5 cursor-pointer flex flex-col relative"
                   style={{
-                    backgroundColor: 'var(--theme-surface, #FDF8F0)',
-                    boxShadow: '0 8px 32px rgba(27, 67, 50, 0.12)',
-                    border: '1px solid rgba(27, 67, 50, 0.06)',
+                    backgroundColor: 'var(--theme-surface, #FFFFFF)',
+                    boxShadow: '0 2px 12px rgba(45, 106, 79, 0.10), 0 0 0 1px var(--theme-border, rgba(45, 106, 79, 0.08))',
+                  }}
+                  onClick={() => navigate(`/producto/${product.slug || product.id}`)}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 32px rgba(45, 106, 79, 0.18), 0 0 0 1px rgba(45, 106, 79, 0.12)'
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 12px rgba(45, 106, 79, 0.10), 0 0 0 1px rgba(45, 106, 79, 0.08)'
                   }}
                 >
-                  {/* Badges - outside image */}
-                  {(product.precio_anterior && product.precio_anterior > product.precio) || !product.stock || (product.stock > 0 && getProductBadges(product).length > 0) ? (
-                    <div className="flex flex-wrap gap-1.5 px-3 pt-3 pb-1">
-                      {product.precio_anterior && product.precio_anterior > product.precio && (
-                        <span className="font-body font-semibold text-[10px] px-2 py-1 rounded-full" style={{ backgroundColor: '#E63946', color: '#FFF' }}>
-                          OFERTA
-                        </span>
-                      )}
-                      {!product.stock && (
-                        <span className="font-body font-semibold text-[10px] px-2 py-1 rounded-full" style={{ backgroundColor: '#DC2626', color: '#FFF' }}>
-                          AGOTADO
-                        </span>
-                      )}
-                      {product.stock > 0 && getProductBadges(product).map(b => (
-                        <span key={b.label} className="font-body font-semibold text-[10px] px-2 py-1 rounded-full" style={{ backgroundColor: b.color, color: '#fff' }}>
-                          {b.label}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-
-                  {/* Image - full width, cover like home grid */}
-                  <div
-                    className="cursor-pointer relative"
-                    onClick={() => navigate(`/producto/${product.slug || product.id}`)}
-                  >
+                  <div className="relative">
                     <div className="aspect-square overflow-hidden" style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}>
                       <img
                         src={fixImageUrl(product.imagen)}
@@ -272,53 +253,75 @@ export default function TiendaPage() {
                     </div>
                   </div>
 
-                  {/* Content */}
-                  <div className="p-3 pt-2 flex flex-col flex-1">
+                  <div className="flex flex-col flex-1 mt-3">
                     <h3
-                      className="font-body font-semibold text-sm leading-snug line-clamp-2 cursor-pointer"
-                      style={{ color: 'var(--theme-text, #3D2817)' }}
-                      onClick={() => navigate(`/producto/${product.slug || product.id}`)}
+                      className="font-body font-semibold text-sm sm:text-[15px] leading-snug line-clamp-2"
+                      style={{ color: 'var(--theme-text, #1A1A1A)' }}
                     >
                       {product.nombre}
                     </h3>
-                    <div className="flex flex-wrap items-baseline gap-x-2 mt-2">
-                      <span className="font-body font-bold text-base sm:text-lg" style={{ color: 'var(--theme-primary, #1B4332)' }}>
-                        {formatPrice(product.precio)}
-                      </span>
-                      {product.precio_anterior && (
-                        <span className="font-body text-[11px] sm:text-xs line-through" style={{ color: 'var(--theme-muted, #999)' }}>
-                          {formatPrice(product.precio_anterior)}
-                        </span>
-                      )}
-                    </div>
-                    {product.price_tiers && product.price_tiers.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-1.5">
-                        {product.price_tiers.slice(0, 2).map((t, i) => (
-                          <span key={i} className="font-body font-medium text-[9px] px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--theme-primary-bg-05, rgba(27,67,50,0.06))', color: 'var(--theme-primary, #1B4332)' }}>
-                            {getTierLabel(t, product)}
+                    <p className="font-body text-xs mt-1 leading-relaxed line-clamp-1" style={{ color: 'var(--theme-muted, #6B6B6B)' }}>
+                      {stripHtml(product.descripcion)}
+                    </p>
+
+                    {/* Badges below description */}
+                    {(product.precio_anterior && product.precio_anterior > product.precio) || !product.stock || (product.stock > 0 && getProductBadges(product).length > 0) ? (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {product.precio_anterior && product.precio_anterior > product.precio && (
+                          <span className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#E63946', color: '#FFFFFF' }}>
+                            {Math.round((1 - product.precio / product.precio_anterior) * 100)}% OFF
+                          </span>
+                        )}
+                        {!product.stock && (
+                          <span className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}>
+                            AGOTADO
+                          </span>
+                        )}
+                        {product.stock > 0 && getProductBadges(product).map(b => (
+                          <span key={b.label} className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: b.color, color: '#fff' }}>
+                            {b.label}
                           </span>
                         ))}
                       </div>
-                    )}
+                    ) : null}
+
                     <div className="mt-auto pt-3">
+                      <div className="flex flex-wrap items-baseline gap-x-2 mb-1">
+                        <span className="font-body font-bold text-base sm:text-lg" style={{ color: 'var(--theme-primary, #1B4332)' }}>
+                          {formatPrice(product.precio)}
+                        </span>
+                        {product.precio_anterior && product.precio_anterior > product.precio && (
+                          <span className="font-body text-xs line-through" style={{ color: 'var(--theme-muted, #999)' }}>
+                            {formatPrice(product.precio_anterior)}
+                          </span>
+                        )}
+                      </div>
+                      {product.price_tiers && product.price_tiers.length > 0 && (
+                        <div className="mb-2 flex flex-wrap gap-1">
+                          {product.price_tiers.slice(0, 2).map((t, i) => (
+                            <span key={i} className="font-body font-medium text-[10px] px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--theme-primary-bg-05, rgba(27,67,50,0.06))', color: 'var(--theme-primary, #1B4332)' }}>
+                              {getTierLabel(t, product)}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                       <button
                         onClick={(e) => {
-                          if (!product.stock) return
-                          e.preventDefault()
                           e.stopPropagation()
-                          addItem(product)
+                          if (!product.stock) return
+                          addItem(product, 1)
                         }}
-                        disabled={!product.stock}
-                        className="w-full inline-flex items-center justify-center gap-2 font-body font-semibold text-xs px-4 py-2.5 rounded-full transition-all duration-300"
+                        disabled={product.stock <= 0}
+                        className="font-body font-semibold text-xs px-5 py-2.5 rounded-full transition-all duration-300 hover:scale-105 inline-flex items-center justify-center gap-1.5 w-full"
                         style={{
-                          backgroundColor: product.stock ? 'var(--theme-accent, #D4A843)' : 'var(--theme-border, #E8E0D5)',
-                          color: product.stock ? 'var(--theme-primary, #1B4332)' : 'var(--theme-muted, #999)',
+                          backgroundColor: product.stock <= 0 ? '#9CA3AF' : 'var(--theme-primary, #1B4332)',
+                          color: 'var(--theme-text-on-primary, #FFFFFF)',
                           letterSpacing: '0.04em',
-                          cursor: product.stock ? 'pointer' : 'not-allowed',
+                          cursor: product.stock <= 0 ? 'not-allowed' : 'pointer',
                         }}
                       >
-                        <ShoppingCart className="w-4 h-4" />
-                        {product.stock ? 'Agregar' : 'Agotado'}
+                        <ShoppingCart className="w-3.5 h-3.5" />
+                        {product.stock <= 0 ? 'Agotado' : 'Agregar'}
                       </button>
                     </div>
                   </div>
