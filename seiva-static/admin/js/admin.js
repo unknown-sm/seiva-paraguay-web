@@ -334,10 +334,11 @@ function renderProductos(searchVal, filterCat, filterActivo) {
 
   var tbody = document.getElementById("productos-tbody");
   if (!tbody) return;
-  tbody.innerHTML = paginated.map(function(p) {
-    var cls = p.activo ? "" : "inactive";
-    return '<tr class="' + cls + '">' +
-      '<td>' + xt(p.nombre) + (p.featured_order > 0 ? ' <span style="font-size:0.7rem;background:var(--accent);color:#fff;padding:1px 6px;border-radius:10px">#' + p.featured_order + '</span>' : '') + (p.destacado && !p.featured_order ? ' <span style="font-size:0.7rem;background:var(--accent);color:#fff;padding:1px 6px;border-radius:10px">Destacado</span>' : '') + '</td>' +
+    tbody.innerHTML = paginated.map(function(p) {
+      var cls = p.activo ? "" : "inactive";
+      return '<tr class="' + cls + '">' +
+        '<td>#' + p.id + '</td>' +
+        '<td>' + xt(p.nombre) + (p.featured_order > 0 ? ' <span style="font-size:0.7rem;background:var(--accent);color:#fff;padding:1px 6px;border-radius:10px">#' + p.featured_order + '</span>' : '') + (p.destacado && !p.featured_order ? ' <span style="font-size:0.7rem;background:var(--accent);color:#fff;padding:1px 6px;border-radius:10px">Destacado</span>' : '') + '</td>' +
       '<td>' + formatGs(p.precio) + (p.precio_anterior ? ' <del style="font-size:0.7rem;color:var(--muted)">' + formatGs(p.precio_anterior) + '</del>' : '') + '</td>' +
       '<td>' + (p.marca || '—') + '</td>' +
       '<td><input type="number" value="' + p.stock + '" min="0" onchange="updateStockInline(' + p.id + ', this.value)" style="width:55px;padding:4px 6px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--text);font-size:0.85rem;text-align:center"></td>' +

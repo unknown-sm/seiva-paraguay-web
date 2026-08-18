@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { fetchProducts, type Product, formatPrice, getProductBadges, getTierLabel } from '../services/api'
+import { fetchProducts, type Product, formatPrice, getProductBadges, getTierLabel, fixImageUrl } from '../services/api'
 import { useCart } from '../context/CartContext'
 import { Search, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react'
 import ProductSkeleton from '../components/ProductSkeleton'
@@ -236,7 +236,7 @@ export default function TiendaPage() {
                     onClick={() => navigate(`/producto/${product.slug || product.id}`)}
                   >
                     <img
-                      src={product.imagen}
+                      src={fixImageUrl(product.imagen)}
                       alt={product.nombre}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"
