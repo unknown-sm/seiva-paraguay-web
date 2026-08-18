@@ -209,7 +209,16 @@ export default function TiendaPage() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
+        {/* Products Grid */}
+        {loading ? (
+          <ProductSkeleton count={8} />
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-20 font-body" style={{ color: 'var(--theme-muted, #5C4033)' }}>
+            No se encontraron productos con esos filtros.
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
               {paginated.map(product => (
                 <div
                   key={product.id}
