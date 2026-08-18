@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#1B4332">
-  <link rel="manifest" href="/admin/manifest.json">
+  <link rel="manifest" href="/admin/manifest.json?v=2">
   <title>Dashboard &mdash; Seiva Paraguay</title>
   <link rel="stylesheet" href="css/admin.css?v=2">
 </head>
@@ -16,7 +16,7 @@
     <h1 class="login-title">Seiva Admin</h1>
     <p class="login-sub">Panel de administraci&oacute;n</p>
       <form id="login-form">
-        <input type="text" id="login-username" placeholder="Usuario" class="login-input" value="admin">
+        <input type="text" id="login-username" placeholder="Usuario" class="login-input" value="admin" autocomplete="username">
         <input type="password" id="login-password" placeholder="Contrase&ntilde;a" class="login-input" autofocus autocomplete="current-password">
         <button type="submit" class="login-btn">Ingresar</button>
         <p id="login-error" class="login-error hidden">Usuario o contrase&ntilde;a incorrecta</p>
@@ -1089,6 +1089,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 <script src="js/admin.js"></script>
-<script src="js/pwa.js?v=2"></script>
+<script src="js/pwa.js?v=3"></script>
 </body>
 </html>

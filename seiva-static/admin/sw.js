@@ -61,3 +61,16 @@ self.addEventListener("notificationclick", function(e) {
     })
   );
 });
+
+// Fetch handler - only handle same-origin, let external requests pass through
+self.addEventListener("fetch", function(e) {
+  var url = new URL(e.request.url);
+  // Only handle same-origin requests
+  if (url.origin !== self.location.origin) {
+    return; // Let browser handle external requests normally
+  }
+  // For same-origin, just use default network fetch
+  e.respondWith(fetch(e.request).catch(function() {
+    return new Response("Offline", { status: 503 });
+  }));
+});
