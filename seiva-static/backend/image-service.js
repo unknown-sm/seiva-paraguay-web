@@ -86,15 +86,8 @@ async function ensureVariantsForFile(filename) {
   return needed.map(s => base + s)
 }
 
-// On-demand generation for a requested variant URL path like "name-600w.webp".
-// Finds the source original (uploads or build dir) and generates the resized
-// WebP into the uploads dir. Returns the absolute path, or null if not possible.
-async function ensureVariantForRequest(relPath) {
-  const m = relPath.match(/^(.+)-(\d+)w\.webp$/)
-  if (!m) return null
-  const base = m[1]
-  const size = parseInt(m[2], 10)
-  if (!SIZES.includes(size)) return null
+// Build candidate source paths (original image) for a given base name.
+function buildSources(base) {
   const exts = ['.webp', '.png', '.jpg', '.jpeg']
   const sources = []
   for (const ext of exts) {
@@ -104,19 +97,52 @@ async function ensureVariantForRequest(relPath) {
   for (const ext of exts) {
     sources.push(path.join(IMG_DIR, base + '-original' + ext))
   }
-  const srcFile = sources.find(f => fs.existsSync(f))
-  if (!srcFile) return null
-  ensureDir()
-  const out = path.join(IMG_DIR, relPath)
-  try {
-    await sharp(srcFile)
-      .resize({ width: size, withoutEnlargement: true })
-      .webp({ quality: WEBP_QUALITY, effort: 4 })
-      .toFile(out)
-    return out
-  } catch (e) {
-    return null
-  }
+  return sources
+}
+
+// In-flight dedupe so concurrent requests for the same variant collapse
+// into a single generation (prevents corrupt/partial files under grid load).
+const inFlight = new Map()
+
+// On-demand generation for a requested variant URL path like "name-600w.webp".
+// Finds the source original and generates the resized WebP into the uploads
+// dir using an atomic temp+rename. Returns the absolute path, or null.
+async function ensureVariantForRequest(relPath) {
+  if (inFlight.has(relPath)) return inFlight.get(relPath)
+  const p = (async () => {
+    const m = relPath.match(/^(.+)-(\d+)w\.webp$/)
+    if (!m) return null
+    const base = m[1]
+    const size = parseInt(m[2], 10)
+    if (!SIZES.includes(size)) return null
+    const srcFile = buildSources(base).find(f => fs.existsSync(f))
+    if (!srcFile) return null
+    ensureDir()
+    const out = path.join(IMG_DIR, relPath)
+    if (fs.existsSync(out)) return out
+    const tmp = out + '.tmp-' + process.pid + '-' + Date.now()
+    try {
+      await sharp(srcFile)
+        .resize({ width: size, withoutEnlargement: true })
+        .webp({ quality: WEBP_QUALITY, effort: 4 })
+        .toFile(tmp)
+      fs.renameSync(tmp, out)
+      return out
+    } catch (e) {
+      try { fs.unlinkSync(tmp) } catch (_) {}
+      return null
+    }
+  })()
+  inFlight.set(relPath, p)
+  try { return await p } finally { inFlight.delete(relPath) }
+}
+
+// Find the original source for a variant path (fallback when generation
+// is not possible) so the image is never broken — just unoptimized.
+function findOriginalForVariant(relPath) {
+  const m = relPath.match(/^(.+)-(\d+)w\.webp$/)
+  if (!m) return null
+  return buildSources(m[1]).find(f => fs.existsSync(f)) || null
 }
 
 module.exports = {
@@ -126,6 +152,7 @@ module.exports = {
   processUploadImage,
   ensureVariantsForFile,
   ensureVariantForRequest,
+  findOriginalForVariant,
   findSource,
   stripExt,
 }

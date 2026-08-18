@@ -162,6 +162,14 @@ app.use("/img/productos", async function(req, res, next) {
       setCache();
       return res.sendFile(generated);
     }
+  } catch (e) { /* fall through to fallback */ }
+  // Fallback: serve the original image so it is never broken
+  try {
+    var original = imageService.findOriginalForVariant(relPath);
+    if (original) {
+      setCache();
+      return res.sendFile(original);
+    }
   } catch (e) { /* fall through to next */ }
   next();
 });
