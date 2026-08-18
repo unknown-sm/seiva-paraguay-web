@@ -208,7 +208,7 @@ export default function ProductoPage() {
               <img
                 src={allImages[selectedImage]}
                 alt={product.nombre}
-                className="w-full aspect-square object-contain p-4"
+                className="w-full aspect-square object-cover"
               />
               {allImages.length > 1 && (
                 <>

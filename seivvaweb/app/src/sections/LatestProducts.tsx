@@ -111,28 +111,6 @@ export default function LatestProducts() {
                     }}
                   />
                 </div>
-                {/* Badges - positioned at top-left of image */}
-                <div className="absolute top-3 left-3 flex flex-wrap gap-1 z-10 pointer-events-none">
-                  {product.precio_anterior && product.precio_anterior > product.precio && (
-                    <span className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#E63946', color: '#FFFFFF' }}>
-                      {Math.round((1 - product.precio / product.precio_anterior) * 100)}% OFF
-                    </span>
-                  )}
-                  {product.stock <= 0 && (
-                    <span className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}>
-                      AGOTADO
-                    </span>
-                  )}
-                  {product.stock > 0 && (() => {
-                    const badges = getProductBadges(product)
-                    if (!badges.length) return null
-                    return badges.map(b => (
-                      <span key={b.label} className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: b.color, color: '#fff' }}>
-                        {b.label}
-                      </span>
-                    ))
-                  })()}
-                </div>
               </div>
 
               <div className="flex flex-col flex-1 mt-3">
@@ -145,6 +123,27 @@ export default function LatestProducts() {
                 <p className="font-body text-xs mt-1 leading-relaxed line-clamp-1" style={{ color: 'var(--theme-muted, #6B6B6B)' }}>
                   {stripHtml(product.descripcion)}
                 </p>
+
+                {/* Badges below description */}
+                {(product.precio_anterior && product.precio_anterior > product.precio) || product.stock <= 0 || (product.stock > 0 && getProductBadges(product).length > 0) ? (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {product.precio_anterior && product.precio_anterior > product.precio && (
+                      <span className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#E63946', color: '#FFFFFF' }}>
+                        {Math.round((1 - product.precio / product.precio_anterior) * 100)}% OFF
+                      </span>
+                    )}
+                    {product.stock <= 0 && (
+                      <span className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}>
+                        AGOTADO
+                      </span>
+                    )}
+                    {product.stock > 0 && getProductBadges(product).map(b => (
+                      <span key={b.label} className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: b.color, color: '#fff' }}>
+                        {b.label}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
 
                 <div className="mt-auto pt-3">
                   <div className="flex flex-wrap items-baseline gap-x-2 mb-1">
