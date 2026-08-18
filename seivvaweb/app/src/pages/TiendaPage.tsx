@@ -209,36 +209,49 @@ export default function TiendaPage() {
           ))}
         </div>
 
-        {/* Products Grid */}
-        {loading ? (
-          <ProductSkeleton count={8} />
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-20 font-body" style={{ color: 'var(--theme-muted, #5C4033)' }}>
-            No se encontraron productos con esos filtros.
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
               {paginated.map(product => (
                 <div
                   key={product.id}
-                  className="group rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5"
+                  className="group rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1.5 flex flex-col"
                   style={{
                     backgroundColor: 'var(--theme-surface, #FDF8F0)',
                     boxShadow: '0 8px 32px rgba(27, 67, 50, 0.12)',
                     border: '1px solid rgba(27, 67, 50, 0.06)',
                   }}
                 >
-                  {/* Image - clickable */}
-                    <div
-                    className="aspect-square overflow-hidden cursor-pointer relative"
-                    style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}
+                  {/* Badges - outside image */}
+                  {(product.precio_anterior && product.precio_anterior > product.precio) || !product.stock || (product.stock > 0 && getProductBadges(product).length > 0) ? (
+                    <div className="flex flex-wrap gap-1.5 px-3 pt-3 pb-1">
+                      {product.precio_anterior && product.precio_anterior > product.precio && (
+                        <span className="font-body font-semibold text-[10px] px-2 py-1 rounded-full" style={{ backgroundColor: '#E63946', color: '#FFF' }}>
+                          OFERTA
+                        </span>
+                      )}
+                      {!product.stock && (
+                        <span className="font-body font-semibold text-[10px] px-2 py-1 rounded-full" style={{ backgroundColor: '#DC2626', color: '#FFF' }}>
+                          AGOTADO
+                        </span>
+                      )}
+                      {product.stock > 0 && getProductBadges(product).map(b => (
+                        <span key={b.label} className="font-body font-semibold text-[10px] px-2 py-1 rounded-full" style={{ backgroundColor: b.color, color: '#fff' }}>
+                          {b.label}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+
+                  {/* Image - larger on mobile */}
+                  <div
+                    className="cursor-pointer relative mx-3 mt-1"
+                    style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', overflow: 'hidden' }}
                     onClick={() => navigate(`/producto/${product.slug || product.id}`)}
                   >
                     <img
                       src={fixImageUrl(product.imagen)}
                       alt={product.nombre}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full object-contain group-hover:scale-105 transition-transform duration-500"
+                      style={{ height: '160px' }}
                       loading="lazy"
                       onError={(e) => {
                         const t = e.target as HTMLImageElement
@@ -248,49 +261,18 @@ export default function TiendaPage() {
                         }
                       }}
                     />
-                    {product.precio_anterior && (
-                      <span
-                        className="absolute bottom-2 right-2 font-body font-bold text-[9px] px-2 py-0.5 rounded-full z-10"
-                        style={{ backgroundColor: '#E63946', color: '#FFF' }}
-                      >
-                        OFERTA
-                      </span>
-                    )}
-                    {!product.stock && (
-                      <div className="absolute inset-0 flex items-center justify-center z-[5]" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}>
-                        <span
-                          className="font-body font-black text-xl sm:text-2xl px-6 py-3 rounded-xl tracking-widest"
-                          style={{ backgroundColor: '#DC2626', color: '#FFFFFF', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}
-                        >
-                          AGOTADO
-                        </span>
-                      </div>
-                    )}
-                    {product.stock > 0 && (() => {
-                      const badges = getProductBadges(product)
-                      if (!badges.length) return null
-                      return (
-                        <div className="absolute bottom-2 left-2 flex flex-wrap gap-1 z-10">
-                          {badges.map(b => (
-                            <span key={b.label} className="font-body font-semibold text-[8px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: b.color, color: '#fff' }}>
-                              {b.label}
-                            </span>
-                          ))}
-                        </div>
-                      )
-                    })()}
                   </div>
 
                   {/* Content */}
-                  <div className="p-4">
+                  <div className="p-3 pt-2 flex flex-col flex-1">
                     <h3
-                      className="font-body font-semibold text-base leading-snug cursor-pointer"
+                      className="font-body font-semibold text-sm leading-snug line-clamp-2 cursor-pointer"
                       style={{ color: 'var(--theme-text, #3D2817)' }}
                       onClick={() => navigate(`/producto/${product.slug || product.id}`)}
                     >
                       {product.nombre}
                     </h3>
-                    <div className="flex flex-wrap items-baseline gap-x-2 mt-3">
+                    <div className="flex flex-wrap items-baseline gap-x-2 mt-2">
                       <span className="font-body font-bold text-base sm:text-lg" style={{ color: 'var(--theme-primary, #1B4332)' }}>
                         {formatPrice(product.precio)}
                       </span>
@@ -301,7 +283,7 @@ export default function TiendaPage() {
                       )}
                     </div>
                     {product.price_tiers && product.price_tiers.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
+                      <div className="flex flex-wrap gap-1 mt-1.5">
                         {product.price_tiers.slice(0, 2).map((t, i) => (
                           <span key={i} className="font-body font-medium text-[9px] px-1.5 py-0.5 rounded" style={{ backgroundColor: 'var(--theme-primary-bg-05, rgba(27,67,50,0.06))', color: 'var(--theme-primary, #1B4332)' }}>
                             {getTierLabel(t, product)}
@@ -309,25 +291,27 @@ export default function TiendaPage() {
                         ))}
                       </div>
                     )}
-                    <button
-                      onClick={(e) => {
-                        if (!product.stock) return
-                        e.preventDefault()
-                        e.stopPropagation()
-                        addItem(product)
-                      }}
-                      disabled={!product.stock}
-                      className="mt-3 w-full inline-flex items-center justify-center gap-2 font-body font-semibold text-xs px-4 py-2.5 rounded-full transition-all duration-300"
-                      style={{
-                        backgroundColor: product.stock ? 'var(--theme-accent, #D4A843)' : 'var(--theme-border, #E8E0D5)',
-                        color: product.stock ? 'var(--theme-primary, #1B4332)' : 'var(--theme-muted, #999)',
-                        letterSpacing: '0.04em',
-                        cursor: product.stock ? 'pointer' : 'not-allowed',
-                      }}
-                    >
-                      <ShoppingCart className="w-4 h-4" />
-                      {product.stock ? 'Agregar' : 'Agotado'}
-                    </button>
+                    <div className="mt-auto pt-3">
+                      <button
+                        onClick={(e) => {
+                          if (!product.stock) return
+                          e.preventDefault()
+                          e.stopPropagation()
+                          addItem(product)
+                        }}
+                        disabled={!product.stock}
+                        className="w-full inline-flex items-center justify-center gap-2 font-body font-semibold text-xs px-4 py-2.5 rounded-full transition-all duration-300"
+                        style={{
+                          backgroundColor: product.stock ? 'var(--theme-accent, #D4A843)' : 'var(--theme-border, #E8E0D5)',
+                          color: product.stock ? 'var(--theme-primary, #1B4332)' : 'var(--theme-muted, #999)',
+                          letterSpacing: '0.04em',
+                          cursor: product.stock ? 'pointer' : 'not-allowed',
+                        }}
+                      >
+                        <ShoppingCart className="w-4 h-4" />
+                        {product.stock ? 'Agregar' : 'Agotado'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
