@@ -218,7 +218,7 @@ export default function TiendaPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5">
               {paginated.map(product => (
                 <div
                   key={product.id}
@@ -250,26 +250,26 @@ export default function TiendaPage() {
                     </div>
                   ) : null}
 
-                  {/* Image - larger on mobile */}
+                  {/* Image - full width, cover like home grid */}
                   <div
-                    className="cursor-pointer relative mx-3 mt-1"
-                    style={{ backgroundColor: '#FFFFFF', borderRadius: '12px', overflow: 'hidden' }}
+                    className="cursor-pointer relative"
                     onClick={() => navigate(`/producto/${product.slug || product.id}`)}
                   >
-                    <img
-                      src={fixImageUrl(product.imagen)}
-                      alt={product.nombre}
-                      className="w-full object-contain group-hover:scale-105 transition-transform duration-500"
-                      style={{ height: '160px' }}
-                      loading="lazy"
-                      onError={(e) => {
-                        const t = e.target as HTMLImageElement
-                        if (!t.dataset.fallback) {
-                          t.dataset.fallback = '1'
-                          t.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="%23f0f0f0" width="100" height="100"/><text x="50" y="50" text-anchor="middle" dy=".3em" fill="%23999" font-size="12">Sin imagen</text></svg>'
-                        }
-                      }}
-                    />
+                    <div className="aspect-square overflow-hidden" style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}>
+                      <img
+                        src={fixImageUrl(product.imagen)}
+                        alt={product.nombre}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                        onError={(e) => {
+                          const t = e.target as HTMLImageElement
+                          if (!t.dataset.fallback) {
+                            t.dataset.fallback = '1'
+                            t.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="%23f0f0f0" width="100" height="100"/><text x="50" y="50" text-anchor="middle" dy=".3em" fill="%23999" font-size="12">Sin imagen</text></svg>'
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
 
                   {/* Content */}
