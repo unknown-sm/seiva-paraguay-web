@@ -84,7 +84,11 @@ export default function ProductoPage() {
     if (product.imagen) {
       const imgUrl = product.imagen.startsWith('http') ? product.imagen : `https://seiva.com.py${product.imagen}`;
       setMeta('og:image', imgUrl);
+      setMeta('twitter:image', imgUrl);
     }
+    setMeta('twitter:card', 'summary_large_image')
+    setMeta('twitter:title', product.nombre)
+    setMeta('twitter:description', product.seo_descripcion || product.descripcion?.replace(/<[^>]*>/g, '').substring(0, 160) || '')
     setMeta('product:price:amount', product.precio.toString())
     setMeta('product:price:currency', 'PYG')
 

@@ -2304,6 +2304,82 @@ let distPath = path.join(__dirname, "dist");
 if (fs.existsSync(distPath)) {
   // New deployment: serve React SPA + API-only backend
   app.use(express.static(distPath));
+
+  // Server-side Open Graph injection for product pages.
+  // Link crawlers (WhatsApp, Facebook, etc.) don't execute JS, so the SPA's
+  // client-side meta tags are never seen — they only get the static index.html
+  // (which ships the store logo). We inject product-specific OG tags into the
+  // raw HTML for /producto/:slug so shared links preview the actual product image.
+  var indexHtmlCache = null;
+  function getIndexHtml() {
+    if (indexHtmlCache === null) {
+      try { indexHtmlCache = fs.readFileSync(path.join(distPath, "index.html"), "utf8"); }
+      catch (e) { indexHtmlCache = ""; }
+    }
+    return indexHtmlCache;
+  }
+  function escapeHtml(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+  function stripHtml(s) {
+    return String(s || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  }
+  var OG_BASE = "https://seiva.com.py";
+
+  app.get(/^\/producto\/([^/]+)\/?$/, function (req, res) {
+    var slug = req.params[0];
+    var product = null;
+    try {
+      product = db.prepare(
+        "SELECT nombre, precio, descripcion, seo_descripcion, imagen FROM productos WHERE activo = 1 AND (slug = ? OR id = ?) LIMIT 1"
+      ).get(slug, Number(slug) || -1);
+    } catch (e) { product = null; }
+
+    var html = getIndexHtml();
+    if (!html) { return res.sendFile(path.join(distPath, "index.html")); }
+
+    var img = OG_BASE + "/logo.png";
+    if (product && product.imagen) {
+      img = product.imagen.indexOf("http") === 0 ? product.imagen : OG_BASE + product.imagen;
+    }
+    var title = (product ? product.nombre : "Seiva Paraguay") + " - Seiva Paraguay";
+    var desc = product
+      ? (product.seo_descripcion || stripHtml(product.descripcion).substring(0, 160) || "")
+      : "Snacks saludables y suplementos naturales. Envíos a todo Paraguay.";
+    var url = OG_BASE + (req.path.charAt(req.path.length - 1) === "/" ? req.path.slice(0, -1) : req.path);
+
+    var og = [
+      "<title>" + escapeHtml(title) + "</title>",
+      '<meta name="description" content="' + escapeHtml(desc) + '" />',
+      '<meta property="og:title" content="' + escapeHtml(title) + '" />',
+      '<meta property="og:description" content="' + escapeHtml(desc) + '" />',
+      '<meta property="og:image" content="' + escapeHtml(img) + '" />',
+      '<meta property="og:image:width" content="1200" />',
+      '<meta property="og:image:height" content="630" />',
+      '<meta property="og:url" content="' + escapeHtml(url) + '" />',
+      '<meta property="og:type" content="' + (product ? "product" : "website") + '" />',
+      product ? '<meta property="product:price:amount" content="' + escapeHtml(product.precio) + '" />' : "",
+      product ? '<meta property="product:price:currency" content="PYG" />' : "",
+      '<meta name="twitter:card" content="summary_large_image" />',
+      '<meta name="twitter:title" content="' + escapeHtml(title) + '" />',
+      '<meta name="twitter:description" content="' + escapeHtml(desc) + '" />',
+      '<meta name="twitter:image" content="' + escapeHtml(img) + '" />'
+    ].join("\n    ");
+
+    var out = html
+      .replace(/<title>[\s\S]*?<\/title>/i, "")
+      .replace(/<meta\s+name="description"[^>]*>/gi, "")
+      .replace(/<meta\s+property="og:[^>]*>/gi, "")
+      .replace(/<meta\s+property="product:[^>]*>/gi, "")
+      .replace(/<meta\s+name="twitter:[^>]*>/gi, "");
+    out = out.replace(/(<head[^>]*>)/i, "$1\n    " + og + "\n  ");
+
+    res.set("Content-Type", "text/html; charset=utf-8");
+    res.send(out);
+  });
+
   app.get("*", (req, res) => {
     if (!req.path.startsWith("/api") && !req.path.startsWith("/admin")) {
       res.sendFile(path.join(distPath, "index.html"));
