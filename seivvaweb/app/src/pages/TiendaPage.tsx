@@ -231,7 +231,7 @@ export default function TiendaPage() {
                 >
                   {/* Image - clickable */}
                     <div
-                    className="aspect-square overflow-hidden cursor-pointer"
+                    className="aspect-square overflow-hidden cursor-pointer relative"
                     style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}
                     onClick={() => navigate(`/producto/${product.slug || product.id}`)}
                   >
