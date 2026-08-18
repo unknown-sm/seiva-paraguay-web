@@ -18,8 +18,11 @@ var PWA = (function() {
       if (data.notification_sound) customSoundUrl = data.notification_sound;
     }).catch(function() {});
 
-    // Registrar service worker
-    navigator.serviceWorker.register("/bd-backpanel/sw.js", { scope: "/bd-backpanel/" })
+    // Registrar service worker. El query ?v= fuerza a los clientes a
+    // descartar un SW obsoleto (que fetched recursos externos / servia HTML
+    // cacheado con CSP viejo) e instalar el limpio. Subir el numero al
+    // cambiar sw.js.
+    navigator.serviceWorker.register("/bd-backpanel/sw.js?v=4", { scope: "/bd-backpanel/" })
       .then(function(reg) {
         console.log("SW registrado:", reg.scope);
         return subscribeUser(reg);
