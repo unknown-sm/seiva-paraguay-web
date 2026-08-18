@@ -293,6 +293,28 @@ function loadStockAlertas() {
 var prodPage = 1;
 var prodPerPage = 20;
 var prodAllData = [];
+var prodSort = { key: null, dir: 1 };
+
+window.sortProductos = function(key) {
+  if (prodSort.key === key) {
+    prodSort.dir = -prodSort.dir;
+  } else {
+    prodSort.key = key;
+    prodSort.dir = 1;
+  }
+  var s = (document.getElementById("productos-search") || {}).value || "";
+  var c = (document.getElementById("prod-filter-cat") || {}).value;
+  var a = (document.getElementById("prod-filter-activo") || {}).value;
+  renderProductos(s, c, a);
+};
+
+function updateSortIndicators() {
+  var headers = document.querySelectorAll("th[data-sort]");
+  headers.forEach(function(th) {
+    var ind = th.querySelector(".sort-ind");
+    if (ind) ind.textContent = (th.getAttribute("data-sort") === prodSort.key) ? (prodSort.dir === 1 ? " ▲" : " ▼") : "";
+  });
+}
 
 function loadProductos() {
   var searchVal = (document.getElementById("productos-search") || {}).value || "";
@@ -325,6 +347,18 @@ function renderProductos(searchVal, filterCat, filterActivo) {
     data = data.filter(function(p) { return p.activo; });
   } else if (filterActivo === '0') {
     data = data.filter(function(p) { return !p.activo; });
+  }
+  if (prodSort.key) {
+    var k = prodSort.key, d = prodSort.dir;
+    data = data.slice().sort(function(a, b) {
+      var av, bv;
+      if (k === "id" || k === "precio" || k === "stock") { av = Number(a[k]) || 0; bv = Number(b[k]) || 0; }
+      else if (k === "activo") { av = a.activo ? 1 : 0; bv = b.activo ? 1 : 0; }
+      else { av = (a[k] || "").toString().toLowerCase(); bv = (b[k] || "").toString().toLowerCase(); }
+      if (av < bv) return -1 * d;
+      if (av > bv) return 1 * d;
+      return 0;
+    });
   }
   var total = data.length;
   var totalPages = Math.ceil(total / prodPerPage);
@@ -378,6 +412,7 @@ function renderProductos(searchVal, filterCat, filterActivo) {
     html += '</div></div>';
     footer.innerHTML = html;
   }
+  updateSortIndicators();
 }
 
 // Buscar en productos — use renderProductos to keep pagination
