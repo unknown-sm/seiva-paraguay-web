@@ -86,12 +86,46 @@ async function ensureVariantsForFile(filename) {
   return needed.map(s => base + s)
 }
 
+// On-demand generation for a requested variant URL path like "name-600w.webp".
+// Finds the source original (uploads or build dir) and generates the resized
+// WebP into the uploads dir. Returns the absolute path, or null if not possible.
+async function ensureVariantForRequest(relPath) {
+  const m = relPath.match(/^(.+)-(\d+)w\.webp$/)
+  if (!m) return null
+  const base = m[1]
+  const size = parseInt(m[2], 10)
+  if (!SIZES.includes(size)) return null
+  const exts = ['.webp', '.png', '.jpg', '.jpeg']
+  const sources = []
+  for (const ext of exts) {
+    sources.push(path.join(IMG_DIR, base + ext))
+    sources.push(path.join(IMG_BUILD_DIR, base + ext))
+  }
+  for (const ext of exts) {
+    sources.push(path.join(IMG_DIR, base + '-original' + ext))
+  }
+  const srcFile = sources.find(f => fs.existsSync(f))
+  if (!srcFile) return null
+  ensureDir()
+  const out = path.join(IMG_DIR, relPath)
+  try {
+    await sharp(srcFile)
+      .resize({ width: size, withoutEnlargement: true })
+      .webp({ quality: WEBP_QUALITY, effort: 4 })
+      .toFile(out)
+    return out
+  } catch (e) {
+    return null
+  }
+}
+
 module.exports = {
   SIZES,
   MIN_DIM,
   ALLOWED_EXT,
   processUploadImage,
   ensureVariantsForFile,
+  ensureVariantForRequest,
   findSource,
   stripExt,
 }

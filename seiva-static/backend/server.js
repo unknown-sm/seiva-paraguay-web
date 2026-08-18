@@ -142,19 +142,28 @@ if (!fs.existsSync(imgPath)) {
 console.log("imgPath: " + imgPath + " exists: " + fs.existsSync(imgPath));
 console.log("imgBuildPath: " + imgBuildPath + " exists: " + fs.existsSync(imgBuildPath));
 // Custom static middleware: check build first, then uploads
-app.use("/img/productos", function(req, res, next) {
+app.use("/img/productos", async function(req, res, next) {
   var relPath = req.path.startsWith("/") ? req.path.slice(1) : req.path;
   var buildFile = path.join(imgBuildPath, relPath);
   var uploadFile = path.join(imgPath, relPath);
+  var setCache = function() { res.setHeader('Cache-Control', 'public, max-age=31536000, immutable'); };
   if (fs.existsSync(buildFile)) {
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-    res.sendFile(buildFile);
-  } else if (fs.existsSync(uploadFile)) {
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-    res.sendFile(uploadFile);
-  } else {
-    next();
+    setCache();
+    return res.sendFile(buildFile);
   }
+  if (fs.existsSync(uploadFile)) {
+    setCache();
+    return res.sendFile(uploadFile);
+  }
+  // On-demand generation of responsive WebP variants (self-healing)
+  try {
+    var generated = await imageService.ensureVariantForRequest(relPath);
+    if (generated) {
+      setCache();
+      return res.sendFile(generated);
+    }
+  } catch (e) { /* fall through to next */ }
+  next();
 });
 
 const qrUpload = multer({
