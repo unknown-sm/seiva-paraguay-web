@@ -216,8 +216,13 @@ export default function Hero() {
               ref={bottleRef}
               src={heroImage}
               alt="Seiva Paraguay"
+              width={380}
+              height={760}
+              fetchPriority="high"
+              decoding="async"
               className="relative z-10 w-[200px] sm:w-[280px] lg:w-[380px] object-contain"
               style={{
+                aspectRatio: "380 / 760",
                 filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.5))',
                 transform: 'rotate(-8deg)',
               }}

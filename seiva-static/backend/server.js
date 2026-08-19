@@ -11,6 +11,7 @@ const helmet = require("helmet");
 const { rateLimit, ipKeyGenerator } = require("express-rate-limit");
 const multer = require("multer");
 const imageService = require("./image-service");
+const compression = require("compression");
 require("dotenv").config();
 
 const app = express();
@@ -87,6 +88,9 @@ app.use(helmet({
     }
   }
 }));
+
+// Compresión gzip/brotli de respuestas (HTML/CSS/JS) en origen
+app.use(compression({ brotli: true, threshold: 1024 }));
 
 // Rate limiter for login - progressive delay
 const loginAttempts = new Map();
@@ -1212,6 +1216,7 @@ app.post("/api/upload-hero", auth, heroUpload.single("hero"), async (req, res) =
 
 // ---------- PRODUCTOS ----------
 app.get("/api/productos", (req, res) => {
+  res.set("Cache-Control", "public, max-age=0, s-maxage=30");
   const rows = db.prepare(`
     SELECT p.*, COALESCE(m.prioridad, 0) as marca_prioridad
     FROM productos p
@@ -2005,6 +2010,7 @@ app.get("/api/stats/top-productos", auth, (req, res) => {
 
 // ---------- CONTENIDO ----------
 app.get("/api/contenido", (req, res) => {
+  res.set("Cache-Control", "public, max-age=60, s-maxage=60");
   const rows = db.prepare("SELECT * FROM contenido").all();
   const obj = {};
   for (const r of rows) obj[r.key] = r.value;
@@ -2477,7 +2483,18 @@ app.use("/bd-backpanel", express.static(adminPath, {
 let distPath = path.join(__dirname, "dist");
 if (fs.existsSync(distPath)) {
   // New deployment: serve React SPA + API-only backend
-  app.use(express.static(distPath));
+  // Cache de HTML en el edge: las rutas sin extensión (documentos) llevan
+  // s-maxage para que Cloudflare las sirva desde el edge y no golpee el origen.
+  app.use((req, res, next) => {
+    if (req.method === "GET" &&
+        !req.path.startsWith("/api") && !req.path.startsWith("/admin") &&
+        !req.path.startsWith("/bd-backpanel") &&
+        !path.extname(req.path)) {
+      res.set("Cache-Control", "public, max-age=300, s-maxage=300");
+    }
+    next();
+  });
+  app.use(express.static(distPath, { maxAge: "1y", immutable: true }));
 
   // Server-side Open Graph injection for product pages.
   // Link crawlers (WhatsApp, Facebook, etc.) don't execute JS, so the SPA's
