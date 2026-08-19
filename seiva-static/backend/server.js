@@ -51,6 +51,13 @@ function sendPushNotification(title, body, url) {
   }
 }
 
+// ---------- SSE (eventos en vivo para el admin) ----------
+const sseClients = new Set();
+function broadcastEvent(type, data) {
+  const payload = "event: " + type + "\ndata: " + JSON.stringify(data || {}) + "\n\n";
+  for (const c of sseClients) { try { c.write(payload); } catch (e) {} }
+}
+
 app.use(cors({
   origin: function(origin, cb) {
     const allowed = process.env.CORS_ORIGIN
@@ -1124,6 +1131,25 @@ function backfillSlugs() {
 
 // ---------- UPLOADS ----------
 app.get("/api/ping", (req, res) => res.json({ pong: true, ts: Date.now() }));
+
+// Canal SSE para notificar al admin en tiempo real (suena la notificación
+// aunque el usuario no haya autorizado el push). Token por query param.
+app.get("/api/admin-events", (req, res) => {
+  try {
+    const decoded = jwt.verify(req.query.token, JWT_SECRET);
+    if (decoded.role !== "admin") return res.status(401).end();
+  } catch (e) {
+    return res.status(401).end();
+  }
+  res.writeHead(200, {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache, no-transform",
+    "Connection": "keep-alive"
+  });
+  res.write("retry: 5000\n\n");
+  sseClients.add(res);
+  req.on("close", () => sseClients.delete(res));
+});
 app.post("/api/upload-qr", auth, qrUpload.single("qr"), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No se subió imagen" });
   try {
@@ -1881,6 +1907,7 @@ app.post("/api/ventas", auth, (req, res) => {
     (cliente || "Cliente") + " — Gs." + (total || 0).toLocaleString("es-PY") + " — " + noms,
     "/admin?tab=historico"
   );
+  broadcastEvent("new-venta", { id: result.lastInsertRowid, cliente: cliente, total: total || 0 });
 });
 
 // ---------- STATS ----------
@@ -2124,6 +2151,7 @@ app.post("/api/pedidos", pedidoLimiter, (req, res) => {
     cliente + " — Gs." + (total || 0).toLocaleString("es-PY") + " — " + prodNames,
     "/admin?tab=pedidos"
   );
+  broadcastEvent("new-pedido", { id: result.lastInsertRowid, cliente: cliente, total: total || 0 });
 });
 
 // ---------- CARRITOS ABANDONADOS ----------

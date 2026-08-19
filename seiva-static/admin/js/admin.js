@@ -122,6 +122,19 @@ function previewSound(url) {
   setTimeout(function() { try { a.pause(); } catch (e) {} }, 2500);
 }
 
+// Canal SSE: suena la notificación en la pestaña abierta cuando entra un pedido/venta,
+// sin depender de que el usuario haya autorizado el push.
+var adminEventsSource = null;
+function connectAdminEvents() {
+  if (adminEventsSource || !window.EventSource) return;
+  var es = new EventSource(API + "/admin-events?token=" + encodeURIComponent(token || ""));
+  function play() { if (window.PWA && PWA.playCashSound) PWA.playCashSound(); }
+  es.addEventListener("new-pedido", play);
+  es.addEventListener("new-venta", play);
+  es.onerror = function() { adminEventsSource = null; };
+  adminEventsSource = es;
+}
+
 // ---------- AUTH ----------
 function login(username, password) {
   return api("/auth/login", { method: "POST", body: JSON.stringify({ username: username, password: password }) });
@@ -665,6 +678,9 @@ document.addEventListener("DOMContentLoaded", function() {
       previewSound(url);
     });
   }
+  // Inicializar PWA (registra SW, suscripción push, sonido custom) y SSE en vivo
+  if (window.PWA && PWA.init) PWA.init();
+  connectAdminEvents();
 });
 
 function editarProducto(id) {
@@ -1591,6 +1607,8 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById("dashboard-screen").classList.remove("hidden");
         switchTab(getTabFromUrl(), true);
         loadGAScript();
+        if (window.PWA && PWA.init) PWA.init();
+        connectAdminEvents();
       } else {
         document.getElementById("login-error").classList.remove("hidden");
       }
