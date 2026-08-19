@@ -1,7 +1,6 @@
 import { lazy, Suspense } from 'react'
 import ProductSkeleton from '../components/ProductSkeleton'
-
-const Hero = lazy(() => import('../sections/Hero'))
+import Hero from '../sections/Hero'
 const StatsBar = lazy(() => import('../sections/StatsBar'))
 const ProductFeatured = lazy(() => import('../sections/ProductFeatured'))
 const FeaturedGrid = lazy(() => import('../sections/FeaturedGrid'))
@@ -12,9 +11,7 @@ const LatestProducts = lazy(() => import('../sections/LatestProducts'))
 export default function HomePage() {
   return (
     <>
-      <Suspense fallback={<div className="min-h-[60vh]" />}>
-        <Hero />
-      </Suspense>
+      <Hero />
       <Suspense fallback={<div className="min-h-[20vh]" />}>
         <StatsBar />
       </Suspense>

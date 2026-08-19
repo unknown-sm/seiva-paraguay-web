@@ -48,8 +48,8 @@ export default function Hero() {
     const ctx = gsap.context(() => {
       if (headlineRef.current) {
         gsap.fromTo(headlineRef.current,
-          { y: 60, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out', delay: 0.5 }
+          { y: 24, opacity: 1 },
+          { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out', delay: 0.1 }
         )
       }
 
@@ -59,11 +59,11 @@ export default function Hero() {
         { y: 0, opacity: 1, stagger: 0.15, duration: 0.7, ease: 'power2.out', delay: 0.9 }
       )
 
-      // Bottle entrance
+      // Bottle entrance (kept visible at mount so LCP paints immediately)
       if (bottleRef.current) {
         gsap.fromTo(bottleRef.current,
-          { scale: 0.7, opacity: 0, rotate: -15 },
-          { scale: 1, opacity: 1, rotate: -8, duration: 1.2, ease: 'elastic.out(1, 0.5)', delay: 0.6 }
+          { scale: 0.92, rotate: -8 },
+          { scale: 1, rotate: -8, duration: 1.0, ease: 'power2.out', delay: 0.2 }
         )
       }
 
@@ -211,23 +211,46 @@ export default function Hero() {
 
           {/* Right Column - Product + Ingredients */}
           <div className="relative flex items-center justify-center order-1 lg:order-2 h-[400px] lg:h-[600px]">
-            {/* Main Bottle */}
-            <img
-              ref={bottleRef}
-              src={heroImage}
-              alt="Seiva Paraguay"
-              width={380}
-              height={760}
-              fetchPriority="high"
-              decoding="async"
-              className="relative z-10 w-[200px] sm:w-[280px] lg:w-[380px] object-contain"
-              style={{
-                aspectRatio: "380 / 760",
-                filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.5))',
-                transform: 'rotate(-8deg)',
-              }}
-              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-            />
+            {/* Main Bottle (LCP) — served as AVIF/WebP when default */}
+            {heroImage === '/images/hero-bottle.jpg' ? (
+              <picture>
+                <source srcSet="/images/hero-bottle.avif" type="image/avif" />
+                <source srcSet="/images/hero-bottle.webp" type="image/webp" />
+                <img
+                  ref={bottleRef}
+                  src={heroImage}
+                  alt="Seiva Paraguay"
+                  width={380}
+                  height={760}
+                  fetchPriority="high"
+                  decoding="async"
+                  className="relative z-10 w-[200px] sm:w-[280px] lg:w-[380px] object-contain"
+                  style={{
+                    aspectRatio: "380 / 760",
+                    filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.5))',
+                    transform: 'rotate(-8deg)',
+                  }}
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                />
+              </picture>
+            ) : (
+              <img
+                ref={bottleRef}
+                src={heroImage}
+                alt="Seiva Paraguay"
+                width={380}
+                height={760}
+                fetchPriority="high"
+                decoding="async"
+                className="relative z-10 w-[200px] sm:w-[280px] lg:w-[380px] object-contain"
+                style={{
+                  aspectRatio: "380 / 760",
+                  filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.5))',
+                  transform: 'rotate(-8deg)',
+                }}
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+              />
+            )}
 
             {/* Floating Ingredients */}
             {ingredients.map((ing, i) => (
