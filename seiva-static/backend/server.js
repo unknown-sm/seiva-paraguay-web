@@ -441,6 +441,17 @@ db.exec(`
   );
 `);
 
+// Los NUEVOS pedidos arrancan en id 1000, sin renumerar los existentes.
+// Solo empuja el contador AUTOINCREMENT; los pedidos actuales conservan su id.
+try {
+  const _p = db.prepare("SELECT MAX(id) AS mx, (SELECT seq FROM sqlite_sequence WHERE name='pedidos') AS seq FROM pedidos").get();
+  const _target = Math.max(999, _p.mx || 0, _p.seq || 0);
+  db.prepare("UPDATE sqlite_sequence SET seq = ? WHERE name='pedidos'").run(_target);
+  if (db.prepare("SELECT changes() c").get().c === 0) {
+    db.prepare("INSERT INTO sqlite_sequence (name, seq) VALUES ('pedidos', ?)").run(_target);
+  }
+} catch (e) { /* sqlite_sequence no existe aun si nunca hubo inserts */ }
+
 const contenidoDefault = {
    hero_titulo: "Suplementos Premium para tu Salud y Rendimiento",
    hero_descripcion: "Las mejores marcas de suplementos, vitaminas y proteinas. Envio rapido a todo Paraguay.",
