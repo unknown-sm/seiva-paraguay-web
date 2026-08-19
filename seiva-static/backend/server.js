@@ -1862,14 +1862,28 @@ app.get("/api/stats", auth, (req, res) => {
   const semanaInicio = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
   const mesInicio = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
 
-  const ventasHoy = db.prepare("SELECT COALESCE(SUM(total), 0) as total, COUNT(*) as cantidad FROM ventas WHERE fecha >= ?").get(hoy);
-  const ventasSemana = db.prepare("SELECT COALESCE(SUM(total), 0) as total, COUNT(*) as cantidad FROM ventas WHERE fecha >= ?").get(semanaInicio);
-  const ventasMes = db.prepare("SELECT COALESCE(SUM(total), 0) as total, COUNT(*) as cantidad FROM ventas WHERE fecha >= ?").get(mesInicio);
+  // Las ventas reales = ventas manuales (tabla ventas) + pedidos del sitio (no cancelados)
+  const salesSum = (since) => {
+    const v = db.prepare("SELECT COALESCE(SUM(total), 0) as total, COUNT(*) as cantidad FROM ventas WHERE fecha >= ?").get(since);
+    const p = db.prepare("SELECT COALESCE(SUM(total), 0) as total, COUNT(*) as cantidad FROM pedidos WHERE fecha >= ? AND estado != 'cancelado'").get(since);
+    return { total: v.total + p.total, cantidad: v.cantidad + p.cantidad };
+  };
+  const ventasHoy = salesSum(hoy);
+  const ventasSemana = salesSum(semanaInicio);
+  const ventasMes = salesSum(mesInicio);
   const productosCount = db.prepare("SELECT COUNT(*) as c FROM productos WHERE activo = 1").get();
-  const ultimasVentas = db.prepare("SELECT * FROM ventas ORDER BY fecha DESC LIMIT 10").all();
 
-  // Calcular ganancias estimadas 30 días
-  const todasMes = db.prepare("SELECT productos, total FROM ventas WHERE fecha >= ?").all(mesInicio);
+  const ultimasVentas = db.prepare("SELECT id, fecha, cliente, productos, total, metodo_pago, whatsapp, 'venta' as origen FROM ventas ORDER BY fecha DESC LIMIT 10").all();
+  const ultimasPedidos = db.prepare("SELECT id, fecha, cliente, productos, total, metodo_pago, whatsapp, 'pedido' as origen FROM pedidos WHERE estado != 'cancelado' ORDER BY fecha DESC LIMIT 10").all();
+  const ultimas_ventas = ultimasVentas.concat(ultimasPedidos)
+    .sort((a, b) => (b.fecha || "").localeCompare(a.fecha || ""))
+    .slice(0, 10)
+    .map(r => ({ ...r, productos: JSON.parse(r.productos || "[]") }));
+
+  // Calcular ganancias estimadas 30 días (ventas + pedidos)
+  const todasMesV = db.prepare("SELECT productos, total FROM ventas WHERE fecha >= ?").all(mesInicio);
+  const todasMesP = db.prepare("SELECT productos, total FROM pedidos WHERE fecha >= ? AND estado != 'cancelado'").all(mesInicio);
+  const todasMes = todasMesV.concat(todasMesP);
   let gananciasMes = 0;
   let costoTotalMes = 0;
   let ventasConCosto = 0;
@@ -1899,15 +1913,16 @@ app.get("/api/stats", auth, (req, res) => {
     costo_mes: costoTotalMes,
     ventas_con_costo: ventasConCosto,
     valor_inventario: inventario.total,
-    ultimas_ventas: ultimasVentas.map(r => ({ ...r, productos: JSON.parse(r.productos || "[]") }))
+    ultimas_ventas: ultimas_ventas
   });
 });
 
 app.get("/api/stats/top-productos", auth, (req, res) => {
   const mesInicio = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
   const ventas = db.prepare("SELECT productos FROM ventas WHERE fecha >= ?").all(mesInicio);
+  const pedidos = db.prepare("SELECT productos FROM pedidos WHERE fecha >= ? AND estado != 'cancelado'").all(mesInicio);
   const conteo = {};
-  for (const v of ventas) {
+  for (const v of ventas.concat(pedidos)) {
     const prods = JSON.parse(v.productos || "[]");
     for (const p of prods) {
       const nombre = p.nombre || "";
