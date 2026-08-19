@@ -1461,6 +1461,7 @@ function renderPedidos() {
           '<option value="cancelado"' + (p.estado === 'cancelado' ? ' selected' : '') + '>Cancelado</option>' +
         '</select>' +
       '</td>' +
+      '<td style="text-align:center"><button type="button" class="btn btn-sm btn-danger" style="margin:0;padding:4px 8px" onclick="event.stopPropagation(); eliminarPedido(' + p.id + ')">Eliminar</button></td>' +
     '</tr>';
   }).join("");
   renderPaginationFooter("pedidos-tbody", total, totalPages, "pedidosPage", "renderPedidos()");
