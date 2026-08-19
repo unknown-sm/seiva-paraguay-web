@@ -187,6 +187,23 @@ const heroUpload = multer({
   fileFilter: (req, file, cb) => cb(null, file.mimetype.startsWith("image/"))
 });
 
+const soundExt = {
+  "audio/mpeg": "mp3", "audio/mp3": "mp3", "audio/wav": "wav", "audio/x-wav": "wav",
+  "audio/wave": "wav", "audio/ogg": "ogg", "audio/webm": "webm", "audio/mp4": "m4a",
+  "audio/aac": "aac", "audio/x-m4a": "m4a"
+};
+const soundUpload = multer({
+  storage: multer.diskStorage({
+    destination: imgPath,
+    filename: (req, file, cb) => {
+      const ext = soundExt[file.mimetype] || "mp3";
+      cb(null, "sound-" + Date.now() + "-" + crypto.randomBytes(3).toString("hex") + "." + ext);
+    }
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => cb(null, file.mimetype.startsWith("audio/"))
+});
+
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, "data", "database.sqlite");
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 
@@ -1121,6 +1138,16 @@ app.post("/api/upload-qr", auth, qrUpload.single("qr"), async (req, res) => {
   const msg = err.code === 'LIMIT_FILE_SIZE' ? "Imagen muy grande (max 5MB)" :
               err.message?.startsWith("FormFileError") || err.message?.includes("image") ? "Formato no permitido" :
               "Error al subir imagen";
+  res.status(400).json({ error: msg });
+});
+
+app.post("/api/upload-sound", auth, soundUpload.single("sound"), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No se subió audio" });
+  res.json({ url: "/img/productos/" + req.file.filename });
+}, (err, req, res, next) => {
+  const msg = err.code === 'LIMIT_FILE_SIZE' ? "Audio muy grande (max 5MB)" :
+              (err.message && err.message.includes("audio")) ? "Formato no permitido" :
+              "Error al subir audio";
   res.status(400).json({ error: msg });
 });
 

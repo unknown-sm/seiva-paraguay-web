@@ -51,6 +51,77 @@ function payBadge(m) {
   return '<span class="badge ' + e[1] + '">' + xt(e[0]) + '</span>';
 }
 
+// ---------- SONIDO DE NOTIFICACIÓN ----------
+// Codifica un AudioBuffer a WAV (PCM 16-bit) sin librerías externas.
+function encodeWav(audioBuffer) {
+  var numCh = audioBuffer.numberOfChannels;
+  var sr = audioBuffer.sampleRate;
+  var len = audioBuffer.length;
+  var blockAlign = numCh * 2;
+  var dataSize = len * blockAlign;
+  var buffer = new ArrayBuffer(44 + dataSize);
+  var view = new DataView(buffer);
+  function ws(off, s) { for (var i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); }
+  ws(0, "RIFF"); view.setUint32(4, 36 + dataSize, true); ws(8, "WAVE");
+  ws(12, "fmt "); view.setUint32(16, 16, true); view.setUint16(20, 1, true);
+  view.setUint16(22, numCh, true); view.setUint32(24, sr, true);
+  view.setUint32(28, sr * blockAlign, true); view.setUint16(32, blockAlign, true); view.setUint16(34, 16, true);
+  ws(36, "data"); view.setUint32(40, dataSize, true);
+  var off = 44; var ch = [];
+  for (var c = 0; c < numCh; c++) ch.push(audioBuffer.getChannelData(c));
+  for (var i = 0; i < len; i++) {
+    for (var c = 0; c < numCh; c++) {
+      var s = Math.max(-1, Math.min(1, ch[c][i]));
+      view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      off += 2;
+    }
+  }
+  return new Blob([view], { type: "audio/wav" });
+}
+
+// Decodifica el archivo, recorta a maxSeconds y devuelve un Blob WAV.
+function trimAudioToWav(file, maxSeconds, cb) {
+  var reader = new FileReader();
+  reader.onload = function() {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) { cb(new Error("Sin soporte de audio")); return; }
+    var ctx = new AC();
+    ctx.decodeAudioData(reader.result).then(function(buf) {
+      var sr = buf.sampleRate;
+      var maxLen = Math.min(Math.floor(sr * maxSeconds), buf.length);
+      var out = ctx.createBuffer(buf.numberOfChannels, maxLen, sr);
+      for (var c = 0; c < buf.numberOfChannels; c++) out.getChannelData(c).set(buf.getChannelData(c).subarray(0, maxLen));
+      cb(null, encodeWav(out));
+    }).catch(function(e) { cb(e); });
+  };
+  reader.onerror = function() { cb(reader.error); };
+  reader.readAsArrayBuffer(file);
+}
+
+function uploadSoundFile(blob, filename) {
+  var fd = new FormData();
+  fd.append("sound", blob, filename);
+  return fetch(API + "/upload-sound", {
+    method: "POST",
+    headers: { "Authorization": "Bearer " + token },
+    body: fd
+  }).then(function(r) {
+    if (!r.ok) return r.text().then(function(t) {
+      try { throw new Error(JSON.parse(t).error || "Error al subir"); } catch (e) { throw new Error("Error al subir audio"); }
+    });
+    return r.json();
+  });
+}
+
+function previewSound(url) {
+  var a = document.getElementById("sound-preview");
+  if (!a) return;
+  a.style.display = "block";
+  a.src = url;
+  a.play().catch(function() {});
+  setTimeout(function() { try { a.pause(); } catch (e) {} }, 2500);
+}
+
 // ---------- AUTH ----------
 function login(username, password) {
   return api("/auth/login", { method: "POST", body: JSON.stringify({ username: username, password: password }) });
@@ -569,6 +640,31 @@ document.addEventListener("DOMContentLoaded", function() {
       switchOfferTab(tab);
     });
   });
+  // Sonido de notificación: subir (recortado a 2s) + probar
+  var soundUploadEl = document.getElementById("sound-upload");
+  if (soundUploadEl) {
+    soundUploadEl.addEventListener("change", function() {
+      var f = this.files && this.files[0];
+      if (!f) return;
+      toast("Procesando audio...");
+      trimAudioToWav(f, 2, function(err, wav) {
+        if (err) { toast("No se pudo procesar el audio"); return; }
+        uploadSoundFile(wav, "sound.wav").then(function(r) {
+          document.getElementById("contenido-notification_sound").value = r.url;
+          toast("Sonido subido (recortado a 2s)");
+          previewSound(r.url);
+        }).catch(function(e) { toast("Error al subir: " + (e.message || "intenta de nuevo")); });
+      });
+    });
+  }
+  var soundTestEl = document.getElementById("sound-test");
+  if (soundTestEl) {
+    soundTestEl.addEventListener("click", function() {
+      var url = (document.getElementById("contenido-notification_sound").value || "").trim();
+      if (!url) { toast("No hay sonido configurado"); return; }
+      previewSound(url);
+    });
+  }
 });
 
 function editarProducto(id) {
@@ -1041,9 +1137,10 @@ function loadContenido() {
    e.preventDefault();
    var body = {};
    var keys = ["hero_titulo", "hero_descripcion", "whatsapp_numero", "whatsapp_mensaje", "hero_imagen", "hero_imagenes", "site_titulo", "site_descripcion", "site_logo", "site_favicon", "logo_height", "logo_fit", "envio_minimo_gratis", "pagos_instrucciones", "efectivo_instrucciones", "notification_sound", "global_envios", "global_pagos", "global_garantia"];
-   for (var i = 0; i < keys.length; i++) {
-     body[keys[i]] = document.getElementById("contenido-" + keys[i]).value;
-   }
+    for (var i = 0; i < keys.length; i++) {
+      var el = document.getElementById("contenido-" + keys[i]);
+      body[keys[i]] = el ? el.value : "";
+    }
    // Save stats bar
    var stats = [];
    for (var j = 0; j < 4; j++) {
