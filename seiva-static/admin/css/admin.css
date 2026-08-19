@@ -16,6 +16,7 @@
   --color-success: #059669;
   --color-danger: #dc2626;
   --color-warning: #d97706;
+  --emerald: #00c896;
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
   --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
   --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
@@ -206,30 +207,100 @@ body {
 }
 
 .stat-card {
+  position: relative;
+  overflow: hidden;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 20px;
-  box-shadow: var(--shadow-sm);
+  border-radius: 14px;
+  padding: 22px 24px;
+  box-shadow: var(--shadow-md);
 }
+/* Left accent bar — generalizes the status-color system to every KPI */
+.stat-card::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--card-accent, var(--emerald)), color-mix(in srgb, var(--card-accent, var(--emerald)) 35%, transparent));
+}
+.stat-card.kpi-sales     { --card-accent: var(--emerald); }
+.stat-card.kpi-products  { --card-accent: #38bdf8; }
+.stat-card.kpi-profit    { --card-accent: var(--emerald); }
+.stat-card.kpi-inventory { --card-accent: #a78bfa; }
+/* Positive (money) metrics use the emerald accent for the main value */
+.stat-card.kpi-sales .stat-card-value,
+.stat-card.kpi-profit .stat-card-value { color: var(--emerald); }
+
+.kpi-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.kpi-icon {
+  width: 38px; height: 38px;
+  flex: none;
+  border-radius: 10px;
+  display: grid; place-items: center;
+  background: color-mix(in srgb, var(--card-accent, var(--emerald)) 16%, transparent);
+  color: var(--card-accent, var(--emerald));
+}
+.kpi-icon svg { width: 20px; height: 20px; display: block; }
+
 .stat-card-label {
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-muted);
-  margin-bottom: 8px;
 }
 .stat-card-value {
-  font-size: 24px;
+  font-size: 27px;
   font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
   color: var(--text);
 }
 .stat-card-sub {
   font-size: 13px;
   color: var(--muted);
-  margin-top: 4px;
+  margin-top: 6px;
 }
+
+/* Progress bars (Top 5 Productos) */
+.bar {
+  height: 8px;
+  background: var(--bg-hover);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--emerald), color-mix(in srgb, var(--emerald) 55%, #34d399));
+}
+.bar-name { font-size: 13.5px; font-weight: 500; color: var(--text); }
+.top-num, .sales-table .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Avatar + payment badges (Últimas Ventas) */
+.avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-weight: 600; font-size: 13px;
+  background: color-mix(in srgb, var(--emerald) 18%, transparent);
+  color: var(--emerald);
+}
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 12px; font-weight: 500;
+  line-height: 1.4;
+}
+.badge-green  { background: color-mix(in srgb, #34d399 16%, transparent); color: #34d399; }
+.badge-blue   { background: color-mix(in srgb, #38bdf8 16%, transparent); color: #38bdf8; }
+.badge-violet { background: color-mix(in srgb, #a78bfa 16%, transparent); color: #a78bfa; }
+.badge-amber  { background: color-mix(in srgb, #fbbf24 16%, transparent); color: #fbbf24; }
+.badge-muted  { background: var(--bg-hover); color: var(--text-muted); }
+.muted { color: var(--muted); }
+.empty { color: var(--muted); font-size: 13px; padding: 8px 0; }
 
 .dashboard-grid {
   display: grid;

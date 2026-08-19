@@ -28,6 +28,29 @@ function xt(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').rep
 function formatGs(n) { return "Gs." + Number(n).toLocaleString("es-PY"); }
 function formatDate(d) { return new Date(d).toLocaleDateString("es-PY", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }); }
 
+function kpiIcon(name) {
+  var i = {
+    bag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>',
+    cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+    box: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg>',
+    trend: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>',
+    layers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>'
+  };
+  return i[name] || "";
+}
+
+function payBadge(m) {
+  var map = {
+    efectivo: ["Efectivo", "badge-green"],
+    transferencia: ["Transferencia", "badge-blue"],
+    tarjeta: ["Tarjeta", "badge-violet"],
+    qr: ["QR", "badge-amber"],
+    whatsapp: ["WhatsApp", "badge-green"]
+  };
+  var e = map[(m || "").toLowerCase()] || [(m || "—"), "badge-muted"];
+  return '<span class="badge ' + e[1] + '">' + xt(e[0]) + '</span>';
+}
+
 // ---------- AUTH ----------
 function login(username, password) {
   return api("/auth/login", { method: "POST", body: JSON.stringify({ username: username, password: password }) });
@@ -153,27 +176,41 @@ function toggleSidebar() {
 // ---------- DASHBOARD ----------
 function loadDashboard() {
   api("/stats").then(function(stats) {
-    var html = "";
-    html += '<div class="stat-card"><div class="stat-card-label">Ventas Hoy</div><div class="stat-card-value">' + formatGs(stats.hoy.total) + '</div><div class="stat-card-sub">' + stats.hoy.cantidad + ' pedidos</div></div>';
-    html += '<div class="stat-card"><div class="stat-card-label">Ventas 7 D&iacute;as</div><div class="stat-card-value">' + formatGs(stats.semana.total) + '</div><div class="stat-card-sub">' + stats.semana.cantidad + ' pedidos</div></div>';
-    html += '<div class="stat-card"><div class="stat-card-label">Ventas 30 D&iacute;as</div><div class="stat-card-value">' + formatGs(stats.mes.total) + '</div><div class="stat-card-sub">' + stats.mes.cantidad + ' pedidos</div></div>';
-    html += '<div class="stat-card"><div class="stat-card-label">Productos Activos</div><div class="stat-card-value">' + stats.productos_activos + '</div></div>';
-    html += '<div class="stat-card" style="border-left:3px solid var(--success)"><div class="stat-card-label">Ganancias Est. 30d</div><div class="stat-card-value" style="color:var(--success)">' + formatGs(stats.ganancias_mes) + '</div><div class="stat-card-sub">' + stats.ventas_con_costo + ' ventas con costo</div></div>';
-    html += '<div class="stat-card" style="border-left:3px solid var(--accent)"><div class="stat-card-label">Valor Inventario</div><div class="stat-card-value">' + formatGs(stats.valor_inventario) + '</div><div class="stat-card-sub">Costo proveedor</div></div>';
-    document.getElementById("stats-cards").innerHTML = html;
+    var cards = [
+      { cls: "kpi-sales",     icon: "bag",   label: "Ventas Hoy",         value: formatGs(stats.hoy.total),         sub: stats.hoy.cantidad + " pedidos" },
+      { cls: "kpi-sales",     icon: "cal",   label: "Ventas 7 Días",      value: formatGs(stats.semana.total),      sub: stats.semana.cantidad + " pedidos" },
+      { cls: "kpi-sales",     icon: "cal",   label: "Ventas 30 Días",     value: formatGs(stats.mes.total),         sub: stats.mes.cantidad + " pedidos" },
+      { cls: "kpi-products",  icon: "box",   label: "Productos Activos",  value: stats.productos_activos,           sub: "En catálogo" },
+      { cls: "kpi-profit",    icon: "trend", label: "Ganancias Est. 30d", value: formatGs(stats.ganancias_mes),     sub: stats.ventas_con_costo + " ventas con costo" },
+      { cls: "kpi-inventory", icon: "layers",label: "Valor Inventario",   value: formatGs(stats.valor_inventario),  sub: "Costo proveedor" }
+    ];
+    document.getElementById("stats-cards").innerHTML = cards.map(function(c) {
+      return '<div class="stat-card ' + c.cls + '"><div class="kpi-top"><span class="kpi-icon">' + kpiIcon(c.icon) + '</span><span class="stat-card-label">' + c.label + '</span></div><div class="stat-card-value">' + c.value + '</div>' + (c.sub ? '<div class="stat-card-sub">' + c.sub + '</div>' : '') + '</div>';
+    }).join("");
 
     var uv = document.getElementById("ultimas-ventas");
-    uv.innerHTML = '<table><thead><tr><th>Fecha</th><th>Cliente</th><th>Total</th><th>Pago</th></tr></thead><tbody>' +
-      stats.ultimas_ventas.map(function(v) {
-        return '<tr><td>' + formatDate(v.fecha) + '</td><td>' + (v.cliente || "—") + '</td><td>' + formatGs(v.total) + '</td><td>' + v.metodo_pago + '</td></tr>';
-      }).join("") + '</tbody></table>';
+    if (!stats.ultimas_ventas || !stats.ultimas_ventas.length) {
+      uv.innerHTML = '<p class="empty">Sin ventas registradas todavía</p>';
+    } else {
+      uv.innerHTML = '<table class="admin-table sales-table"><thead><tr><th></th><th>Fecha</th><th>Cliente</th><th class="num">Total</th><th>Pago</th></tr></thead><tbody>' +
+        stats.ultimas_ventas.map(function(v) {
+          var ini = xt(((v.cliente || "?").trim().charAt(0) || "?").toUpperCase());
+          return '<tr><td><span class="avatar">' + ini + '</span></td><td class="muted">' + formatDate(v.fecha) + '</td><td>' + xt(v.cliente || "—") + '</td><td class="num">' + formatGs(v.total) + '</td><td>' + payBadge(v.metodo_pago) + '</td></tr>';
+        }).join("") + '</tbody></table>';
+    }
   });
 
   api("/stats/top-productos").then(function(top) {
     var tp = document.getElementById("top-productos");
-    tp.innerHTML = '<table><thead><tr><th>Producto</th><th>Cantidad</th></tr></thead><tbody>' +
-      top.map(function(p, i) {
-        return '<tr><td>' + (i + 1) + ". " + p.nombre + '</td><td>' + p.cantidad + '</td></tr>';
+    if (!top || !top.length) {
+      tp.innerHTML = '<p class="empty">Sin datos de ventas en 30 días</p>';
+      return;
+    }
+    var max = top.reduce(function(m, p) { return Math.max(m, p.cantidad); }, 0);
+    tp.innerHTML = '<table class="admin-table"><thead><tr><th>Producto</th><th class="top-num">Vendidos</th></tr></thead><tbody>' +
+      top.map(function(p) {
+        var pct = max ? Math.round(p.cantidad / max * 100) : 0;
+        return '<tr><td><div class="bar-name">' + xt(p.nombre) + '</div><div class="bar"><div class="bar-fill" style="width:' + pct + '%"></div></div></td><td class="top-num">' + p.cantidad + '</td></tr>';
       }).join("") + '</tbody></table>';
   });
 
