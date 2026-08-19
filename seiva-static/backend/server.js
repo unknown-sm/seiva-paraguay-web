@@ -468,10 +468,10 @@ const contenidoDefault = {
    ]),
    whatsapp_numero: "595992120303",
    whatsapp_mensaje: "Hola! Hice un pedido en la web y quiero confirmar mi compra.",
-   site_titulo: "Seiva Paraguay — Suplementos, Vitaminas y Proteinas",
-   site_descripcion: "Suplementos deportivos, vitaminas, proteinas y mas. Las mejores marcas con envio a todo Paraguay. Pedi por WhatsApp.",
-   site_logo: "/images/hero-bottle.jpg",
-   site_favicon: "/images/hero-bottle.jpg",
+    site_titulo: "Seiva Paraguay — Suplementos, Vitaminas y Bienestar",
+    site_descripcion: "Seiva Paraguay: suplementos, vitaminas, proteinas y productos para el bienestar. Envios a todo Paraguay. Pedi por WhatsApp.",
+    site_logo: "/logo.png",
+    site_favicon: "/favicon.svg",
    logo_height: "32",
    logo_fit: "contain",
   qr_activo: "",
@@ -2552,6 +2552,28 @@ if (fs.existsSync(distPath)) {
 
     res.set("Content-Type", "text/html; charset=utf-8");
     res.send(out);
+  });
+
+  // Dynamic XML sitemap (homepage + all active products) for search engines.
+  app.get("/sitemap.xml", function (req, res) {
+    var base = "https://seiva.com.py";
+    var urls = [base + "/"];
+    try {
+      var rows = db.prepare(
+        "SELECT slug FROM productos WHERE activo = 1 AND slug IS NOT NULL AND slug != ''"
+      ).all();
+      rows.forEach(function (r) {
+        urls.push(base + "/producto/" + encodeURIComponent(r.slug));
+      });
+    } catch (e) { /* ignore */ }
+    var xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    urls.forEach(function (u) {
+      xml += "  <url><loc>" + escapeHtml(u) + "</loc></url>\n";
+    });
+    xml += "</urlset>\n";
+    res.set("Content-Type", "application/xml; charset=utf-8");
+    res.send(xml);
   });
 
   app.get("*", (req, res) => {

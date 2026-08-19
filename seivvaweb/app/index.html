@@ -3,18 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Seiva Paraguay — Frescura Natural</title>
-    <meta property="og:title" content="Seiva Paraguay — Frescura Natural" />
-    <meta property="og:description" content="Snacks saludables y suplementos naturales. Envíos a todo Paraguay." />
+    <title>Seiva Paraguay — Suplementos, Vitaminas y Bienestar</title>
+    <meta name="description" content="Seiva Paraguay: suplementos, vitaminas, proteínas y productos para el bienestar. Encontrá opciones de calidad con envío a todo Paraguay. Pedí por WhatsApp." />
+    <link rel="canonical" href="https://seiva.com.py/" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <meta property="og:title" content="Seiva Paraguay — Suplementos, Vitaminas y Bienestar" />
+    <meta property="og:description" content="Suplementos, vitaminas, proteínas y productos para el bienestar. Envíos a todo Paraguay. Pedí por WhatsApp." />
     <meta property="og:image" content="https://seiva.com.py/logo.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:url" content="https://seiva.com.py/" />
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_PY" />
+    <meta property="og:site_name" content="Seiva Paraguay" />
     <meta property="fb:app_id" content="" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Seiva Paraguay — Suplementos, Vitaminas y Proteínas" />
-    <meta name="twitter:description" content="Suplementos deportivos, vitaminas, proteínas y más. Las mejores marcas con envío a todo Paraguay. Pedí por WhatsApp." />
+    <meta name="twitter:title" content="Seiva Paraguay — Suplementos, Vitaminas y Bienestar" />
+    <meta name="twitter:description" content="Suplementos, vitaminas, proteínas y productos para el bienestar. Envíos a todo Paraguay. Pedí por WhatsApp." />
     <meta name="twitter:image" content="https://seiva.com.py/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,13 +40,13 @@
              document.querySelector('meta[property="og:description"]').content = data.site_descripcion;
              document.querySelector('meta[name="twitter:description"]').content = data.site_descripcion;
            }
-            if (data.site_favicon) {
-              var link = document.createElement('link');
-              link.rel = 'icon';
-              link.type = 'image/png';
-              link.href = data.site_favicon;
-              document.head.appendChild(link);
-            }
+             if (data.site_favicon) {
+               var link = document.createElement('link');
+               link.rel = 'icon';
+               link.type = data.site_favicon.indexOf('.svg') !== -1 ? 'image/svg+xml' : 'image/png';
+               link.href = data.site_favicon;
+               document.head.appendChild(link);
+             }
             if (data.site_logo) {
               document.querySelector('meta[property="og:image"]').content = data.site_logo;
               document.querySelector('meta[name="twitter:image"]').content = data.site_logo;
