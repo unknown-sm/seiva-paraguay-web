@@ -66,6 +66,7 @@ var PWA = (function() {
   function playSynthesizedSound() {
     try {
       var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state === "suspended") { try { ctx.resume(); } catch (e) {} }
       var now = ctx.currentTime;
 
       // Cash register / Cha-ching sound

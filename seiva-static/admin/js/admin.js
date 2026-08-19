@@ -131,7 +131,7 @@ function connectAdminEvents() {
   function play() { if (window.PWA && PWA.playCashSound) PWA.playCashSound(); }
   es.addEventListener("new-pedido", play);
   es.addEventListener("new-venta", play);
-  es.onerror = function() { adminEventsSource = null; };
+  es.onerror = function() { try { es.close(); } catch (e) {} adminEventsSource = null; };
   adminEventsSource = es;
 }
 

@@ -2,21 +2,24 @@
   "name": "Seiva Admin",
   "short_name": "Seiva Admin",
   "description": "Panel de administración Seiva Paraguay",
-  "start_url": "/admin",
+  "start_url": "/bd-backpanel",
+  "scope": "/bd-backpanel",
   "display": "standalone",
   "background_color": "#1B4332",
   "theme_color": "#1B4332",
   "orientation": "any",
   "icons": [
     {
-      "src": "https://old.seiva.com.py/wp-content/uploads/seiva-logo-rectangulo.png",
+      "src": "/bd-backpanel/icon.svg",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/svg+xml",
+      "purpose": "any"
     },
     {
-      "src": "https://old.seiva.com.py/wp-content/uploads/seiva-logo-rectangulo.png",
+      "src": "/bd-backpanel/icon.svg",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }

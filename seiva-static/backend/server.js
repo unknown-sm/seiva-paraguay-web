@@ -1144,11 +1144,13 @@ app.get("/api/admin-events", (req, res) => {
   res.writeHead(200, {
     "Content-Type": "text/event-stream",
     "Cache-Control": "no-cache, no-transform",
-    "Connection": "keep-alive"
+    "Connection": "keep-alive",
+    "X-Accel-Buffering": "no"
   });
   res.write("retry: 5000\n\n");
   sseClients.add(res);
-  req.on("close", () => sseClients.delete(res));
+  const ping = setInterval(() => { try { res.write(": ping\n\n"); } catch (e) {} }, 20000);
+  req.on("close", () => { clearInterval(ping); sseClients.delete(res); });
 });
 app.post("/api/upload-qr", auth, qrUpload.single("qr"), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No se subió imagen" });
