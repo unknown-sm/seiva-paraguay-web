@@ -452,6 +452,9 @@ try {
   }
 } catch (e) { /* sqlite_sequence no existe aun si nunca hubo inserts */ }
 
+// Columna para saber si el stock ya fue reservado al crear el pedido
+try { db.exec("ALTER TABLE pedidos ADD COLUMN stock_reservado INTEGER DEFAULT 0"); } catch (e) {}
+
 const contenidoDefault = {
    hero_titulo: "Suplementos Premium para tu Salud y Rendimiento",
    hero_descripcion: "Las mejores marcas de suplementos, vitaminas y proteinas. Envio rapido a todo Paraguay.",
@@ -2156,6 +2159,13 @@ app.post("/api/pedidos", pedidoLimiter, (req, res) => {
   ).run(
     cliente, whatsapp, direccion || "", JSON.stringify(productos), total || 0, metodo_pago || "whatsapp", notas || ""
   );
+  // Reservar stock al crear el pedido: el producto pasa a "agotado" si llega a 0
+  for (const p of productos) {
+    if (p.id && p.cantidad) {
+      db.prepare("UPDATE productos SET stock = MAX(0, stock - ?) WHERE id = ?").run(p.cantidad, p.id);
+    }
+  }
+  db.prepare("UPDATE pedidos SET stock_reservado = 1 WHERE id = ?").run(result.lastInsertRowid);
   res.json({ id: result.lastInsertRowid, estado: "pendiente" });
   // Notificación push
   const prodNames = productos.map(p => p.cantidad + "x " + p.nombre).join(", ");
@@ -2374,24 +2384,23 @@ app.patch("/api/pedidos/:id/estado", auth, (req, res) => {
   const pedido = db.prepare("SELECT * FROM pedidos WHERE id = ?").get(req.params.id);
   if (!pedido) return res.status(404).json({ error: "No encontrado" });
 
-  if (estado === "confirmado" && pedido.estado !== "confirmado") {
-    const prods = JSON.parse(pedido.productos || "[]");
-    for (const p of prods) {
-      if (p.id && p.cantidad) {
-        db.prepare("UPDATE productos SET stock = stock - ? WHERE id = ? AND stock >= ?").run(p.cantidad, p.id, p.cantidad);
-      }
-    }
-  }
-  if (estado === "cancelado" && pedido.estado === "confirmado") {
-    const prods = JSON.parse(pedido.productos || "[]");
-    for (const p of prods) {
-      if (p.id && p.cantidad) {
-        db.prepare("UPDATE productos SET stock = stock + ? WHERE id = ?").run(p.cantidad, p.id);
-      }
-    }
-  }
+  const prods = JSON.parse(pedido.productos || "[]");
+  const reservado = pedido.stock_reservado;
 
-  db.prepare("UPDATE pedidos SET estado = ? WHERE id = ?").run(estado, req.params.id);
+  // Cancelar: reponer stock si estaba reservado (modelo nuevo) o era confirmado (modelo viejo)
+  if (estado === "cancelado" && pedido.estado !== "cancelado") {
+    if (reservado || pedido.estado === "confirmado") {
+      for (const p of prods) {
+        if (p.id && p.cantidad) {
+          db.prepare("UPDATE productos SET stock = stock + ? WHERE id = ?").run(p.cantidad, p.id);
+        }
+      }
+    }
+    db.prepare("UPDATE pedidos SET estado = ?, stock_reservado = 0 WHERE id = ?").run(estado, req.params.id);
+  } else {
+    // Confirmar/enviar/entregar ya no mueve el stock (se reservó al crear el pedido)
+    db.prepare("UPDATE pedidos SET estado = ? WHERE id = ?").run(estado, req.params.id);
+  }
   res.json({ ok: true, estado });
 });
 
