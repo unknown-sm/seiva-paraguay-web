@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { fetchProducts, type Product, formatPrice, getDiscountedPrice, getActiveTier, fixImageUrl, imageSrcSet } from '../services/api'
 import { useCart } from '../context/CartContext'
+import { useCurrentProduct } from '../context/CurrentProductContext'
 import { ShoppingCart, Minus, Plus, ChevronLeft, ChevronRight, Tag, Box, Info, Package, ChevronDown } from 'lucide-react'
 import GlobalSections from '../components/GlobalSections'
 
@@ -33,6 +34,7 @@ export default function ProductoPage() {
   const [showShort, setShowShort] = useState(false)
   const [showLong, setShowLong] = useState(false)
   const { addItem } = useCart()
+  const { setCurrentProductName } = useCurrentProduct()
 
   useEffect(() => {
     fetchProducts()
@@ -48,6 +50,12 @@ export default function ProductoPage() {
         setLoading(false)
       })
   }, [slug])
+
+  // Share the current product name with the global MobileTabBar WhatsApp button
+  useEffect(() => {
+    setCurrentProductName(product ? product.nombre : null)
+    return () => setCurrentProductName(null)
+  }, [product, setCurrentProductName])
 
   // SEO meta tags
   useEffect(() => {

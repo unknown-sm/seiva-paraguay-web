@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Home, Store, MessageCircle, ShoppingCart, Menu } from 'lucide-react'
 import { useCart } from '../context/CartContext'
+import { useCurrentProduct } from '../context/CurrentProductContext'
 
 export default function MobileTabBar() {
   const location = useLocation()
   const { totalItems, openCart } = useCart()
+  const { currentProductName } = useCurrentProduct()
   const [whatsappNumero, setWhatsappNumero] = useState('595992120303')
   const [whatsappMensaje, setWhatsappMensaje] = useState('')
 
@@ -29,6 +31,13 @@ export default function MobileTabBar() {
     window.dispatchEvent(new CustomEvent('open-mobile-menu'))
   }
 
+  const getWhatsAppMessage = () => {
+    if (location.pathname.startsWith('/producto/') && currentProductName) {
+      return `Hola! quiero hacer un pedido de este producto: ${currentProductName}`
+    }
+    return whatsappMensaje || 'Hola! Hice un pedido en la web y quiero confirmar mi compra.'
+  }
+
   const tabs = [
     { icon: Home, label: 'Inicio', to: '/', action: null },
     { icon: Store, label: 'Tienda', to: '/tienda', action: null },
@@ -36,7 +45,7 @@ export default function MobileTabBar() {
       icon: MessageCircle,
       label: 'WhatsApp',
       to: null,
-      action: () => window.open('https://wa.me/' + whatsappNumero + '?text=' + encodeURIComponent(whatsappMensaje), '_blank'),
+      action: () => window.open('https://wa.me/' + whatsappNumero + '?text=' + encodeURIComponent(getWhatsAppMessage()), '_blank'),
       isCenter: true,
     },
     {

@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { CartProvider } from './context/CartContext'
 import { ThemeProvider } from './context/ThemeContext'
+import { CurrentProductProvider } from './context/CurrentProductContext'
 import CartDrawer from './components/CartDrawer'
 import MobileTabBar from './components/MobileTabBar'
 import ScrollToTop from './components/ScrollToTop'
@@ -42,9 +43,10 @@ export default function App() {
   return (
     <ThemeProvider>
       <CartProvider>
-        <BrowserRouter>
-          <ScrollToTop />
-          <Routes>
+        <CurrentProductProvider>
+          <BrowserRouter>
+            <ScrollToTop />
+            <Routes>
             <Route path="/" element={<Layout><HomePage /></Layout>} />
             <Route path="/tienda" element={<Layout><TiendaPage /></Layout>} />
             <Route path="/producto/:slug" element={<Layout><ProductoPage /></Layout>} />
@@ -56,7 +58,8 @@ export default function App() {
             <Route path="/promos" element={<Layout><PromosPage /></Layout>} />
             <Route path="/pagina/:slug" element={<Layout><DynamicPage /></Layout>} />
           </Routes>
-        </BrowserRouter>
+          </BrowserRouter>
+        </CurrentProductProvider>
       </CartProvider>
     </ThemeProvider>
   )
