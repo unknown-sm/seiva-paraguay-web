@@ -935,24 +935,40 @@ function parseVariantes(raw) {
   } catch { return []; }
 }
 
-function parseProducto(row) {
-  const price_tiers = db.prepare("SELECT min_cantidad, max_cantidad, descuento FROM descuentos_cantidad WHERE producto_id = ? ORDER BY min_cantidad").all(row.id);
+function parseProducto(row, ctx) {
+  let price_tiers;
+  let marca = null;
+  let marcaDescuentos = [];
+  if (ctx) {
+    // Datos precargados en lote (evita N+1 en listados de productos)
+    price_tiers = (ctx.byProduct.get(row.id) || []).map(t => ({
+      min_cantidad: t.min_cantidad, max_cantidad: t.max_cantidad, descuento: t.descuento
+    }));
+    if (row.marca != null) {
+      const marcaId = ctx.marcaMap.get(String(row.marca).toLowerCase());
+      if (marcaId != null) { marca = { id: marcaId }; marcaDescuentos = ctx.mdByMarca.get(marcaId) || []; }
+    }
+  } else {
+    price_tiers = db.prepare("SELECT min_cantidad, max_cantidad, descuento FROM descuentos_cantidad WHERE producto_id = ? ORDER BY min_cantidad").all(row.id);
+    if (row.marca) {
+      marca = db.prepare("SELECT id FROM marcas WHERE LOWER(nombre) = LOWER(?) AND activo = 1").get(row.marca);
+      if (marca) {
+        const now = new Date().toISOString();
+        marcaDescuentos = db.prepare(`
+          SELECT * FROM descuentos_marca
+          WHERE marca_id = ?
+          AND (fecha_inicio IS NULL OR fecha_inicio <= ?)
+          AND (fecha_fin IS NULL OR fecha_fin >= ?)
+          ORDER BY min_cantidad
+        `).all(marca.id, now, now);
+      }
+    }
+  }
 
   // Buscar descuentos por marca
   let marca_descuento = undefined;
-  if (row.marca) {
-    const marca = db.prepare("SELECT id FROM marcas WHERE LOWER(nombre) = LOWER(?) AND activo = 1").get(row.marca);
-    if (marca) {
-      const now = new Date().toISOString();
-      const marcaDescuentos = db.prepare(`
-        SELECT * FROM descuentos_marca
-        WHERE marca_id = ?
-        AND (fecha_inicio IS NULL OR fecha_inicio <= ?)
-        AND (fecha_fin IS NULL OR fecha_fin >= ?)
-        ORDER BY min_cantidad
-      `).all(marca.id, now, now);
-
-      for (const md of marcaDescuentos) {
+  if (marca) {
+    for (const md of marcaDescuentos) {
         const exclusiones = JSON.parse(md.exclusiones || "[]");
         const inclusiones = JSON.parse(md.inclusiones || "[]");
         // Si producto está en exclusiones, saltar
@@ -995,10 +1011,9 @@ function parseProducto(row) {
             descuento: descuento
 });
         }
-      }
-      // Re-sort
-      price_tiers.sort((a, b) => a.min_cantidad - b.min_cantidad);
     }
+    // Re-sort
+    price_tiers.sort((a, b) => a.min_cantidad - b.min_cantidad);
   }
 
   return {
@@ -1014,6 +1029,46 @@ function parseProducto(row) {
     price_tiers: price_tiers.length > 0 ? price_tiers : undefined,
     marca_descuento: marca_descuento
   };
+}
+
+// Carga en una sola pasada los descuentos de cantidad, el mapa de marcas
+// activas y los descuentos de marca para todo un lote de productos.
+// Evita el patrón N+1 de parseProducto (antes: 2-3 queries por producto).
+function loadDiscountBatches(rows) {
+  const ctx = { byProduct: new Map(), marcaMap: new Map(), mdByMarca: new Map() };
+  if (!rows || !rows.length) return ctx;
+  const ids = rows.map(r => r.id);
+  const ph = ids.map(() => "?").join(",");
+  const descs = db.prepare(`SELECT producto_id, min_cantidad, max_cantidad, descuento FROM descuentos_cantidad WHERE producto_id IN (${ph}) ORDER BY min_cantidad`).all(...ids);
+  for (const d of descs) {
+    if (!ctx.byProduct.has(d.producto_id)) ctx.byProduct.set(d.producto_id, []);
+    ctx.byProduct.get(d.producto_id).push({ min_cantidad: d.min_cantidad, max_cantidad: d.max_cantidad, descuento: d.descuento });
+  }
+  const marcas = db.prepare("SELECT id, LOWER(nombre) AS ln FROM marcas WHERE activo = 1").all();
+  for (const m of marcas) if (!ctx.marcaMap.has(m.ln)) ctx.marcaMap.set(m.ln, m.id);
+  const marcaIds = new Set();
+  for (const r of rows) {
+    if (r.marca != null) {
+      const mid = ctx.marcaMap.get(String(r.marca).toLowerCase());
+      if (mid != null) marcaIds.add(mid);
+    }
+  }
+  if (marcaIds.size) {
+    const mph = [...marcaIds].map(() => "?").join(",");
+    const now = new Date().toISOString();
+    const mds = db.prepare(`SELECT * FROM descuentos_marca WHERE marca_id IN (${mph}) AND (fecha_inicio IS NULL OR fecha_inicio <= ?) AND (fecha_fin IS NULL OR fecha_fin >= ?)`).all(...marcaIds, now, now);
+    for (const md of mds) {
+      if (!ctx.mdByMarca.has(md.marca_id)) ctx.mdByMarca.set(md.marca_id, []);
+      ctx.mdByMarca.get(md.marca_id).push(md);
+    }
+  }
+  return ctx;
+}
+
+// Versión batch de parseProducto: precarga los descuentos una vez.
+function parseProductos(rows) {
+  const ctx = loadDiscountBatches(rows);
+  return rows.map(r => parseProducto(r, ctx));
 }
 
 // Generar slug único desde nombre
@@ -1099,14 +1154,14 @@ app.get("/api/productos", (req, res) => {
       p.destacado DESC,
       p.id DESC
   `).all();
-  const result = rows.map(parseProducto);
+  const result = parseProductos(rows);
   result.forEach(r => { delete r.precio_proveedor; delete r.marca_prioridad; });
   res.json(result);
 });
 
 app.get("/api/productos/destacados", (req, res) => {
   const rows = db.prepare("SELECT * FROM productos WHERE featured_order > 0 AND activo = 1 ORDER BY featured_order ASC LIMIT 8").all();
-  const result = rows.map(parseProducto);
+  const result = parseProductos(rows);
   result.forEach(r => { delete r.precio_proveedor; delete r.marca_prioridad; });
   res.json(result);
 });
@@ -1116,13 +1171,13 @@ app.get("/api/productos/combos", (req, res) => {
   const combos = rows.filter(r => {
     const tags = JSON.parse(r.etiquetas || "[]");
     return tags.includes("combo");
-  }).map(parseProducto);
-  res.json(combos);
+  });
+  res.json(parseProductos(combos));
 });
 
 app.get("/api/productos/all", auth, (req, res) => {
   const rows = db.prepare("SELECT * FROM productos ORDER BY id DESC").all();
-  res.json(rows.map(parseProducto));
+  res.json(parseProductos(rows));
 });
 
 app.post("/api/productos", auth, (req, res) => {
