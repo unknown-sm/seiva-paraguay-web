@@ -17,12 +17,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const crypto = require("crypto");
 
-// Secrets: usar env vars si existen, sino generar aleatorio y advertir
-const JWT_SECRET = process.env.JWT_SECRET || "sva-jwt-" + crypto.randomBytes(24).toString("hex");
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "sva-admin-" + crypto.randomBytes(12).toString("hex");
-
-if (!process.env.JWT_SECRET) console.warn("WARN: JWT_SECRET not set. Using auto-generated value. Set it in env vars for production.");
-if (!process.env.ADMIN_PASSWORD) console.warn("WARN: ADMIN_PASSWORD not set. Using auto-generated value: " + ADMIN_PASSWORD);
+// Secrets: definidos abajo, luego de asegurar el directorio de datos (ver DB_PATH).
 
 // VAPID keys for web push
 const VAPID_PUBLIC = process.env.VAPID_PUBLIC_KEY || "BOeFF0Sfcc8j7xHiQHZCdnNzWB2ib6Co7dLWJMf109QC7VwZTbxeKi4LbEt2vGhDgLUv1Jca1pd6T1CX1fZ5HVU";
@@ -194,6 +189,23 @@ const heroUpload = multer({
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, "data", "database.sqlite");
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+
+// ---------- SECRETS ----------
+// Si hay env vars, se usan. Si no, JWT_SECRET se genera UNA vez y se persiste
+// en archivo dentro del volumen de datos para que las sesiones de admin
+// sobrevivan a reinicios del proceso (sin exponer el password en logs).
+const SECRET_FILE = process.env.JWT_SECRET_FILE || path.join(path.dirname(DB_PATH), ".jwt_secret");
+function loadJwtSecret() {
+  if (process.env.JWT_SECRET) return process.env.JWT_SECRET;
+  try { if (fs.existsSync(SECRET_FILE)) return fs.readFileSync(SECRET_FILE, "utf8").trim(); } catch (e) {}
+  var gen = "sva-jwt-" + crypto.randomBytes(24).toString("hex");
+  try { fs.writeFileSync(SECRET_FILE, gen, { mode: 0o600 }); } catch (e) {}
+  return gen;
+}
+const JWT_SECRET = loadJwtSecret();
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "sva-admin-" + crypto.randomBytes(12).toString("hex");
+if (!process.env.JWT_SECRET) console.warn("WARN: JWT_SECRET no configurado; se usa valor persistido en " + SECRET_FILE + ". Setealo en env para producción.");
+if (!process.env.ADMIN_PASSWORD) console.warn("WARN: ADMIN_PASSWORD no configurado; se generó uno aleatorio (no se muestra). Setealo en env para poder loguearte tras reinicios.");
 
 // Daily auto-backup (once every 24h, keep last 2)
 const BACKUP_DIR = path.join(path.dirname(DB_PATH), "backups");
@@ -1040,9 +1052,15 @@ function backfillSlugs() {
 
 // ---------- UPLOADS ----------
 app.get("/api/ping", (req, res) => res.json({ pong: true, ts: Date.now() }));
-app.post("/api/upload-qr", auth, qrUpload.single("qr"), (req, res) => {
+app.post("/api/upload-qr", auth, qrUpload.single("qr"), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No se subió imagen" });
-  res.json({ url: "/img/productos/" + req.file.filename });
+  try {
+    const url = await imageService.processQrImage(req.file.path);
+    res.json({ url });
+  } catch (err) {
+    try { if (req.file && req.file.path) fs.unlinkSync(req.file.path); } catch (_) {}
+    res.status(err.status || 400).json({ error: err.message || "Error al procesar imagen" });
+  }
 }, (err, req, res, next) => {
   // Multer error handler for QR upload
   const msg = err.code === 'LIMIT_FILE_SIZE' ? "Imagen muy grande (max 5MB)" :

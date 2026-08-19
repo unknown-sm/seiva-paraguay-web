@@ -145,11 +145,45 @@ function findOriginalForVariant(relPath) {
   return buildSources(m[1]).find(f => fs.existsSync(f)) || null
 }
 
+// Process a QR upload (multer already saved it to disk). Unlike product
+// images, QRs must stay lossless PNG and have no min-size. Critically, the
+// buffer is validated through sharp: a spoofed non-image (html/svg/php) is
+// rejected, and even SVG is rasterized to PNG so no script/HTML is stored.
+// The extension is server-controlled (.png) — never from the original name.
+async function processQrImage(tmpPath) {
+  if (!fs.existsSync(tmpPath)) {
+    const e = new Error('Archivo no encontrado')
+    e.status = 400
+    throw e
+  }
+  const buf = fs.readFileSync(tmpPath)
+  let meta
+  try {
+    meta = await sharp(buf).metadata()
+  } catch (e) {
+    try { fs.unlinkSync(tmpPath) } catch (_) {}
+    const err = new Error('El archivo no es una imagen válida')
+    err.status = 400
+    throw err
+  }
+  if (!meta.width || !meta.height) {
+    fs.unlinkSync(tmpPath)
+    const e = new Error('Imagen inválida')
+    e.status = 400
+    throw e
+  }
+  const base = 'qr-' + Date.now() + '-' + crypto.randomBytes(4).toString('hex')
+  await sharp(buf).png({ quality: 100 }).toFile(path.join(IMG_DIR, base + '.png'))
+  fs.unlinkSync(tmpPath)
+  return '/img/productos/' + base + '.png'
+}
+
 module.exports = {
   SIZES,
   MIN_DIM,
   ALLOWED_EXT,
   processUploadImage,
+  processQrImage,
   ensureVariantsForFile,
   ensureVariantForRequest,
   findOriginalForVariant,
