@@ -178,6 +178,29 @@ export default function Categories() {
                   {stripHtml(product.descripcion)}
                 </p>
 
+                {/* Tags also below the description */}
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {product.precio_anterior && (
+                    <span className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#E63946', color: '#FFFFFF' }}>
+                      OFERTA
+                    </span>
+                  )}
+                  {product.stock <= 0 && (
+                    <span className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}>
+                      AGOTADO
+                    </span>
+                  )}
+                  {(() => {
+                    const badges = getProductBadges(product)
+                    if (!badges.length) return null
+                    return badges.map(b => (
+                      <span key={b.label} className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: b.color, color: '#fff' }}>
+                        {b.label}
+                      </span>
+                    ))
+                  })()}
+                </div>
+
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4 gap-2">
                   <div>
                     <div className="flex flex-wrap items-baseline gap-x-2">
