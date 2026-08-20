@@ -142,11 +142,17 @@ export default function CheckoutPage() {
 
   const filteredCiudades = useMemo(() => {
     const query = ciudadInput.trim().toLowerCase()
-    if (!query) return ciudadesParaguay
-    return ciudadesParaguay.filter(c =>
-      c.ciudad.toLowerCase().includes(query) ||
-      c.departamento.toLowerCase().includes(query)
-    )
+    const matches = query
+      ? ciudadesParaguay.filter(c =>
+          c.ciudad.toLowerCase().includes(query) ||
+          c.departamento.toLowerCase().includes(query)
+        )
+      : ciudadesParaguay
+    // Prioridad: Asunción siempre arriba; luego las que empiezan con la letra tipeada.
+    const q0 = query.charAt(0)
+    const tier = (c: { ciudad: string }) =>
+      c.ciudad === 'Asunción' ? 2 : (q0 && c.ciudad.toLowerCase().startsWith(q0) ? 1 : 0)
+    return matches.slice().sort((a, b) => tier(b) - tier(a))
   }, [ciudadInput])
 
   const groupedCiudades = useMemo(() => {
