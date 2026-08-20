@@ -1327,6 +1327,60 @@ function closeFaviconCrop() {
   document.getElementById("modal-favicon-crop").classList.add("hidden");
   if (faviconCropper) { faviconCropper.destroy(); faviconCropper = null; }
 }
+
+// Product main image cropper (locked to 1:1)
+var productCropper = null;
+document.getElementById("btn-crop-product").addEventListener("click", function() {
+  document.getElementById("prod-crop-upload").click();
+});
+document.getElementById("prod-crop-upload").addEventListener("change", function(e) {
+  var file = e.target.files[0];
+  e.target.value = "";
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var img = document.getElementById("product-crop-img");
+    img.src = ev.target.result;
+    document.getElementById("modal-product-crop").classList.remove("hidden");
+    img.onload = function() {
+      if (productCropper) productCropper.destroy();
+      productCropper = new Cropper(img, {
+        aspectRatio: 1,
+        viewMode: 1,
+        autoCropArea: 1
+      });
+    };
+  };
+  reader.readAsDataURL(file);
+});
+document.getElementById("modal-close-product-crop").addEventListener("click", closeProductCrop);
+document.getElementById("modal-overlay-product-crop").addEventListener("click", closeProductCrop);
+document.getElementById("product-crop-cancel").addEventListener("click", closeProductCrop);
+document.getElementById("product-crop-apply").addEventListener("click", function() {
+  if (!productCropper) return;
+  var canvas = productCropper.getCroppedCanvas({ maxWidth: 1200, maxHeight: 1200, imageSmoothingQuality: "high" });
+  canvas.toBlob(function(blob) {
+    var fd = new FormData();
+    fd.append("hero", blob, "producto.jpg");
+    fetch(API + "/upload-hero", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + token },
+      body: fd
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      if (data.url) {
+        window._scrapedImage = data.url;
+        var img = document.getElementById("prod-custom-image-img"); if (img) img.src = data.url;
+        var prev = document.getElementById("prod-custom-image-preview"); if (prev) prev.style.display = "flex";
+        closeProductCrop();
+        toast("Imagen recortada (1:1). Guardá para aplicar.");
+      } else { toast("Error al subir"); }
+    }).catch(function() { toast("Error al subir"); });
+  }, "image/jpeg", 0.92);
+});
+function closeProductCrop() {
+  document.getElementById("modal-product-crop").classList.add("hidden");
+  if (productCropper) { productCropper.destroy(); productCropper = null; }
+}
 var heroProductoId = null;
 var heroSearchTimeout = null;
 

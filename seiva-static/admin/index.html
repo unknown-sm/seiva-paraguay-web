@@ -497,8 +497,10 @@
         <button type="button" id="btn-scrape-url" class="btn btn-sm btn-secondary" style="height:32px">Importar</button>
         <span style="color:var(--border)">|</span>
          <label for="prod-image-upload" class="btn btn-sm btn-secondary" style="height:32px;margin:0;cursor:pointer;display:inline-flex;align-items:center;gap:4px">📷 Subir imagen</label>
-         <input type="file" id="prod-image-upload" accept="image/*" style="display:none">
-         <label for="prod-gallery-upload" class="btn btn-sm btn-secondary" style="height:32px;margin:0;cursor:pointer;display:inline-flex;align-items:center;gap:4px">🖼️ Galería</label>
+          <input type="file" id="prod-image-upload" accept="image/*" style="display:none">
+          <button type="button" id="btn-crop-product" class="btn btn-sm btn-secondary" style="height:32px;margin:0;cursor:pointer;display:inline-flex;align-items:center;gap:4px">✂️ Recortar 1:1</button>
+          <input type="file" id="prod-crop-upload" accept="image/*" style="display:none">
+          <label for="prod-gallery-upload" class="btn btn-sm btn-secondary" style="height:32px;margin:0;cursor:pointer;display:inline-flex;align-items:center;gap:4px">🖼️ Galería</label>
          <input type="file" id="prod-gallery-upload" accept="image/*" multiple style="display:none">
          <span id="scrape-status" style="font-size:0.75rem;color:var(--muted);min-width:120px"></span>
        </div>
@@ -1082,6 +1084,21 @@
       <div style="display:flex;gap:8px;margin-top:12px">
         <button type="button" id="favicon-crop-apply" class="btn btn-primary">Aplicar</button>
         <button type="button" id="favicon-crop-cancel" class="btn btn-sm">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modal-product-crop" class="modal hidden">
+  <div class="modal-overlay" id="modal-overlay-product-crop"></div>
+  <div class="modal-content" style="max-width:520px">
+    <div class="modal-header"><h3>Recortar imagen (1:1)</h3><button class="modal-close" id="modal-close-product-crop">&times;</button></div>
+    <div class="modal-body">
+      <p class="help-text">Recortá la foto principal en formato cuadrado (relación 1:1).</p>
+      <div style="margin:12px 0"><img id="product-crop-img" src="" style="max-width:100%;max-height:300px;"></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button type="button" id="product-crop-apply" class="btn btn-primary">Aplicar</button>
+        <button type="button" id="product-crop-cancel" class="btn btn-sm">Cancelar</button>
       </div>
     </div>
   </div>
