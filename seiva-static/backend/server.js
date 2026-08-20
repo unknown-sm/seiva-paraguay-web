@@ -2010,7 +2010,9 @@ app.get("/api/stats/top-productos", auth, (req, res) => {
 
 // ---------- CONTENIDO ----------
 app.get("/api/contenido", (req, res) => {
-  res.set("Cache-Control", "public, max-age=60, s-maxage=60");
+  // No cache: el contenido cambia con cada edición del admin (logo, favicon, hero).
+  // Si Cloudflare hace edge-cache de esta ruta, los cambios tardan horas en verse.
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate");
   const rows = db.prepare("SELECT * FROM contenido").all();
   const obj = {};
   for (const r of rows) obj[r.key] = r.value;
