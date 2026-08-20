@@ -1264,9 +1264,11 @@ document.getElementById("logo-upload").addEventListener("change", function(e) {
 });
 
 // Favicon upload
+var faviconSelectedFile = null;
 document.getElementById("favicon-upload").addEventListener("change", function(e) {
   var file = e.target.files[0];
   if (!file) return;
+  faviconSelectedFile = file;
   var fd = new FormData();
   fd.append("hero", file);
   fetch(API + "/upload-hero", {
@@ -1287,19 +1289,26 @@ document.getElementById("favicon-upload").addEventListener("change", function(e)
 // Favicon Cropper
 var faviconCropper = null;
 document.getElementById("favicon-crop-btn").addEventListener("click", function() {
-  var url = document.getElementById("contenido-site_favicon").value;
-  if (!url) { toast("Primero subí o pegá una URL de imagen"); return; }
   var img = document.getElementById("favicon-crop-img");
-  img.src = url;
-  document.getElementById("modal-favicon-crop").classList.remove("hidden");
-  img.onload = function() {
+  function startCrop() {
+    document.getElementById("modal-favicon-crop").classList.remove("hidden");
     if (faviconCropper) faviconCropper.destroy();
     faviconCropper = new Cropper(img, {
       aspectRatio: 1,
       viewMode: 1,
       autoCropArea: 1
     });
-  };
+  }
+  if (faviconSelectedFile) {
+    var reader = new FileReader();
+    reader.onload = function(ev) { img.src = ev.target.result; img.onload = startCrop; };
+    reader.readAsDataURL(faviconSelectedFile);
+  } else {
+    var url = document.getElementById("contenido-site_favicon").value;
+    if (!url) { toast("Primero subí o pegá una URL de imagen"); return; }
+    img.src = url;
+    img.onload = startCrop;
+  }
 });
 document.getElementById("modal-close-favicon-crop").addEventListener("click", closeFaviconCrop);
 document.getElementById("modal-overlay-favicon-crop").addEventListener("click", closeFaviconCrop);
