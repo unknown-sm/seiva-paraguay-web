@@ -1305,12 +1305,14 @@ document.getElementById("modal-close-favicon-crop").addEventListener("click", cl
 document.getElementById("modal-overlay-favicon-crop").addEventListener("click", closeFaviconCrop);
 document.getElementById("favicon-crop-cancel").addEventListener("click", closeFaviconCrop);
 document.getElementById("favicon-crop-apply").addEventListener("click", function() {
-  if (!faviconCropper) return;
+  if (!faviconCropper) { toast("Cargá la imagen a recortar primero."); return; }
   var canvas = faviconCropper.getCroppedCanvas({ width: 64, height: 64 });
+  if (!canvas) { toast("No se pudo recortar la imagen."); return; }
   canvas.toBlob(function(blob) {
+    if (!blob) { toast("Error al generar el favicon."); return; }
     var fd = new FormData();
-    fd.append("hero", blob, "favicon.png");
-    fetch(API + "/upload-hero", {
+    fd.append("qr", blob, "favicon.png");
+    fetch(API + "/upload-qr", {
       method: "POST",
       headers: { "Authorization": "Bearer " + token },
       body: fd
@@ -1318,9 +1320,9 @@ document.getElementById("favicon-crop-apply").addEventListener("click", function
       if (data.url) {
         document.getElementById("contenido-site_favicon").value = data.url;
         closeFaviconCrop();
-        toast("Favicon recortado. Guarda para aplicar.");
-      }
-    }).catch(function() { toast("Error al subir"); });
+        toast("Favicon recortado (PNG). Guarda para aplicar.");
+      } else { toast("Error al subir: " + (data.error || "intenta de nuevo")); }
+    }).catch(function() { toast("Error al subir el favicon"); });
   }, "image/png");
 });
 function closeFaviconCrop() {
@@ -1328,38 +1330,44 @@ function closeFaviconCrop() {
   if (faviconCropper) { faviconCropper.destroy(); faviconCropper = null; }
 }
 
-// Product main image cropper (locked to 1:1)
+// Product main image cropper (locked to 1:1) — recorta la imagen YA cargada
 var productCropper = null;
+function openImageCrop(src) {
+  var img = document.getElementById("product-crop-img");
+  img.onload = function() {
+    if (productCropper) productCropper.destroy();
+    productCropper = new Cropper(img, { aspectRatio: 1, viewMode: 1, autoCropArea: 1 });
+  };
+  img.src = src;
+  document.getElementById("modal-product-crop").classList.remove("hidden");
+}
 document.getElementById("btn-crop-product").addEventListener("click", function() {
-  document.getElementById("prod-crop-upload").click();
+  var existing = window._scrapedImage;
+  if (existing && !/^https?:\/\//i.test(existing)) {
+    openImageCrop(existing);
+  } else {
+    if (existing) toast("La imagen es de una URL externa; subila primero para recortarla.");
+    else toast("Primero subí o importá la imagen del producto.");
+    document.getElementById("prod-crop-upload").click();
+  }
 });
 document.getElementById("prod-crop-upload").addEventListener("change", function(e) {
   var file = e.target.files[0];
   e.target.value = "";
   if (!file) return;
   var reader = new FileReader();
-  reader.onload = function(ev) {
-    var img = document.getElementById("product-crop-img");
-    img.src = ev.target.result;
-    document.getElementById("modal-product-crop").classList.remove("hidden");
-    img.onload = function() {
-      if (productCropper) productCropper.destroy();
-      productCropper = new Cropper(img, {
-        aspectRatio: 1,
-        viewMode: 1,
-        autoCropArea: 1
-      });
-    };
-  };
+  reader.onload = function(ev) { openImageCrop(ev.target.result); };
   reader.readAsDataURL(file);
 });
 document.getElementById("modal-close-product-crop").addEventListener("click", closeProductCrop);
 document.getElementById("modal-overlay-product-crop").addEventListener("click", closeProductCrop);
 document.getElementById("product-crop-cancel").addEventListener("click", closeProductCrop);
 document.getElementById("product-crop-apply").addEventListener("click", function() {
-  if (!productCropper) return;
+  if (!productCropper) { toast("Cargá la imagen a recortar primero."); return; }
   var canvas = productCropper.getCroppedCanvas({ maxWidth: 1200, maxHeight: 1200, imageSmoothingQuality: "high" });
+  if (!canvas) { toast("No se pudo recortar la imagen."); return; }
   canvas.toBlob(function(blob) {
+    if (!blob) { toast("Error al generar la imagen recortada."); return; }
     var fd = new FormData();
     fd.append("hero", blob, "producto.jpg");
     fetch(API + "/upload-hero", {
@@ -1373,8 +1381,8 @@ document.getElementById("product-crop-apply").addEventListener("click", function
         var prev = document.getElementById("prod-custom-image-preview"); if (prev) prev.style.display = "flex";
         closeProductCrop();
         toast("Imagen recortada (1:1). Guardá para aplicar.");
-      } else { toast("Error al subir"); }
-    }).catch(function() { toast("Error al subir"); });
+      } else { toast("Error al subir: " + (data.error || "intenta de nuevo")); }
+    }).catch(function() { toast("Error al subir la imagen recortada"); });
   }, "image/jpeg", 0.92);
 });
 function closeProductCrop() {
