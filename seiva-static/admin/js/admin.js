@@ -1397,7 +1397,7 @@ function loadHeroProduct() {
     if (prod) {
       heroProductoId = prod.id;
       document.getElementById("hero-producto-name").textContent = prod.nombre + " —Gs." + Number(prod.precio).toLocaleString("es-PY");
-      document.getElementById("hero-producto-selected").style.display = "block";
+      document.getElementById("hero-producto-selected").style.display = "inline-flex";
     }
   }).catch(function() {});
 }
@@ -1427,7 +1427,7 @@ document.getElementById("hero-producto-search").addEventListener("input", functi
 function selectHeroProduct(id, nombre, precio) {
   heroProductoId = id;
   document.getElementById("hero-producto-name").textContent = nombre + " —Gs." + Number(precio).toLocaleString("es-PY");
-  document.getElementById("hero-producto-selected").style.display = "block";
+  document.getElementById("hero-producto-selected").style.display = "inline-flex";
   document.getElementById("hero-producto-results").innerHTML = "";
   document.getElementById("hero-producto-search").value = "";
   api("/hero-producto", { method: "PUT", body: JSON.stringify({ producto_id: id }) }).then(function() {

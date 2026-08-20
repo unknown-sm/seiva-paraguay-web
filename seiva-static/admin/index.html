@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es" data-theme="light">
 <head>
   <meta charset="UTF-8">
@@ -318,109 +318,175 @@
         <div class="card-header"><h3>Contenido del Sitio</h3></div>
         <div class="card-body">
           <form id="contenido-form">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+            <div class="contenido-grid">
               <!-- Columna 1 -->
-              <div>
-                <h4 style="margin-bottom:12px">General</h4>
-                <div class="form-group"><label>Titulo Hero</label><input type="text" id="contenido-hero_titulo" class="form-input"></div>
-                <div class="form-group"><label>Descripcion Hero</label><textarea id="contenido-hero_descripcion" rows="2" class="form-input"></textarea></div>
-                <div class="form-group"><label>WhatsApp Numero</label><input type="text" id="contenido-whatsapp_numero" placeholder="595992120303" class="form-input"></div>
-                <div class="form-group"><label>Mensaje de WhatsApp (pedido)</label><textarea id="contenido-whatsapp_mensaje" rows="2" class="form-input" placeholder="Hola! Hice un pedido en la web y quiero confirmar mi compra."></textarea></div>
-                <div class="form-group"><label>Sonido de notificación</label><div style="display:flex;gap:8px;align-items:center"><input type="text" id="contenido-notification_sound" class="form-input" placeholder="/img/productos/notification.mp3" style="flex:1"><label for="sound-upload" class="btn btn-primary" style="margin:0;cursor:pointer;white-space:nowrap">Subir</label><button type="button" id="sound-test" class="btn" style="margin:0;white-space:nowrap">&#9654; Probar</button><input type="file" id="sound-upload" accept="audio/*" style="display:none"></div><audio id="sound-preview" controls style="margin-top:8px;width:100%;display:none"></audio></div>
-                <div class="form-group"><label>Titulo SEO</label><input type="text" id="contenido-site_titulo" class="form-input"></div>
-                <div class="form-group"><label>Descripcion SEO</label><textarea id="contenido-site_descripcion" rows="2" class="form-input"></textarea></div>
-                <div class="form-group"><label>Monto minimo delivery gratis (Gs.)</label><input type="number" id="contenido-envio_minimo_gratis" class="form-input"></div>
-                <div class="form-group"><label>Instrucciones de pago (para el cliente)</label><textarea id="contenido-pagos_instrucciones" rows="4" class="form-input" placeholder="Ej: Transferir al banco X, enviar comprobante por WhatsApp, etc."></textarea></div>
-                <div class="form-group"><label>Instrucciones Efectivo al recibir</label><textarea id="contenido-efectivo_instrucciones" rows="3" class="form-input" placeholder="Informacion para clientes que pagan en efectivo"></textarea></div>
-                <hr style="margin:16px 0;border:none;border-top:1px solid #e0d6cc">
-                <h4 style="margin-bottom:12px">Logo y Favicon</h4>
+              <div class="section-card">
+                <div class="section-card-header"><span class="sec-icon">&#128196;</span><h3>General</h3></div>
+
                 <div class="form-group">
-                  <label>Logo (Navbar y Footer)</label>
-                  <div style="display:flex;gap:8px;align-items:center">
-                    <input type="text" id="contenido-site_logo" class="form-input" placeholder="/img/logo.png" style="flex:1">
-                    <label for="logo-upload" class="btn btn-primary" style="margin:0;cursor:pointer;white-space:nowrap">Subir</label>
-                    <input type="file" id="logo-upload" accept="image/*" style="display:none">
-                  </div>
+                  <label class="field-label">T&iacute;tulo Hero</label>
+                  <input type="text" id="contenido-hero_titulo" class="form-input">
                 </div>
-                 <div class="form-group">
-                   <label>Favicon</label>
-                   <div style="display:flex;gap:8px;align-items:center">
-                     <input type="text" id="contenido-site_favicon" class="form-input" placeholder="/img/favicon.ico" style="flex:1">
-                     <label for="favicon-upload" class="btn btn-primary" style="margin:0;cursor:pointer;white-space:nowrap">Subir</label>
-                     <input type="file" id="favicon-upload" accept="image/*,.ico" style="display:none">
-                     <button type="button" id="favicon-crop-btn" class="btn btn-sm" style="white-space:nowrap">Recortar</button>
-                   </div>
-                   <div id="favicon-preview" style="margin-top:8px;display:none"><img id="favicon-preview-img" src="" style="width:32px;height:32px;"></div>
-                 </div>
-                 <hr style="margin:16px 0;border:none;border-top:1px solid #e0d6cc">
-                 <h4 style="margin-bottom:12px">Ajustes del Logo</h4>
-                 <div class="form-group"><label>Altura del logo (px)</label><input type="number" id="contenido-logo_height" class="form-input" placeholder="32" min="16" max="120"></div>
-                 <div class="form-group"><label>Ajuste del logo</label><select id="contenido-logo_fit" class="form-input"><option value="contain">Contener (recomendado)</option><option value="cover">Cubrir</option><option value="fill">Estirar</option></select></div>
-                <hr style="margin:16px 0;border:none;border-top:1px solid #e0d6cc">
-                <h4 style="margin-bottom:12px">Secciones globales</h4>
-                <div class="form-group"><label>Envios</label><textarea id="contenido-global_envios" rows="4" class="form-input"></textarea></div>
-                <div class="form-group"><label>Pagos</label><textarea id="contenido-global_pagos" rows="4" class="form-input"></textarea></div>
-                <div class="form-group"><label>Garantia y devoluciones</label><textarea id="contenido-global_garantia" rows="4" class="form-input"></textarea></div>
+                <div class="form-group">
+                  <label class="field-label">Descripci&oacute;n Hero</label>
+                  <textarea id="contenido-hero_descripcion" rows="2" class="form-input"></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="field-label">WhatsApp N&uacute;mero</label>
+                  <input type="text" id="contenido-whatsapp_numero" placeholder="595992120303" class="form-input">
+                </div>
+                <div class="form-group">
+                  <label class="field-label">Mensaje de WhatsApp (pedido)</label>
+                  <textarea id="contenido-whatsapp_mensaje" rows="2" class="form-input" placeholder="Hola! Hice un pedido en la web y quiero confirmar mi compra."></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="field-label">Sonido de notificaci&oacute;n</label>
+                  <div class="input-group">
+                    <input type="text" id="contenido-notification_sound" class="form-input" placeholder="/img/productos/notification.mp3">
+                    <label for="sound-upload" class="btn btn-primary upload-btn"><svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Subir</label>
+                    <button type="button" id="sound-test" class="btn btn-primary upload-btn"><svg class="btn-ico" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg> Probar</button>
+                  </div>
+                  <audio id="sound-preview" controls style="margin-top:8px;width:100%;display:none"></audio>
+                </div>
+                <div class="form-group">
+                  <label class="field-label">T&iacute;tulo SEO</label>
+                  <input type="text" id="contenido-site_titulo" class="form-input">
+                </div>
+                <div class="form-group">
+                  <label class="field-label">Descripci&oacute;n SEO</label>
+                  <textarea id="contenido-site_descripcion" rows="2" class="form-input"></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="field-label">Monto m&iacute;nimo delivery gratis (Gs.)</label>
+                  <input type="number" id="contenido-envio_minimo_gratis" class="form-input">
+                </div>
+                <div class="form-group">
+                  <label class="field-label">Instrucciones de pago (para el cliente)</label>
+                  <textarea id="contenido-pagos_instrucciones" rows="4" class="form-input" placeholder="Ej: Transferir al banco X, enviar comprobante por WhatsApp, etc."></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="field-label">Instrucciones Efectivo al recibir</label>
+                  <textarea id="contenido-efectivo_instrucciones" rows="3" class="form-input" placeholder="Informaci&oacute;n para clientes que pagan en efectivo"></textarea>
+                </div>
+
+                <div class="subsection-title">Logo y Favicon</div>
+                <div class="form-group">
+                  <label class="field-label">Logo (Navbar y Footer)</label>
+                  <div class="input-group">
+                    <input type="text" id="contenido-site_logo" class="form-input" placeholder="/img/logo.png">
+                    <label for="logo-upload" class="btn btn-primary upload-btn"><svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Subir</label>
+                  </div>
+                  <input type="file" id="logo-upload" accept="image/*" style="display:none">
+                </div>
+                <div class="form-group">
+                  <label class="field-label">Favicon</label>
+                  <div class="input-group">
+                    <input type="text" id="contenido-site_favicon" class="form-input" placeholder="/img/favicon.ico">
+                    <label for="favicon-upload" class="btn btn-primary upload-btn"><svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Subir</label>
+                    <button type="button" id="favicon-crop-btn" class="btn upload-btn">Recortar</button>
+                  </div>
+                  <input type="file" id="favicon-upload" accept="image/*,.ico" style="display:none">
+                  <div id="favicon-preview" style="margin-top:8px;display:none"><img id="favicon-preview-img" src="" style="width:32px;height:32px;"></div>
+                </div>
+
+                <div class="subsection-title">Ajustes del Logo</div>
+                <div class="form-group">
+                  <label class="field-label">Altura del logo (px)</label>
+                  <input type="number" id="contenido-logo_height" class="form-input" placeholder="32" min="16" max="120">
+                </div>
+                <div class="form-group">
+                  <label class="field-label">Ajuste del logo</label>
+                  <select id="contenido-logo_fit" class="form-input"><option value="contain">Contener (recomendado)</option><option value="cover">Cubrir</option><option value="fill">Estirar</option></select>
+                </div>
+
+                <div class="subsection-title">Secciones globales</div>
+                <div class="form-group">
+                  <label class="field-label">Env&iacute;os</label>
+                  <textarea id="contenido-global_envios" rows="4" class="form-input"></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="field-label">Pagos</label>
+                  <textarea id="contenido-global_pagos" rows="4" class="form-input"></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="field-label">Garant&iacute;a y devoluciones</label>
+                  <textarea id="contenido-global_garantia" rows="4" class="form-input"></textarea>
+                </div>
               </div>
 
               <!-- Columna 2 -->
               <div>
-                <h4 style="margin-bottom:12px">Hero (Seccion Principal)</h4>
-                <div class="form-group">
-                  <label>Imagen principal</label>
-                  <div style="display:flex;gap:8px;align-items:center">
-                    <input type="text" id="contenido-hero_imagen" class="form-input" placeholder="/images/hero-bottle.jpg" style="flex:1">
-                    <label for="hero-upload" class="btn btn-primary" style="margin:0;cursor:pointer;white-space:nowrap">Subir</label>
+                <div class="section-card">
+                  <div class="section-card-header"><span class="sec-icon">&#10024;</span><h3>Hero (Secci&oacute;n Principal)</h3></div>
+                  <div class="form-group">
+                    <label class="field-label">Imagen principal</label>
+                    <div class="input-group">
+                      <input type="text" id="contenido-hero_imagen" class="form-input" placeholder="/images/hero-bottle.jpg">
+                      <label for="hero-upload" class="btn btn-primary upload-btn"><svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Subir</label>
+                    </div>
                     <input type="file" id="hero-upload" accept="image/*" style="display:none">
                   </div>
-                </div>
-                <div class="form-group">
-                  <label>Imagenes flotantes (separadas por coma)</label>
-                  <div style="display:flex;gap:8px;align-items:center">
-                    <input type="text" id="contenido-hero_imagenes" class="form-input" placeholder="/images/floating-leaf.png, /images/floating-orange.png, ..." style="flex:1">
-                    <label for="hero-ingredients-upload" class="btn btn-primary" style="margin:0;cursor:pointer;white-space:nowrap">Subir</label>
+                  <div class="form-group">
+                    <label class="field-label">Im&aacute;genes flotantes (separadas por coma)</label>
+                    <div class="input-group">
+                      <input type="text" id="contenido-hero_imagenes" class="form-input" placeholder="/images/floating-leaf.png, /images/floating-orange.png, ...">
+                      <label for="hero-ingredients-upload" class="btn btn-primary upload-btn"><svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Subir</label>
+                    </div>
                     <input type="file" id="hero-ingredients-upload" accept="image/*" multiple style="display:none">
                   </div>
                 </div>
-                <hr style="margin:16px 0;border:none;border-top:1px solid #e0d6cc">
-                <h4 style="margin-bottom:12px">Producto Destacado</h4>
-                <div class="form-group">
-                  <label>Buscar producto para mostrar como destacado</label>
-                  <input type="text" id="hero-producto-search" class="form-input" placeholder="Escribi el nombre del producto...">
-                  <div id="hero-producto-results" style="margin-top:8px;max-height:200px;overflow-y:auto"></div>
-                  <div id="hero-producto-selected" style="margin-top:8px;padding:10px;background:var(--bg-secondary);border-radius:8px;display:none">
-                    <span style="font-weight:600" id="hero-producto-name"></span>
-                    <button type="button" class="btn btn-sm" onclick="clearHeroProduct()" style="margin-left:8px;color:#c0392b">Quitar</button>
+
+                <div class="section-card">
+                  <div class="section-card-header"><span class="sec-icon">&#11088;</span><h3>Producto Destacado</h3></div>
+                  <div class="form-group">
+                    <label class="field-label">Buscar producto para mostrar como destacado</label>
+                    <input type="text" id="hero-producto-search" class="form-input" placeholder="Escrib&iacute; el nombre del producto...">
+                    <div id="hero-producto-results" style="margin-top:8px;max-height:200px;overflow-y:auto"></div>
+                    <div id="hero-producto-selected" class="prod-chip" style="display:none;margin-top:10px">
+                      <span class="prod-chip-name" id="hero-producto-name"></span>
+                      <button type="button" class="prod-chip-remove" onclick="clearHeroProduct()" aria-label="Quitar">&#10005;</button>
+                    </div>
                   </div>
                 </div>
-                <hr style="margin:16px 0;border:none;border-top:1px solid #e0d6cc">
-                <h4 style="margin-bottom:12px">Estadisticas (Stats Bar)</h4>
-                <div id="stats-bar-editor">
-                  <div class="form-group"><label>Icono 1</label><select id="stat-0-icon" class="form-input"><option value="Star">Star</option><option value="Truck">Truck</option><option value="ShieldCheck">ShieldCheck</option><option value="Leaf">Leaf</option><option value="Award">Award</option><option value="Heart">Heart</option><option value="Zap">Zap</option></select></div>
-                  <div class="form-group"><label>Valor 1</label><input type="text" id="stat-0-value" class="form-input" placeholder="4.9"></div>
-                  <div class="form-group"><label>Etiqueta 1</label><input type="text" id="stat-0-label" class="form-input" placeholder="Valoracion"></div>
-                  <div class="form-group"><label>Relleno 1</label><select id="stat-0-fill" class="form-input"><option value="true">Si</option><option value="false">No</option></select></div>
-                  <hr style="margin:12px 0;border:none;border-top:1px solid #e0d6cc">
-                  <div class="form-group"><label>Icono 2</label><select id="stat-1-icon" class="form-input"><option value="Star">Star</option><option value="Truck">Truck</option><option value="ShieldCheck">ShieldCheck</option><option value="Leaf">Leaf</option><option value="Award">Award</option><option value="Heart">Heart</option><option value="Zap">Zap</option></select></div>
-                  <div class="form-group"><label>Valor 2</label><input type="text" id="stat-1-value" class="form-input" placeholder="Envio Gratis"></div>
-                  <div class="form-group"><label>Etiqueta 2</label><input type="text" id="stat-1-label" class="form-input" placeholder="En pedidos +Gs.150000"></div>
-                  <div class="form-group"><label>Relleno 2</label><select id="stat-1-fill" class="form-input"><option value="false">No</option><option value="true">Si</option></select></div>
-                  <hr style="margin:12px 0;border:none;border-top:1px solid #e0d6cc">
-                  <div class="form-group"><label>Icono 3</label><select id="stat-2-icon" class="form-input"><option value="Star">Star</option><option value="Truck">Truck</option><option value="ShieldCheck">ShieldCheck</option><option value="Leaf">Leaf</option><option value="Award">Award</option><option value="Heart">Heart</option><option value="Zap">Zap</option></select></div>
-                  <div class="form-group"><label>Valor 3</label><input type="text" id="stat-2-value" class="form-input" placeholder="Garantia"></div>
-                  <div class="form-group"><label>Etiqueta 3</label><input type="text" id="stat-2-label" class="form-input" placeholder="30 dias de devolucion"></div>
-                  <div class="form-group"><label>Relleno 3</label><select id="stat-2-fill" class="form-input"><option value="false">No</option><option value="true">Si</option></select></div>
-                  <hr style="margin:12px 0;border:none;border-top:1px solid #e0d6cc">
-                  <div class="form-group"><label>Icono 4</label><select id="stat-3-icon" class="form-input"><option value="Star">Star</option><option value="Truck">Truck</option><option value="ShieldCheck">ShieldCheck</option><option value="Leaf">Leaf</option><option value="Award">Award</option><option value="Heart">Heart</option><option value="Zap">Zap</option></select></div>
-                  <div class="form-group"><label>Valor 4</label><input type="text" id="stat-3-value" class="form-input" placeholder="Calidad"></div>
-                  <div class="form-group"><label>Etiqueta 4</label><input type="text" id="stat-3-label" class="form-input" placeholder="Marcas certificadas"></div>
-                  <div class="form-group"><label>Relleno 4</label><select id="stat-3-fill" class="form-input"><option value="false">No</option><option value="true">Si</option></select></div>
+
+                <div class="section-card">
+                  <div class="section-card-header"><span class="sec-icon">&#128202;</span><h3>Estad&iacute;sticas (Stats Bar)</h3></div>
+                  <div class="stats-grid">
+                    <div class="stat-subcard">
+                      <div class="stat-subcard-title">Estad&iacute;stica 1</div>
+                      <div class="form-group"><label class="field-label">Icono</label><select id="stat-0-icon" class="form-input"><option value="Star">Star</option><option value="Truck">Truck</option><option value="ShieldCheck">ShieldCheck</option><option value="Leaf">Leaf</option><option value="Award">Award</option><option value="Heart">Heart</option><option value="Zap">Zap</option></select></div>
+                      <div class="form-group"><label class="field-label">Valor</label><input type="text" id="stat-0-value" class="form-input" placeholder="4.9"></div>
+                      <div class="form-group"><label class="field-label">Etiqueta</label><input type="text" id="stat-0-label" class="form-input" placeholder="Valoraci&oacute;n"></div>
+                      <div class="form-group"><label class="field-label">Relleno</label><select id="stat-0-fill" class="form-input"><option value="true">S&iacute;</option><option value="false">No</option></select></div>
+                    </div>
+                    <div class="stat-subcard">
+                      <div class="stat-subcard-title">Estad&iacute;stica 2</div>
+                      <div class="form-group"><label class="field-label">Icono</label><select id="stat-1-icon" class="form-input"><option value="Star">Star</option><option value="Truck">Truck</option><option value="ShieldCheck">ShieldCheck</option><option value="Leaf">Leaf</option><option value="Award">Award</option><option value="Heart">Heart</option><option value="Zap">Zap</option></select></div>
+                      <div class="form-group"><label class="field-label">Valor</label><input type="text" id="stat-1-value" class="form-input" placeholder="Env&iacute;o Gratis"></div>
+                      <div class="form-group"><label class="field-label">Etiqueta</label><input type="text" id="stat-1-label" class="form-input" placeholder="En pedidos +Gs.150000"></div>
+                      <div class="form-group"><label class="field-label">Relleno</label><select id="stat-1-fill" class="form-input"><option value="false">No</option><option value="true">S&iacute;</option></select></div>
+                    </div>
+                    <div class="stat-subcard">
+                      <div class="stat-subcard-title">Estad&iacute;stica 3</div>
+                      <div class="form-group"><label class="field-label">Icono</label><select id="stat-2-icon" class="form-input"><option value="Star">Star</option><option value="Truck">Truck</option><option value="ShieldCheck">ShieldCheck</option><option value="Leaf">Leaf</option><option value="Award">Award</option><option value="Heart">Heart</option><option value="Zap">Zap</option></select></div>
+                      <div class="form-group"><label class="field-label">Valor</label><input type="text" id="stat-2-value" class="form-input" placeholder="Garant&iacute;a"></div>
+                      <div class="form-group"><label class="field-label">Etiqueta</label><input type="text" id="stat-2-label" class="form-input" placeholder="30 d&iacute;as de devoluci&oacute;n"></div>
+                      <div class="form-group"><label class="field-label">Relleno</label><select id="stat-2-fill" class="form-input"><option value="false">No</option><option value="true">S&iacute;</option></select></div>
+                    </div>
+                    <div class="stat-subcard">
+                      <div class="stat-subcard-title">Estad&iacute;stica 4</div>
+                      <div class="form-group"><label class="field-label">Icono</label><select id="stat-3-icon" class="form-input"><option value="Star">Star</option><option value="Truck">Truck</option><option value="ShieldCheck">ShieldCheck</option><option value="Leaf">Leaf</option><option value="Award">Award</option><option value="Heart">Heart</option><option value="Zap">Zap</option></select></div>
+                      <div class="form-group"><label class="field-label">Valor</label><input type="text" id="stat-3-value" class="form-input" placeholder="Calidad"></div>
+                      <div class="form-group"><label class="field-label">Etiqueta</label><input type="text" id="stat-3-label" class="form-input" placeholder="Marcas certificadas"></div>
+                      <div class="form-group"><label class="field-label">Relleno</label><select id="stat-3-fill" class="form-input"><option value="false">No</option><option value="true">S&iacute;</option></select></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-            <hr style="margin:16px 0;border:none;border-top:1px solid #e0d6cc">
+            <hr style="margin:16px 0;border:none;border-top:1px solid var(--border)">
             <button type="submit" class="btn btn-primary">Guardar</button>
-          </form>
+</form>
           <p id="contenido-msg" class="msg hidden"></p>
         </div>
       </div>
