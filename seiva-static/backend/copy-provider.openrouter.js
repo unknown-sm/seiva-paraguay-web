@@ -66,8 +66,13 @@ function parseCopy(content, draft) {
   };
 }
 
-async function generateCopy(draft) {
-  if (!OPENROUTER_API_KEY) throw new Error("OPENROUTER_API_KEY no configurada");
+async function callOpenRouter(messages, useJsonMode) {
+  const body = {
+    model: OPENROUTER_MODEL,
+    messages,
+    temperature: 0.7,
+  };
+  if (useJsonMode) body.response_format = { type: "json_object" };
   const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -76,19 +81,27 @@ async function generateCopy(draft) {
       "HTTP-Referer": process.env.PUBLIC_BASE_URL || "https://seiva.com.py",
       "X-Title": "Seiva Product Wizard",
     },
-    body: JSON.stringify({
-      model: OPENROUTER_MODEL,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: buildUserPrompt(draft) },
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.7,
-    }),
+    body: JSON.stringify(body),
   });
   const data = await res.json();
-  if (!data.ok) throw new Error(data.error?.message || "OpenRouter error");
-  return parseCopy(data.choices[0].message.content, draft);
+  if (!data.ok) return { ok: false, error: data.error?.message || "OpenRouter error" };
+  return { ok: true, content: data.choices[0].message.content };
+}
+
+async function generateCopy(draft) {
+  if (!OPENROUTER_API_KEY) throw new Error("OPENROUTER_API_KEY no configurada");
+  const messages = [
+    { role: "system", content: SYSTEM_PROMPT },
+    { role: "user", content: buildUserPrompt(draft) },
+  ];
+  // Intento 1: con JSON mode (OpenAI-style). Algunos modelos (Gemini) lo rechazan.
+  let r = await callOpenRouter(messages, true);
+  if (!r.ok) {
+    // Intento 2: sin JSON mode, parseo JSON del texto de respuesta.
+    r = await callOpenRouter(messages, false);
+  }
+  if (!r.ok) throw new Error(r.error);
+  return parseCopy(r.content, draft);
 }
 
 module.exports = { generateCopy };

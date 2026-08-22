@@ -13,6 +13,7 @@
 const fs = require("fs");
 const path = require("path");
 const copyProvider = require("./copy-provider");
+const stubProvider = require("./copy-provider.stub");
 
 let CTX = null;
 
@@ -294,7 +295,14 @@ async function generateAndPreview(chatId, draft) {
     draft.copy = copy;
     if (copy.seo_keywords && copy.seo_keywords.length) draft.datos.seo_keywords = copy.seo_keywords;
   } catch (e) {
-    return CTX.tg.sendMessage(chatId, "⚠️ No pude generar el texto con la IA: " + e.message + ". Revisá las keys de OpenRouter o usá COPY_PROVIDER=stub.");
+    // Si la IA falla, no frenamos: usamos plantilla y publicamos igual.
+    const copy = await stubProvider.generateCopy(draft.datos);
+    draft.copy = copy;
+    draft.copy._fallback = true;
+    await CTX.tg.sendMessage(chatId,
+      "⚠️ No pude generar la descripción con la IA (" + e.message + ").\n" +
+      "Usé una plantilla básica — vas a poder editarla después desde el admin.\n" +
+      "Para activar la IA: revisá OPENROUTER_API_KEY/OPENROUTER_MODEL en Dokploy, o poné COPY_PROVIDER=stub para no usar IA.");
   }
   save(chatId, "PREVIEW", draft);
   return renderPreview(chatId, draft);
