@@ -157,7 +157,7 @@ async function receivePhoto(chatId, draft, msg, extra = false) {
   const tmp = path.join(CTX.imgPath, "tmp-" + Date.now() + ".jpg");
   fs.writeFileSync(tmp, buf);
   const out = await CTX.processUploadImage(tmp);
-  fs.unlinkSync(tmp);
+  // processUploadImage ya borra tmp; no eliminar de nuevo (ENOENT).
   if (!out) return CTX.tg.sendMessage(chatId, "Error procesando la imagen.");
   draft.imagenes.push({ filename: out, principal: draft.imagenes.length === 0 });
   if (!extra) {
@@ -196,7 +196,34 @@ async function receiveLink(chatId, draft, url, text) {
     if (vals.precio) draft.datos.precio = vals.precio;
     if (vals.stock !== undefined) draft.datos.stock = vals.stock;
     if (vals.proveedor_brl) draft.datos.precio_proveedor = Math.round(vals.proveedor_brl * BRL_RATE);
-    if (data.imagen) draft.imagenes.push({ filename: data.imagen, principal: true });
+    if (data.imagen) {
+      let imgFile = data.imagen;
+      // Si el scrape no descargó la imagen (data.imagen es una URL),
+      // reintento con headers para esquivar bloqueo de hotlink.
+      if (/^https?:\/\//.test(imgFile)) {
+        try {
+          const origin = new URL(imgFile).origin;
+          const r = await fetch(imgFile, {
+            headers: {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+              "Referer": origin,
+            },
+          });
+          if (r.ok) {
+            const buf = Buffer.from(await r.arrayBuffer());
+            const tmp = path.join(CTX.imgPath, "tmp-" + Date.now() + ".jpg");
+            fs.writeFileSync(tmp, buf);
+            const processed = await CTX.processUploadImage(tmp);
+            imgFile = processed || null;
+          } else {
+            imgFile = null;
+          }
+        } catch (e) {
+          imgFile = null;
+        }
+      }
+      if (imgFile) draft.imagenes.push({ filename: imgFile, principal: true });
+    }
     const auto = [];
     if (draft.datos.precio) auto.push("precio público Gs. " + Number(draft.datos.precio).toLocaleString("es-PY"));
     if (draft.datos.precio_proveedor) auto.push("proveedor Gs. " + Number(draft.datos.precio_proveedor).toLocaleString("es-PY"));
