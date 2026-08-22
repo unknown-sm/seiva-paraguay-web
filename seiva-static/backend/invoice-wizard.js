@@ -40,6 +40,10 @@ function save(chatId, state, draft) {
     chatId, state, JSON.stringify(draft));
 }
 
+function hasSession(chatId) {
+  return !!load(chatId);
+}
+
 function clear(chatId) {
   CTX.db.prepare("DELETE FROM bot_sessions WHERE chat_id = ?").run(chatId);
 }
@@ -161,6 +165,30 @@ function matchItems(items, products) {
 }
 
 // ---------- flujo ----------
+async function handleAwaitFile(chatId, draft, msg) {
+  const text = msg.text || "";
+  let content = null;
+  if (msg.document && /\.txt$/i.test(msg.document.file_name || "")) {
+    const f = await CTX.tg.getFile(msg.document.file_id);
+    if (f.ok) {
+      const buf = await CTX.tg.downloadFile(f.result.file_path);
+      content = buf.toString("utf8");
+      draft.factura = msg.document.file_name || "factura.txt";
+    }
+  } else if (text) {
+    content = text;
+    draft.factura = "texto pegado";
+  }
+  if (!content) return CTX.tg.sendMessage(chatId, "No leí nada. Mandá un .txt o pegá el texto de la factura.");
+  draft.items = parseDocument(content);
+  if (!draft.items.length) return CTX.tg.sendMessage(chatId, "No pude extraer ítems del texto. Revisá el formato.");
+  const products = CTX.db.prepare("SELECT id, nombre, marca, precio_proveedor FROM productos").all();
+  matchItems(draft.items, products);
+  draft.pendingIndex = null;
+  save(chatId, "REVIEW", draft);
+  return renderReview(chatId, draft);
+}
+
 async function onMessage(msg) {
   const chatId = msg.chat.id;
   const text = msg.text || "";
@@ -178,30 +206,21 @@ async function onMessage(msg) {
       "Ej: <code>Ozempic Nat 60cap 2000mg  1  12,50</code>");
   }
 
-  if (!session) return false;
+  if (!session) {
+    // Sin comando: si es un .txt o texto con precios, arrancamos la carga de proveedor.
+    const isFactura = (msg.document && /\.txt$/i.test(msg.document.file_name || "")) ||
+      (text && /\d[\d.,]*\s*(?:R\$|\$)?\s*\d[\d.,]*|\d,\d{2}/.test(text) && text.split(/\r?\n/).filter(Boolean).length >= 1);
+    if (isFactura) {
+      const draft = { items: [], rate: DEFAULT_RATE, factura: "", pendingIndex: null, searchResults: [] };
+      save(chatId, "AWAIT_FILE", draft);
+      return await handleAwaitFile(chatId, draft, msg);
+    }
+    return false;
+  }
   const { state, draft } = session;
 
   if (state === "AWAIT_FILE") {
-    let content = null;
-    if (msg.document && /\.txt$/i.test(msg.document.file_name || "")) {
-      const f = await CTX.tg.getFile(msg.document.file_id);
-      if (f.ok) {
-        const buf = await CTX.tg.downloadFile(f.result.file_path);
-        content = buf.toString("utf8");
-        draft.factura = msg.document.file_name || "factura.txt";
-      }
-    } else if (text) {
-      content = text;
-      draft.factura = "texto pegado";
-    }
-    if (!content) return CTX.tg.sendMessage(chatId, "No leí nada. Mandá un .txt o pegá el texto de la factura.");
-    draft.items = parseDocument(content);
-    if (!draft.items.length) return CTX.tg.sendMessage(chatId, "No pude extraer ítems del texto. Revisá el formato.");
-    const products = CTX.db.prepare("SELECT id, nombre, marca, precio_proveedor FROM productos").all();
-    matchItems(draft.items, products);
-    draft.pendingIndex = null;
-    save(chatId, "REVIEW", draft);
-    return renderReview(chatId, draft);
+    return await handleAwaitFile(chatId, draft, msg);
   }
 
   if (state === "SET_RATE") {
@@ -321,4 +340,4 @@ async function applyUpdates(chatId, draft) {
     (omitidos ? omitidos + " ítem(s) omitidos (sin match o sin precio)." : ""));
 }
 
-module.exports = { init, handleUpdate };
+module.exports = { init, handleUpdate, hasSession };

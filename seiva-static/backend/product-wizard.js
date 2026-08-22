@@ -45,6 +45,26 @@ function clear(chatId) {
   CTX.db.prepare("DELETE FROM bot_sessions WHERE chat_id = ?").run(chatId);
 }
 
+function hasSession(chatId) {
+  return !!load(chatId);
+}
+
+function newDraft() {
+  return { imagenes: [], datos_tecnicos: {}, datos: {}, source: null, copy: {} };
+}
+
+function startProduct(chatId) {
+  const draft = newDraft();
+  save(chatId, "AWAIT_SOURCE", draft);
+  return CTX.tg.sendMessage(chatId,
+    "📦 <b>Carga rápida de producto</b>\n\n" +
+    "Envianos una <b>foto</b> del producto o un <b>link</b> (otra tienda, marketplace o red social).",
+    { reply_markup: { inline_keyboard: [[
+      { text: "📸 Mandar foto", callback_data: "wz_hint_photo" },
+      { text: "🔗 Mandar link", callback_data: "wz_hint_link" },
+    ]] } });
+}
+
 function imgUrl(filename) {
   if (!filename) return "";
   if (filename.startsWith("http")) return filename;
@@ -72,18 +92,24 @@ async function onMessage(msg) {
   }
 
   if (text === "/cargar" || text === "/nuevo" || text === "/producto") {
-    const draft = { imagenes: [], datos_tecnicos: {}, datos: {}, source: null, copy: {} };
-    save(chatId, "AWAIT_SOURCE", draft);
-    return CTX.tg.sendMessage(chatId,
-      "📦 <b>Carga rápida de producto</b>\n\n" +
-      "Envianos una <b>foto</b> del producto o un <b>link</b> (otra tienda, marketplace o red social).",
-      { reply_markup: { inline_keyboard: [[
-        { text: "📸 Mandar foto", callback_data: "wz_hint_photo" },
-        { text: "🔗 Mandar link", callback_data: "wz_hint_link" },
-      ]] } });
+    return startProduct(chatId);
   }
 
-  if (!session) return false;
+  if (!session) {
+    // Sin comando: si manda foto o link, arrancamos el alta directo.
+    const url = extractUrl(text);
+    if (msg.photo && msg.photo.length) {
+      const draft = newDraft();
+      save(chatId, "AWAIT_SOURCE", draft);
+      return await receivePhoto(chatId, draft, msg);
+    }
+    if (url) {
+      const draft = newDraft();
+      save(chatId, "AWAIT_SOURCE", draft);
+      return await receiveLink(chatId, draft, url);
+    }
+    return false;
+  }
   const { state, draft } = session;
 
   if (state === "AWAIT_SOURCE") {
@@ -354,4 +380,4 @@ function slugify(s) {
     .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80);
 }
 
-module.exports = { init, handleUpdate };
+module.exports = { init, handleUpdate, hasSession };

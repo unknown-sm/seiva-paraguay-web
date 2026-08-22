@@ -3,6 +3,7 @@ const path = require("path");
 const crypto = require("crypto");
 const productWizard = require("./product-wizard");
 const invoiceWizard = require("./invoice-wizard");
+const botRouter = require("./bot-router");
 
 // Telegram Bot Configuration
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
@@ -441,12 +442,9 @@ ${p.activo ? "✅ Activo" : "⏸️ Inactivo"}`;
 
 // Handle incoming webhook
 async function handleWebhook(update) {
-  // Asistente de carga rápida: si el mensaje/callback es del wizard, lo maneja y corta acá
-  const handled = await productWizard.handleUpdate(update);
+  // Router de intención: link/foto -> producto, .txt factura -> precio proveedor.
+  const handled = await botRouter.handleUpdate(update);
   if (handled) return;
-  // Asistente de precio de proveedor (facturas)
-  const handledInv = await invoiceWizard.handleUpdate(update);
-  if (handledInv) return;
 
   // Handle callback queries (inline keyboard buttons)
   if (update.callback_query) {
