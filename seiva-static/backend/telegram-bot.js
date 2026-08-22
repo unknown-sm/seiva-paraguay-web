@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+const productWizard = require("./product-wizard");
 
 // Telegram Bot Configuration
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
@@ -13,12 +14,30 @@ let db = null;
 let botInfo = null;
 
 // Initialize bot with database reference
-function init(database) {
+function init(database, shared = {}) {
   db = database;
   if (!TELEGRAM_BOT_TOKEN) {
     console.log("[Telegram Bot] No TELEGRAM_BOT_TOKEN set - bot disabled");
     return;
   }
+  // Inicializar asistente de carga rápida de productos
+  productWizard.init({
+    db: database,
+    imgPath: shared.imgPath,
+    publicBase: shared.publicBase || "https://seiva.com.py",
+    allowedChats: shared.allowedChats || [],
+    tg: {
+      sendMessage,
+      sendPhoto,
+      getFile,
+      downloadFile,
+      answerCallback: (id) => telegramAPI("answerCallbackQuery", { callback_query_id: id }),
+    },
+    downloadImage: shared.downloadImage,
+    scrapeProductData: shared.scrapeProductData,
+    processUploadImage: shared.processUploadImage,
+    generateSlug: shared.generateSlug,
+  });
   console.log("[Telegram Bot] Initialized");
 }
 
@@ -409,6 +428,10 @@ ${p.activo ? "✅ Activo" : "⏸️ Inactivo"}`;
 
 // Handle incoming webhook
 async function handleWebhook(update) {
+  // Asistente de carga rápida: si el mensaje/callback es del wizard, lo maneja y corta acá
+  const handled = await productWizard.handleUpdate(update);
+  if (handled) return;
+
   // Handle callback queries (inline keyboard buttons)
   if (update.callback_query) {
     const cb = update.callback_query;

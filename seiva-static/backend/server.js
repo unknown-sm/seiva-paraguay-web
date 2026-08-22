@@ -263,7 +263,18 @@ const db = new DatabaseSync(DB_PATH);
 
 // Initialize Telegram Bot
 const telegramBot = require("./telegram-bot");
-telegramBot.init(db);
+const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || "https://seiva.com.py";
+const TELEGRAM_ALLOWED_CHATS = (process.env.TELEGRAM_ALLOWED_CHATS || "")
+  .split(",").map(s => parseInt(s.trim(), 10)).filter(Boolean);
+telegramBot.init(db, {
+  imgPath,
+  publicBase: PUBLIC_BASE_URL,
+  allowedChats: TELEGRAM_ALLOWED_CHATS,
+  downloadImage,
+  scrapeProductData,
+  processUploadImage: imageService.processUploadImage,
+  generateSlug,
+});
 
 db.exec("PRAGMA journal_mode = WAL");
 db.exec("PRAGMA foreign_keys = ON");
@@ -2437,9 +2448,10 @@ app.delete("/api/error-logs", auth, (req, res) => {
 
 // ---------- TELEGRAM BOT WEBHOOK ----------
 app.post("/api/telegram/webhook", (req, res) => {
-  // Verify secret token
+  // Verify secret token. If TELEGRAM_WEBHOOK_SECRET is not set, reject always
+  // (undefined !== undefined would otherwise let anyone post without a token).
   const secret = req.headers["x-telegram-bot-api-secret-token"];
-  if (secret !== process.env.TELEGRAM_WEBHOOK_SECRET) {
+  if (!process.env.TELEGRAM_WEBHOOK_SECRET || secret !== process.env.TELEGRAM_WEBHOOK_SECRET) {
     return res.status(403).json({ error: "Forbidden" });
   }
   telegramBot.handleWebhook(req.body);

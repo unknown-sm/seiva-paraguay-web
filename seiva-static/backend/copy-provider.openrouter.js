@@ -1,0 +1,94 @@
+// Generador de copy vía OpenRouter (OpenAI-compatible chat completions).
+// Reusa OPENROUTER_API_KEY / OPENROUTER_MODEL ya presentes en el bot.
+
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || "google/gemini-2.0-flash-001";
+
+const SYSTEM_PROMPT = `Sos redactor SEO de una tienda de suplementos en Paraguay (Seiva). Vas a recibir datos de un producto y debés generar: título optimizado, descripción corta y descripción larga.
+
+REGLAS ESTRICTAS:
+- Solo usá datos que vengan en el producto fuente (nombre, marca, presentación, datos técnicos, precio). NO inventes propiedades medicinales ni beneficios que el producto no declare en su empaque o fuente original.
+- Tono confiable y profesional. No prometas resultados médicos ni hagas afirmaciones que suenen a promesa de cura/tratamiento/diagnóstico.
+- Adaptá el tono a Paraguay: usá "vos", moneda en guaraníes (Gs.) escrita como número con separador de miles.
+- SEO local natural (sin relleno): incluí de forma orgánica frases como "suplementos Paraguay", "[nombre] comprar Paraguay", "envío a todo el país".
+- Título: claro, con la keyword principal al inicio.
+
+FORMATO de descripcion_larga (respetá SIEMPRE esta estructura, en HTML con <br> y <b>):
+[Encabezado: una frase que dice qué es el producto.]
+<b>🔹 Beneficios principales</b>
+• (3 a 5 bulletes, uno por línea, beneficio real del producto)
+<b>🔹 Modo de uso</b>
+(dosis sugerida si aplica, o "Seguí las indicaciones del envase.")
+<b>🔹 Ideal para</b>
+(público objetivo: quienes buscan energía, recuperación muscular, pérdida de peso, etc.)
+[CIERRE corto con llamado a la acción: "Compralo ahora en Seiva y recibilo en tu casa en todo Paraguay."]
+
+Respondé SOLO con JSON válido (sin markdown, sin fences):
+{
+  "titulo": "...",
+  "descripcion_corta": "...",
+  "descripcion_larga": "...",
+  "seo_keywords": ["palabra1", "palabra2"]
+}`;
+
+function buildUserPrompt(d) {
+  const dt = d.datos_tecnicos && Object.keys(d.datos_tecnicos).length
+    ? "\nDatos técnicos: " + JSON.stringify(d.datos_tecnicos)
+    : "";
+  return `Producto a redactar:
+Nombre: ${d.nombre || ""}
+Marca: ${d.marca || ""}
+Presentación: ${d.presentacion || ""}
+Precio: ${d.precio ? "Gs. " + Number(d.precio).toLocaleString("es-PY") : ""}
+Categoría: ${d.categoria || "suplementos"}${dt}`;
+}
+
+function parseCopy(content, draft) {
+  let json;
+  try {
+    json = JSON.parse(content.replace(/^```(?:json)?\s*|\s*```$/g, "").trim());
+  } catch (e) {
+    // fallback: intentar extraer primer bloque { ... }
+    const m = content.match(/\{[\s\S]*\}/);
+    if (m) json = JSON.parse(m[0]);
+    else throw new Error("Respuesta de IA no es JSON");
+  }
+  const larg = json.descripcion_larga || "";
+  // Assert estructura mínima
+  const needs = ["Beneficios principales", "Modo de uso", "Ideal para"];
+  const missing = needs.filter(n => !larg.includes(n));
+  return {
+    titulo: (json.titulo || draft.nombre || "").toString().slice(0, 160),
+    descripcion_corta: (json.descripcion_corta || "").toString().slice(0, 300),
+    descripcion_larga: larg,
+    seo_keywords: Array.isArray(json.seo_keywords) ? json.seo_keywords : [],
+    _structure_missing: missing,
+  };
+}
+
+async function generateCopy(draft) {
+  if (!OPENROUTER_API_KEY) throw new Error("OPENROUTER_API_KEY no configurada");
+  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+      "HTTP-Referer": process.env.PUBLIC_BASE_URL || "https://seiva.com.py",
+      "X-Title": "Seiva Product Wizard",
+    },
+    body: JSON.stringify({
+      model: OPENROUTER_MODEL,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: buildUserPrompt(draft) },
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.7,
+    }),
+  });
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.error?.message || "OpenRouter error");
+  return parseCopy(data.choices[0].message.content, draft);
+}
+
+module.exports = { generateCopy };
