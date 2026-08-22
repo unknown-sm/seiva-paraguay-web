@@ -86,7 +86,8 @@ async function handleUpdate(update) {
 
 async function onMessage(msg) {
   const chatId = msg.chat.id;
-  const text = msg.text || "";
+  // Texto: msg.text normal, o msg.caption si manda foto/documento con texto.
+  const text = msg.text || msg.caption || "";
   const session = load(chatId);
 
   if (CTX.allowedChats && CTX.allowedChats.length && !CTX.allowedChats.includes(chatId)) {
@@ -111,21 +112,40 @@ async function onMessage(msg) {
     if (msg.photo && msg.photo.length) {
       const draft = newDraft();
       save(chatId, "AWAIT_SOURCE", draft);
-      return await receivePhoto(chatId, draft, msg);
+      try {
+        return await receivePhoto(chatId, draft, msg);
+      } catch (e) {
+        console.error("[Wizard] receivePhoto crasheo:", e.message);
+        save(chatId, "COLLECT", draft);
+        return askNextField(chatId, draft);
+      }
     }
     if (url) {
       const draft = newDraft();
       save(chatId, "AWAIT_SOURCE", draft);
-      return await receiveLink(chatId, draft, url, text);
+      try {
+        return await receiveLink(chatId, draft, url, text);
+      } catch (e) {
+        console.error("[Wizard] receiveLink crasheo:", e.message);
+        // El flujo ya empezó: seguimos preguntando campos a mano.
+        save(chatId, "COLLECT", draft);
+        return askNextField(chatId, draft);
+      }
     }
     return false;
   }
   const { state, draft } = session;
 
   if (state === "AWAIT_SOURCE") {
-    if (msg.photo && msg.photo.length) return await receivePhoto(chatId, draft, msg);
+    if (msg.photo && msg.photo.length) {
+      try { return await receivePhoto(chatId, draft, msg); }
+      catch (e) { console.error("[Wizard] receivePhoto crasheo:", e.message); save(chatId, "COLLECT", draft); return askNextField(chatId, draft); }
+    }
     const url = extractUrl(text);
-    if (url) return await receiveLink(chatId, draft, url, text);
+    if (url) {
+      try { return await receiveLink(chatId, draft, url, text); }
+      catch (e) { console.error("[Wizard] receiveLink crasheo:", e.message); save(chatId, "COLLECT", draft); return askNextField(chatId, draft); }
+    }
     return CTX.tg.sendMessage(chatId, "No entendí. Envianos una foto 📸 o un link 🔗 del producto.");
   }
 

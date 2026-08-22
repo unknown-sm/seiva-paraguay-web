@@ -450,6 +450,18 @@ ${p.activo ? "✅ Activo" : "⏸️ Inactivo"}`;
 
 // Handle incoming webhook
 async function handleWebhook(update) {
+  // Log de diagnóstico: ver exactamente qué llega de Telegram.
+  try {
+    if (update.message) {
+      const m = update.message;
+      console.log("[TG-IN] chat=" + m.chat.id + " text=" + JSON.stringify((m.text || "").slice(0, 120)) +
+        " caption=" + JSON.stringify((m.caption || "").slice(0, 80)) +
+        " photo=" + (m.photo ? m.photo.length : 0) + " doc=" + (m.document ? m.document.file_name : "-"));
+    } else if (update.callback_query) {
+      console.log("[TG-IN] cb chat=" + update.callback_query.message.chat.id + " data=" + update.callback_query.data);
+    }
+  } catch (e) { /* no romper el flujo por logging */ }
+
   // Diagnóstico: /debug responde qué código corre el server + config + chat id.
   if (update.message && update.message.text && update.message.text.trim() === "/debug") {
     const cid = update.message.chat.id;
