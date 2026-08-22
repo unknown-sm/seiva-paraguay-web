@@ -44,17 +44,30 @@ Categoría: ${d.categoria || "suplementos"}${dt}`;
 }
 
 function parseCopy(content, draft) {
-  let json;
+  let json = null;
   try {
     json = JSON.parse(content.replace(/^```(?:json)?\s*|\s*```$/g, "").trim());
   } catch (e) {
     // fallback: intentar extraer primer bloque { ... }
     const m = content.match(/\{[\s\S]*\}/);
-    if (m) json = JSON.parse(m[0]);
-    else throw new Error("Respuesta de IA no es JSON");
+    if (m) {
+      try { json = JSON.parse(m[0]); } catch (e2) { json = null; }
+    }
+  }
+  // Si no hay JSON válido, usamos el texto crudo como descripción larga.
+  // (modelos free chicos a veces devuelven texto suelto en vez de JSON)
+  if (!json) {
+    const raw = String(content || "").trim();
+    return {
+      titulo: (draft.nombre || "Producto").toString().slice(0, 160),
+      descripcion_corta: raw.slice(0, 300),
+      descripcion_larga: raw || "",
+      seo_keywords: [],
+      _structure_missing: ["Beneficios principales", "Modo de uso", "Ideal para"],
+      _raw_text: true,
+    };
   }
   const larg = json.descripcion_larga || "";
-  // Assert estructura mínima
   const needs = ["Beneficios principales", "Modo de uso", "Ideal para"];
   const missing = needs.filter(n => !larg.includes(n));
   return {
@@ -66,12 +79,15 @@ function parseCopy(content, draft) {
   };
 }
 
-async function callOpenRouter(messages, useJsonMode) {
-  const body = {
-    model: OPENROUTER_MODEL,
-    messages,
-    temperature: 0.7,
-  };
+async function callOpenRouter(messages, useJsonMode, mergeSystem) {
+  let msgs = messages;
+  if (mergeSystem) {
+    // Algunos modelos free no aceptan rol "system": lo fusionamos en el primer user message.
+    const sys = messages.find(m => m.role === "system");
+    const usr = messages.find(m => m.role === "user");
+    msgs = [{ role: "user", content: (sys ? sys.content + "\n\n" : "") + (usr ? usr.content : "") }];
+  }
+  const body = { model: OPENROUTER_MODEL, messages: msgs, temperature: 0.7 };
   if (useJsonMode) body.response_format = { type: "json_object" };
   const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
@@ -94,12 +110,12 @@ async function generateCopy(draft) {
     { role: "system", content: SYSTEM_PROMPT },
     { role: "user", content: buildUserPrompt(draft) },
   ];
-  // Intento 1: con JSON mode (OpenAI-style). Algunos modelos (Gemini) lo rechazan.
-  let r = await callOpenRouter(messages, true);
-  if (!r.ok) {
-    // Intento 2: sin JSON mode, parseo JSON del texto de respuesta.
-    r = await callOpenRouter(messages, false);
-  }
+  // Intento 1: JSON mode estricto (OpenAI/Gemini lo soportan).
+  let r = await callOpenRouter(messages, true, false);
+  // Intento 2: sin JSON mode (algunos modelos free lo rechazan).
+  if (!r.ok) r = await callOpenRouter(messages, false, false);
+  // Intento 3: sin JSON mode y fusionando system+user (modelos que no aceptan rol system).
+  if (!r.ok) r = await callOpenRouter(messages, false, true);
   if (!r.ok) throw new Error(r.error);
   return parseCopy(r.content, draft);
 }
