@@ -6,7 +6,7 @@ const invoiceWizard = require("./invoice-wizard");
 const botRouter = require("./bot-router");
 
 // Marcador de versión: visible en /debug para saber qué código corre el server.
-const BUILD_TAG = "bot-2026-08-22-audit1";
+const BUILD_TAG = "bot-2026-08-22-hardened1";
 
 // Telegram Bot Configuration
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
@@ -504,9 +504,18 @@ async function handleWebhook(update) {
   if (!update.message) return;
 
   const chatId = update.message.chat.id;
-  const text = update.message.text || "";
+  const text = update.message.text || update.message.caption || "";
   const photo = update.message.photo;
   const document = update.message.document;
+
+  // RED DE SEGURIDAD: si el mensaje tiene link o foto y llegó hasta acá,
+  // significa que el router no lo capturó (no debería pasar). Lo mandamos
+  // directo al wizard de alta en vez de clasificarlo con la IA.
+  if (/https?:\/\//i.test(text) || (photo && photo.length)) {
+    console.warn("[TG-IN] link/foto llegó al flujo viejo — redirigiendo al wizard de alta");
+    const rescued = await productWizard.handleUpdate(update);
+    if (rescued) return;
+  }
 
   // Handle photo upload (product image)
   if (photo && photo.length > 0) {
