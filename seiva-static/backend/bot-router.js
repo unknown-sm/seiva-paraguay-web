@@ -5,6 +5,15 @@
 const productWizard = require("./product-wizard");
 const invoiceWizard = require("./invoice-wizard");
 
+// Inyectado por telegram-bot.init() para evitar dependencia circular.
+let tg = {
+  sendMessage: (cid, text) => Promise.resolve({ ok: false, error: "tg no inicializado" }),
+};
+
+function init(ctx) {
+  if (ctx && ctx.tg) tg = ctx.tg;
+}
+
 function chatIdOf(update) {
   if (update.message) return update.message.chat.id;
   if (update.callback_query) return update.callback_query.message.chat.id;
@@ -28,7 +37,7 @@ async function handleUpdate(update) {
 
   // No entendió nada: preguntar, no tirar error.
   if (cid) {
-    return require("./telegram-bot").sendMessage(cid,
+    return tg.sendMessage(cid,
       "No capté qué querés hacer. Podés:\n" +
       "• Pegarme un <b>link</b> o mandar una <b>foto</b> de un producto para subirlo a la web.\n" +
       "• Mandarme un <b>.txt</b> de factura (con precios en reales) para cargar precio de proveedor.\n" +
@@ -37,4 +46,4 @@ async function handleUpdate(update) {
   return false;
 }
 
-module.exports = { handleUpdate };
+module.exports = { init, handleUpdate };

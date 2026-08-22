@@ -52,6 +52,8 @@ function init(database, shared = {}) {
       answerCallback: (id) => telegramAPI("answerCallbackQuery", { callback_query_id: id }),
     },
   });
+  // Inicializar el router de intención con los helpers de envío (evita require circular).
+  botRouter.init({ tg: { sendMessage } });
   console.log("[Telegram Bot] Initialized");
 }
 
