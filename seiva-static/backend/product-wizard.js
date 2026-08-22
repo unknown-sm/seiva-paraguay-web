@@ -72,6 +72,7 @@ function imgUrl(filename) {
 }
 
 const COPY_FIELDS = ["titulo", "descripcion_corta", "descripcion_larga"];
+const BRL_RATE = parseInt(process.env.BRL_RATE, 10) || 1200;
 
 async function handleUpdate(update) {
   try {
@@ -106,7 +107,7 @@ async function onMessage(msg) {
     if (url) {
       const draft = newDraft();
       save(chatId, "AWAIT_SOURCE", draft);
-      return await receiveLink(chatId, draft, url);
+      return await receiveLink(chatId, draft, url, text);
     }
     return false;
   }
@@ -115,7 +116,7 @@ async function onMessage(msg) {
   if (state === "AWAIT_SOURCE") {
     if (msg.photo && msg.photo.length) return await receivePhoto(chatId, draft, msg);
     const url = extractUrl(text);
-    if (url) return await receiveLink(chatId, draft, url);
+    if (url) return await receiveLink(chatId, draft, url, text);
     return CTX.tg.sendMessage(chatId, "No entendí. Envianos una foto 📸 o un link 🔗 del producto.");
   }
 
@@ -160,19 +161,24 @@ async function receivePhoto(chatId, draft, msg, extra = false) {
   draft.imagenes.push({ filename: out, principal: draft.imagenes.length === 0 });
   if (!extra) {
     draft.source = "foto";
+    // Datos sueltos del caption (precio, proveedor, stock)
+    const vals = extractInlineData(msg.caption || msg.text || "");
+    if (vals.precio) draft.datos.precio = vals.precio;
+    if (vals.stock !== undefined) draft.datos.stock = vals.stock;
+    if (vals.proveedor_brl) draft.datos.precio_proveedor = Math.round(vals.proveedor_brl * BRL_RATE);
     save(chatId, "COLLECT", draft);
     return askNextField(chatId, draft);
   }
   save(chatId, "GALLERY", draft);
 }
 
-async function receiveLink(chatId, draft, url) {
+async function receiveLink(chatId, draft, url, text) {
   draft.source = "link";
   draft.url_origen = url;
   try {
     const data = await CTX.scrapeProductData(url);
-    // El link solo aporta imagen + descripción. El precio público y el de
-    // proveedor se definen manualmente (la factura es la fuente de proveedor).
+    // El link aporta nombre + imagen. Precio público, proveedor y stock
+    // se leen del texto que el usuario mandó junto con el link (o se piden después).
     draft.datos = Object.assign({
       nombre: data.nombre || "",
       marca: data.marca || "",
@@ -181,9 +187,21 @@ async function receiveLink(chatId, draft, url) {
       stock: 0,
       categoria: "suplementos",
     }, draft.datos);
-    draft.datos_tecnicos = extractTech(data.descripcion || data.descripcion_larga || "");
+    // Presentación automática desde el nombre scrapeado (ej: "60 cápsulas")
+    const tech = extractTech(data.nombre || data.descripcion || "");
+    if (tech.presentacion && !draft.datos.presentacion) draft.datos.presentacion = tech.presentacion;
+    // Datos sueltos del mensaje (precio 60mil, proveedor 30 reales, stock 5)
+    const vals = extractInlineData(text || "");
+    if (vals.precio) draft.datos.precio = vals.precio;
+    if (vals.stock !== undefined) draft.datos.stock = vals.stock;
+    if (vals.proveedor_brl) draft.datos.precio_proveedor = Math.round(vals.proveedor_brl * BRL_RATE);
     if (data.imagen) draft.imagenes.push({ filename: data.imagen, principal: true });
-    const resumen = `🔎 <b>Extraje del link:</b>\n• Nombre: ${draft.datos.nombre || "—"}\n• Marca: ${draft.datos.marca || "—"}\n• Imagen: ${draft.imagenes.length ? "sí" : "no"}\n\nEl precio público y el de proveedor los ponés vos manualmente.`;
+    const auto = [];
+    if (draft.datos.precio) auto.push("precio público Gs. " + Number(draft.datos.precio).toLocaleString("es-PY"));
+    if (draft.datos.precio_proveedor) auto.push("proveedor Gs. " + Number(draft.datos.precio_proveedor).toLocaleString("es-PY"));
+    if (draft.datos.stock) auto.push("stock " + draft.datos.stock);
+    const resumen = `🔎 <b>Extraje del link:</b>\n• Nombre: ${draft.datos.nombre || "—"}\n• Marca: ${draft.datos.marca || "—"}\n• Imagen: ${draft.imagenes.length ? "sí" : "no"}` +
+      (auto.length ? "\n\n✅ Ya tengo: " + auto.join(" · ") + "\nLo que falte te lo pregunto." : "\n\nPasame el precio público, stock, etc. y los cargo.") ;
     await CTX.tg.sendMessage(chatId, resumen);
   } catch (e) {
     await CTX.tg.sendMessage(chatId, "⚠️ No pude scrapear el link (JS pesado o bloqueado). Completemos a mano.");
@@ -196,6 +214,38 @@ function extractTech(text) {
   const out = {};
   const m = text.match(/(\d+\s?(?:mg|g|ml|lb|cápsulas|caps|comprimidos))/gi);
   if (m) out.presentacion = m.slice(0, 3).join(", ");
+  return out;
+}
+
+// Extrae del texto que acompaña al link/foto: precio público (Gs),
+// precio de proveedor (reales) y stock. Devuelve { precio, proveedor_brl, stock }.
+function extractInlineData(text) {
+  const out = {};
+  const t = " " + text.toLowerCase() + " ";
+  // precio público: "precio 60mil", "precio 60000", "gs 60000", "60000 gs"
+  const precioRe = /precio\s+([\d.]+\s*mil|\d[\d.]*)|gs\.?\s*(\d[\d.]*)|(\d[\d.]*)\s*gs/;
+  const pm = t.match(precioRe);
+  if (pm) {
+    let raw = (pm[1] || pm[2] || pm[3] || "").replace(/\./g, "").replace(/\s/g, "");
+    if (/mil/.test(pm[1] || "")) raw = String(parseInt(raw, 10) * 1000);
+    const n = parseInt(raw, 10);
+    if (n > 0) out.precio = n;
+  }
+  // precio proveedor en reales: "proveedor 30 reales", "provedor 30 real", "30 reales"
+  const provRe = /prov[eé]edor\s+(\d[\d.,]*)\s*(?:reales?|r\$|rs\$|\$)?|(\d[\d.,]*)\s*reales?/;
+  const prm = t.match(provRe);
+  if (prm) {
+    const raw = (prm[1] || prm[2] || "").replace(/\./g, "").replace(",", ".");
+    const n = parseFloat(raw);
+    if (n > 0) out.proveedor_brl = n;
+  }
+  // stock: "stock 5", "stock:5", "5 unidades"
+  const stockRe = /stock\s*:?\s*(\d+)|(\d+)\s*unidades/;
+  const sm = t.match(stockRe);
+  if (sm) {
+    const n = parseInt(sm[1] || sm[2], 10);
+    if (n >= 0) out.stock = n;
+  }
   return out;
 }
 
@@ -338,8 +388,8 @@ async function publish(chatId, draft, messageId) {
   const slug = (CTX.generateSlug ? CTX.generateSlug(d.nombre) : slugify(d.nombre));
   try {
     const result = CTX.db.prepare(
-      `INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, marca, seo_descripcion, slug)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+      `INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, marca, seo_descripcion, slug, precio_proveedor)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
     ).run(
       d.nombre || "Sin nombre",
       parseInt(d.precio) || 0,
@@ -356,7 +406,8 @@ async function publish(chatId, draft, messageId) {
       1,
       d.marca || "",
       c.descripcion_corta || "",
-      slug
+      slug,
+      d.precio_proveedor ? parseInt(d.precio_proveedor) : null
     );
     const newId = result.lastInsertRowid;
     clear(chatId);
