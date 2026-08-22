@@ -145,17 +145,19 @@ async function receiveLink(chatId, draft, url) {
   draft.url_origen = url;
   try {
     const data = await CTX.scrapeProductData(url);
+    // El link solo aporta imagen + descripción. El precio público y el de
+    // proveedor se definen manualmente (la factura es la fuente de proveedor).
     draft.datos = Object.assign({
       nombre: data.nombre || "",
       marca: data.marca || "",
-      precio: data.precio || "",
+      precio: "",
       presentacion: "",
       stock: 0,
       categoria: "suplementos",
     }, draft.datos);
     draft.datos_tecnicos = extractTech(data.descripcion || data.descripcion_larga || "");
     if (data.imagen) draft.imagenes.push({ filename: data.imagen, principal: true });
-    const resumen = `🔎 <b>Extraje del link:</b>\n• Nombre: ${draft.datos.nombre || "—"}\n• Marca: ${draft.datos.marca || "—"}\n• Precio: ${draft.datos.precio ? "Gs. " + Number(draft.datos.precio).toLocaleString("es-PY") : "—"}\n• Imagen: ${draft.imagenes.length ? "sí" : "no"}`;
+    const resumen = `🔎 <b>Extraje del link:</b>\n• Nombre: ${draft.datos.nombre || "—"}\n• Marca: ${draft.datos.marca || "—"}\n• Imagen: ${draft.imagenes.length ? "sí" : "no"}\n\nEl precio público y el de proveedor los ponés vos manualmente.`;
     await CTX.tg.sendMessage(chatId, resumen);
   } catch (e) {
     await CTX.tg.sendMessage(chatId, "⚠️ No pude scrapear el link (JS pesado o bloqueado). Completemos a mano.");

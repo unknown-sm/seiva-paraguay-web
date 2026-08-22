@@ -547,6 +547,8 @@ try { db.exec("ALTER TABLE productos ADD COLUMN upsell TEXT DEFAULT '[]'"); } ca
 try { db.exec("ALTER TABLE productos ADD COLUMN slug TEXT DEFAULT ''"); } catch (e) {}
 try { db.exec("ALTER TABLE productos ADD COLUMN featured_order INTEGER DEFAULT 0"); } catch (e) {}
 try { db.exec("ALTER TABLE productos ADD COLUMN precio_proveedor INTEGER DEFAULT NULL"); } catch (e) {}
+try { db.exec("ALTER TABLE productos ADD COLUMN proveedor_updated_at TEXT DEFAULT ''"); } catch (e) {}
+try { db.exec("ALTER TABLE productos ADD COLUMN factura_origen TEXT DEFAULT ''"); } catch (e) {}
 try { db.exec("ALTER TABLE productos ADD COLUMN delivery_gratis INTEGER DEFAULT 0"); } catch (e) {}
 try { db.exec("ALTER TABLE productos ADD COLUMN presentaciones TEXT DEFAULT '[]'"); } catch (e) {}
 

@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const productWizard = require("./product-wizard");
+const invoiceWizard = require("./invoice-wizard");
 
 // Telegram Bot Configuration
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
@@ -37,6 +38,18 @@ function init(database, shared = {}) {
     scrapeProductData: shared.scrapeProductData,
     processUploadImage: shared.processUploadImage,
     generateSlug: shared.generateSlug,
+  });
+  // Asistente de precio de proveedor (facturas)
+  invoiceWizard.init({
+    db: database,
+    allowedChats: shared.allowedChats || [],
+    tg: {
+      sendMessage,
+      sendPhoto,
+      getFile,
+      downloadFile,
+      answerCallback: (id) => telegramAPI("answerCallbackQuery", { callback_query_id: id }),
+    },
   });
   console.log("[Telegram Bot] Initialized");
 }
@@ -431,6 +444,9 @@ async function handleWebhook(update) {
   // Asistente de carga rápida: si el mensaje/callback es del wizard, lo maneja y corta acá
   const handled = await productWizard.handleUpdate(update);
   if (handled) return;
+  // Asistente de precio de proveedor (facturas)
+  const handledInv = await invoiceWizard.handleUpdate(update);
+  if (handledInv) return;
 
   // Handle callback queries (inline keyboard buttons)
   if (update.callback_query) {
