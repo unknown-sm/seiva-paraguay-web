@@ -194,9 +194,15 @@ async function onMessage(msg) {
   const text = msg.text || "";
   const session = load(chatId);
 
-  if (CTX.allowedChats && CTX.allowedChats.length && !CTX.allowedChats.includes(chatId)) return false;
+  if (CTX.allowedChats && CTX.allowedChats.length && !CTX.allowedChats.includes(chatId)) {
+    // Rechazo explícito con instrucción, no silencio.
+    return CTX.tg.sendMessage(chatId,
+      "⛔ <b>No autorizado.</b> Tu chat ID es <code>" + chatId + "</code>.\n" +
+      "Agregalo a <code>TELEGRAM_ALLOWED_CHATS</code> en Dokploy (separá varios con coma) y redeploy.");
+  }
 
-  if (text === "/factura" || text === "/precio" || text === "/proveedor") {
+  if (text === "/factura" || text === "/precio" || text === "/proveedor" ||
+      /\b(cargar|subir|mandar|pasar)?\s*factura\b|precio de proveedor|precios de proveedor/i.test(text)) {
     const draft = { items: [], rate: DEFAULT_RATE, factura: "", pendingIndex: null, searchResults: [] };
     save(chatId, "AWAIT_FILE", draft);
     return CTX.tg.sendMessage(chatId,

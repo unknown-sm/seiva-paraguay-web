@@ -5,6 +5,9 @@ const productWizard = require("./product-wizard");
 const invoiceWizard = require("./invoice-wizard");
 const botRouter = require("./bot-router");
 
+// Marcador de versión: visible en /debug para saber qué código corre el server.
+const BUILD_TAG = "bot-2026-08-22-audit1";
+
 // Telegram Bot Configuration
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
 const TELEGRAM_WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET || crypto.randomBytes(32).toString("hex");
@@ -14,14 +17,17 @@ const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || "google/gemini-2.0-flas
 // Bot state
 let db = null;
 let botInfo = null;
+let ALLOWED_CHATS = [];
 
 // Initialize bot with database reference
 function init(database, shared = {}) {
   db = database;
+  ALLOWED_CHATS = shared.allowedChats || [];
   if (!TELEGRAM_BOT_TOKEN) {
     console.log("[Telegram Bot] No TELEGRAM_BOT_TOKEN set - bot disabled");
     return;
   }
+  console.log("[Telegram Bot] Build: " + BUILD_TAG);
   // Inicializar asistente de carga rápida de productos
   productWizard.init({
     db: database,
@@ -444,6 +450,18 @@ ${p.activo ? "✅ Activo" : "⏸️ Inactivo"}`;
 
 // Handle incoming webhook
 async function handleWebhook(update) {
+  // Diagnóstico: /debug responde qué código corre el server + config + chat id.
+  if (update.message && update.message.text && update.message.text.trim() === "/debug") {
+    const cid = update.message.chat.id;
+    return sendMessage(cid,
+      "🔧 <b>Debug del bot</b>\n" +
+      "Build: <code>" + BUILD_TAG + "</code>\n" +
+      "Tu chat ID: <code>" + cid + "</code>\n" +
+      "Chats permitidos: " + (ALLOWED_CHATS.length ? ALLOWED_CHATS.join(", ") : "(todos)") + "\n" +
+      "IA: " + (OPENROUTER_API_KEY ? "OpenRouter" : "sin key") + " · modelo: " + OPENROUTER_MODEL + " · COPY_PROVIDER=" + (process.env.COPY_PROVIDER || "openrouter") + "\n" +
+      "Router: activo · Sesión alta: " + (productWizard.hasSession(cid) ? "sí" : "no") + " · Sesión factura: " + (invoiceWizard.hasSession(cid) ? "sí" : "no"));
+  }
+
   // Router de intención: link/foto -> producto, .txt factura -> precio proveedor.
   const handled = await botRouter.handleUpdate(update);
   if (handled) return;
@@ -511,29 +529,35 @@ async function handleWebhook(update) {
   // Understand intent with AI
   const intent = await understandIntent(text);
 
-  if (intent.action === "help") {
-    const helpText = `🤖 <b>Seiva Bot - Comandos</b>
+  // Si no se entendió la intención: ayuda amigable, nunca "Acción no reconocida".
+  if (!intent || !intent.action || intent.action === "unknown") {
+    await sendMessage(chatId,
+      "No capté qué querés hacer. Podés:\n" +
+      "• Pegarme un <b>link</b> o mandar una <b>foto</b> de un producto → lo subo a la web.\n" +
+      "• Mandarme un <b>.txt</b> de factura (precios en reales) → actualizo precio de proveedor.\n" +
+      "• Escribir <b>\"subir producto\"</b> para empezar un alta.\n" +
+      "• Consultar: \"listar productos\", \"listar pedidos\", \"pedido 123\".");
+    return;
+  }
 
-📦 <b>Inventario:</b>
-• listar productos
-• ver producto [nombre/id]
-• agregar producto [nombre] precio [X] stock [X]
+  if (intent.action === "help") {
+    const helpText = `🤖 <b>Seiva Bot</b> <code>${BUILD_TAG}</code>
+
+🚀 <b>Lo más fácil:</b>
+• Pegame un <b>link</b> de producto (podés sumar "precio 60mil stock 5") → lo subo a la web
+• Mandame una <b>foto</b> → subo el producto
+• Mandame un <b>.txt</b> de factura → actualizo precios de proveedor
+• Escribí "subir producto" para empezar
+
+📦 <b>Inventario (lenguaje natural):</b>
+• listar productos / ver producto [nombre]
 • actualizar producto [id] campo valor
-• eliminar producto [id/nombre]
 
 📋 <b>Pedidos:</b>
-• listar pedidos [estado]
-• pedido [id]
-• actualizar pedido [id] estado [nuevo estado]
+• listar pedidos [estado] / pedido [id]
+• actualizar pedido [id] estado [nuevo]
 
-📸 <b>Imágenes:</b>
-• Enviá una foto para subir como imagen de producto
-
-💡 <b>Ejemplos:</b>
-• agregar vitamina c precio 50000 stock 100
-• pedido 123
-• actualizar pedido 123 estado confirmado
-• listar pedidos pendientes`;
+🔧 /debug → diagnóstico del bot`;
     await sendMessage(chatId, helpText);
     return;
   }

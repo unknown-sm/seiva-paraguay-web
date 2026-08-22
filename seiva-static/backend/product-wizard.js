@@ -90,7 +90,11 @@ async function onMessage(msg) {
   const session = load(chatId);
 
   if (CTX.allowedChats && CTX.allowedChats.length && !CTX.allowedChats.includes(chatId)) {
-    return false;
+    // Rechazo explícito con instrucción, no silencio.
+    return CTX.tg.sendMessage(chatId,
+      "⛔ <b>No autorizado.</b> Tu chat ID es <code>" + chatId + "</code>.\n" +
+      "Agregalo a <code>TELEGRAM_ALLOWED_CHATS</code> en Dokploy (separá varios con coma) y redeploy.\n" +
+      "Si ya lo agregaste, verificá que sea el número exacto (sin @, sin espacios).");
   }
 
   if (text === "/cargar" || text === "/nuevo" || text === "/producto") {
@@ -98,6 +102,10 @@ async function onMessage(msg) {
   }
 
   if (!session) {
+    // Lenguaje natural: "subir producto", "cargar un producto", "nuevo producto"
+    if (/(subir|cargar|agregar|crear|publicar)\s+(un\s+|una\s+|el\s+|la\s+)?(nuevo\s+|nueva\s+)?producto|nuevo\s+producto|producto\s+nuevo/i.test(text)) {
+      return startProduct(chatId);
+    }
     // Sin comando: si manda foto o link, arrancamos el alta directo.
     const url = extractUrl(text);
     if (msg.photo && msg.photo.length) {
