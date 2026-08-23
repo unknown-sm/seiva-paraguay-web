@@ -80,7 +80,7 @@ async function handleUpdate(update) {
     if (update.message) return await onMessage(update.message);
     if (update.callback_query) return await onCallback(update.callback_query);
   } catch (e) {
-    console.error("[Wizard] error:", e.message);
+    console.error("[Wizard] error:", e.message, "| stack:", (e.stack || "").split("\n").slice(0, 3).join(" <- "));
   }
 }
 

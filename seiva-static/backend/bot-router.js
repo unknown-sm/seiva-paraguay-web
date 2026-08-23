@@ -31,8 +31,10 @@ async function handleUpdate(update) {
 
   // Sin sesión: cada wizard detecta su propia intención y arranca solo.
   const r1 = await productWizard.handleUpdate(update);
+  console.log("[Router] productWizard ->", r1 ? "handled" : "skip");
   if (r1) return r1;
   const r2 = await invoiceWizard.handleUpdate(update);
+  console.log("[Router] invoiceWizard ->", r2 ? "handled" : "skip");
   if (r2) return r2;
 
   // No entendió nada: preguntar, no tirar error.
