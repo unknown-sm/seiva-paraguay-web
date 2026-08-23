@@ -4,11 +4,17 @@
 //
 // Estados (FSM):
 //   AWAIT_SOURCE -> recolecta foto o link
-//   COLLECT      -> pregunta campos faltantes uno a uno (nombre, marca, presentacion, precio, stock)
+//   COLLECT      -> (solo si el usuario elige Editar un campo a mano)
 //   GALLERY      -> acepta fotos extra o "listo"
 //   GENERATE     -> genera copy con copy-provider
-//   PREVIEW      -> muestra ficha y botones Publicar/Editar/Cancelar
+//   PREVIEW      -> muestra ficha + foto y botones Publicar/Editar/Cancelar
 //   EDIT_FIELD   -> edita un campo y vuelve a PREVIEW
+//
+// Mejoras (build alta-nl):
+//   - Lenguaje natural: parsea precio/stock/marca/categoria del mensaje junto al link.
+//   - Marca y categoría se matchean contra la DB y se CREAN automáticamente si no existen.
+//   - Imagen robusta: usa el archivo que ya bajó el scrape; si es URL, reintenta con headers; nunca crashea.
+//   - Después de scrape+NL va DIRECTO al PREVIEW (con foto) antes de publicar.
 
 const fs = require("fs");
 const path = require("path");
@@ -28,8 +34,16 @@ function init(ctx) {
 }
 
 function load(chatId) {
-  const row = CTX.db.prepare("SELECT state, draft FROM bot_sessions WHERE chat_id = ?").get(chatId);
+  const row = CTX.db.prepare("SELECT state, draft, updated_at FROM bot_sessions WHERE chat_id = ?").get(chatId);
   if (!row) return null;
+  // Expiración: sesión de más de 30 min se descarta (evita sesiones huérfanas trabando el chat).
+  try {
+    const ageMs = Date.now() - new Date(row.updated_at + "Z").getTime();
+    if (ageMs > 30 * 60 * 1000) {
+      clear(chatId);
+      return null;
+    }
+  } catch (e) { /* updated_at inválido: no descartar */ }
   let draft = {};
   try { draft = JSON.parse(row.draft); } catch (e) {}
   return { state: row.state, draft };
@@ -51,7 +65,7 @@ function hasSession(chatId) {
 }
 
 function newDraft() {
-  return { imagenes: [], datos_tecnicos: {}, datos: {}, source: null, copy: {} };
+  return { imagenes: [], datos_tecnicos: {}, datos: {}, source: null, copy: {}, marca_id: null, categoria_id: null };
 }
 
 function startProduct(chatId) {
@@ -59,7 +73,8 @@ function startProduct(chatId) {
   save(chatId, "AWAIT_SOURCE", draft);
   return CTX.tg.sendMessage(chatId,
     "📦 <b>Carga rápida de producto</b>\n\n" +
-    "Envianos una <b>foto</b> del producto o un <b>link</b> (otra tienda, marketplace o red social).",
+    "Envianos una <b>foto</b> del producto o un <b>link</b> (otra tienda, marketplace o red social).\n" +
+    "Podés escribir junto al link los datos: <i>precio 60mil stock 5 marca V7 Energy categoria suplementos</i>.",
     { reply_markup: { inline_keyboard: [[
       { text: "📸 Mandar foto", callback_data: "wz_hint_photo" },
       { text: "🔗 Mandar link", callback_data: "wz_hint_link" },
@@ -82,23 +97,23 @@ async function handleUpdate(update) {
   } catch (e) {
     console.error("[Wizard] error:", e.message, "| stack:", (e.stack || "").split("\n").slice(0, 3).join(" <- "));
   }
+  return false;
 }
 
 async function onMessage(msg) {
   const chatId = msg.chat.id;
-  // Texto: msg.text normal, o msg.caption si manda foto/documento con texto.
   const text = msg.text || msg.caption || "";
   const session = load(chatId);
 
   if (CTX.allowedChats && CTX.allowedChats.length && !CTX.allowedChats.includes(chatId)) {
-    // Rechazo explícito con instrucción, no silencio.
     return CTX.tg.sendMessage(chatId,
       "⛔ <b>No autorizado.</b> Tu chat ID es <code>" + chatId + "</code>.\n" +
       "Agregalo a <code>TELEGRAM_ALLOWED_CHATS</code> en Dokploy (separá varios con coma) y redeploy.\n" +
       "Si ya lo agregaste, verificá que sea el número exacto (sin @, sin espacios).");
   }
 
-  if (text === "/cargar" || text === "/nuevo" || text === "/producto") {
+  if (text === "/cargar" || text === "/nuevo" || text === "/producto" || /^\s*preview\s*$/i.test(text)) {
+    if (session && session.state === "PREVIEW") return renderPreview(chatId, session.draft);
     return startProduct(chatId);
   }
 
@@ -107,7 +122,7 @@ async function onMessage(msg) {
     if (/(subir|cargar|agregar|crear|publicar)\s+(un\s+|una\s+|el\s+|la\s+)?(nuevo\s+|nueva\s+)?producto|nuevo\s+producto|producto\s+nuevo/i.test(text)) {
       return startProduct(chatId);
     }
-    // Sin comando: si manda foto o link, arrancamos el alta directo.
+    // Sin comando: si manda foto o link, arrancamos el alta directo y vamos al preview.
     const url = extractUrl(text);
     if (msg.photo && msg.photo.length) {
       const draft = newDraft();
@@ -116,8 +131,7 @@ async function onMessage(msg) {
         return await receivePhoto(chatId, draft, msg);
       } catch (e) {
         console.error("[Wizard] receivePhoto crasheo:", e.message);
-        save(chatId, "COLLECT", draft);
-        return askNextField(chatId, draft);
+        return generateAndPreview(chatId, draft);
       }
     }
     if (url) {
@@ -127,26 +141,48 @@ async function onMessage(msg) {
         return await receiveLink(chatId, draft, url, text);
       } catch (e) {
         console.error("[Wizard] receiveLink crasheo:", e.message);
-        // El flujo ya empezó: seguimos preguntando campos a mano.
-        save(chatId, "COLLECT", draft);
-        return askNextField(chatId, draft);
+        return generateAndPreview(chatId, draft);
       }
     }
     return false;
   }
+
   const { state, draft } = session;
 
   if (state === "AWAIT_SOURCE") {
     if (msg.photo && msg.photo.length) {
       try { return await receivePhoto(chatId, draft, msg); }
-      catch (e) { console.error("[Wizard] receivePhoto crasheo:", e.message); save(chatId, "COLLECT", draft); return askNextField(chatId, draft); }
+      catch (e) { console.error("[Wizard] receivePhoto crasheo:", e.message); return generateAndPreview(chatId, draft); }
     }
     const url = extractUrl(text);
     if (url) {
       try { return await receiveLink(chatId, draft, url, text); }
-      catch (e) { console.error("[Wizard] receiveLink crasheo:", e.message); save(chatId, "COLLECT", draft); return askNextField(chatId, draft); }
+      catch (e) { console.error("[Wizard] receiveLink crasheo:", e.message); return generateAndPreview(chatId, draft); }
     }
     return CTX.tg.sendMessage(chatId, "No entendí. Envianos una foto 📸 o un link 🔗 del producto.");
+  }
+
+  if (state === "PREVIEW") {
+    // Si manda otro link/foto estando en preview -> reemplaza el producto.
+    if (msg.photo && msg.photo.length) {
+      clear(chatId);
+      const d = newDraft(); save(chatId, "AWAIT_SOURCE", d);
+      try { return await receivePhoto(chatId, d, msg); }
+      catch (e) { return generateAndPreview(chatId, d); }
+    }
+    const url = extractUrl(text);
+    if (url) {
+      clear(chatId);
+      const d = newDraft(); save(chatId, "AWAIT_SOURCE", d);
+      try { return await receiveLink(chatId, d, url, text); }
+      catch (e) { return generateAndPreview(chatId, d); }
+    }
+    if (/^\s*(publicar|subir|confirmar|si|sí|yes)\s*$/i.test(text)) return await publish(chatId, draft);
+    if (/^\s*(cancelar|borrar|eliminar|no)\s*$/i.test(text)) { clear(chatId); return CTX.tg.sendMessage(chatId, "🚫 Carga cancelada."); }
+    if (/^\s*(editar|corregir|cambiar|modificar)\s*$/i.test(text)) return sendEditMenu(chatId, draft);
+    return CTX.tg.sendMessage(chatId,
+      "📋 Está en <b>vista previa</b>. Usá los botones ✅ Publicar / ✏️ Editar / ❌ Cancelar.\n" +
+      "O mandame otro link/foto para reemplazar este producto.");
   }
 
   if (state === "COLLECT") return await receiveField(chatId, draft, text);
@@ -165,6 +201,15 @@ async function onMessage(msg) {
     if (COPY_FIELDS.includes(field)) draft.copy[field] = text.trim();
     else draft.datos[field] = text.trim();
     delete draft._editField;
+    // Si editó marca/categoria, re-matchear contra DB.
+    if (field === "marca") {
+      const m = matchMarca(draft.datos.marca);
+      draft.marca_id = m.id; draft.datos.marca = m.nombre;
+    }
+    if (field === "categoria") {
+      const c = matchCategoria(draft.datos.categoria);
+      draft.categoria_id = c.id; draft.datos.categoria = c.nombre;
+    }
     save(chatId, "PREVIEW", draft);
     return renderPreview(chatId, draft);
   }
@@ -177,123 +222,62 @@ function extractUrl(text) {
   return m ? m[0] : null;
 }
 
-async function receivePhoto(chatId, draft, msg, extra = false) {
-  const fileId = msg.photo[msg.photo.length - 1].file_id;
-  const file = await CTX.tg.getFile(fileId);
-  if (!file.ok) return CTX.tg.sendMessage(chatId, "No pude leer la foto. Probá de nuevo.");
-  const buf = await CTX.tg.downloadFile(file.result.file_path);
-  const tmp = path.join(CTX.imgPath, "tmp-" + Date.now() + ".jpg");
-  fs.writeFileSync(tmp, buf);
-  const out = await CTX.processUploadImage(tmp);
-  // processUploadImage ya borra tmp; no eliminar de nuevo (ENOENT).
-  if (!out) return CTX.tg.sendMessage(chatId, "Error procesando la imagen.");
-  draft.imagenes.push({ filename: out, principal: draft.imagenes.length === 0 });
-  if (!extra) {
-    draft.source = "foto";
-    // Datos sueltos del caption (precio, proveedor, stock)
-    const vals = extractInlineData(msg.caption || msg.text || "");
-    if (vals.precio) draft.datos.precio = vals.precio;
-    if (vals.stock !== undefined) draft.datos.stock = vals.stock;
-    if (vals.proveedor_brl) draft.datos.precio_proveedor = Math.round(vals.proveedor_brl * BRL_RATE);
-    save(chatId, "COLLECT", draft);
-    return askNextField(chatId, draft);
-  }
-  save(chatId, "GALLERY", draft);
+// ---------- Parseo de lenguaje natural ----------
+// Del mensaje del usuario extrae: precio (Gs), stock, marca, categoria, presentacion.
+// Tolera palabras de relleno ("precio es 60 mil", "marca su precio...").
+const STOPWORDS = new Set(["su", "el", "la", "los", "las", "mi", "tu", "otra", "uno", "una", "lo", "de", "es", "suya", "nuestra", "nuestro"]);
+
+function parseMarca(text) {
+  // Patrón A: "V7 energy es su marca" -> la marca es lo que antecede a "es su marca"
+  let m = text.match(/([\w.éíóúñ\- ]+?)\s+es\s+su\s+marca/i);
+  if (m) { const x = m[1].trim(); if (x && !STOPWORDS.has(x.toLowerCase())) return x; }
+  // Patrón A2: "su marca es V7 energy"
+  m = text.match(/su\s+marca\s+es\s+([\w.éíóúñ\- ]+)/i);
+  if (m) { const x = m[1].trim(); if (x && !STOPWORDS.has(x.toLowerCase())) return x; }
+  // Patrón B: "marca X" / "marca: X" (X corto, sin palabras de relleno)
+  m = text.match(/(?:marca|brand)\s*:?\s+([\w.éíóúñ\-]+)/i);
+  if (m) { const x = m[1].trim(); if (x && !STOPWORDS.has(x.toLowerCase())) return x; }
+  return null;
 }
 
-async function receiveLink(chatId, draft, url, text) {
-  draft.source = "link";
-  draft.url_origen = url;
-  try {
-    const data = await CTX.scrapeProductData(url);
-    // El link aporta nombre + imagen. Precio público, proveedor y stock
-    // se leen del texto que el usuario mandó junto con el link (o se piden después).
-    draft.datos = Object.assign({
-      nombre: data.nombre || "",
-      marca: data.marca || "",
-      precio: "",
-      presentacion: "",
-      stock: 0,
-      categoria: "suplementos",
-    }, draft.datos);
-    // Presentación automática desde el nombre scrapeado (ej: "60 cápsulas")
-    const tech = extractTech(data.nombre || data.descripcion || "");
-    if (tech.presentacion && !draft.datos.presentacion) draft.datos.presentacion = tech.presentacion;
-    // Datos sueltos del mensaje (precio 60mil, proveedor 30 reales, stock 5)
-    const vals = extractInlineData(text || "");
-    if (vals.precio) draft.datos.precio = vals.precio;
-    if (vals.stock !== undefined) draft.datos.stock = vals.stock;
-    if (vals.proveedor_brl) draft.datos.precio_proveedor = Math.round(vals.proveedor_brl * BRL_RATE);
-    if (data.imagen) {
-      let imgFile = data.imagen;
-      // Si el scrape no descargó la imagen (data.imagen es una URL),
-      // reintento con headers para esquivar bloqueo de hotlink.
-      if (/^https?:\/\//.test(imgFile)) {
-        try {
-          const origin = new URL(imgFile).origin;
-          const r = await fetch(imgFile, {
-            headers: {
-              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-              "Referer": origin,
-            },
-          });
-          if (r.ok) {
-            const buf = Buffer.from(await r.arrayBuffer());
-            const tmp = path.join(CTX.imgPath, "tmp-" + Date.now() + ".jpg");
-            fs.writeFileSync(tmp, buf);
-            const processed = await CTX.processUploadImage(tmp);
-            imgFile = processed || null;
-          } else {
-            imgFile = null;
-          }
-        } catch (e) {
-          imgFile = null;
-        }
-      }
-      if (imgFile) draft.imagenes.push({ filename: imgFile, principal: true });
+function parseCategoria(text) {
+  const m = text.match(/(?:categor[ií]a|category|cat)\w*\s*:?\s+([\w.éíóúñ\-]+)/i);
+  if (m) { const x = m[1].trim(); if (x && !STOPWORDS.has(x.toLowerCase())) return x; }
+  return null;
+}
+
+function parsePrecio(text) {
+  // Buscar "precio" y, en los ~40 chars siguientes, un número (opcional "mil").
+  const idx = text.toLowerCase().indexOf("precio");
+  if (idx >= 0) {
+    const after = text.slice(idx, idx + 40);
+    const mm = after.match(/(\d[\d.]*)\s*mil|(\d[\d.]*)/i);
+    if (mm) {
+      let raw = (mm[1] || mm[2] || "").replace(/\./g, "").replace(/\s/g, "");
+      if (/mil/i.test(mm[0])) raw = String(parseInt(raw, 10) * 1000);
+      const n = parseInt(raw, 10);
+      if (n > 0) return n;
     }
-    const auto = [];
-    if (draft.datos.precio) auto.push("precio público Gs. " + Number(draft.datos.precio).toLocaleString("es-PY"));
-    if (draft.datos.precio_proveedor) auto.push("proveedor Gs. " + Number(draft.datos.precio_proveedor).toLocaleString("es-PY"));
-    if (draft.datos.stock) auto.push("stock " + draft.datos.stock);
-    const resumen = `🔎 <b>Extraje del link:</b>\n• Nombre: ${draft.datos.nombre || "—"}\n• Marca: ${draft.datos.marca || "—"}\n• Imagen: ${draft.imagenes.length ? "sí" : "no"}` +
-      (auto.length ? "\n\n✅ Ya tengo: " + auto.join(" · ") + "\nLo que falte te lo pregunto." : "\n\nPasame el precio público, stock, etc. y los cargo.") ;
-    await CTX.tg.sendMessage(chatId, resumen);
-  } catch (e) {
-    await CTX.tg.sendMessage(chatId, "⚠️ No pude scrapear el link (JS pesado o bloqueado). Completemos a mano.");
   }
-  save(chatId, "COLLECT", draft);
-  return askNextField(chatId, draft);
+  // "gs 60000" o "60000 gs"
+  let m = text.match(/gs\.?\s*(\d[\d.]*)/i) || text.match(/(\d[\d.]*)\s*gs\b/i);
+  if (m) { const n = parseInt(m[1].replace(/\./g, ""), 10); if (n > 0) return n; }
+  return null;
 }
 
-function extractTech(text) {
+function parseMessageForProduct(text) {
   const out = {};
-  const m = text.match(/(\d+\s?(?:mg|g|ml|lb|cápsulas|caps|comprimidos))/gi);
-  if (m) out.presentacion = m.slice(0, 3).join(", ");
-  return out;
-}
-
-// Extrae del texto que acompaña al link/foto: precio público (Gs),
-// precio de proveedor (reales) y stock. Devuelve { precio, proveedor_brl, stock }.
-function extractInlineData(text) {
-  const out = {};
-  const t = " " + text.toLowerCase() + " ";
-  // precio público: "precio 60mil", "precio 60000", "gs 60000", "60000 gs"
-  const precioRe = /precio\s+([\d.]+\s*mil|\d[\d.]*)|gs\.?\s*(\d[\d.]*)|(\d[\d.]*)\s*gs/;
-  const pm = t.match(precioRe);
-  if (pm) {
-    let raw = (pm[1] || pm[2] || pm[3] || "").replace(/\./g, "").replace(/\s/g, "");
-    if (/mil/.test(pm[1] || "")) raw = String(parseInt(raw, 10) * 1000);
-    const n = parseInt(raw, 10);
-    if (n > 0) out.precio = n;
-  }
-  // precio proveedor en reales: "proveedor 30 reales", "provedor 30 real", "30 reales"
-  const provRe = /prov[eé]edor\s+(\d[\d.,]*)\s*(?:reales?|r\$|rs\$|\$)?|(\d[\d.,]*)\s*reales?/;
+  const t = " " + (text || "").toLowerCase() + " ";
+  // precio público (Gs)
+  const precio = parsePrecio(text);
+  if (precio) out.precio = precio;
+  // precio proveedor en reales: "proveedor 30 reales", "30 reales"
+  const provRe = /prov[eé]edor\s+(\d[\d.,]*)\s*(?:reales?|r\$|\$)?|(\d[\d.,]*)\s*reales?/;
   const prm = t.match(provRe);
   if (prm) {
     const raw = (prm[1] || prm[2] || "").replace(/\./g, "").replace(",", ".");
     const n = parseFloat(raw);
-    if (n > 0) out.proveedor_brl = n;
+    if (n > 0) out.precio_proveedor = Math.round(n * BRL_RATE);
   }
   // stock: "stock 5", "stock:5", "5 unidades"
   const stockRe = /stock\s*:?\s*(\d+)|(\d+)\s*unidades/;
@@ -302,7 +286,158 @@ function extractInlineData(text) {
     const n = parseInt(sm[1] || sm[2], 10);
     if (n >= 0) out.stock = n;
   }
+  const marca = parseMarca(text);
+  if (marca) out.marca = marca;
+  const cat = parseCategoria(text);
+  if (cat) out.categoria = cat;
   return out;
+}
+
+function extractTech(text) {
+  const out = {};
+  const m = text.match(/(\d+\s?(?:mg|g|ml|lb|cápsulas|caps|comprimidos|capsulas))/gi);
+  if (m) out.presentacion = m.slice(0, 3).join(", ");
+  return out;
+}
+
+// ---------- Match / auto-creación de marca y categoría ----------
+function matchMarca(text) {
+  if (!text || !text.trim()) return { id: null, nombre: "" };
+  const nombre = text.trim().replace(/\s+/g, " ");
+  try {
+    const row = CTX.db.prepare("SELECT id, nombre FROM marcas WHERE LOWER(nombre)=LOWER(?) AND activo=1").get(nombre);
+    if (row) return { id: row.id, nombre: row.nombre };
+    const like = CTX.db.prepare("SELECT id, nombre FROM marcas WHERE LOWER(?) LIKE '%'||LOWER(nombre)||'%' AND activo=1 LIMIT 1").get(nombre);
+    if (like) return { id: like.id, nombre: like.nombre };
+    CTX.db.prepare("INSERT OR IGNORE INTO marcas (nombre, prioridad, activo) VALUES (?,0,1)").run(nombre);
+    const nr = CTX.db.prepare("SELECT id, nombre FROM marcas WHERE LOWER(nombre)=LOWER(?)").get(nombre);
+    return { id: nr ? nr.id : null, nombre };
+  } catch (e) { return { id: null, nombre }; }
+}
+
+function matchCategoria(text) {
+  if (!text || !text.trim()) return { id: null, nombre: "suplementos" };
+  const nombre = text.trim().replace(/\s+/g, " ");
+  try {
+    const row = CTX.db.prepare("SELECT id, nombre FROM categorias WHERE LOWER(nombre)=LOWER(?) AND activo=1").get(nombre);
+    if (row) return { id: row.id, nombre: row.nombre };
+    const like = CTX.db.prepare("SELECT id, nombre FROM categorias WHERE LOWER(?) LIKE '%'||LOWER(nombre)||'%' AND activo=1 LIMIT 1").get(nombre);
+    if (like) return { id: like.id, nombre: like.nombre };
+    const slug = (CTX.generateSlug ? CTX.generateSlug(nombre) : slugify(nombre)) || ("cat-" + Date.now());
+    CTX.db.prepare("INSERT OR IGNORE INTO categorias (nombre, slug, descripcion, activo) VALUES (?,?,?,1)").run(nombre, slug, "");
+    const nr = CTX.db.prepare("SELECT id, nombre FROM categorias WHERE LOWER(nombre)=LOWER(?)").get(nombre);
+    return { id: nr ? nr.id : null, nombre };
+  } catch (e) { return { id: null, nombre: "suplementos" }; }
+}
+
+// ---------- Recepción de foto ----------
+async function receivePhoto(chatId, draft, msg, extra = false) {
+  const fileId = msg.photo[msg.photo.length - 1].file_id;
+  const file = await CTX.tg.getFile(fileId);
+  if (!file.ok) return CTX.tg.sendMessage(chatId, "No pude leer la foto. Probá de nuevo.");
+  const buf = await CTX.tg.downloadFile(file.result.file_path);
+  const tmp = path.join(CTX.imgPath, "tmp-" + Date.now() + ".jpg");
+  fs.writeFileSync(tmp, buf);
+  const out = await CTX.processUploadImage(tmp);
+  if (!out) return CTX.tg.sendMessage(chatId, "Error procesando la imagen.");
+  draft.imagenes.push({ filename: out, principal: draft.imagenes.length === 0 });
+  if (!extra) {
+    draft.source = "foto";
+    const vals = parseMessageForProduct(msg.caption || msg.text || "");
+    if (vals.precio) draft.datos.precio = vals.precio;
+    if (vals.stock !== undefined) draft.datos.stock = vals.stock;
+    if (vals.precio_proveedor) draft.datos.precio_proveedor = vals.precio_proveedor;
+    if (vals.marca) { const m = matchMarca(vals.marca); draft.marca_id = m.id; draft.datos.marca = m.nombre; }
+    if (vals.categoria) { const c = matchCategoria(vals.categoria); draft.categoria_id = c.id; draft.datos.categoria = c.nombre; }
+    return generateAndPreview(chatId, draft);
+  }
+  save(chatId, "GALLERY", draft);
+}
+
+// ---------- Recepción de link ----------
+async function receiveLink(chatId, draft, url, text) {
+  draft.source = "link";
+  draft.url_origen = url;
+  let data = null;
+  try {
+    data = await CTX.scrapeProductData(url);
+  } catch (e) {
+    console.warn("[Wizard] scrape falló, continuamos con NL:", e.message);
+  }
+
+  // Datos base del scrape (si lo hubo).
+  const base = data || {};
+  draft.datos = Object.assign({
+    nombre: base.nombre || "",
+    marca: base.marca || "",
+    precio: "",
+    presentacion: "",
+    stock: 0,
+    categoria: "suplementos",
+  }, draft.datos);
+
+  // Presentación automática desde el nombre scrapeado.
+  const tech = extractTech((base.nombre || "") + " " + (base.descripcion || ""));
+  if (tech.presentacion && !draft.datos.presentacion) draft.datos.presentacion = tech.presentacion;
+
+  // Merge con lenguaje natural del mensaje del usuario (gana el usuario si lo dice).
+  const vals = parseMessageForProduct(text || "");
+  if (vals.precio) draft.datos.precio = vals.precio;
+  if (vals.stock !== undefined) draft.datos.stock = vals.stock;
+  if (vals.precio_proveedor) draft.datos.precio_proveedor = vals.precio_proveedor;
+  if (vals.marca) { const m = matchMarca(vals.marca); draft.marca_id = m.id; draft.datos.marca = m.nombre; }
+  if (vals.categoria) { const c = matchCategoria(vals.categoria); draft.categoria_id = c.id; draft.datos.categoria = c.nombre; }
+
+  // Marca/categoría del scrape si el usuario no las dio.
+  if (!draft.datos.marca && base.marca) { const m = matchMarca(base.marca); draft.marca_id = m.id; draft.datos.marca = m.nombre; }
+  if ((!draft.datos.categoria || draft.datos.categoria === "suplementos") && base.categoria) {
+    const c = matchCategoria(base.categoria); draft.categoria_id = c.id; draft.datos.categoria = c.nombre;
+  }
+
+  // Imagen: preferir el archivo local que ya bajó el scrape; si es URL, reintentar con headers.
+  let imgFile = await resolveImage(base.imagen, url);
+  if (imgFile) draft.imagenes.push({ filename: imgFile, principal: true });
+
+  // Resumen de lo extraído.
+  const auto = [];
+  if (draft.datos.precio) auto.push("precio Gs. " + Number(draft.datos.precio).toLocaleString("es-PY"));
+  if (draft.datos.precio_proveedor) auto.push("proveedor Gs. " + Number(draft.datos.precio_proveedor).toLocaleString("es-PY"));
+  if (draft.datos.stock) auto.push("stock " + draft.datos.stock);
+  const resumen = `🔎 <b>Extraje del link:</b>\n• Nombre: ${draft.datos.nombre || "—"}\n• Marca: ${draft.datos.marca || "—"}\n• Categoría: ${draft.datos.categoria || "—"}\n• Imagen: ${draft.imagenes.length ? "sí" : "no"}` +
+    (auto.length ? "\n\n✅ Ya tengo: " + auto.join(" · ") : "\n\nLo que falte lo completás con Editar.");
+  await CTX.tg.sendMessage(chatId, resumen);
+
+  return generateAndPreview(chatId, draft);
+}
+
+// Devuelve un filename local servible en /img/productos, o null.
+async function resolveImage(scrapedImagen, url) {
+  // Caso 1: el scrape ya lo bajó a disco (downloadImage devolvió un nombre de archivo local).
+  if (scrapedImagen && !/^https?:/i.test(scrapedImagen)) {
+    // asegurar que el archivo exista en imgPath
+    const p = path.join(CTX.imgPath, path.basename(scrapedImagen));
+    if (fs.existsSync(p)) return path.basename(scrapedImagen);
+  }
+  // Caso 2: es una URL -> bajar con headers (referer = origin) para esquivar hotlink.
+  if (scrapedImagen && /^https?:/i.test(scrapedImagen)) {
+    try {
+      const origin = new URL(scrapedImagen).origin;
+      const r = await fetch(scrapedImagen, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Referer": origin,
+        },
+      });
+      if (r.ok) {
+        const buf = Buffer.from(await r.arrayBuffer());
+        const tmp = path.join(CTX.imgPath, "tmp-" + Date.now() + ".jpg");
+        fs.writeFileSync(tmp, buf);
+        const processed = await CTX.processUploadImage(tmp);
+        if (processed) return processed;
+      }
+    } catch (e) { console.warn("[Wizard] re-descarga de imagen falló:", e.message); }
+  }
+  return null;
 }
 
 const FIELD_ORDER = ["nombre", "marca", "presentacion", "precio", "stock"];
@@ -329,6 +464,8 @@ async function receiveField(chatId, draft, text) {
     val = parseInt(val.replace(/[^\d]/g, ""), 10) || 0;
   }
   draft.datos[field] = val;
+  if (field === "marca") { const m = matchMarca(val); draft.marca_id = m.id; draft.datos.marca = m.nombre; }
+  if (field === "categoria") { const c = matchCategoria(val); draft.categoria_id = c.id; draft.datos.categoria = c.nombre; }
   const faltan = FIELD_ORDER.filter(f => !draft.datos[f] || (f === "precio" && !Number(draft.datos[f])));
   if (faltan.length === 0) return goGallery(chatId, draft);
   draft._next = faltan[0];
@@ -350,7 +487,6 @@ async function generateAndPreview(chatId, draft) {
     draft.copy = copy;
     if (copy.seo_keywords && copy.seo_keywords.length) draft.datos.seo_keywords = copy.seo_keywords;
   } catch (e) {
-    // Si la IA falla, no frenamos: usamos plantilla y publicamos igual.
     const copy = await stubProvider.generateCopy(draft.datos);
     draft.copy = copy;
     draft.copy._fallback = true;
@@ -371,7 +507,9 @@ function previewCaption(draft) {
     "📋 <b>VISTA PREVIA</b>\n\n" +
     "<b>Título:</b> " + escapeHtml(c.titulo || d.nombre) + "\n" +
     "<b>Precio:</b> " + precio + "\n" +
-    "<b>Marca:</b> " + escapeHtml(d.marca || "—") + "  ·  <b>Presentación:</b> " + escapeHtml(d.presentacion || "—") + "\n\n" +
+    "<b>Marca:</b> " + escapeHtml(d.marca || "—") + (draft.marca_id ? " ✅(BD)" : "") + "\n" +
+    "<b>Categoría:</b> " + escapeHtml(d.categoria || "—") + (draft.categoria_id ? " ✅(BD)" : "") + "\n" +
+    "<b>Presentación:</b> " + escapeHtml(d.presentacion || "—") + "\n\n" +
     "<b>Descripción corta:</b>\n" + escapeHtml(c.descripcion_corta || "—") + "\n\n" +
     "<b>Descripción larga:</b>\n" + escapeHtml(stripTags(c.descripcion_larga || "—")) + "\n\n" +
     "<b>Galería:</b> " + draft.imagenes.length + " imagen(es)"
@@ -401,7 +539,7 @@ async function onCallback(cb) {
   if (!session) return false;
   await CTX.tg.answerCallback(cb.id);
 
-  if (data === "wz_publish") return await publish(chatId, session.draft, cb.message.message_id);
+  if (data === "wz_publish") return await publish(chatId, session.draft);
   if (data === "wz_cancel") { clear(chatId); return CTX.tg.sendMessage(chatId, "🚫 Carga cancelada."); }
   if (data === "wz_edit") return sendEditMenu(chatId, session.draft);
   if (data === "wz_back") { save(chatId, "PREVIEW", session.draft); return renderPreview(chatId, session.draft); }
@@ -417,6 +555,7 @@ async function onCallback(cb) {
       ? "📸 Mandame la foto del producto como adjunto."
       : "🔗 Pegá el link de la página del producto.");
   }
+  return false;
 }
 
 function sendEditMenu(chatId, draft) {
@@ -434,7 +573,10 @@ function sendEditMenu(chatId, draft) {
       { text: "Presentación", callback_data: "wz_field_presentacion" },
     ],
     [
+      { text: "Categoría", callback_data: "wz_field_categoria" },
       { text: "Desc. corta", callback_data: "wz_field_descripcion_corta" },
+    ],
+    [
       { text: "Desc. larga", callback_data: "wz_field_descripcion_larga" },
     ],
     [{ text: "↩️ Volver a vista previa", callback_data: "wz_back" }],
@@ -449,15 +591,20 @@ async function publish(chatId, draft, messageId) {
   const principalFile = (draft.imagenes.find(i => i.principal) || draft.imagenes[0] || {}).filename || "";
   const imagenPath = principalFile ? "/img/productos/" + path.basename(principalFile) : "";
   const slug = (CTX.generateSlug ? CTX.generateSlug(d.nombre) : slugify(d.nombre));
+
+  // Marca/categoría: usar las matcheadas (o crearlas si hace falta).
+  const marca = matchMarca(d.marca);
+  const cat = matchCategoria(d.categoria || "suplementos");
+
   try {
     const result = CTX.db.prepare(
-      `INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, marca, seo_descripcion, slug, precio_proveedor)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+      `INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, marca, seo_descripcion, slug, precio_proveedor, categoria_id)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
     ).run(
       d.nombre || "Sin nombre",
       parseInt(d.precio) || 0,
       d.precio_anterior || null,
-      d.categoria || "suplementos",
+      cat.nombre || "suplementos",
       d.subcategoria || "",
       c.descripcion_corta || "",
       c.descripcion_larga || "",
@@ -467,16 +614,19 @@ async function publish(chatId, draft, messageId) {
       imagenPath,
       parseInt(d.stock) || 0,
       1,
-      d.marca || "",
+      marca.nombre || "",
       c.descripcion_corta || "",
       slug,
-      d.precio_proveedor ? parseInt(d.precio_proveedor) : null
+      d.precio_proveedor ? parseInt(d.precio_proveedor) : null,
+      cat.id || null
     );
     const newId = result.lastInsertRowid;
     clear(chatId);
     return CTX.tg.sendMessage(chatId,
       "✅ <b>Producto publicado</b> (#" + newId + ")\n" +
       escapeHtml(c.titulo || d.nombre) + "\n" +
+      (marca.nombre ? "🏷️ Marca: " + escapeHtml(marca.nombre) + "\n" : "") +
+      (cat.nombre ? "📂 Categoría: " + escapeHtml(cat.nombre) + "\n" : "") +
       CTX.publicBase.replace(/\/$/, "") + "/producto/" + slug);
   } catch (e) {
     return CTX.tg.sendMessage(chatId, "⚠️ Error al publicar: " + e.message);

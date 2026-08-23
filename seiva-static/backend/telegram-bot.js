@@ -672,38 +672,16 @@ async function handleWebhook(update) {
 
   // RED DE SEGURIDAD: si el mensaje tiene link o foto y llegó hasta acá,
   // significa que el router no lo capturó (no debería pasar). Lo mandamos
-  // directo al wizard de alta en vez de clasificarlo con la IA.
+  // directo al wizard de alta. El wizard NUNCA debe caer al modo conversación
+  // ni al handler viejo de fotos: si no puede procesarlo, decimos por qué.
   if (/https?:\/\//i.test(text) || (photo && photo.length)) {
-    console.warn("[TG-IN] link/foto llegó al flujo viejo — redirigiendo al wizard de alta");
+    console.warn("[TG-IN] link/foto no capturado por router, reenviando al wizard de alta");
     const rescued = await productWizard.handleUpdate(update);
     if (rescued) return;
-  }
-
-  // Handle photo upload (product image)
-  if (photo && photo.length > 0) {
-    const largestPhoto = photo[photo.length - 1];
-    const fileResult = await getFile(largestPhoto.file_id);
-    if (fileResult.ok) {
-      const fileBuffer = await downloadFile(fileResult.result.file_path);
-      const filename = `telegram-${Date.now()}.jpg`;
-      const imgPath = path.join(__dirname, "..", "img", "productos", filename);
-      fs.writeFileSync(imgPath, fileBuffer);
-      await sendMessage(chatId, `📸 Imagen recibida: /img/productos/${filename}\nUsala con: agregar producto nombre precio stock imagen:/img/productos/${filename}`);
-    }
-    return;
-  }
-
-  // Handle document upload
-  if (document && document.mime_type?.startsWith("image/")) {
-    const fileResult = await getFile(document.file_id);
-    if (fileResult.ok) {
-      const fileBuffer = await downloadFile(fileResult.result.file_path);
-      const filename = `telegram-${Date.now()}-${document.file_name}`;
-      const imgPath = path.join(__dirname, "..", "img", "productos", filename);
-      fs.writeFileSync(imgPath, fileBuffer);
-      await sendMessage(chatId, `📸 Imagen recibida: /img/productos/${filename}`);
-    }
-    return;
+    // El wizard no pudo (caso rarísimo). Avisamos en vez de mandarlo a la IA.
+    return sendMessage(chatId,
+      "⚠️ No pude procesar el link/foto en este momento. " +
+      "Escribí <b>/cargar</b> para empezar de nuevo, o mandame el link de nuevo.");
   }
 
   // Handle text commands
