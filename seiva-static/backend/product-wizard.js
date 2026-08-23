@@ -407,36 +407,118 @@ async function receiveLink(chatId, draft, url, text) {
     (auto.length ? "\n\n✅ Ya tengo: " + auto.join(" · ") : "\n\nLo que falte lo completás con Editar.");
   await CTX.tg.sendMessage(chatId, resumen);
 
+  // Si no pudimos descargar la imagen, avisamos claramente para que la suba manual.
+  if (!draft.imagenes.length) {
+    await CTX.tg.sendMessage(chatId, "⚠️ <b>No pude descargar la imagen</b> del link (está protegida o no disponible).\nMandámela por acá como foto y la agrego al producto.");
+  }
+
   return generateAndPreview(chatId, draft);
 }
 
-// Devuelve un filename local servible en /img/productos, o null.
+// Devuelve un filename local en /img/productos (SIEMPRE convertido a WebP por
+// image-service), o null si no se pudo obtener la imagen.
+// Regla: si la imagen está protegida o no se puede descargar, devolvemos null y
+// el flujo AVISA al usuario para que la suba manualmente (nunca usamos URL remota).
 async function resolveImage(scrapedImagen, url) {
   // Caso 1: el scrape ya lo bajó a disco (downloadImage devolvió un nombre de archivo local).
   if (scrapedImagen && !/^https?:/i.test(scrapedImagen)) {
-    // asegurar que el archivo exista en imgPath
     const p = path.join(CTX.imgPath, path.basename(scrapedImagen));
     if (fs.existsSync(p)) return path.basename(scrapedImagen);
   }
-  // Caso 2: es una URL -> bajar con headers (referer = origin) para esquivar hotlink.
+
+  // Caso 2: es una URL -> intentar bajar con headers de browser (esquiva hotlink)
+  // y convertir a WebP. Probamos tamaño grande y el original del scrape.
   if (scrapedImagen && /^https?:/i.test(scrapedImagen)) {
-    try {
-      const origin = new URL(scrapedImagen).origin;
-      const r = await fetch(scrapedImagen, {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-          "Referer": origin,
-        },
-      });
-      if (r.ok) {
-        const buf = Buffer.from(await r.arrayBuffer());
-        const tmp = path.join(CTX.imgPath, "tmp-" + Date.now() + ".jpg");
-        fs.writeFileSync(tmp, buf);
-        const processed = await CTX.processUploadImage(tmp);
-        if (processed) return processed;
-      }
-    } catch (e) { console.warn("[Wizard] re-descarga de imagen falló:", e.message); }
+    const candidates = upgradeImageUrl(scrapedImagen);
+    for (const imgUrl of candidates) {
+      const local = await tryDownload(imgUrl);
+      if (local) return local;
+    }
   }
+
+  // Caso 3: el scrape no trajo imagen o falló la descarga. Intentar extraerla
+  // del HTML de la página (las tiendas suelen poner la imagen grande en <img>/JSON-LD).
+  if (url) {
+    const fromHtml = await tryExtractImageFromPage(url);
+    if (fromHtml) return fromHtml;
+  }
+
+  // No se pudo: devolvemos null y el llamador avisa para hacerlo manual.
+  return null;
+}
+
+// Algunos CDNs (awsli) sirven la misma imagen en varios tamaños: probamos
+// el tamaño grande primero, luego el original del scrape.
+function upgradeImageUrl(u) {
+  const out = [];
+  try {
+    const up = u.replace(/\/\d+x\d+\//, "/2500x2500/");
+    if (up !== u) out.push(up);
+  } catch (e) {}
+  out.push(u);
+  return out;
+}
+
+// Descarga la imagen y la convierte a WebP (image-service). Devuelve el filename
+// local o null si no se pudo (protegida, vacía, no es imagen, etc.).
+async function tryDownload(imgUrl) {
+  try {
+    const origin = new URL(imgUrl).origin;
+    const r = await fetch(imgUrl, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "image/avif,image/webp,image/png,image/jpeg,*/*",
+        "Referer": origin,
+      },
+      redirect: "follow",
+    });
+    const buf = Buffer.from(await r.arrayBuffer());
+    // Hotlink: algunos CDNs responden 200 con body vacío. Validamos tamaño y firma.
+    if (!r.ok || buf.length < 500) { console.warn("[Wizard] imagen vacía/protegida:", imgUrl, "status", r.status, "bytes", buf.length); return null; }
+    const sig = buf.slice(0, 4).toString("hex");
+    const isImg = sig.startsWith("89504e47") || sig.startsWith("ffd8ff") || (buf.slice(0, 4).toString() === "RIFF" && buf.slice(8, 12).toString() === "WEBP");
+    if (!isImg) { console.warn("[Wizard] respuesta no es imagen:", imgUrl); return null; }
+    const tmp = path.join(CTX.imgPath, "tmp-" + Date.now() + ".jpg");
+    fs.writeFileSync(tmp, buf);
+    // processUploadImage convierte a WebP y genera variantes.
+    const processed = await CTX.processUploadImage(tmp);
+    if (processed) return processed;
+  } catch (e) { console.warn("[Wizard] descarga de imagen falló:", imgUrl, e.message); }
+  return null;
+}
+
+// Extrae la imagen principal del HTML de la página (para cuando el og:image falla).
+async function tryExtractImageFromPage(pageUrl) {
+  try {
+    const r = await fetch(pageUrl, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml",
+      },
+      redirect: "follow",
+    });
+    if (!r.ok) return null;
+    const html = await r.text();
+    // 1) JSON-LD con image
+    const ldMatch = html.match(/"image"\s*:\s*"([^"]+\.(?:png|jpg|jpeg|webp))"/i)
+      || html.match(/"image"\s*:\s*\{\s*"@type"\s*:\s*"ImageObject"\s*,\s*"url"\s*:\s*"([^"]+)"/i);
+    // 2) og:image
+    const ogMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+      || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+    const cand = (ldMatch && ldMatch[1]) || (ogMatch && ogMatch[1]);
+    if (!cand) return null;
+    let imgUrl = cand;
+    if (imgUrl.startsWith("//")) imgUrl = "https:" + imgUrl;
+    if (imgUrl.startsWith("/")) {
+      const o = new URL(pageUrl).origin;
+      imgUrl = o + imgUrl;
+    }
+    // Reintentar descarga (con upgrade de tamaño).
+    for (const u of upgradeImageUrl(imgUrl)) {
+      const local = await tryDownload(u);
+      if (local) return local;
+    }
+  } catch (e) { console.warn("[Wizard] extracción de imagen desde HTML falló:", e.message); }
   return null;
 }
 
@@ -587,8 +669,10 @@ function sendEditMenu(chatId, draft) {
 async function publish(chatId, draft, messageId) {
   const d = draft.datos;
   const c = draft.copy || {};
-  const galeria = draft.imagenes.map(i => imgUrl(i.filename));
-  const principalFile = (draft.imagenes.find(i => i.principal) || draft.imagenes[0] || {}).filename || "";
+  // Solo imágenes locales (las remotas son fallback de preview, no se guardan en la web).
+  const localImgs = (draft.imagenes || []).filter(i => i.filename && !/^https?:/i.test(i.filename));
+  const galeria = localImgs.map(i => imgUrl(i.filename));
+  const principalFile = (localImgs.find(i => i.principal) || localImgs[0] || {}).filename || "";
   const imagenPath = principalFile ? "/img/productos/" + path.basename(principalFile) : "";
   const slug = (CTX.generateSlug ? CTX.generateSlug(d.nombre) : slugify(d.nombre));
 
