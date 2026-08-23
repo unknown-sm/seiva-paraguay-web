@@ -37,14 +37,10 @@ async function handleUpdate(update) {
   console.log("[Router] invoiceWizard ->", r2 ? "handled" : "skip");
   if (r2) return r2;
 
-  // No entendió nada: preguntar, no tirar error.
-  if (cid) {
-    return tg.sendMessage(cid,
-      "No capté qué querés hacer. Podés:\n" +
-      "• Pegarme un <b>link</b> o mandar una <b>foto</b> de un producto para subirlo a la web.\n" +
-      "• Mandarme un <b>.txt</b> de factura (con precios en reales) para cargar precio de proveedor.\n" +
-      "También podés usar /cargar o /factura si preferís.");
-  }
+  // No entendió nada: NO capturamos el mensaje. Devolvemos false para que
+  // telegram-bot.js lo derive al MODO CONVERSACIÓN (IA con contexto de tienda).
+  // (Un Promise es truthy: si mandáramos el help con `return tg.sendMessage`,
+  //  el router reportaría "handled" y la IA nunca respondería. Por eso false.)
   return false;
 }
 

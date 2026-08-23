@@ -6,7 +6,7 @@ const invoiceWizard = require("./invoice-wizard");
 const botRouter = require("./bot-router");
 
 // Marcador de versión: visible en /debug para saber qué código corre el server.
-const BUILD_TAG = "bot-2026-08-22-hardened1";
+const BUILD_TAG = "bot-2026-08-22-conversa1";
 
 // Telegram Bot Configuration
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
@@ -161,7 +161,8 @@ Examples:
 "listar productos" -> {"action":"list_products","params":{},"response":"Lista de productos"}`;
 
   try {
-    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    // Intento 1: system + user separados
+    let res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
@@ -174,16 +175,55 @@ Examples:
           { role: "user", content: message },
         ],
         temperature: 0.3,
-        max_tokens: 500,
+        max_tokens: 900,
       }),
     });
 
-    const data = await res.json();
+    let data = await res.json();
+    if (!data.ok && !data.choices) {
+      // Intento 2: fusionar system en user (modelos free que no aceptan rol system)
+      res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: OPENROUTER_MODEL,
+          messages: [
+            { role: "user", content: systemPrompt + "\n\nMensaje del usuario: " + message },
+          ],
+          temperature: 0.3,
+          max_tokens: 900,
+        }),
+      });
+      data = await res.json();
+    }
+
     const content = data.choices?.[0]?.message?.content || "";
-    // Parse JSON from response
+    // Parse JSON from response — tolerante a modelos que cortan el JSON
+    // (ej: laguna-xs free devuelve {"action":"list_products","params":{"estado":"pendi
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
+      try {
+        return JSON.parse(jsonMatch[0]);
+      } catch (e) {
+        // JSON cortado: intentar reparar extrayendo campos clave con regex
+        const repaired = {};
+        const actionM = content.match(/"action"\s*:\s*"([^"]+)"/);
+        if (actionM) repaired.action = actionM[1];
+        const idM = content.match(/"id"\s*:\s*(\d+)/);
+        if (idM) repaired.params = Object.assign(repaired.params || {}, { id: parseInt(idM[1], 10) });
+        const estadoM = content.match(/"estado"\s*:\s*"([^"]*)/);
+        if (estadoM) repaired.params = Object.assign(repaired.params || {}, { estado: estadoM[1] });
+        const nombreM = content.match(/"nombre"\s*:\s*"([^"]*)/);
+        if (nombreM) repaired.params = Object.assign(repaired.params || {}, { nombre: nombreM[1] });
+        if (repaired.action) {
+          console.log("[Telegram Bot] IA devolvió JSON cortado, reparado:", JSON.stringify(repaired));
+          return repaired;
+        }
+        return simpleIntentMatch(message);
+      }
     }
     return simpleIntentMatch(message);
   } catch (e) {
@@ -192,9 +232,119 @@ Examples:
   }
 }
 
+// ---------- MODO CONVERSACIÓN ----------
+// Memoria corta por chat: últimos 10 turnos para que la IA tenga contexto.
+const chatMemory = new Map();
+
+// Busca productos que coincidan con palabras clave de la pregunta del usuario.
+// Ej: "cuáles creatinas tenemos?" -> busca LIKE '%creatin%' y devuelve matches reales.
+function searchProductsForContext(userText) {
+  if (!db || !userText) return [];
+  try {
+    // Palabras relevantes: sustantivos de 4+ letras (descarta "cuales", "tenemos", etc.)
+    const stop = new Set(["cuales", "cual", "tienen", "tenemos", "disponibles", "disponible", "hay", "stock", "precio", "precios", "productos", "producto", "tienda", "cuanto", "cuantos", "cuantas", "donde", "como", "para", "sobre", "tienen", "tenes", "sos", "bot", "hola", "buenas", "gracias", "quiero", "puedo", "nuestro", "nuestra"]);
+    const words = userText.toLowerCase().replace(/[^a-záéíóúñ0-9\s]/g, " ").split(/\s+/)
+      .filter(w => w.length >= 4 && !stop.has(w));
+    if (!words.length) return [];
+    const rows = db.prepare("SELECT nombre, marca, precio, stock, activo FROM productos WHERE activo=1 LIMIT 500").all();
+    const scored = [];
+    for (const p of rows) {
+      const hay = (p.nombre + " " + (p.marca || "")).toLowerCase();
+      let hits = 0;
+      for (const w of words) if (hay.includes(w.slice(0, Math.max(4, w.length - 1)))) hits++;
+      if (hits > 0) scored.push({ p, hits });
+    }
+    scored.sort((a, b) => b.hits - a.hits);
+    return scored.slice(0, 10).map(s => s.p);
+  } catch (e) {
+    return [];
+  }
+}
+
+function buildStoreContext(userText) {
+  if (!db) return "";
+  try {
+    const total = db.prepare("SELECT COUNT(*) c FROM productos WHERE activo=1").get().c;
+    const stockBajo = db.prepare("SELECT nombre, stock FROM productos WHERE activo=1 AND stock <= 5 ORDER BY stock ASC LIMIT 5").all();
+    const pedidosPend = db.prepare("SELECT COUNT(*) c FROM pedidos WHERE estado='pendiente'").get().c;
+    let ctx = `Tienda: Seiva Paraguay (seiva.com.py), suplementos, precios en guaraníes (Gs).\n`;
+    ctx += `Productos activos: ${total}. Pedidos pendientes: ${pedidosPend}.\n`;
+    // Búsqueda dirigida: si la pregunta menciona productos, traer los matches reales.
+    const matches = searchProductsForContext(userText);
+    if (matches.length) {
+      ctx += `Productos que coinciden con tu consulta:\n` + matches.map(p => `- ${p.nombre}${p.marca ? " (" + p.marca + ")" : ""} | Gs. ${Number(p.precio).toLocaleString("es-PY")} | stock ${p.stock}`).join("\n") + "\n";
+    }
+    const topProductos = db.prepare("SELECT nombre, precio, stock FROM productos WHERE activo=1 ORDER BY id DESC LIMIT 8").all();
+    if (topProductos.length && !matches.length) {
+      ctx += `Últimos productos cargados:\n` + topProductos.map(p => `- ${p.nombre} | Gs. ${Number(p.precio).toLocaleString("es-PY")} | stock ${p.stock}`).join("\n") + "\n";
+    }
+    if (stockBajo.length) {
+      ctx += `Stock bajo (≤5): ` + stockBajo.map(p => `${p.nombre} (${p.stock})`).join(", ") + "\n";
+    }
+    return ctx;
+  } catch (e) {
+    return "";
+  }
+}
+
+async function chatWithAI(chatId, userText) {
+  await sendMessage(chatId, "💭 Pensando…");
+  if (!OPENROUTER_API_KEY) {
+    return sendMessage(chatId, "No tengo IA configurada (falta OPENROUTER_API_KEY en el server). Mientras tanto: mandame un link o foto de producto y lo subo, o un .txt de factura y actualizo precios.");
+  }
+  const system = `Sos el asistente de Telegram de Seiva Paraguay, una tienda de suplementos en Paraguay. El dueño (Luis) te escribe para conversar y consultarte sobre su tienda.
+
+Reglas:
+- Respondé en español, tono cercano, usando "vos" (español rioplatense/paraguayo).
+- Usá los datos reales de la tienda que te paso como contexto. Si no sabés algo, decilo.
+- Precios en guaraníes (Gs.) con separador de miles.
+- No prometas funciones que no tenés. Lo que PODÉS hacer además de conversar: subir productos (te mandan link o foto), actualizar precio de proveedor (factura .txt con precios en reales), listar productos/pedidos, y actualizar pedidos.
+- Si el usuario pide alguna de esas acciones, indicale cómo pedirla (ej: "mandame el link del producto y lo subo").
+- Sé breve y útil. Máximo un par de párrafos.
+
+Contexto actual de la tienda:
+${buildStoreContext(userText)}`;
+
+  // Memoria: últimos 10 turnos
+  const mem = chatMemory.get(chatId) || [];
+  mem.push({ role: "user", content: userText });
+  while (mem.length > 10) mem.shift();
+  chatMemory.set(chatId, mem);
+
+  try {
+    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: OPENROUTER_MODEL,
+        messages: [
+          { role: "system", content: system },
+          ...mem.map(m => ({ role: m.role, content: m.content })),
+        ],
+        temperature: 0.7,
+        max_tokens: 600,
+      }),
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content;
+    if (reply) {
+      mem.push({ role: "assistant", content: reply });
+      while (mem.length > 10) mem.shift();
+      chatMemory.set(chatId, mem);
+      return sendMessage(chatId, reply);
+    }
+    return sendMessage(chatId, "La IA no respondió (modelo ocupado o sin créditos). Probá de nuevo en un rato o mandame un link/foto para subir un producto.");
+  } catch (e) {
+    console.error("[Telegram Bot] chatWithAI error:", e.message);
+    return sendMessage(chatId, "Error hablando con la IA: " + e.message);
+  }
+}
+
 // Simple keyword matching fallback
-function simpleIntentMatch(message) {
-  const msg = message.toLowerCase().trim();
+function simpleIntentMatch(message) {  const msg = message.toLowerCase().trim();
   const result = { action: "unknown", params: {}, response: "" };
 
   if (msg.startsWith("/start") || msg === "ayuda" || msg === "help") {
@@ -448,6 +598,18 @@ ${p.activo ? "✅ Activo" : "⏸️ Inactivo"}`;
   }
 }
 
+// Detecta si el texto es un comando de acción (no conversación).
+// Si NO matchea, el mensaje se deriva al MODO CONVERSACIÓN (IA).
+function isExplicitCommand(text) {
+  const t = (text || "").trim().toLowerCase();
+  if (!t) return false;
+  if (t.startsWith("/")) return true; // /start, /debug, /cargar, /factura...
+  // Palabras que indican una acción sobre la DB, no una pregunta.
+  const accion = /(^|\b)(agregar producto|nuevo producto|add product|actualizar|modificar|eliminar|borrar|delete|listar|ver producto|producto\s+\d+|pedido\s+\d+|listar pedidos|actualizar pedido|cargar producto|subir producto|factura|crear pedido)/i;
+  if (accion.test(t)) return true;
+  return false;
+}
+
 // Handle incoming webhook
 async function handleWebhook(update) {
   // Log de diagnóstico: ver exactamente qué llega de Telegram.
@@ -547,18 +709,19 @@ async function handleWebhook(update) {
   // Handle text commands
   if (!text) return;
 
-  // Understand intent with AI
+  // MODO CONVERSACIÓN: cualquier texto que NO sea un comando explícito
+  // (link/foto/.txt ya fueron capturados por el router/seguridad arriba)
+  // va a la IA para que el dueño pueda preguntar y charlar con la tienda.
+  if (!isExplicitCommand(text)) {
+    return chatWithAI(chatId, text);
+  }
+
+  // Comando explícito: clasificar y ejecutar acción de DB.
   const intent = await understandIntent(text);
 
-  // Si no se entendió la intención: ayuda amigable, nunca "Acción no reconocida".
+  // Si no se entendió la intención: MODO CONVERSACIÓN con IA + contexto de la tienda.
   if (!intent || !intent.action || intent.action === "unknown") {
-    await sendMessage(chatId,
-      "No capté qué querés hacer. Podés:\n" +
-      "• Pegarme un <b>link</b> o mandar una <b>foto</b> de un producto → lo subo a la web.\n" +
-      "• Mandarme un <b>.txt</b> de factura (precios en reales) → actualizo precio de proveedor.\n" +
-      "• Escribir <b>\"subir producto\"</b> para empezar un alta.\n" +
-      "• Consultar: \"listar productos\", \"listar pedidos\", \"pedido 123\".");
-    return;
+    return chatWithAI(chatId, text);
   }
 
   if (intent.action === "help") {
