@@ -262,19 +262,22 @@ setInterval(dailyBackup, 24 * 60 * 60 * 1000);
 const db = new DatabaseSync(DB_PATH);
 
 // Initialize Telegram Bot
+// [MIGRATION] Bot moved to n8n (2026-08-23). init() disabled so the webhook
+// stops handling updates; n8n now owns the Telegram webhook. Re-enable by
+// uncommenting. DB + image API remain here for n8n to call.
 const telegramBot = require("./telegram-bot");
 const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || "https://seiva.com.py";
 const TELEGRAM_ALLOWED_CHATS = (process.env.TELEGRAM_ALLOWED_CHATS || "")
   .split(",").map(s => parseInt(s.trim(), 10)).filter(Boolean);
-telegramBot.init(db, {
-  imgPath,
-  publicBase: PUBLIC_BASE_URL,
-  allowedChats: TELEGRAM_ALLOWED_CHATS,
-  downloadImage,
-  scrapeProductData,
-  processUploadImage: imageService.processUploadImage,
-  generateSlug,
-});
+// telegramBot.init(db, {
+//   imgPath,
+//   publicBase: PUBLIC_BASE_URL,
+//   allowedChats: TELEGRAM_ALLOWED_CHATS,
+//   downloadImage,
+//   scrapeProductData,
+//   processUploadImage: imageService.processUploadImage,
+//   generateSlug,
+// });
 
 db.exec("PRAGMA journal_mode = WAL");
 db.exec("PRAGMA foreign_keys = ON");
@@ -981,6 +984,32 @@ function auth(req, res, next) {
   }
 }
 
+// [MIGRATION] Bot session store for n8n wizard FSM (replaces in-memory state).
+db.exec(`CREATE TABLE IF NOT EXISTS bot_sessions (
+  chat_id TEXT PRIMARY KEY,
+  state TEXT NOT NULL DEFAULT '',
+  draft TEXT NOT NULL DEFAULT '{}',
+  updated TEXT NOT NULL DEFAULT (datetime('now'))
+)`);
+app.get("/api/bot-session/:chatId", auth, (req, res) => {
+  const r = db.prepare("SELECT * FROM bot_sessions WHERE chat_id=?").get(req.params.chatId);
+  res.json(r || {});
+});
+app.put("/api/bot-session/:chatId", auth, (req, res) => {
+  try {
+    const { state = "", draft = "{}" } = req.body || {};
+    db.prepare(`INSERT INTO bot_sessions (chat_id, state, draft, updated)
+      VALUES (?,?,?,datetime('now'))
+      ON CONFLICT(chat_id) DO UPDATE SET state=excluded.state, draft=excluded.draft, updated=datetime('now')`)
+      .run(req.params.chatId, state, JSON.stringify(draft));
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+app.delete("/api/bot-session/:chatId", auth, (req, res) => {
+  db.prepare("DELETE FROM bot_sessions WHERE chat_id=?").run(req.params.chatId);
+  res.json({ ok: true });
+});
+
 function parseVariantes(raw) {
   try {
     const parsed = JSON.parse(raw || "[]");
@@ -1222,6 +1251,30 @@ app.post("/api/upload-hero", auth, heroUpload.single("hero"), async (req, res) =
 }, (err, req, res, next) => {
   // Multer error handler for hero upload
   const msg = err.code === 'LIMIT_FILE_SIZE' ? "Imagen muy grande (max 10MB)" :
+              err.message?.startsWith("FormFileError") || err.message?.includes("image") ? "Formato no permitido" :
+              "Error al subir imagen";
+  res.status(400).json({ error: msg });
+});
+
+// [MIGRATION] Endpoint for n8n to store Telegram product photos.
+const productUpload = multer({
+  storage: multer.diskStorage({
+    destination: imgPath,
+    filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname.replace(/[^\w.-]/g, "_"))
+  }),
+  limits: { fileSize: 12 * 1024 * 1024 }
+});
+app.post("/api/product-image", auth, productUpload.single("image"), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "No se subió imagen" });
+    const url = await imageService.processUploadImage(req.file.path);
+    res.json({ path: url });
+  } catch (err) {
+    const status = err.status || 500;
+    res.status(status).json({ error: err.message || "Error al procesar imagen" });
+  }
+}, (err, req, res, next) => {
+  const msg = err.code === 'LIMIT_FILE_SIZE' ? "Imagen muy grande (max 12MB)" :
               err.message?.startsWith("FormFileError") || err.message?.includes("image") ? "Formato no permitido" :
               "Error al subir imagen";
   res.status(400).json({ error: msg });
