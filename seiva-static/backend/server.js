@@ -998,9 +998,12 @@ app.get("/api/bot-session/:chatId", auth, (req, res) => {
 app.put("/api/bot-session/:chatId", auth, (req, res) => {
   try {
     const { state = "", draft = "{}" } = req.body || {};
-    db.prepare(`INSERT INTO bot_sessions (chat_id, state, draft, updated)
+    // production table may use updated_at instead of updated — detect once
+    const cols = db.prepare("PRAGMA table_info(bot_sessions)").all().map(c => c.name);
+    const updCol = cols.includes("updated") ? "updated" : "updated_at";
+    db.prepare(`INSERT INTO bot_sessions (chat_id, state, draft, ${updCol})
       VALUES (?,?,?,datetime('now'))
-      ON CONFLICT(chat_id) DO UPDATE SET state=excluded.state, draft=excluded.draft, updated=datetime('now')`)
+      ON CONFLICT(chat_id) DO UPDATE SET state=excluded.state, draft=excluded.draft, ${updCol}=datetime('now')`)
       .run(req.params.chatId, state, JSON.stringify(draft));
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
