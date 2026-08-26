@@ -1287,6 +1287,46 @@ app.post("/api/product-image", auth, productUpload.single("image"), async (req, 
   res.status(400).json({ error: msg });
 });
 
+// Descarga una imagen externa, la guarda temporalmente y la procesa con
+// imageService (genera WebP + variantes). Devuelve el path local tipo
+// /img/productos/hero-...webp o null si falla.
+async function downloadAndProcessImage(imgUrl) {
+  if (!imgUrl || !/^https?:\/\//i.test(imgUrl)) return null;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20000);
+  try {
+    const origin = new URL(imgUrl).origin;
+    const response = await fetch(imgUrl, {
+      signal: controller.signal,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "image/avif,image/webp,image/png,image/jpeg,*/*",
+        "Referer": origin,
+      },
+      redirect: "follow",
+    });
+    if (!response.ok) { console.warn("[downloadImage] HTTP", response.status, imgUrl); return null; }
+    const buf = Buffer.from(await response.arrayBuffer());
+    if (buf.length < 500) { console.warn("[downloadImage] imagen vacía", imgUrl); return null; }
+    const sig = buf.slice(0, 4).toString("hex");
+    const isImg = sig.startsWith("89504e47") || sig.startsWith("ffd8ff") || (buf.slice(0, 4).toString() === "RIFF" && buf.slice(8, 12).toString() === "WEBP");
+    if (!isImg) { console.warn("[downloadImage] no es imagen", imgUrl, sig); return null; }
+    const tmp = path.join(__dirname, "img", "productos", "tmp-dl-" + crypto.randomBytes(6).toString("hex") + ".jpg");
+    fs.writeFileSync(tmp, buf);
+    try {
+      const localPath = await imageService.processUploadImage(tmp);
+      return localPath;
+    } finally {
+      try { if (fs.existsSync(tmp)) fs.unlinkSync(tmp); } catch (_) {}
+    }
+  } catch (e) {
+    console.warn("[downloadImage] error", imgUrl, e.message);
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 // ---------- PRODUCTOS ----------
 app.get("/api/productos", (req, res) => {
   res.set("Cache-Control", "public, max-age=0, s-maxage=30");
@@ -1327,18 +1367,37 @@ app.get("/api/productos/all", auth, (req, res) => {
   res.json(parseProductos(rows));
 });
 
-app.post("/api/productos", auth, (req, res) => {
+app.post("/api/productos", auth, async (req, res) => {
   try {
-    const { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell, slug, featured_order, precio_proveedor, delivery_gratis, variantes, presentaciones } = req.body;
+    let { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell, slug, featured_order, precio_proveedor, delivery_gratis, variantes, presentaciones } = req.body;
     const variantesData = variantes || presentaciones || [];
     if (!nombre || !precio) return res.status(400).json({ error: "Nombre y precio requeridos" });
+
+    // Descargar imagen principal si es URL externa
+    if (imagen && /^https?:\/\//i.test(imagen)) {
+      const local = await downloadAndProcessImage(imagen);
+      imagen = local || "";
+    }
+
+    // Descargar galería si contiene URLs externas
+    const rawGaleria = Array.isArray(galeria) ? galeria : [];
+    const processedGaleria = [];
+    for (const img of rawGaleria) {
+      if (img && /^https?:\/\//i.test(img)) {
+        const local = await downloadAndProcessImage(img);
+        if (local) processedGaleria.push(local);
+      } else if (img) {
+        processedGaleria.push(img);
+      }
+    }
+
     const cid = categoria_id || null;
     const catName = categoria || (cid ? db.prepare("SELECT nombre FROM categorias WHERE id=?").get(cid)?.nombre : "suplementos") || "suplementos";
     const finalSlug = slug || generateSlug(nombre);
     const fo = parseInt(featured_order) || 0;
     const pp = precio_proveedor ? parseInt(precio_proveedor) : null;
     const result = db.prepare("INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell, slug, featured_order, precio_proveedor, delivery_gratis, presentaciones) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").run(
-      nombre, precio, precio_anterior || null, catName, subcategoria || "", descripcion || "", descripcion_larga || "", JSON.stringify(galeria || []), JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, cid, sku || "", marca || "", seo_descripcion || "", JSON.stringify(crosssell || []), JSON.stringify(upsell || []), finalSlug, fo, pp, delivery_gratis ? 1 : 0, JSON.stringify(variantesData)
+      nombre, precio, precio_anterior || null, catName, subcategoria || "", descripcion || "", descripcion_larga || "", JSON.stringify(processedGaleria), JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, cid, sku || "", marca || "", seo_descripcion || "", JSON.stringify(crosssell || []), JSON.stringify(upsell || []), finalSlug, fo, pp, delivery_gratis ? 1 : 0, JSON.stringify(variantesData)
     );
     res.json({ id: result.lastInsertRowid, slug: finalSlug });
   } catch (err) {
