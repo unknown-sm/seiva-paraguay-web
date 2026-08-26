@@ -1468,8 +1468,17 @@ app.patch("/api/productos/stock-batch", auth, (req, res) => {
 });
 
 app.delete("/api/productos/:id", auth, (req, res) => {
-  db.prepare("DELETE FROM productos WHERE id = ?").run(req.params.id);
-  res.json({ ok: true });
+  try {
+    const id = req.params.id;
+    // Limpiar dependencias antes del borrado (foreign keys)
+    db.prepare("DELETE FROM descuentos_cantidad WHERE producto_id = ?").run(id);
+    db.prepare("DELETE FROM productos_fts WHERE rowid = ?").run(id);
+    db.prepare("DELETE FROM productos WHERE id = ?").run(id);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error("[DELETE producto]", e.message);
+    res.status(500).json({ error: "Error al eliminar producto: " + e.message });
+  }
 });
 
 // ---------- MARCAS ----------

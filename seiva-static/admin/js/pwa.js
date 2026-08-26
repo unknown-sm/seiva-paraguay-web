@@ -25,7 +25,11 @@ var PWA = (function() {
     navigator.serviceWorker.register("/bd-backpanel/sw.js?v=4", { scope: "/bd-backpanel/" })
       .then(function(reg) {
         console.log("SW registrado:", reg.scope);
-        return subscribeUser(reg);
+        // Suscribir a push notifications (si hay soporte)
+        if (reg.pushManager) {
+          return subscribeUser(reg);
+        }
+        return reg;
       })
       .catch(function(err) {
         console.error("Error registrando SW:", err);
@@ -141,4 +145,46 @@ var PWA = (function() {
   }
 
   return { init: init, playCashSound: playCashSound };
+
+  // Suscribir al usuario a push notifications
+  async function subscribeUser(reg) {
+    try {
+      // Verificar si ya hay una suscripción activa
+      let sub = await reg.pushManager.getSubscription();
+      if (sub) return sub;
+
+      // Suscribir con la clave VAPID pública
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(
+          "BOeFF0Sfcc8j7xHiQHZCdnNzWB2ib6Co7dLWJMf109QC7VwZTbxeKi4LbEt2vGhDgLUv1Jca1pd6T1CX1fZ5HVU"
+        ),
+      });
+
+      // Enviar suscripción al servidor
+      await fetch(API + "/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(sub),
+      });
+
+      console.log("[PWA] Suscrito a push notifications");
+      return sub;
+    } catch (e) {
+      console.log("[PWA] No se pudo suscribir a push:", e.message);
+      return null;
+    }
+  }
+
+  // Convertir clave VAPID de base64 a Uint8Array
+  function urlBase64ToUint8Array(base64String) {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
 })();
