@@ -555,6 +555,10 @@ try { db.exec("ALTER TABLE productos ADD COLUMN factura_origen TEXT DEFAULT ''")
 try { db.exec("ALTER TABLE productos ADD COLUMN delivery_gratis INTEGER DEFAULT 0"); } catch (e) {}
 try { db.exec("ALTER TABLE productos ADD COLUMN presentaciones TEXT DEFAULT '[]'"); } catch (e) {}
 
+// Configurar búsqueda FTS5
+const searchService = require("./search-service");
+searchService.setupFts(db);
+
 try { db.exec("ALTER TABLE pedidos ADD COLUMN envio_costo INTEGER DEFAULT 0"); } catch (e) {}
 try { db.exec("ALTER TABLE pedidos ADD COLUMN envio_ciudad TEXT DEFAULT ''"); } catch (e) {}
 try { db.exec("ALTER TABLE envios ADD COLUMN tipo TEXT DEFAULT 'delivery'"); } catch (e) {}
@@ -2105,11 +2109,30 @@ app.get("/api/hero-producto", (req, res) => {
   res.json(parseProducto(prod));
 });
 
+// Búsqueda en el panel admin (productos para hero, destacados, etc.)
+// Usa FTS5 + fuzzy matching.
 app.get("/api/hero-producto/search", auth, (req, res) => {
   const q = req.query.q || "";
   if (q.length < 2) return res.json([]);
-  const rows = db.prepare("SELECT id, nombre, precio, imagen FROM productos WHERE activo = 1 AND nombre LIKE ? ORDER BY nombre LIMIT 20").all("%" + q + "%");
+  const rows = searchService.search(db, q, 20);
   res.json(rows);
+});
+
+// Búsqueda pública en la tienda (sin auth)
+app.get("/api/search", (req, res) => {
+  const q = req.query.q || "";
+  const limit = Math.min(parseInt(req.query.limit) || 20, 50);
+  if (q.length < 2) return res.json({ query: q, results: [], count: 0 });
+  const results = searchService.search(db, q, limit);
+  res.json({ query: q, results, count: results.length });
+});
+
+// Sugerencias para typeahead (rápido, sin fuzzy)
+app.get("/api/search/suggest", (req, res) => {
+  const q = req.query.q || "";
+  if (q.length < 2) return res.json({ query: q, suggestions: [] });
+  const suggestions = searchService.suggest(db, q, 5);
+  res.json({ query: q, suggestions });
 });
 
 app.put("/api/hero-producto", auth, (req, res) => {
