@@ -43,10 +43,10 @@
              document.querySelector('meta[name="twitter:description"]').content = data.site_descripcion;
            }
              if (data.site_favicon) {
-               var link = document.createElement('link');
+               var link = document.querySelector('link[rel="icon"]') || document.createElement('link');
                link.rel = 'icon';
                link.type = data.site_favicon.indexOf('.svg') !== -1 ? 'image/svg+xml' : 'image/png';
-               link.href = data.site_favicon;
+               link.href = data.site_favicon + '?v=' + Date.now();
                document.head.appendChild(link);
              }
             if (data.site_logo) {
