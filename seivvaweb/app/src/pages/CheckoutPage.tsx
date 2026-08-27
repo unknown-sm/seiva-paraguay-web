@@ -515,6 +515,7 @@ export default function CheckoutPage() {
                         style={{ borderColor: errors.telefono ? '#ef4444' : 'rgba(0,0,0,0.18)', backgroundColor: '#FFFFFF', color: 'var(--theme-text, #3D2817)', minWidth: '100px', backgroundImage: 'none' }}
                       >
                         <option value="+595">🇵🇾 +595</option>
+                        <option value="+1">🇺🇸 +1</option>
                         <option value="+55">🇧🇷 +55</option>
                         <option value="+54">🇦🇷 +54</option>
                         <option value="+598">🇺🇾 +598</option>
