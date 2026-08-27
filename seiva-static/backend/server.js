@@ -279,7 +279,8 @@ const TELEGRAM_ALLOWED_CHATS = (process.env.TELEGRAM_ALLOWED_CHATS || "")
 //   generateSlug,
 // });
 
-db.exec("PRAGMA journal_mode = WAL");
+//db.exec("PRAGMA journal_mode = WAL"); // Desactivado: WAL se corrompe en este VPS
+db.exec("PRAGMA journal_mode = DELETE");
 db.exec("PRAGMA foreign_keys = ON");
 
 db.exec(`
