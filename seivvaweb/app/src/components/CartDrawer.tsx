@@ -202,7 +202,7 @@ export default function CartDrawer() {
                 boxShadow: '0 4px 16px rgba(27,67,50,0.25)',
               }}
             >
-              Finalizar Pedido
+              Ir a facturación
             </Link>
 
             <Link

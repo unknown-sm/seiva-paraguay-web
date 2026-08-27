@@ -152,7 +152,7 @@ export default function CartPage() {
               }}
             >
               <Send className="w-5 h-5" />
-              Finalizar Pedido
+              Ir a facturación
             </button>
 
             <Link
