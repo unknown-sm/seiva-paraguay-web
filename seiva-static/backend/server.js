@@ -1469,11 +1469,29 @@ app.patch("/api/productos/stock-batch", auth, (req, res) => {
 
 app.delete("/api/productos/:id", auth, (req, res) => {
   try {
-    const id = req.params.id;
-    // Limpiar dependencias antes del borrado (foreign keys)
-    db.prepare("DELETE FROM descuentos_cantidad WHERE producto_id = ?").run(id);
-    db.prepare("DELETE FROM productos_fts WHERE rowid = ?").run(id);
-    db.prepare("DELETE FROM productos WHERE id = ?").run(id);
+    const id = parseInt(req.params.id, 10);
+    if (!id) return res.status(400).json({ error: "ID inválido" });
+
+    // Verificar si productos_fts existe (puede no existir en versiones antiguas)
+    const ftsExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='productos_fts'").get();
+
+    // Transacción manual (node:sqlite no tiene db.transaction)
+    db.exec("BEGIN");
+    try {
+      db.prepare("DELETE FROM descuentos_cantidad WHERE producto_id = ?").run(id);
+      db.prepare("DELETE FROM promos WHERE producto_id = ?").run(id);
+      db.prepare("DELETE FROM promos WHERE regala_producto_id = ?").run(id);
+      db.prepare("DELETE FROM contenido WHERE key = 'hero_producto_id' AND value = ?").run(String(id));
+      if (ftsExists) {
+        db.prepare("DELETE FROM productos_fts WHERE rowid = ?").run(id);
+      }
+      db.prepare("DELETE FROM productos WHERE id = ?").run(id);
+      db.exec("COMMIT");
+    } catch (innerErr) {
+      db.exec("ROLLBACK");
+      throw innerErr;
+    }
+
     res.json({ ok: true });
   } catch (e) {
     console.error("[DELETE producto]", e.message);
