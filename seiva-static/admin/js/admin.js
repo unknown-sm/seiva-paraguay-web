@@ -503,7 +503,7 @@ function renderProductos(searchVal, filterCat, filterActivo) {
         '<button class="btn-icon" onclick="duplicarProducto(' + p.id + ')" title="Duplicar (copia inactiva)">&#128203;</button>' +
         '<button class="btn-icon" onclick="toggleProducto(' + p.id + ')" title="Activar/Desactivar">' + (p.activo ? '&#128065;' : '&#128065;&#8205;&#128488;') + '</button>' +
         '<button class="btn-icon" onclick="eliminarProducto(' + p.id + ')" title="Eliminar">&#128465;</button>' +
-        (p.activo ? '<a href="/producto/' + p.id + '" target="_blank" class="btn-icon" title="Ver en web">&#128269;</a>' : '') +
+        (p.activo ? '<a href="/producto/' + encodeURIComponent(p.slug) + '" target="_blank" class="btn-icon" title="Ver en web">&#128269;</a>' : '') +
       '</td>' +
     '</tr>';
   }).join("");
