@@ -1893,31 +1893,86 @@ async function scrapeProductData(url) {
       imagenLocal = await downloadImage(imagenUrl, nombre);
     }
 
-    // === GALERÍA: extraer múltiples imágenes del producto ===
+    // === GALERÍA: extraer SOLO las imágenes del producto ===
+    // el proveedor es Loja Integrada (cdn.awsli.com.br): las fotos del producto
+    // comparten el mismo ID en el path (/produto/<id>/), y vienen en varios tamaños
+    // (64x50 thumb, 600x1000 grande). Se filtra por ID + se deduplica por slug
+    // tomando la resolución más grande. Para otros sitios hay heurística general.
     const galeria = [];
     try {
-      const seen = new Set();
-      const imgSrcs = [];
-      $('img').each(function () {
-        let src = $(this).attr('src') || $(this).attr('data-src') || $(this).attr('data-original') || '';
+      const base = new URL(url);
+      const negUrl = /logo|icon|favicon|avatar|banner|promo|selo|payment|pagamento|whatsapp|cart|flag|pix|boleto|placeholder|spinner|loader|bullet|btn|sem-imagem|sem_foto/i;
+      const negCls = 'header, footer, nav, [class*="menu"], [class*="sidebar"], [class*="widget"], [class*="relacionad"], [class*="related"], [class*="recomend"], [class*="sugest"], [class*="promo"], [class*="newsletter"], [class*="footer"], [class*="depoimento"], [class*="banner"], [class*="selo"], [class*="marcas"], [class*="parceiro"], [class*="compre-junto"], [class*="vitrine"], [class*="lista"]';
+
+      // recoger candidatos (src absoluto + prioridad)
+      const candidates = [];
+      const addCandidate = (el, prio) => {
+        let src = $(el).attr('src') || $(el).attr('data-src') || $(el).attr('data-original') || $(el).attr('data-zoom') || $(el).attr('data-large') || '';
         if (!src) return;
+        let srcset = $(el).attr('srcset') || $(el).attr('data-srcset') || '';
+        if (srcset) {
+          // tomar la resolución más grande del set
+          const parts = srcset.split(',').map(p => p.trim()).filter(Boolean);
+          if (parts.length) { const b = parts[parts.length - 1].split(/\s+/)[0]; if (/^https?:/.test(b)) src = b; }
+        }
         if (src.startsWith('//')) src = 'https:' + src;
-        if (src.startsWith('/')) src = new URL(url).origin + src;
+        else if (src.startsWith('/')) src = base.origin + src;
         if (!/^https?:\/\//.test(src)) return;
-        if (/logo|placeholder|avatar|icon|favicon|spinner|loader/i.test(src)) return;
+        if (negUrl.test(src)) return;
         if (/\.(svg|gif|ico)\b/i.test(src)) return;
-        imgSrcs.push(src);
+        const w = parseInt($(el).attr('width') || '', 10);
+        const h = parseInt($(el).attr('height') || '', 10);
+        if ((w && w < 80) || (h && h < 80)) return;
+        candidates.push({ src, prio });
+      };
+
+      // contenedores de galería/producto primero
+      $('[class*="product-gallery"] img, [class*="gallery"] img, [class*="product-image"] img, [class*="product-media"] img, [class*="product__media"] img, [class*="thumb"] img, [class*="imagem-produto"] img, [itemprop="image"], [data-zoom], [data-zoom-image], .fotorama img, .flexslider img, .flex-viewport img, [class*="swiper"] img').each(function () {
+        if ($(this).closest(negCls).length) return;
+        addCandidate(this, 1);
       });
-      for (const s of imgSrcs) {
-        if (seen.has(s)) continue;
-        seen.add(s);
-        if (galeria.length >= 8) break;
-        // no repetir la imagen principal
-        if (s === imagenUrl) continue;
-        try {
-          const local = await downloadImage(s, nombre + '-gal');
-          if (local) galeria.push(local);
-        } catch (e) { /* seguir con la siguiente */ }
+      if (candidates.length < 2) {
+        $('img').each(function () {
+          if ($(this).closest(negCls).length) return;
+          addCandidate(this, 0);
+        });
+      }
+
+      // --- deduplicar por foto (mismo slug, distinto tamaño) y priorizar resolución ---
+      // Loja Integrada: cdn.awsli.com.br/<WxH>/.../produto/<id>/<slug>-<hash>
+      // quitamos el segmento <WxH> para agrupar la misma foto en sus tamaños.
+      const bySlug = new Map();
+      for (const c of candidates) {
+        let path = c.src.replace(/^https?:\/\/[^\/]+\//, '');
+        let size = 0;
+        const sz = path.match(/^(\d+)x(\d+)\//);
+        if (sz) {
+          size = parseInt(sz[1], 10) * parseInt(sz[2], 10);
+          path = path.replace(/^\d+x\d+\//, '');
+        }
+        const key = path.split('?')[0];
+        const cur = bySlug.get(key);
+        if (!cur || size > cur.size) bySlug.set(key, { src: c.src, size, key, prio: c.prio });
+      }
+
+      // --- detectar el ID de producto (Loja Integrada) y restringir a él ---
+      let produtoId = null;
+      const idMatch = (imagenUrl || '').match(/\/produto\/(\d+)\//i) || Array.from(bySlug.values()).map(v => (v.src.match(/\/produto\/(\d+)\//i) || [])[1]).find(Boolean);
+      if (idMatch) produtoId = idMatch[1] || idMatch;
+
+      // ordenar: primero prioridad alta, luego resolución más grande
+      const ordered = Array.from(bySlug.values())
+        .filter(v => !produtoId || new RegExp('/produto/' + produtoId + '/').test(v.src))
+        .sort((a, b) => (b.prio - a.prio) || (b.size - a.size));
+
+      // slug de la imagen principal sin el prefijo de tamaño, para no repetirla en galería
+      const imgSlug = (u) => (u || '').replace(/^https?:\/\/[^\/]+\//, '').replace(/^\d+x\d+\//, '').split('?')[0];
+      let count = 0;
+      for (const v of ordered) {
+        if (count >= 8) break;
+        if (imagenUrl && imgSlug(v.src) === imgSlug(imagenUrl)) continue;
+        const local = await downloadImage(v.src, nombre + '-gal');
+        if (local) { galeria.push(local); count++; }
       }
     } catch (e) { /* galería opcional */ }
 
