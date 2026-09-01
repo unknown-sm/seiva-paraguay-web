@@ -458,6 +458,14 @@ db.exec(`
     details TEXT DEFAULT NULL,
     ts TEXT DEFAULT (datetime('now'))
   );
+  CREATE TABLE IF NOT EXISTS audit_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    accion TEXT NOT NULL,
+    producto_id INTEGER,
+    detalle TEXT DEFAULT '',
+    chat_id TEXT DEFAULT '',
+    ts TEXT DEFAULT (datetime('now'))
+  );
 `);
 
 // Los NUEVOS pedidos arrancan en id 1000, sin renumerar los existentes.
@@ -1712,8 +1720,9 @@ async function scrapeProductData(url) {
                 $('[itemprop="brand"]').text().trim() ||
                 $('.brand, .marca, [class*="brand"], [class*="marca"]').first().text().trim() ||
                 '';
-    // Limpiar marca si es muy larga (probablemente basura)
-    if (marca.length > 50) marca = '';
+    // Limpiar etiqueta "Marca:"/"Brand:" y espacios sobrantes
+    marca = String(marca).replace(/^(marca|brand)\s*:?\s*/i, '').replace(/\s+/g, ' ').trim();
+    if (marca.length > 50 || /^(sin marca|-|n\/a)$/i.test(marca)) marca = '';
 
     // Extraer SKU
     let sku = $('meta[property="product:sku"]').attr('content') ||
@@ -1874,6 +1883,44 @@ async function scrapeProductData(url) {
       imagenLocal = await downloadImage(imagenUrl, nombre);
     }
 
+    // === GALERÍA: extraer múltiples imágenes del producto ===
+    const galeria = [];
+    try {
+      const seen = new Set();
+      const imgSrcs = [];
+      $('img').each(function () {
+        let src = $(this).attr('src') || $(this).attr('data-src') || $(this).attr('data-original') || '';
+        if (!src) return;
+        if (src.startsWith('//')) src = 'https:' + src;
+        if (src.startsWith('/')) src = new URL(url).origin + src;
+        if (!/^https?:\/\//.test(src)) return;
+        if (/logo|placeholder|avatar|icon|favicon|spinner|loader/i.test(src)) return;
+        if (/\.(svg|gif|ico)\b/i.test(src)) return;
+        imgSrcs.push(src);
+      });
+      for (const s of imgSrcs) {
+        if (seen.has(s)) continue;
+        seen.add(s);
+        if (galeria.length >= 8) break;
+        // no repetir la imagen principal
+        if (s === imagenUrl) continue;
+        try {
+          const local = await downloadImage(s, nombre + '-gal');
+          if (local) galeria.push(local);
+        } catch (e) { /* seguir con la siguiente */ }
+      }
+    } catch (e) { /* galería opcional */ }
+
+    // === Moneda del precio (sitio brasileño devuelve R$, no Gs) ===
+    let moneda = '';
+    try {
+      const bodyTxt = $('body').text();
+      if (/R\$\s?\d/i.test(bodyTxt)) moneda = 'BRL';
+      else if (/Gs\.?\s?\d|PYG/i.test(bodyTxt)) moneda = 'PYG';
+      else if (/U\$S?\s?\d/i.test(bodyTxt)) moneda = 'USD';
+      else if (/\u20ac\s?\d/i.test(bodyTxt)) moneda = 'EUR';
+    } catch (e) {}
+
     // Formatear descripciones
     if (!descCorta.includes('<ul>') && !descCorta.includes('<li>')) {
       descCorta = formatDescription(descCorta);
@@ -1888,7 +1935,9 @@ async function scrapeProductData(url) {
       descripcion: descCorta,
       descripcion_larga: descLarga,
       precio: precio,
+      moneda: moneda,
       imagen: imagenLocal || imagenUrl,
+      galeria: galeria,
       url_origen: url
     };
   } catch (error) {
@@ -2614,6 +2663,22 @@ app.delete("/api/error-logs", auth, (req, res) => {
   res.json({ ok: true });
 });
 
+// ---------- AUDIT LOG (registro de cambios del bot de inventario) ----------
+app.post("/api/audit", auth, (req, res) => {
+  try {
+    const { accion, producto_id, detalle, chat_id } = req.body || {};
+    if (!accion) return res.status(400).json({ error: "accion requerida" });
+    db.prepare("INSERT INTO audit_log (accion, producto_id, detalle, chat_id) VALUES (?,?,?,?)")
+      .run(accion, producto_id || null, JSON.stringify(detalle || {}), chat_id || "");
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+app.get("/api/audit", auth, (req, res) => {
+  const limit = parseInt(req.query.limit) || 200;
+  const rows = db.prepare("SELECT * FROM audit_log ORDER BY id DESC LIMIT ?").all(limit);
+  res.json(rows);
+});
+
 // ---------- TELEGRAM BOT WEBHOOK ----------
 app.post("/api/telegram/webhook", (req, res) => {
   // Verify secret token. If TELEGRAM_WEBHOOK_SECRET is not set, reject always
@@ -2796,7 +2861,9 @@ app.listen(PORT, () => {
   console.log("Admin: http://localhost:" + PORT + "/admin");
 
   // Setup Telegram webhook if configured
-  if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_WEBHOOK_URL) {
-    telegramBot.setWebhook(process.env.TELEGRAM_WEBHOOK_URL);
-  }
+  // [SEIVA] Webhook lo gestiona n8n (bot de carga de productos). Comentado para
+  // evitar que el backend pise el webhook de n8n cada vez que reinicia.
+  // if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_WEBHOOK_URL) {
+  //   telegramBot.setWebhook(process.env.TELEGRAM_WEBHOOK_URL);
+  // }
 });
