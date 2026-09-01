@@ -1722,6 +1722,11 @@ async function scrapeProductData(url) {
                  $('h1').first().text().trim() || 
                  $('title').text().trim() || 
                  'Producto sin nombre';
+    nombre = String(nombre || '').replace(/\s+/g, ' ').trim();
+    // Detectar páginas de bloqueo/error (Magalu y otras): si el título es basura, fallar
+    if (/n[ãa]o (é |e |foi |foi )?poss[ií]vel|acesso negado|acessar a p[aá]gina|não foi poss[ií]vel|captcha|verify you are human|attention required|just a moment|access denied|403 forbidden|page not found|p[aá]gina n[ãa]o encontrada|não encontrad/i.test(nombre) || !nombre || nombre === 'Producto sin nombre') {
+      throw new Error('Sitio bloqueó el acceso o no se pudo extraer el producto (título no válido).');
+    }
 
     // Extraer marca
     let marca = $('meta[property="product:brand"]').attr('content') ||
