@@ -769,6 +769,15 @@ try {
 } catch(e) { console.warn("[Migration] brand fix skip:", e.message); }
 
 function stripHtml(html) { if (!html) return ""; return html.replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim(); }
+// Convierte un texto de precio ("R$ 76,75", "76.75", "1.234,56") a número con decimales.
+function parsePrecio(s) {
+  if (!s) return null;
+  let t = String(s).trim();
+  // millares con punto + decimales con coma (formato latino)
+  if (t.includes(',')) t = t.replace(/\./g, '').replace(',', '.');
+  const n = parseFloat(t);
+  return isNaN(n) ? null : n;
+}
 function slugify(text) { return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").substring(0, 60); }
 function inferSubcat(titulo) {
   const t = titulo.toLowerCase();
@@ -1404,7 +1413,7 @@ app.post("/api/productos", auth, async (req, res) => {
     const catName = categoria || (cid ? db.prepare("SELECT nombre FROM categorias WHERE id=?").get(cid)?.nombre : "suplementos") || "suplementos";
     const finalSlug = slug || generateSlug(nombre);
     const fo = parseInt(featured_order) || 0;
-    const pp = precio_proveedor ? parseInt(precio_proveedor) : null;
+    const pp = (precio_proveedor !== undefined && precio_proveedor !== null && precio_proveedor !== '') ? parseFloat(precio_proveedor) : null;
     const result = db.prepare("INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell, slug, featured_order, precio_proveedor, delivery_gratis, presentaciones) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").run(
       nombre, precio, precio_anterior || null, catName, subcategoria || "", descripcion || "", descripcion_larga || "", JSON.stringify(processedGaleria), JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, cid, sku || "", marca || "", seo_descripcion || "", JSON.stringify(crosssell || []), JSON.stringify(upsell || []), finalSlug, fo, pp, delivery_gratis ? 1 : 0, JSON.stringify(variantesData)
     );
@@ -1422,7 +1431,7 @@ app.put("/api/productos/:id", auth, (req, res) => {
     const catName = categoria || (cid ? db.prepare("SELECT nombre FROM categorias WHERE id=?").get(cid)?.nombre : "suplementos") || "suplementos";
     const finalSlug = slug || (nombre ? generateSlug(nombre, req.params.id) : undefined);
     const fo = parseInt(featured_order) || 0;
-    const pp = precio_proveedor !== undefined ? (precio_proveedor ? parseInt(precio_proveedor) : null) : undefined;
+    const pp = precio_proveedor !== undefined ? (precio_proveedor !== null && precio_proveedor !== '' ? parseFloat(precio_proveedor) : null) : undefined;
     
     if (finalSlug) {
       const sql = "UPDATE productos SET nombre=?, precio=?, precio_anterior=?, categoria=?, subcategoria=?, descripcion=?, descripcion_larga=?, galeria=?, etiquetas=?, destacado=?, imagen=?, stock=?, activo=?, categoria_id=?, sku=?, marca=?, seo_descripcion=?, crosssell=?, upsell=?, slug=?, featured_order=?" + (pp !== undefined ? ", precio_proveedor=?" : "") + " WHERE id=?";
@@ -1834,7 +1843,7 @@ async function scrapeProductData(url) {
       }
     }
 
-    // Extraer precio
+    // Extraer precio (conserva decimales: "76,75" -> 76.75)
     let precio = null;
     const precioSelectors = [
       '[class*="price"] [class*="current"], [class*="precio"] [class*="actual"]',
@@ -1848,7 +1857,7 @@ async function scrapeProductData(url) {
         const precioText = el.text() || el.attr('content') || '';
         const match = precioText.match(/[\d.,]+/);
         if (match) {
-          precio = parseInt(match[0].replace(/[^\d]/g, ''));
+          precio = parsePrecio(match[0]);
           if (precio > 0) break;
         }
       }
@@ -1858,9 +1867,10 @@ async function scrapeProductData(url) {
       const bodyText = $('body').text();
       const precioMatch = bodyText.match(/Gs\.?\s*([\d.,]+)/i) || 
                          bodyText.match(/PYG\s*([\d.,]+)/i) ||
-                         bodyText.match(/\$\s*([\d.,]+)/i);
+                         bodyText.match(/\$\s*([\d.,]+)/i) ||
+                         bodyText.match(/R\$\s*([\d.,]+)/i);
       if (precioMatch) {
-        precio = parseInt(precioMatch[1].replace(/[^\d]/g, ''));
+        precio = parsePrecio(precioMatch[1]);
       }
     }
 
