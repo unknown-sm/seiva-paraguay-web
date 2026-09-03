@@ -16,3 +16,5 @@ Thumbs.db
 ruvector.db
 .mcp.json
 #seiva-static/backend/data/database.sqlite
+*.sqlite-shm
+*.sqlite-wal

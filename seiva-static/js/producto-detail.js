@@ -18,6 +18,29 @@
     return '/api';
   }
 
+  // Quita cualquier HTML peligroso y deja solo etiquetas seguras para renderizar
+  // la descripción larga del producto (h3, p, strong, em, ul/li, br).
+  function sanitizeDescriptionHtml(html) {
+    if (!html) return '';
+    // whitelist: solo h2, h3, h4, p, br, strong, em, ul, ol, li
+    var allowed = /<\/?(?:h[2-4]|p|br|strong|em|ul|ol|li)(?:\s[^>]*)?>/gi;
+    var result = '';
+    var lastIndex = 0;
+    var stripped = String(html).replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+                                .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+                                .replace(/\son\w+\s*=\s*"[^"]*"/gi, '')
+                                .replace(/\son\w+\s*=\s*'[^']*'/gi, '')
+                                .replace(/javascript:/gi, '');
+    var m;
+    while ((m = allowed.exec(stripped)) !== null) {
+      result += stripped.slice(lastIndex, m.index);
+      result += m[0];
+      lastIndex = m.index + m[0].length;
+    }
+    result += stripped.slice(lastIndex);
+    return result;
+  }
+
   function fetchProduct(id) {
     return fetch(getApiBase() + '/productos')
       .then(function(r) { return r.json(); })
@@ -89,6 +112,18 @@
     var desc = p.descripcion || '';
     desc = desc.replace(/<[^>]+>/g, '');
     descEl.textContent = desc;
+
+    // Descripción larga: si viene HTML del backend, lo saneamos y renderizamos.
+    var largaWrap = document.getElementById('prod-descripcion-larga-wrap');
+    var largaEl = document.getElementById('prod-descripcion-larga');
+    var larga = p.descripcion_larga || '';
+    if (larga) {
+      larga = sanitizeDescriptionHtml(larga);
+      largaEl.innerHTML = larga;
+      largaWrap.style.display = 'block';
+    } else {
+      largaWrap.style.display = 'none';
+    }
 
     var waEl = document.getElementById('prod-whatsapp');
     var waNum = '595992120303';
