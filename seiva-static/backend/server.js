@@ -81,7 +81,7 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:"],
+      imgSrc: ["'self'", "data:", "https:", "https://seiva.com.py", "https://old.seiva.com.py"],
       scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://static.cloudflareinsights.com", "https://www.googletagmanager.com"],
       scriptSrcAttr: ["'unsafe-inline'"],
       connectSrc: ["'self'", "https://old.seiva.com.py", "https://static.cloudflareinsights.com", "https://www.google-analytics.com", "https://www.google.com", "https://region1.google-analytics.com", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com", "https://www.googletagmanager.com"],
