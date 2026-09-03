@@ -304,8 +304,12 @@ async function rPut(id, full, cambios) {
 async function startCrear(campos, textoMsg, photoMsg, linkMsg) {
   let d = Object.assign({}, campos || {});
 
-  // link → scrape
-  if (linkMsg && !d.nombre) {
+  // Detecta si el link es una IMAGEN directa (jpg/png/webp/...) en vez de una
+  // página de producto. Si es imagen, NO scrapeamos: usamos el link como imagen.
+  const esImagen = /\.(jpe?g|png|webp|gif|avif|bmp|svg|heic)([?#].*)?$/i.test(linkMsg || '');
+
+  // link → scrape (solo si NO es una imagen directa)
+  if (linkMsg && !d.nombre && !esImagen) {
     try {
       const s = await http('POST', BASE + '/scrape-product', { url: linkMsg });
       d.nombre = s.nombre;
@@ -335,6 +339,11 @@ async function startCrear(campos, textoMsg, photoMsg, linkMsg) {
       // los datos que el usuario ya dio por texto y pedimos solo lo que falte.
       d._scrape_fallo = true;
     }
+  }
+
+  // imagen directa por URL (el usuario pasó un link a una foto, no a un producto)
+  if (linkMsg && esImagen && !d.imagen) {
+    d.imagen = linkMsg;
   }
 
   // foto → imagen principal
@@ -368,7 +377,7 @@ async function startCrear(campos, textoMsg, photoMsg, linkMsg) {
   let prM = t.match(/\b(?:precio\s+)?(?:proveedor|proovedor|provedor|fornecedor|costo)\s*[:\=]?\s*(\d+(?:[.,]\d+)?)/i);
   if (prM) d.precio_proveedor = num(prM[1]);
 
-  const mm = (t.match(/\bmarca\s*[:\=]?\s*([^,;]+?)(?=\s+(?:precio|stock|categoria|proveedor|costo)\b|$)/i) || [])[1];
+  let mm = (t.match(/\b(?:marca|brand)\s*(?:de\s+|es\s+)?[:\=]?\s*([^,;]+?)(?=\s+(?:precio|stock|categoria|proveedor|costo)\b|$)/i) || [])[1];
   if (mm) d.marca = mm.trim();
   if (!d.nombre) {
     let n = t.replace(/^(?:crear|crea|nuevo|agregar|alta|cargar|subir)\s*(?:producto)?\s*[:\-]?\s*/i, '')
@@ -385,6 +394,20 @@ async function startCrear(campos, textoMsg, photoMsg, linkMsg) {
     if (n && /\b(?:precio|proveedor|proovedor|provedor|fornecedor|costo|reales|reais)\b/i.test(n)) n = '';
     // si tras limpiar no quedó nada real, no lo usamos como nombre (se preguntará)
     if (n && n.length >= 2) d.nombre = n;
+  }
+
+  // Si no se capturó marca explícita ("marca X"), intentamos extraerla del final
+  // del nombre: "... - Unilife" o "... Unilife". Solo si el sufijo NO tiene dígitos
+  // (para no agarrar "60 Cápsulas" ni "500mg" como marca).
+  if (!d.marca && d.nombre) {
+    const nm = d.nombre.match(/^(.*?)\s*[-–]\s*([A-Za-zÁÉÍÓÚÑáéíóúñ][A-Za-zÁÉÍÓÚÑáéíóúñ\s]+)$/);
+    if (nm) {
+      const posibleMarca = nm[2].trim();
+      if (posibleMarca && !/\d/.test(posibleMarca) && posibleMarca.length >= 2 && posibleMarca.length <= 20) {
+        d.marca = posibleMarca;
+        d.nombre = nm[1].trim();
+      }
+    }
   }
 
   return continuarCrear(d, t, photoMsg, linkMsg);
