@@ -140,7 +140,9 @@ async function handleConfirm() {
   const t = text.toLowerCase();
 
   if (state === 'crear_confirm') {
-    if (/^(aprobar|sí|si|ok|confirmar|dale|crear)$/i.test(t)) {
+    // Normalizar: quitar puntuación (ej "si}" → "si") para ser tolerante a typos.
+    const tn = t.replace(/[^a-z0-9áéíóúñ\s]/gi, ' ').replace(/\s+/g, ' ').trim();
+    if (/^(aprobar|aprobado|confirmo|confirmar|sí|si|sip|dale|ok|crear|va|vamos|yes|claro)$/i.test(tn)) {
       try {
         // Diagnóstico: ver QUÉ se va a enviar al backend.
         const prod = draft.producto || {};
@@ -155,12 +157,18 @@ async function handleConfirm() {
         return out('❌ No pude crear: ' + e.message);
       }
     }
-    if (/^(cancelar|no|abortar)$/i.test(t)) { await clearSession(); return out('❌ Creación cancelada.'); }
-    await clearSession(); return null; // nueva intención: reprocesar
+    if (/^(cancelar|cancela|no|abortar|salir|descartar)$/i.test(tn)) { await clearSession(); return out('❌ Creación cancelada.'); }
+    // Si mandó un comando nuevo (lista, stock, etc.), soltamos la confirmación y reprocesamos.
+    if (/(\blista\b|\blistar\b|\bstock\b|\bbusca\b|\bbuscar\b|\bprecio\b|\belimin\b|\bnuevo\b|\bpublic\b|\bocult\b|\bayuda\b|\bhelp\b|\bmenu\b)/i.test(t)) {
+      await clearSession(); return null;
+    }
+    // Typo o texto no reconocido: NO perdemos la sesión; recordamos qué responder.
+    return out('🤔 No entendí. Respondé <b>APROBAR</b> para crearlo, o <b>CANCELAR</b> para descartarlo.');
   }
 
   if (state === 'eliminar_confirm') {
-    if (/^(confirmar|sí|si|ok|dale|eliminar|borrar)$/i.test(t)) {
+    const tn = t.replace(/[^a-z0-9áéíóúñ\s]/gi, ' ').replace(/\s+/g, ' ').trim();
+    if (/^(confirmar|confirmo|sí|si|sip|ok|dale|eliminar|elimina|borrar|borra|yes)$/i.test(tn)) {
       try {
         await http('DELETE', API_P + '/' + draft.id);
         await log('ELIMINAR', draft.id, { nombre: draft.nombre });
@@ -170,8 +178,11 @@ async function handleConfirm() {
         return out('❌ No pude eliminar: ' + e.message);
       }
     }
-    if (/^(cancelar|no|abortar)$/i.test(t)) { await clearSession(); return out('❌ Eliminación cancelada.'); }
-    await clearSession(); return null; // nueva intención: reprocesar
+    if (/^(cancelar|cancela|no|abortar|salir)$/i.test(tn)) { await clearSession(); return out('❌ Eliminación cancelada.'); }
+    if (/(\blista\b|\blistar\b|\bstock\b|\bbusca\b|\bbuscar\b|\bprecio\b|\bcrear\b|\bnuevo\b|\bpublic\b|\bocult\b|\bayuda\b|\bhelp\b|\bmenu\b)/i.test(t)) {
+      await clearSession(); return null;
+    }
+    return out('🤔 No entendí. Respondé <b>CONFIRMAR</b> para eliminar, o <b>CANCELAR</b>.');
   }
 
   if (state === 'seleccion') {
