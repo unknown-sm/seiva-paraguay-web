@@ -1,0 +1,92 @@
+{
+  "name": "Seiva - Inventario v3 (determinista)",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message",
+          "callback_query"
+        ],
+        "additionalFields": {}
+      },
+      "id": "tg",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -360,
+        300
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "wtekAWcrcfSlrW67",
+          "name": "SEIVA Bot"
+        }
+      },
+      "webhookId": "seiva-agent-v3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const tg = $('Telegram Trigger').item.json;\nconst m = tg.message || (tg.callback_query && tg.callback_query.message);\nif (!m || !m.chat) { return []; }\nconst cid = m.chat.id;\nconst txt = String(m.text || m.caption || '').trim();\n\nconst API = 'https://seiva.com.py/api/productos';\nconst TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzg3NjE5ODk5LCJleHAiOjIxMDI5Nzk4OTl9.EOwKkZgszm1F8x5Z3bV9fKyiNQLe6NVTyX1e9ck1l4s';\nconst OR_KEY = '[REDACTED_OR_KEY]-57b620bcf9508ac73313bd991a9cd666e380fb70e8e98520bc98eb1985fc2ec4';\nconst _http = this.helpers.httpRequest;\n\nasync function call(method, p, body) {\n  const opts = { method: method, url: API + p, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN }, json: true };\n  if (body !== undefined && body !== null) opts.body = body;\n  return await _http(opts);\n}\n\n// Cargar inventario (mismo token verificado)\nlet prods = [];\ntry {\n  const invRaw = await _http({ method: 'GET', url: API + '/all', headers: { Authorization: 'Bearer ' + TOKEN }, json: true });\n  prods = Array.isArray(invRaw) ? invRaw : (invRaw && Array.isArray(invRaw.data) ? invRaw.data : []);\n} catch (e) { prods = []; }\nprods = prods.filter(p => p && typeof p === 'object');\n\nconst fmt = n => Number(n || 0).toLocaleString('es-PY');\nconst nums = t => (t.match(/\\d+/g) || []).map(Number);\nconst inv = prods.map(p => 'ID ' + p.id + ' | ' + p.nombre + ' | stock:' + p.stock + ' | precio:' + p.precio + ' | ' + (p.activo ? 'publicado' : 'oculto')).join('\\n');\n\n// ÚNICA salida\nfunction out(texto) { return [{ json: { chatId: cid, texto: texto } }]; }\n\nconst HELP = '🤖 <b>Seiva Bot — Inventario</b>\\n\\n' +\n  '🆕 <b>Crear producto:</b>\\n<code>crear Nombre del producto precio 60000 stock 10</code>\\n\\n' +\n  '📊 <b>Stock:</b>\\n<code>stock 188 5</code> → poner el producto 188 en 5\\n' +\n  'También: \"poné el 188 en 5\", \"stock del 188 a 10\"\\n\\n' +\n  '🌐 <b>Publicar / ocultar:</b>\\n<code>publicar 188</code> · <code>ocultar 188</code>\\n\\n' +\n  '📦 <b>Listar:</b>\\n<code>lista</code> (los 40 últimos)\\n\\n' +\n  '🔎 <b>Buscar:</b>\\n<code>buscar colostro</code> · \"¿cuánto stock de creatina?\"\\n\\n' +\n  '💬 Cualquier otra cosa, escribime y te ayudo.';\n\n// --- 0. Ayuda ---\nif (/^\\/start$|^\\/debug$|^\\/help$|^ayuda$|^help$|^menu$|^comandos?$/i.test(txt)) {\n  return out(HELP);\n}\n\n// --- 1. Listar ---\nif (/^(lista|listar|listame|listá|productos|inventario)$/i.test(txt) || /^(ver|mostrar)\\s+(todo|productos|inventario)$/i.test(txt)) {\n  if (!prods.length) return out('📦 No hay productos cargados (o no pude leer el inventario).');\n  const top = prods.slice(0, 40);\n  let o = '📦 <b>Productos (' + top.length + ' de ' + prods.length + '):</b>\\n';\n  for (const p of top) {\n    o += (p.activo ? '✅' : '⏸️') + ' <b>#' + p.id + '</b> ' + p.nombre + '\\n      💰 ' + fmt(p.precio) + ' Gs · stock: ' + p.stock + '\\n';\n  }\n  return out(o);\n}\n\n// --- 2. Crear producto ---\nif (/^(?:crear|crea|nuevo\\s+producto|nuevo|agregar\\s+producto|agregar|alta|cargar\\s+producto|cargar)\\b/i.test(txt)) {\n  let resto = txt.replace(/^(?:crear|crea|nuevo\\s+producto|nuevo|agregar\\s+producto|agregar|alta|cargar\\s+producto|cargar)\\b\\s*(?:producto)?\\s*[:\\-]?\\s*/i, '').trim();\n  let precio = null, stock = 0, marca = '';\n  const pm = resto.match(/\\bprecio\\s*[:\\=]?\\s*(\\d+)/i);\n  if (pm) { precio = parseInt(pm[1]); resto = resto.replace(/\\bprecio\\s*[:\\=]?\\s*\\d+/i, ' '); }\n  const sm = resto.match(/\\bstock\\s*[:\\=]?\\s*(\\d+)/i);\n  if (sm) { stock = parseInt(sm[1]); resto = resto.replace(/\\bstock\\s*[:\\=]?\\s*\\d+/i, ' '); }\n  const mm = resto.match(/\\bmarca\\s*[:\\=]?\\s*([^,;]+)/i);\n  if (mm) { marca = mm[1].trim(); resto = resto.replace(/\\bmarca\\s*[:\\=]?\\s*[^,;]+/i, ' '); }\n  const nombre = resto.replace(/[:\\=,;|]+/g, ' ').replace(/\\s+/g, ' ').trim();\n  if (!nombre) return out('❌ Faltó el nombre. Formato: <code>crear Nombre del producto precio 60000 stock 10</code>');\n  if (precio === null) return out('❌ Faltó el precio. Formato: <code>crear Nombre del producto precio 60000 stock 10</code>');\n  try {\n    const r = await call('POST', '', { nombre: nombre, precio: precio, stock: stock, marca: marca });\n    return out('✅ Producto creado:\\n<b>#' + r.id + '</b> ' + nombre + '\\n💰 ' + fmt(precio) + ' Gs · stock ' + stock);\n  } catch (e) {\n    return out('❌ No pude crear el producto: ' + e.message);\n  }\n}\n\n// --- 2b. Stock ---\nif (/(?:\\bstock\\b|pon[eé]?|poner|dej[aá](?:r|me)?|cambiar)/i.test(txt) && nums(txt).length >= 2) {\n  const n = nums(txt);\n  const id = n[0];\n  const val = n[n.length - 1];\n  if (val < 0) return out('❌ El stock no puede ser negativo.');\n  try {\n    await call('PATCH', '/stock-batch', { updates: [{ id: id, stock: val }] });\n    const p = prods.find(x => x.id === id);\n    return out('✅ Stock de <b>#' + id + '</b>' + (p ? ' (' + p.nombre + ')' : '') + ' actualizado a <b>' + val + '</b> unidades.');\n  } catch (e) {\n    return out('❌ No pude actualizar el stock: ' + e.message);\n  }\n}\n\n// --- 3. Publicar / ocultar ---\nconst publ = /public(?:o|a|ar)|activ(?:o|a|ar)|mostr(?:a|ar)/i.test(txt);\nconst ocult = /ocult(?:o|a|ar)|despublic(?:o|a|ar)|desactiv(?:o|a|ar)|inactiv(?:o|a|ar)|escond(?:e|er)/i.test(txt);\nif ((publ || ocult) && nums(txt).length >= 1) {\n  const id = nums(txt)[0];\n  const p = prods.find(x => x.id === id);\n  const actual = p ? !!p.activo : null;\n  if (actual !== null) {\n    if (publ && actual) return out('ℹ️ El producto <b>#' + id + '</b>' + (p ? ' (' + p.nombre + ')' : '') + ' ya está <b>PUBLICADO</b>.');\n    if (ocult && !actual) return out('ℹ️ El producto <b>#' + id + '</b>' + (p ? ' (' + p.nombre + ')' : '') + ' ya está <b>OCULTO</b>.');\n  }\n  try {\n    const r = await call('PATCH', '/' + id + '/toggle', undefined);\n    return out((r && r.activo ? '✅' : '⏸️') + ' Producto <b>#' + id + '</b> ahora está <b>' + (r && r.activo ? 'PUBLICADO' : 'OCULTO') + '</b>.');\n  } catch (e) {\n    return out('❌ No pude cambiar el estado: ' + e.message);\n  }\n}\n\n// --- 4. Buscar ---\nif (/(?:busca[r]?|cu[aá]nto|cu[aá]l|qu[eé]\\s*stock|stock\\s+de)/i.test(txt)) {\n  const q = txt.replace(/busca[r]?|cu[aá]nto|cu[aá]l|stock|hay|tienen|tenemos|ten[eé]s|de\\b|la\\b|el\\b/gi, ' ')\n    .toLowerCase().replace(/[^a-záéíóúñ0-9\\s]/g, ' ').split(/\\s+/).filter(w => w.length >= 3).join(' ');\n  if (!q) return out('🔎 Decime qué producto buscás, ej: <code>buscar colostro</code>');\n  const words = q.split(' ');\n  const hits = prods.filter(p => { const h = (p.nombre || '').toLowerCase(); return words.some(w => h.includes(w)); }).slice(0, 10);\n  if (!hits.length) return out('🔎 No encontré nada con \"' + q + '\". Probá con <code>lista</code>.');\n  let o = '🔎 Resultados:\\n';\n  for (const p of hits) o += '✅ <b>#' + p.id + '</b> ' + p.nombre + ' · ' + fmt(p.precio) + ' Gs · stock <b>' + p.stock + '</b>\\n';\n  return out(o);\n}\n\n// --- 5. Charla libre → OpenRouter (solo responde, NUNCA escribe) ---\ntry {\n  const r = await _http({\n    method: 'POST',\n    url: 'https://openrouter.ai/api/v1/chat/completions',\n    headers: { Authorization: 'Bearer ' + OR_KEY, 'Content-Type': 'application/json' },\n    json: true,\n    body: {\n      model: 'xiaomi/mimo-v2.5',\n      messages: [\n        { role: 'system', content: 'Sos el asistente de Telegram de Seiva Paraguay, tienda de suplementos (precios en guaraníes Gs). Respondé en español rioplatense, tono cercano y breve. Usá el INVENTARIO para dar datos reales (ID, stock, precio). NO afirmes haber hecho cambios en la base de datos: vos solo respondés, no modificás nada. Si el usuario pide cambiar stock o publicar/ocultar/crear, decile los comandos: \"stock ID valor\", \"publicar ID\", \"ocultar ID\", \"crear Nombre precio N stock N\", \"lista\", \"buscar texto\".' },\n        { role: 'user', content: txt + '\\n\\nINVENTARIO (datos reales):\\n' + inv }\n      ],\n      temperature: 0.6,\n      max_tokens: 500\n    }\n  });\n  const reply = r && r.choices && r.choices[0] && r.choices[0].message ? r.choices[0].message.content : null;\n  return out(reply || 'No pude responder ahora. Escribí \"ayuda\" para ver los comandos.');\n} catch (e) {\n  return out('💬 No pude procesar eso. Escribí \"ayuda\" para ver los comandos.');\n}"
+      },
+      "id": "route",
+      "name": "Router",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -140,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.texto }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "resp",
+      "name": "Responder",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        300
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "wtekAWcrcfSlrW67",
+          "name": "SEIVA Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

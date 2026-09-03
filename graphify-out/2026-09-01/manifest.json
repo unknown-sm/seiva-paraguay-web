@@ -1,0 +1,1882 @@
+{
+  "backup.js": {
+    "mtime": 1785282847.3806298,
+    "ast_hash": "5dd12d5d9782e84e70925362ec3f97ed",
+    "semantic_hash": "5dd12d5d9782e84e70925362ec3f97ed"
+  },
+  "check_db.py": {
+    "mtime": 1780671101.8059702,
+    "ast_hash": "769f2f0f2bfff69ec520a7d41656667a",
+    "semantic_hash": "769f2f0f2bfff69ec520a7d41656667a"
+  },
+  "check_db2.py": {
+    "mtime": 1780672138.2649865,
+    "ast_hash": "ff58cf1ba63ad01a64624f38a27b08f0",
+    "semantic_hash": "ff58cf1ba63ad01a64624f38a27b08f0"
+  },
+  "clean_descs.py": {
+    "mtime": 1780764525.4405906,
+    "ast_hash": "fad2f219ad03bc54fa23a9af03354aba",
+    "semantic_hash": "fad2f219ad03bc54fa23a9af03354aba"
+  },
+  "clean_escapes.py": {
+    "mtime": 1780626834.6225169,
+    "ast_hash": "87c18c99b7e87fb62566ac3dcc4ad63b",
+    "semantic_hash": "87c18c99b7e87fb62566ac3dcc4ad63b"
+  },
+  "extract_descuentos.py": {
+    "mtime": 1780671475.0889702,
+    "ast_hash": "5d7a30b2681f38c781dec11c7cac83a3",
+    "semantic_hash": "5d7a30b2681f38c781dec11c7cac83a3"
+  },
+  "fix-qr-checkout.php": {
+    "mtime": 1779710720.3037894,
+    "ast_hash": "1ffbc7cffce0b165fce95b9181dcfc6b",
+    "semantic_hash": "1ffbc7cffce0b165fce95b9181dcfc6b"
+  },
+  "har.json": {
+    "mtime": 1787191650.399821,
+    "ast_hash": "af34a73e0fbc2107c9458ff91ad4b10d",
+    "semantic_hash": ""
+  },
+  "mobile-opencode/package.json": {
+    "mtime": 1779458823.2680004,
+    "ast_hash": "7c2af61162fdd98d4be27b8a993f4c6f",
+    "semantic_hash": "7c2af61162fdd98d4be27b8a993f4c6f"
+  },
+  "mobile-opencode/public/app.js": {
+    "mtime": 1779458893.0279434,
+    "ast_hash": "3ead0d4998bcf7b4938d5dd0eb245ebd",
+    "semantic_hash": "3ead0d4998bcf7b4938d5dd0eb245ebd"
+  },
+  "mobile-opencode/public/manifest.json": {
+    "mtime": 1779458894.9216745,
+    "ast_hash": "489381a085165c8b24bbd63de7d31703",
+    "semantic_hash": "489381a085165c8b24bbd63de7d31703"
+  },
+  "mobile-opencode/public/sw.js": {
+    "mtime": 1779458897.0114305,
+    "ast_hash": "0445ac1eadbb3757772ea0fd835fe207",
+    "semantic_hash": "0445ac1eadbb3757772ea0fd835fe207"
+  },
+  "mobile-opencode/server.js": {
+    "mtime": 1779458923.7797647,
+    "ast_hash": "fa9fc619aa4f5e7698c3257831d0a706",
+    "semantic_hash": "fa9fc619aa4f5e7698c3257831d0a706"
+  },
+  "payment-qr-woo-extracted/payment-qr-woo/assets/woopro-front.js": {
+    "mtime": 1768088306.0,
+    "ast_hash": "84a812eca28c932889f3cea64e28eb5f",
+    "semantic_hash": "84a812eca28c932889f3cea64e28eb5f"
+  },
+  "payment-qr-woo-extracted/payment-qr-woo/assets/woopro.js": {
+    "mtime": 1592174506.0,
+    "ast_hash": "82cc0be747bc4d21bd96b8411f4968d3",
+    "semantic_hash": "82cc0be747bc4d21bd96b8411f4968d3"
+  },
+  "payment-qr-woo-extracted/payment-qr-woo/functions.php": {
+    "mtime": 1768346240.0,
+    "ast_hash": "3cca2e7e8c92e1fea1bb88a2e5038b19",
+    "semantic_hash": "3cca2e7e8c92e1fea1bb88a2e5038b19"
+  },
+  "payment-qr-woo-extracted/payment-qr-woo/payment-qr-woo.php": {
+    "mtime": 1768346240.0,
+    "ast_hash": "57720421202a293a4f3ea0799ce64f1e",
+    "semantic_hash": "57720421202a293a4f3ea0799ce64f1e"
+  },
+  "restore.js": {
+    "mtime": 1785283304.2904658,
+    "ast_hash": "ddf9ba61158ae14931b01c818ed82968",
+    "semantic_hash": "ddf9ba61158ae14931b01c818ed82968"
+  },
+  "seiva-static/admin/js/admin.js": {
+    "mtime": 1787411068.2067614,
+    "ast_hash": "7d4cbe76369257aadbf68096e666dec9",
+    "semantic_hash": ""
+  },
+  "seiva-static/admin/js/pwa.js": {
+    "mtime": 1787155903.3500943,
+    "ast_hash": "6046c0709e35f8bf5c6f7f82564d32cc",
+    "semantic_hash": "6046c0709e35f8bf5c6f7f82564d32cc"
+  },
+  "seiva-static/admin/manifest.json": {
+    "mtime": 1787155894.715227,
+    "ast_hash": "c724d2d1a1b2d783fdae0b9330f23cfb",
+    "semantic_hash": "c724d2d1a1b2d783fdae0b9330f23cfb"
+  },
+  "seiva-static/admin/sw.js": {
+    "mtime": 1787020017.9189985,
+    "ast_hash": "d80853c648c9dee6547118f655e83f9a",
+    "semantic_hash": "d80853c648c9dee6547118f655e83f9a"
+  },
+  "seiva-static/backend/check-db.js": {
+    "mtime": 1780671077.4053886,
+    "ast_hash": "69a4582c456b56bb0c6d4c725405f275",
+    "semantic_hash": "69a4582c456b56bb0c6d4c725405f275"
+  },
+  "seiva-static/backend/generate-image-variants.js": {
+    "mtime": 1787066041.321944,
+    "ast_hash": "af76bfe657fb8ee13f9667ed914ff06a",
+    "semantic_hash": "af76bfe657fb8ee13f9667ed914ff06a"
+  },
+  "seiva-static/backend/image-service.js": {
+    "mtime": 1787102685.0354893,
+    "ast_hash": "532cc171eec95210585c4d81852eef3b",
+    "semantic_hash": "532cc171eec95210585c4d81852eef3b"
+  },
+  "seiva-static/backend/import-from-wc.js": {
+    "mtime": 1786385821.505736,
+    "ast_hash": "536f597afb729d45135c7d594c77fe65",
+    "semantic_hash": "536f597afb729d45135c7d594c77fe65"
+  },
+  "seiva-static/backend/import-products.js": {
+    "mtime": 1779641436.0379245,
+    "ast_hash": "010dc1f45efb0f7c77f58b3430e30e8d",
+    "semantic_hash": "010dc1f45efb0f7c77f58b3430e30e8d"
+  },
+  "seiva-static/backend/package.json": {
+    "mtime": 1787175465.9657154,
+    "ast_hash": "85f68e97e386a751afcca5972f6dfa00",
+    "semantic_hash": ""
+  },
+  "seiva-static/backend/server.js": {
+    "mtime": 1787620347.761979,
+    "ast_hash": "ceaa8697fb0d4b7d0e38220b72a1debe",
+    "semantic_hash": ""
+  },
+  "seiva-static/backend/sync-gallery-images.js": {
+    "mtime": 1786710409.3148282,
+    "ast_hash": "84437b41a3b78ec73c9a054d57b21117",
+    "semantic_hash": "84437b41a3b78ec73c9a054d57b21117"
+  },
+  "seiva-static/backend/sync-stock.js": {
+    "mtime": 1784559769.4437542,
+    "ast_hash": "14bb2c561d8b37423f5e8844a9af94ba",
+    "semantic_hash": "14bb2c561d8b37423f5e8844a9af94ba"
+  },
+  "seiva-static/backend/sync-wc-gallery.js": {
+    "mtime": 1786724073.900361,
+    "ast_hash": "27179d3e42c37c7577847c449642458b",
+    "semantic_hash": "27179d3e42c37c7577847c449642458b"
+  },
+  "seiva-static/backend/sync-wp-gallery.js": {
+    "mtime": 1786720981.8149235,
+    "ast_hash": "8d6d4366c7cc3b8ced8c69ab7e21e34d",
+    "semantic_hash": "8d6d4366c7cc3b8ced8c69ab7e21e34d"
+  },
+  "seiva-static/backend/telegram-bot.js": {
+    "mtime": 1787446827.75972,
+    "ast_hash": "d2fbf129f3d4289920bac6f8718d9c4f",
+    "semantic_hash": ""
+  },
+  "seiva-static/js/main.js": {
+    "mtime": 1779671072.1296926,
+    "ast_hash": "62ff369f2ad3184b5591699d012ddf3d",
+    "semantic_hash": "62ff369f2ad3184b5591699d012ddf3d"
+  },
+  "seiva-static/js/producto-detail.js": {
+    "mtime": 1786484621.7453961,
+    "ast_hash": "37b9ba279661fa735d4e5a700d007845",
+    "semantic_hash": "37b9ba279661fa735d4e5a700d007845"
+  },
+  "seiva-static/js/productos.js": {
+    "mtime": 1786379440.4414926,
+    "ast_hash": "6fbc634f3c0e0c970b94c591e7da7469",
+    "semantic_hash": "6fbc634f3c0e0c970b94c591e7da7469"
+  },
+  "seiva-static/js/theme.js": {
+    "mtime": 1779579993.0825548,
+    "ast_hash": "87592f880703dedd65c8db96d20bd109",
+    "semantic_hash": "87592f880703dedd65c8db96d20bd109"
+  },
+  "seiva-static/js/whatsapp.js": {
+    "mtime": 1779580004.4429398,
+    "ast_hash": "fff712b851816a9fe2e139e7f3096ee8",
+    "semantic_hash": "fff712b851816a9fe2e139e7f3096ee8"
+  },
+  "seivvaweb/app/components.json": {
+    "mtime": 1779670029.0,
+    "ast_hash": "8df57b256ec5ade8f4832fd28cf7bdd4",
+    "semantic_hash": "8df57b256ec5ade8f4832fd28cf7bdd4"
+  },
+  "seivvaweb/app/eslint.config.js": {
+    "mtime": 1779670029.0,
+    "ast_hash": "b8893da386a89dfd3672dad848f4ec7e",
+    "semantic_hash": "b8893da386a89dfd3672dad848f4ec7e"
+  },
+  "seivvaweb/app/package.json": {
+    "mtime": 1782525453.6166396,
+    "ast_hash": "c5178362aa208a65e130a2b881e7c120",
+    "semantic_hash": "c5178362aa208a65e130a2b881e7c120"
+  },
+  "seivvaweb/app/postcss.config.js": {
+    "mtime": 1779670029.0,
+    "ast_hash": "ef3ba2a81ba19f8ea5ddf625521e96f0",
+    "semantic_hash": "ef3ba2a81ba19f8ea5ddf625521e96f0"
+  },
+  "seivvaweb/app/src/App.tsx": {
+    "mtime": 1787180848.6107783,
+    "ast_hash": "9a31dbb964d1d86e37bcb26b90173ed4",
+    "semantic_hash": ""
+  },
+  "seivvaweb/app/src/components/CartDrawer.tsx": {
+    "mtime": 1787065988.7694564,
+    "ast_hash": "00816fee5f2b318e1564007a1f09b657",
+    "semantic_hash": "00816fee5f2b318e1564007a1f09b657"
+  },
+  "seivvaweb/app/src/components/GlobalSections.tsx": {
+    "mtime": 1780765674.4442205,
+    "ast_hash": "b86d2f59bc27c2c6b0866e83983f1aa0",
+    "semantic_hash": "b86d2f59bc27c2c6b0866e83983f1aa0"
+  },
+  "seivvaweb/app/src/components/MobileTabBar.tsx": {
+    "mtime": 1787180851.710265,
+    "ast_hash": "8b49902f35db704d7237ef49c336ec38",
+    "semantic_hash": ""
+  },
+  "seivvaweb/app/src/components/ProductSkeleton.tsx": {
+    "mtime": 1779739546.0420983,
+    "ast_hash": "8555ff4fe236abd51c151e3fda28647e",
+    "semantic_hash": "8555ff4fe236abd51c151e3fda28647e"
+  },
+  "seivvaweb/app/src/components/ScrollToTop.tsx": {
+    "mtime": 1779718557.632177,
+    "ast_hash": "fca73ca3b1d59a220f5cf4c0b8d42e6d",
+    "semantic_hash": "fca73ca3b1d59a220f5cf4c0b8d42e6d"
+  },
+  "seivvaweb/app/src/components/ThemePanel.tsx": {
+    "mtime": 1780754274.4571862,
+    "ast_hash": "d8444f471644a5e6b26c7ba0ee8a84ff",
+    "semantic_hash": "d8444f471644a5e6b26c7ba0ee8a84ff"
+  },
+  "seivvaweb/app/src/components/ui/accordion.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "581b83215a419af526e5447e6d01fcdb",
+    "semantic_hash": "581b83215a419af526e5447e6d01fcdb"
+  },
+  "seivvaweb/app/src/components/ui/alert-dialog.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "815fc512f7d24dfa437dee6622e027f7",
+    "semantic_hash": "815fc512f7d24dfa437dee6622e027f7"
+  },
+  "seivvaweb/app/src/components/ui/alert.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "8e59179ed2f0f6e33320d0081b9782fa",
+    "semantic_hash": "8e59179ed2f0f6e33320d0081b9782fa"
+  },
+  "seivvaweb/app/src/components/ui/aspect-ratio.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "be7a9b030095db724fb3d9ca4e62293c",
+    "semantic_hash": "be7a9b030095db724fb3d9ca4e62293c"
+  },
+  "seivvaweb/app/src/components/ui/avatar.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "a94ddb60cff346499b10e164b2db790d",
+    "semantic_hash": "a94ddb60cff346499b10e164b2db790d"
+  },
+  "seivvaweb/app/src/components/ui/badge.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "7efa8abd36eee59f14998b447d169304",
+    "semantic_hash": "7efa8abd36eee59f14998b447d169304"
+  },
+  "seivvaweb/app/src/components/ui/breadcrumb.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "14763038175abd2410d97d8166c89480",
+    "semantic_hash": "14763038175abd2410d97d8166c89480"
+  },
+  "seivvaweb/app/src/components/ui/button-group.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "73a99a33fdbb8cf7742f0aad44829e25",
+    "semantic_hash": "73a99a33fdbb8cf7742f0aad44829e25"
+  },
+  "seivvaweb/app/src/components/ui/button.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "7e1b8d2215587c9ea334242b2afa4a40",
+    "semantic_hash": "7e1b8d2215587c9ea334242b2afa4a40"
+  },
+  "seivvaweb/app/src/components/ui/calendar.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "5d3fb01c5e7002fb7d8a3a9b7eb490da",
+    "semantic_hash": "5d3fb01c5e7002fb7d8a3a9b7eb490da"
+  },
+  "seivvaweb/app/src/components/ui/card.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "a6752f4d1da504c7f03196d90cde4b2c",
+    "semantic_hash": "a6752f4d1da504c7f03196d90cde4b2c"
+  },
+  "seivvaweb/app/src/components/ui/carousel.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "002c75de6ce1dec35a6dd9f6c0d1d07b",
+    "semantic_hash": "002c75de6ce1dec35a6dd9f6c0d1d07b"
+  },
+  "seivvaweb/app/src/components/ui/chart.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "fda4a5662ef4c6d63fe3ae0323e502a5",
+    "semantic_hash": "fda4a5662ef4c6d63fe3ae0323e502a5"
+  },
+  "seivvaweb/app/src/components/ui/checkbox.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "4b0b973d7b0463443696a35f9f73743d",
+    "semantic_hash": "4b0b973d7b0463443696a35f9f73743d"
+  },
+  "seivvaweb/app/src/components/ui/collapsible.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "e978727a4d734730f3b7bfd0c2e22ea6",
+    "semantic_hash": "e978727a4d734730f3b7bfd0c2e22ea6"
+  },
+  "seivvaweb/app/src/components/ui/command.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "2fb812963643e439707b72a80b3a5628",
+    "semantic_hash": "2fb812963643e439707b72a80b3a5628"
+  },
+  "seivvaweb/app/src/components/ui/context-menu.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "e427ed2770f6d3a8018481c61f90d24b",
+    "semantic_hash": "e427ed2770f6d3a8018481c61f90d24b"
+  },
+  "seivvaweb/app/src/components/ui/dialog.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "3f1e562b11b0d89ddfdf756ca4a8d71d",
+    "semantic_hash": "3f1e562b11b0d89ddfdf756ca4a8d71d"
+  },
+  "seivvaweb/app/src/components/ui/drawer.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "d2f77e51ad7cefcf112c855235a172dc",
+    "semantic_hash": "d2f77e51ad7cefcf112c855235a172dc"
+  },
+  "seivvaweb/app/src/components/ui/dropdown-menu.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "8a7f49b4f303577830fafaaaedb8c4f3",
+    "semantic_hash": "8a7f49b4f303577830fafaaaedb8c4f3"
+  },
+  "seivvaweb/app/src/components/ui/empty.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "82cc505b749945f1cc9ff2f28cca5010",
+    "semantic_hash": "82cc505b749945f1cc9ff2f28cca5010"
+  },
+  "seivvaweb/app/src/components/ui/field.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "9e1f956571f6fb6ec2db4f9530d3a501",
+    "semantic_hash": "9e1f956571f6fb6ec2db4f9530d3a501"
+  },
+  "seivvaweb/app/src/components/ui/form.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "cc761fa32f15b47f7cacf623f48b115f",
+    "semantic_hash": "cc761fa32f15b47f7cacf623f48b115f"
+  },
+  "seivvaweb/app/src/components/ui/hover-card.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "a1010352934f4cdf860caa32491a3706",
+    "semantic_hash": "a1010352934f4cdf860caa32491a3706"
+  },
+  "seivvaweb/app/src/components/ui/input-group.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "0543d798938fe000ce50c08db1623194",
+    "semantic_hash": "0543d798938fe000ce50c08db1623194"
+  },
+  "seivvaweb/app/src/components/ui/input-otp.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "225d01c4ef58e641b5e1da4a625b3a92",
+    "semantic_hash": "225d01c4ef58e641b5e1da4a625b3a92"
+  },
+  "seivvaweb/app/src/components/ui/input.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "6666f8369b53c79d39be8060dc6c4ce5",
+    "semantic_hash": "6666f8369b53c79d39be8060dc6c4ce5"
+  },
+  "seivvaweb/app/src/components/ui/item.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "4e417a2db9cd3144bd5d1f2f0ad399fa",
+    "semantic_hash": "4e417a2db9cd3144bd5d1f2f0ad399fa"
+  },
+  "seivvaweb/app/src/components/ui/kbd.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "226fdb1bb271e6fe392e96e7742c28b2",
+    "semantic_hash": "226fdb1bb271e6fe392e96e7742c28b2"
+  },
+  "seivvaweb/app/src/components/ui/label.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "14f124762142b39a666ce10d3b42d28c",
+    "semantic_hash": "14f124762142b39a666ce10d3b42d28c"
+  },
+  "seivvaweb/app/src/components/ui/menubar.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "002ba75dff73bd945ffd9ab3e6c95613",
+    "semantic_hash": "002ba75dff73bd945ffd9ab3e6c95613"
+  },
+  "seivvaweb/app/src/components/ui/navigation-menu.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "bea6b8a7ef7d7e7d5dc09afe7631fb59",
+    "semantic_hash": "bea6b8a7ef7d7e7d5dc09afe7631fb59"
+  },
+  "seivvaweb/app/src/components/ui/pagination.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "ba23d7233a420983feef894ee045234d",
+    "semantic_hash": "ba23d7233a420983feef894ee045234d"
+  },
+  "seivvaweb/app/src/components/ui/popover.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "d7255316c532c766cee7792d775e4d0f",
+    "semantic_hash": "d7255316c532c766cee7792d775e4d0f"
+  },
+  "seivvaweb/app/src/components/ui/progress.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "99485ee3f0e4ca4498b61ce92ea1a2a9",
+    "semantic_hash": "99485ee3f0e4ca4498b61ce92ea1a2a9"
+  },
+  "seivvaweb/app/src/components/ui/radio-group.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "42634c5e24aebafa3f4ce9c91960dbfe",
+    "semantic_hash": "42634c5e24aebafa3f4ce9c91960dbfe"
+  },
+  "seivvaweb/app/src/components/ui/resizable.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "ba59b159222ff15aace4bf830adf1b3d",
+    "semantic_hash": "ba59b159222ff15aace4bf830adf1b3d"
+  },
+  "seivvaweb/app/src/components/ui/scroll-area.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "360243727fcdcb4d509af4516aaa9d0d",
+    "semantic_hash": "360243727fcdcb4d509af4516aaa9d0d"
+  },
+  "seivvaweb/app/src/components/ui/select.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "321b9fcc46c1b24952663ccc7c46d6a2",
+    "semantic_hash": "321b9fcc46c1b24952663ccc7c46d6a2"
+  },
+  "seivvaweb/app/src/components/ui/separator.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "07b35dc35f811b26a1ee3982582ba9fb",
+    "semantic_hash": "07b35dc35f811b26a1ee3982582ba9fb"
+  },
+  "seivvaweb/app/src/components/ui/sheet.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "6945241f834cad4ca26b2b06a7c49a50",
+    "semantic_hash": "6945241f834cad4ca26b2b06a7c49a50"
+  },
+  "seivvaweb/app/src/components/ui/sidebar.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "686da2b9988bb2320a83efa07b4bd551",
+    "semantic_hash": "686da2b9988bb2320a83efa07b4bd551"
+  },
+  "seivvaweb/app/src/components/ui/skeleton.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "ee5017bac14efeda715feaceb488382a",
+    "semantic_hash": "ee5017bac14efeda715feaceb488382a"
+  },
+  "seivvaweb/app/src/components/ui/slider.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "d2fa780e560966380be921f5fda38615",
+    "semantic_hash": "d2fa780e560966380be921f5fda38615"
+  },
+  "seivvaweb/app/src/components/ui/sonner.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "2b9423344bf169fe8fddb5649fe4f95c",
+    "semantic_hash": "2b9423344bf169fe8fddb5649fe4f95c"
+  },
+  "seivvaweb/app/src/components/ui/spinner.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "28b695734ef3b6840b47d713ae3d31ce",
+    "semantic_hash": "28b695734ef3b6840b47d713ae3d31ce"
+  },
+  "seivvaweb/app/src/components/ui/switch.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "f93349e0eb061fc4e6c055ded4cff087",
+    "semantic_hash": "f93349e0eb061fc4e6c055ded4cff087"
+  },
+  "seivvaweb/app/src/components/ui/table.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "bad93c98f980433a2dda868c4289e942",
+    "semantic_hash": "bad93c98f980433a2dda868c4289e942"
+  },
+  "seivvaweb/app/src/components/ui/tabs.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "65854b541abbc3c9f39cb075d4cb43ca",
+    "semantic_hash": "65854b541abbc3c9f39cb075d4cb43ca"
+  },
+  "seivvaweb/app/src/components/ui/textarea.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "04f9af2a78672f7018b16db2bcec5036",
+    "semantic_hash": "04f9af2a78672f7018b16db2bcec5036"
+  },
+  "seivvaweb/app/src/components/ui/toggle-group.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "27b499cb2dc497e3ab9691a1d3557469",
+    "semantic_hash": "27b499cb2dc497e3ab9691a1d3557469"
+  },
+  "seivvaweb/app/src/components/ui/toggle.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "cc63619fa22a57807b699d1e23fd1452",
+    "semantic_hash": "cc63619fa22a57807b699d1e23fd1452"
+  },
+  "seivvaweb/app/src/components/ui/tooltip.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "34079b3ac4d0eb8851c6cab74bd68e00",
+    "semantic_hash": "34079b3ac4d0eb8851c6cab74bd68e00"
+  },
+  "seivvaweb/app/src/context/CartContext.tsx": {
+    "mtime": 1787069392.2955081,
+    "ast_hash": "7414137772afe28b49ea99607de8f0f8",
+    "semantic_hash": "7414137772afe28b49ea99607de8f0f8"
+  },
+  "seivvaweb/app/src/context/ThemeContext.tsx": {
+    "mtime": 1782563059.7701886,
+    "ast_hash": "a42e3afc4a01a3f67242d24e7ebb1197",
+    "semantic_hash": "a42e3afc4a01a3f67242d24e7ebb1197"
+  },
+  "seivvaweb/app/src/data/ciudades.ts": {
+    "mtime": 1786667218.5200808,
+    "ast_hash": "22bd43f1413e40994b8542172d365586",
+    "semantic_hash": "22bd43f1413e40994b8542172d365586"
+  },
+  "seivvaweb/app/src/hooks/use-mobile.ts": {
+    "mtime": 1779670029.0,
+    "ast_hash": "209b5193af16624cdd89d3591480dd48",
+    "semantic_hash": "209b5193af16624cdd89d3591480dd48"
+  },
+  "seivvaweb/app/src/lib/utils.ts": {
+    "mtime": 1779670029.0,
+    "ast_hash": "5a6fd53fdcf2be529e9cc0b718fde352",
+    "semantic_hash": "5a6fd53fdcf2be529e9cc0b718fde352"
+  },
+  "seivvaweb/app/src/main.tsx": {
+    "mtime": 1779675340.4679444,
+    "ast_hash": "36940471378c9049709c348f01a6937f",
+    "semantic_hash": "36940471378c9049709c348f01a6937f"
+  },
+  "seivvaweb/app/src/pages/CartPage.tsx": {
+    "mtime": 1787066000.6315794,
+    "ast_hash": "784b7737fafcaf6e5171e87eab950974",
+    "semantic_hash": "784b7737fafcaf6e5171e87eab950974"
+  },
+  "seivvaweb/app/src/pages/CheckoutPage.tsx": {
+    "mtime": 1787189353.398222,
+    "ast_hash": "a883c366df7cca5b3a83de7dd66cb255",
+    "semantic_hash": ""
+  },
+  "seivvaweb/app/src/pages/ContactoPage.tsx": {
+    "mtime": 1780754089.7750766,
+    "ast_hash": "c370e5d574d619955a8dc377866698e7",
+    "semantic_hash": "c370e5d574d619955a8dc377866698e7"
+  },
+  "seivvaweb/app/src/pages/DynamicPage.tsx": {
+    "mtime": 1780765686.2096963,
+    "ast_hash": "952a956d095050d45cb52d6a61707e11",
+    "semantic_hash": "952a956d095050d45cb52d6a61707e11"
+  },
+  "seivvaweb/app/src/pages/FaqPage.tsx": {
+    "mtime": 1780439695.4389672,
+    "ast_hash": "a26ca13288d5073f059e5fa41c2d5435",
+    "semantic_hash": "a26ca13288d5073f059e5fa41c2d5435"
+  },
+  "seivvaweb/app/src/pages/Home.tsx": {
+    "mtime": 1779670029.0,
+    "ast_hash": "e415e608e98bb87d7642ec6655c9a62f",
+    "semantic_hash": "e415e608e98bb87d7642ec6655c9a62f"
+  },
+  "seivvaweb/app/src/pages/HomePage.tsx": {
+    "mtime": 1787176705.799997,
+    "ast_hash": "a7cf6cd0c7145f1599504d8f4bdbcebe",
+    "semantic_hash": ""
+  },
+  "seivvaweb/app/src/pages/PoliticasPage.tsx": {
+    "mtime": 1786379654.3180583,
+    "ast_hash": "3a4f01ea634e31a9af1686b9af48b6e8",
+    "semantic_hash": "3a4f01ea634e31a9af1686b9af48b6e8"
+  },
+  "seivvaweb/app/src/pages/ProductoPage.tsx": {
+    "mtime": 1787180849.7359414,
+    "ast_hash": "cf25fef1b3f55aae5b1017df0adf93ae",
+    "semantic_hash": ""
+  },
+  "seivvaweb/app/src/pages/PromosPage.tsx": {
+    "mtime": 1782821999.942564,
+    "ast_hash": "d316b6e2284f2771843dbe7f723c8aaa",
+    "semantic_hash": "d316b6e2284f2771843dbe7f723c8aaa"
+  },
+  "seivvaweb/app/src/pages/TiendaPage.tsx": {
+    "mtime": 1787066320.039387,
+    "ast_hash": "726370ac23b07691a1ca484a1c6b6969",
+    "semantic_hash": "726370ac23b07691a1ca484a1c6b6969"
+  },
+  "seivvaweb/app/src/sections/Categories.tsx": {
+    "mtime": 1787243988.4901483,
+    "ast_hash": "22c41c6fa54f24387ade02ab853d93df",
+    "semantic_hash": ""
+  },
+  "seivvaweb/app/src/sections/CombosSection.tsx": {
+    "mtime": 1786812559.3515599,
+    "ast_hash": "f67c34477daabe18392f9e43bafa6959",
+    "semantic_hash": "f67c34477daabe18392f9e43bafa6959"
+  },
+  "seivvaweb/app/src/sections/FeaturedGrid.tsx": {
+    "mtime": 1787065902.1167128,
+    "ast_hash": "c83e7478209a08513865947ee8993790",
+    "semantic_hash": "c83e7478209a08513865947ee8993790"
+  },
+  "seivvaweb/app/src/sections/Footer.tsx": {
+    "mtime": 1786664489.1721761,
+    "ast_hash": "267f51ad96350e293d92ec0d364ab868",
+    "semantic_hash": "267f51ad96350e293d92ec0d364ab868"
+  },
+  "seivvaweb/app/src/sections/Hero.tsx": {
+    "mtime": 1787176679.318231,
+    "ast_hash": "23184a21fe042c848db70901c98f1893",
+    "semantic_hash": ""
+  },
+  "seivvaweb/app/src/sections/LatestProducts.tsx": {
+    "mtime": 1787065888.733184,
+    "ast_hash": "0766329ceda5798e5bf6e3f64bbb819c",
+    "semantic_hash": "0766329ceda5798e5bf6e3f64bbb819c"
+  },
+  "seivvaweb/app/src/sections/Navbar.tsx": {
+    "mtime": 1786668012.9514973,
+    "ast_hash": "fdf62d89ee0ec7244a198d1c28ca1864",
+    "semantic_hash": "fdf62d89ee0ec7244a198d1c28ca1864"
+  },
+  "seivvaweb/app/src/sections/ProductFeatured.tsx": {
+    "mtime": 1787066032.1057916,
+    "ast_hash": "1454b8a785377eeb69271b036b42d08c",
+    "semantic_hash": "1454b8a785377eeb69271b036b42d08c"
+  },
+  "seivvaweb/app/src/sections/StatsBar.tsx": {
+    "mtime": 1786660115.046967,
+    "ast_hash": "087f9d94efe63595e97fb8d863428fa4",
+    "semantic_hash": "087f9d94efe63595e97fb8d863428fa4"
+  },
+  "seivvaweb/app/src/services/api.ts": {
+    "mtime": 1787065868.3208344,
+    "ast_hash": "8bb9642f467a9ec465814fcbb2301058",
+    "semantic_hash": "8bb9642f467a9ec465814fcbb2301058"
+  },
+  "seivvaweb/app/tailwind.config.js": {
+    "mtime": 1779670029.0,
+    "ast_hash": "bb6f7289ceb7822e4bfe655fec0911ef",
+    "semantic_hash": "bb6f7289ceb7822e4bfe655fec0911ef"
+  },
+  "seivvaweb/app/tsconfig.app.json": {
+    "mtime": 1779670029.0,
+    "ast_hash": "0b48ddb9ffef9f0cd9d905cf7ced2988",
+    "semantic_hash": "0b48ddb9ffef9f0cd9d905cf7ced2988"
+  },
+  "seivvaweb/app/tsconfig.json": {
+    "mtime": 1779670029.0,
+    "ast_hash": "438582e60f2170ca48077f93c4297acc",
+    "semantic_hash": "438582e60f2170ca48077f93c4297acc"
+  },
+  "seivvaweb/app/tsconfig.node.json": {
+    "mtime": 1779670029.0,
+    "ast_hash": "eec85c9d7c6b599801557f1afd86672c",
+    "semantic_hash": "eec85c9d7c6b599801557f1afd86672c"
+  },
+  "seivvaweb/app/vite.config.ts": {
+    "mtime": 1787177853.607163,
+    "ast_hash": "ff136ccc483d60a2d91ee749740e5e61",
+    "semantic_hash": ""
+  },
+  "AGENTS.md": {
+    "mtime": 1786191091.8288116,
+    "ast_hash": "82a056ee0c84a17f2c3a1a6a1f1dc330",
+    "semantic_hash": "82a056ee0c84a17f2c3a1a6a1f1dc330"
+  },
+  "CONTEXT-SAVE.md": {
+    "mtime": 1782525419.8458326,
+    "ast_hash": "997c96be4c885ec2d6e807a806b84d8f",
+    "semantic_hash": "997c96be4c885ec2d6e807a806b84d8f"
+  },
+  "README.md": {
+    "mtime": 1779457726.7757883,
+    "ast_hash": "10571d5530be539fdf52335f488a2bc6",
+    "semantic_hash": "10571d5530be539fdf52335f488a2bc6"
+  },
+  "docker-compose.yml": {
+    "mtime": 1786815010.850188,
+    "ast_hash": "b7077739be24fd794ad1d4658d5a1663",
+    "semantic_hash": "b7077739be24fd794ad1d4658d5a1663"
+  },
+  "docs/superpowers/plans/2025-05-25-flujo-pedidos.md": {
+    "mtime": 1779720516.4000192,
+    "ast_hash": "665cb178c29f25a0ed078269a7ae4c5d",
+    "semantic_hash": "665cb178c29f25a0ed078269a7ae4c5d"
+  },
+  "docs/superpowers/specs/2026-06-23-seiva-mejoras-design.md": {
+    "mtime": 1782215734.8251743,
+    "ast_hash": "4faa09f89ba5d043085a1229610d3341",
+    "semantic_hash": "4faa09f89ba5d043085a1229610d3341"
+  },
+  "fix-top.txt": {
+    "mtime": 1779710791.1426394,
+    "ast_hash": "bb1a78b3857c0fae408086a72d7eefcb",
+    "semantic_hash": "bb1a78b3857c0fae408086a72d7eefcb"
+  },
+  "mobile-opencode/docker-compose.yml": {
+    "mtime": 1779458930.5991826,
+    "ast_hash": "a46ac3e58514075a57ef001cd10c5874",
+    "semantic_hash": "a46ac3e58514075a57ef001cd10c5874"
+  },
+  "mobile-opencode/public/index.html": {
+    "mtime": 1779458862.75336,
+    "ast_hash": "997c509b50a7798692c418deb6605d3e",
+    "semantic_hash": "997c509b50a7798692c418deb6605d3e"
+  },
+  "payment-qr-woo-extracted/payment-qr-woo/readme.txt": {
+    "mtime": 1768088306.0,
+    "ast_hash": "d93cfa6151185d05a102c5a7d612ec6f",
+    "semantic_hash": "d93cfa6151185d05a102c5a7d612ec6f"
+  },
+  "seiva-static/DESIGN.md": {
+    "mtime": 1779579943.1344674,
+    "ast_hash": "c498b10c5d87ae929a2a35cb716be861",
+    "semantic_hash": "c498b10c5d87ae929a2a35cb716be861"
+  },
+  "seiva-static/admin/index.html": {
+    "mtime": 1787411068.2047622,
+    "ast_hash": "4874c2894f26d0c7748dc816544350a8",
+    "semantic_hash": ""
+  },
+  "seiva-static/contacto.html": {
+    "mtime": 1786379706.0580032,
+    "ast_hash": "b82884791ee4d830cea901ac0f9692bf",
+    "semantic_hash": "b82884791ee4d830cea901ac0f9692bf"
+  },
+  "seiva-static/debug.html": {
+    "mtime": 1779669753.0947626,
+    "ast_hash": "3ad7db205a76bb14aad75ba271f562be",
+    "semantic_hash": "3ad7db205a76bb14aad75ba271f562be"
+  },
+  "seiva-static/faq.html": {
+    "mtime": 1786379709.3210557,
+    "ast_hash": "e538940121ad278d2a101e0333fb0677",
+    "semantic_hash": "e538940121ad278d2a101e0333fb0677"
+  },
+  "seiva-static/index.html": {
+    "mtime": 1786379657.5150068,
+    "ast_hash": "af8dfa1b609b835b99d7c52f30a003a1",
+    "semantic_hash": "af8dfa1b609b835b99d7c52f30a003a1"
+  },
+  "seiva-static/politicas.html": {
+    "mtime": 1786379711.8043034,
+    "ast_hash": "e973e3cb2b83b0ee20e57d0023659658",
+    "semantic_hash": "e973e3cb2b83b0ee20e57d0023659658"
+  },
+  "seiva-static/preview/preview-a.html": {
+    "mtime": 1779640374.9455366,
+    "ast_hash": "319cbdc4be12d19ebfa27b57f1d15d0d",
+    "semantic_hash": "319cbdc4be12d19ebfa27b57f1d15d0d"
+  },
+  "seiva-static/preview/preview-b.html": {
+    "mtime": 1779640415.9842935,
+    "ast_hash": "5870f9f0dffb9f45f6656747c0e76a6e",
+    "semantic_hash": "5870f9f0dffb9f45f6656747c0e76a6e"
+  },
+  "seiva-static/producto.html": {
+    "mtime": 1786553639.0737047,
+    "ast_hash": "56c9f1f0e42fa31b651c3c0bc702108f",
+    "semantic_hash": "56c9f1f0e42fa31b651c3c0bc702108f"
+  },
+  "seiva-static/qa-test.html": {
+    "mtime": 1779668575.1963458,
+    "ast_hash": "a0f424833698af1e331f32581d24eb65",
+    "semantic_hash": "a0f424833698af1e331f32581d24eb65"
+  },
+  "seiva-static/test-images.html": {
+    "mtime": 1779668093.0521097,
+    "ast_hash": "e3aa523dfe1ef79d668af6bc4ab0f96e",
+    "semantic_hash": "e3aa523dfe1ef79d668af6bc4ab0f96e"
+  },
+  "seiva-static/test-simple.html": {
+    "mtime": 1779668264.8195307,
+    "ast_hash": "d053e562ead283ba394eba282bdc398e",
+    "semantic_hash": "d053e562ead283ba394eba282bdc398e"
+  },
+  "seiva-static/tienda.html": {
+    "mtime": 1786379441.9260316,
+    "ast_hash": "36bb05fe952ae37cd33790c3f9d61e8f",
+    "semantic_hash": "36bb05fe952ae37cd33790c3f9d61e8f"
+  },
+  "seivvaweb/app/README.md": {
+    "mtime": 1779670029.0,
+    "ast_hash": "cac141da861c855e069a9c32557458ac",
+    "semantic_hash": "cac141da861c855e069a9c32557458ac"
+  },
+  "seivvaweb/app/index.html": {
+    "mtime": 1787177822.696612,
+    "ast_hash": "fd9ba1779e53bf55f50df38bd6677d9c",
+    "semantic_hash": ""
+  },
+  "seivvaweb/app/info.md": {
+    "mtime": 1779670029.0,
+    "ast_hash": "1bdf950c33ac0cd2a999bbe70d79b317",
+    "semantic_hash": "1bdf950c33ac0cd2a999bbe70d79b317"
+  },
+  "seivvaweb/app/public/robots.txt": {
+    "mtime": 1787172455.9604015,
+    "ast_hash": "4b6c0dbe6937eb5ebac9d9eee78bb377",
+    "semantic_hash": "4b6c0dbe6937eb5ebac9d9eee78bb377"
+  },
+  "payment-qr-woo-extracted/payment-qr-woo/assets/icon/icon.svg": {
+    "mtime": 1592005970.0,
+    "ast_hash": "b1288a4c4f460f681399891d3ce757d3",
+    "semantic_hash": "b1288a4c4f460f681399891d3ce757d3"
+  },
+  "payment-qr-woo-extracted/payment-qr-woo/assets/loader.gif": {
+    "mtime": 1592005970.0,
+    "ast_hash": "6e5d6096c02e8c18ad95d40ae5bf0089",
+    "semantic_hash": "6e5d6096c02e8c18ad95d40ae5bf0089"
+  },
+  "payment-qr-woo-extracted/payment-qr-woo/assets/yape.png": {
+    "mtime": 1592005970.0,
+    "ast_hash": "c226f5e095ed3a15f28db5ec6f3e6474",
+    "semantic_hash": "c226f5e095ed3a15f28db5ec6f3e6474"
+  },
+  "seiva-static/admin/icon.svg": {
+    "mtime": 1787155885.4189198,
+    "ast_hash": "a1505b57def631fad230a8a980befa57",
+    "semantic_hash": "a1505b57def631fad230a8a980befa57"
+  },
+  "seiva-static/img/logo/seiva-logo.png": {
+    "mtime": 1779667618.7356167,
+    "ast_hash": "2edb7a7fed18b80f29f0d483647500cc",
+    "semantic_hash": "2edb7a7fed18b80f29f0d483647500cc"
+  },
+  "seiva-static/img/productos/4-magnesio-combinacion-60-capsulas-ng.webp": {
+    "mtime": 1786386615.8045862,
+    "ast_hash": "433e97b23a32cc8f8c54d000df0dcef6",
+    "semantic_hash": "433e97b23a32cc8f8c54d000df0dcef6"
+  },
+  "seiva-static/img/productos/5-magnesios-120-capsulas-500mg-ue.png": {
+    "mtime": 1786386616.2344694,
+    "ast_hash": "ce142686322263668b8939f7e302a016",
+    "semantic_hash": "ce142686322263668b8939f7e302a016"
+  },
+  "seiva-static/img/productos/5-magnesios-60-capsulas-500mg-ue.png": {
+    "mtime": 1786386619.5549078,
+    "ast_hash": "ce142686322263668b8939f7e302a016",
+    "semantic_hash": "ce142686322263668b8939f7e302a016"
+  },
+  "seiva-static/img/productos/6-magnesios-potasio-60-capsulas-500mg-ue.jpg": {
+    "mtime": 1786386614.6810122,
+    "ast_hash": "993dab1b4969df63a923be7567133bb0",
+    "semantic_hash": "993dab1b4969df63a923be7567133bb0"
+  },
+  "seiva-static/img/productos/7-magnesios-120-capsulas-500mg-ue.jpg": {
+    "mtime": 1786386612.786204,
+    "ast_hash": "26be7771ba0ecab81e6e6d762d44b72e",
+    "semantic_hash": "26be7771ba0ecab81e6e6d762d44b72e"
+  },
+  "seiva-static/img/productos/aceite-de-ajo-60-capsulas-1000mg-mx.webp": {
+    "mtime": 1786386618.486988,
+    "ast_hash": "8f9b0e51e8a2aad6116f9653164ca0da",
+    "semantic_hash": "8f9b0e51e8a2aad6116f9653164ca0da"
+  },
+  "seiva-static/img/productos/aceite-de-coco-60-capsulas-1250mg-ap.webp": {
+    "mtime": 1786386618.4542673,
+    "ast_hash": "00bad3cb64fc2a9333bd32cc34caad87",
+    "semantic_hash": "00bad3cb64fc2a9333bd32cc34caad87"
+  },
+  "seiva-static/img/productos/aceite-de-coco-cocoshow-200ml-sw.png": {
+    "mtime": 1786386615.4123757,
+    "ast_hash": "2fef88d3e7bc19df0a3fa3e56ff5394b",
+    "semantic_hash": "2fef88d3e7bc19df0a3fa3e56ff5394b"
+  },
+  "seiva-static/img/productos/aceite-de-oregano-120-capsulas-500mg-ue.png": {
+    "mtime": 1786386613.0800133,
+    "ast_hash": "3adde08658deeb20c7cffed92e2611b0",
+    "semantic_hash": "3adde08658deeb20c7cffed92e2611b0"
+  },
+  "seiva-static/img/productos/aceite-de-oregano-120-capsulas-6000mg-americano.jpg": {
+    "mtime": 1786386612.4379985,
+    "ast_hash": "990914c5ee036bb56a9daa8cf41501a1",
+    "semantic_hash": "990914c5ee036bb56a9daa8cf41501a1"
+  },
+  "seiva-static/img/productos/aceite-de-oregano-20ml-an.jpeg": {
+    "mtime": 1786386614.4394789,
+    "ast_hash": "1cad839807089acd3db94545b5535598",
+    "semantic_hash": "1cad839807089acd3db94545b5535598"
+  },
+  "seiva-static/img/productos/aceite-de-oregano-30ml-ue.png": {
+    "mtime": 1786386619.1790817,
+    "ast_hash": "172c98d39199f468002d8bb3e955d55e",
+    "semantic_hash": "172c98d39199f468002d8bb3e955d55e"
+  },
+  "seiva-static/img/productos/aceite-de-oregano-aceite-de-coco.jpg": {
+    "mtime": 1786386615.371926,
+    "ast_hash": "2b684dafdaea65871e5b433e7db1f981",
+    "semantic_hash": "2b684dafdaea65871e5b433e7db1f981"
+  },
+  "seiva-static/img/productos/acido-urico-120-capsulas-500mg-ue.webp": {
+    "mtime": 1786386616.718537,
+    "ast_hash": "67d203016472300a62226825a8918f45",
+    "semantic_hash": "67d203016472300a62226825a8918f45"
+  },
+  "seiva-static/img/productos/arginina-1000mg-60-capsulas-v7.webp": {
+    "mtime": 1786386614.296611,
+    "ast_hash": "0efc478539b8260b570823fa608b340e",
+    "semantic_hash": "0efc478539b8260b570823fa608b340e"
+  },
+  "seiva-static/img/productos/ashwagandha-extracto-120-capsulas-ue.png": {
+    "mtime": 1786386614.2610598,
+    "ast_hash": "2e6b38c402f11a1be5cdcc56de1c81d2",
+    "semantic_hash": "2e6b38c402f11a1be5cdcc56de1c81d2"
+  },
+  "seiva-static/img/productos/ashwagandha-extracto-60-capsulas-ue.png": {
+    "mtime": 1786386616.293467,
+    "ast_hash": "2e6b38c402f11a1be5cdcc56de1c81d2",
+    "semantic_hash": "2e6b38c402f11a1be5cdcc56de1c81d2"
+  },
+  "seiva-static/img/productos/bcaa-300g-leucina---isoleucina---valina-300g-ry.jpg": {
+    "mtime": 1786386614.6468997,
+    "ast_hash": "8ce6876ffdfa0e6bd9c63d88c3a9ee11",
+    "semantic_hash": "8ce6876ffdfa0e6bd9c63d88c3a9ee11"
+  },
+  "seiva-static/img/productos/berberina-120-capsulas-500mg-ue.webp": {
+    "mtime": 1786386614.475373,
+    "ast_hash": "16c08482e4a5cca5d6a839c8f9ead165",
+    "semantic_hash": "16c08482e4a5cca5d6a839c8f9ead165"
+  },
+  "seiva-static/img/productos/berberina-60-capsulas-500mg-ue.webp": {
+    "mtime": 1786386616.686549,
+    "ast_hash": "16c08482e4a5cca5d6a839c8f9ead165",
+    "semantic_hash": "16c08482e4a5cca5d6a839c8f9ead165"
+  },
+  "seiva-static/img/productos/beta-alanina-300g-ultraconcentrado-ry.jpg": {
+    "mtime": 1786386614.5570054,
+    "ast_hash": "a2ca017ece5836bb1a6af58165479c9a",
+    "semantic_hash": "a2ca017ece5836bb1a6af58165479c9a"
+  },
+  "seiva-static/img/productos/biotina-60-capsulas-45ug-v7.webp": {
+    "mtime": 1786386618.6794853,
+    "ast_hash": "ad4639dc9bceffe6e652288bd499f6b2",
+    "semantic_hash": "ad4639dc9bceffe6e652288bd499f6b2"
+  },
+  "seiva-static/img/productos/bisglicinato-120caps-treonato-120caps-combo.png": {
+    "mtime": 1786386613.234789,
+    "ast_hash": "80ebf09ce5808dc33ca9975a28b9b608",
+    "semantic_hash": "80ebf09ce5808dc33ca9975a28b9b608"
+  },
+  "seiva-static/img/productos/bisglicinato-de-magnesio-120-capsulas-500mg-ue.jpg": {
+    "mtime": 1786386617.2543826,
+    "ast_hash": "f510cb72ad7980e8579f0b70b4778278",
+    "semantic_hash": "f510cb72ad7980e8579f0b70b4778278"
+  },
+  "seiva-static/img/productos/bisglicinato-de-magnesio-60-capsulas-500mg-ad.png": {
+    "mtime": 1786386614.9472046,
+    "ast_hash": "6559fad62eeccba737d586a30a4659a3",
+    "semantic_hash": "6559fad62eeccba737d586a30a4659a3"
+  },
+  "seiva-static/img/productos/bisglicinato-de-magnesio-60-capsulas-500mg-ue.jpg": {
+    "mtime": 1786386616.7840889,
+    "ast_hash": "f510cb72ad7980e8579f0b70b4778278",
+    "semantic_hash": "f510cb72ad7980e8579f0b70b4778278"
+  },
+  "seiva-static/img/productos/calostro-bovino-120-capsulas-500mg-ue.jpg": {
+    "mtime": 1786386617.2220285,
+    "ast_hash": "e06e4d25289a59675d666ae87fef1263",
+    "semantic_hash": "e06e4d25289a59675d666ae87fef1263"
+  },
+  "seiva-static/img/productos/calostro-bovino-60-capsulas-500mg-ue.jpg": {
+    "mtime": 1786386614.7780137,
+    "ast_hash": "e06e4d25289a59675d666ae87fef1263",
+    "semantic_hash": "e06e4d25289a59675d666ae87fef1263"
+  },
+  "seiva-static/img/productos/calostro-bovino-calostrum-60-capsulas-ul.webp": {
+    "mtime": 1786386618.7873833,
+    "ast_hash": "27954e7be31a2427e61922a73b3916c4",
+    "semantic_hash": "27954e7be31a2427e61922a73b3916c4"
+  },
+  "seiva-static/img/productos/carticalcio-500mg-120-capsulas-ue.png": {
+    "mtime": 1786386612.5735412,
+    "ast_hash": "37e311bbc96c465f082e78f293335b00",
+    "semantic_hash": "37e311bbc96c465f082e78f293335b00"
+  },
+  "seiva-static/img/productos/chanca-piedra-60-capsulas-500mg-sm.webp": {
+    "mtime": 1786386617.8037956,
+    "ast_hash": "b5b57cb857b077a149c13481da8b0317",
+    "semantic_hash": "b5b57cb857b077a149c13481da8b0317"
+  },
+  "seiva-static/img/productos/coenzima-coq-10-ubiquinona-60-capsulas-50mg-ul.webp": {
+    "mtime": 1786386618.8223975,
+    "ast_hash": "24845c89c75e3e68735bf6b3ef184756",
+    "semantic_hash": "24845c89c75e3e68735bf6b3ef184756"
+  },
+  "seiva-static/img/productos/colageno-hair-skin-nails-60-capsulas-mx.webp": {
+    "mtime": 1786386619.0740051,
+    "ast_hash": "6c82b966aa096117a48e4c59f0754fa1",
+    "semantic_hash": "6c82b966aa096117a48e4c59f0754fa1"
+  },
+  "seiva-static/img/productos/colageno-hidrolizado-60-capsulas-500mg-ue.png": {
+    "mtime": 1786386619.4517345,
+    "ast_hash": "db7d02562abcafc4f4efcb23ae7a6b8f",
+    "semantic_hash": "db7d02562abcafc4f4efcb23ae7a6b8f"
+  },
+  "seiva-static/img/productos/colageno-hidrolizado-vitamina-c-120-capsulas-ry.webp": {
+    "mtime": 1786386616.092344,
+    "ast_hash": "ebeb34909bc2d664b2d9b3b3cd16a700",
+    "semantic_hash": "ebeb34909bc2d664b2d9b3b3cd16a700"
+  },
+  "seiva-static/img/productos/colageno-tipo-ii-60-capsulas-ul.webp": {
+    "mtime": 1786386618.9297583,
+    "ast_hash": "1bc7016a20be15a68a8b1502f9bff2a3",
+    "semantic_hash": "1bc7016a20be15a68a8b1502f9bff2a3"
+  },
+  "seiva-static/img/productos/colageno-tipo-ii-curcuma-500mg-120-capsulas-ue.webp": {
+    "mtime": 1786386616.8978834,
+    "ast_hash": "d2f51d99d119f6c058521dd58a595e2d",
+    "semantic_hash": "d2f51d99d119f6c058521dd58a595e2d"
+  },
+  "seiva-static/img/productos/colageno-tipo-ii-curcuma-500mg-60-capsulas-ue.webp": {
+    "mtime": 1786386616.994794,
+    "ast_hash": "d2f51d99d119f6c058521dd58a595e2d",
+    "semantic_hash": "d2f51d99d119f6c058521dd58a595e2d"
+  },
+  "seiva-static/img/productos/complejo-b-polivitaminico-120-capsulas-ue.webp": {
+    "mtime": 1786386613.1121075,
+    "ast_hash": "5c64ad69468544f1a3050bb90a230561",
+    "semantic_hash": "5c64ad69468544f1a3050bb90a230561"
+  },
+  "seiva-static/img/productos/complejo-b-polivitaminico-60-capsulas-mx.png": {
+    "mtime": 1786386619.0422814,
+    "ast_hash": "2b00f346d89ee12f798223040342e768",
+    "semantic_hash": "2b00f346d89ee12f798223040342e768"
+  },
+  "seiva-static/img/productos/complejo-b-polivitaminico-60-capsulas-ue.webp": {
+    "mtime": 1786386614.3991022,
+    "ast_hash": "5c64ad69468544f1a3050bb90a230561",
+    "semantic_hash": "5c64ad69468544f1a3050bb90a230561"
+  },
+  "seiva-static/img/productos/complejo-b-vitaminas-60-capsulas-ul.webp": {
+    "mtime": 1786386618.9662666,
+    "ast_hash": "b24ee618ae6e97894c3031d52d4449c5",
+    "semantic_hash": "b24ee618ae6e97894c3031d52d4449c5"
+  },
+  "seiva-static/img/productos/creatina-chocklers-100-pura-300g-mx.webp": {
+    "mtime": 1786386617.901728,
+    "ast_hash": "1527568707c6fb480f9e21f0f7ea40b7",
+    "semantic_hash": "1527568707c6fb480f9e21f0f7ea40b7"
+  },
+  "seiva-static/img/productos/creatina-limao-unilife-300g-un.jpg": {
+    "mtime": 1786386612.3360033,
+    "ast_hash": "3024adbf0af81d910587434385113896",
+    "semantic_hash": "3024adbf0af81d910587434385113896"
+  },
+  "seiva-static/img/productos/creatina-monohidratada-120-capsulas-750mg-ry.jpg": {
+    "mtime": 1786386615.650988,
+    "ast_hash": "6ecdf7ab84689eec22e91b3b4a4ce093",
+    "semantic_hash": "6ecdf7ab84689eec22e91b3b4a4ce093"
+  },
+  "seiva-static/img/productos/creatina-rei-terra-150g-ry.jpg": {
+    "mtime": 1786386617.6550415,
+    "ast_hash": "42d0a9fa36776518356586091c9b2b3b",
+    "semantic_hash": "42d0a9fa36776518356586091c9b2b3b"
+  },
+  "seiva-static/img/productos/creatina-rei-terra-300g-ry.jpeg": {
+    "mtime": 1786386612.9782164,
+    "ast_hash": "df5b265dee10eb2441fdc9fac28383a5",
+    "semantic_hash": "df5b265dee10eb2441fdc9fac28383a5"
+  },
+  "seiva-static/img/productos/curcuma-con-jengibre-y-pimienta-60-caps-500mg-americano-ab.jpg": {
+    "mtime": 1786386617.1883879,
+    "ast_hash": "ea794b5fba063102a7cf104e7685184d",
+    "semantic_hash": "ea794b5fba063102a7cf104e7685184d"
+  },
+  "seiva-static/img/productos/curcuma-con-pimienta-negra-120-capsulas-500mg-ue.png": {
+    "mtime": 1786386612.472698,
+    "ast_hash": "81b7e2ed005160955389c3ec54d7bdd7",
+    "semantic_hash": "81b7e2ed005160955389c3ec54d7bdd7"
+  },
+  "seiva-static/img/productos/curcuma-con-pimienta-negra-60-capsulas-500mg-ue.png": {
+    "mtime": 1786386619.4176848,
+    "ast_hash": "81b7e2ed005160955389c3ec54d7bdd7",
+    "semantic_hash": "81b7e2ed005160955389c3ec54d7bdd7"
+  },
+  "seiva-static/img/productos/curcuma-inmune-c-d-e-s-z-500mg-90-tabletas-ng.jpg": {
+    "mtime": 1786386616.0238364,
+    "ast_hash": "49d3e3dd65f7ec4021b0463bcce895ff",
+    "semantic_hash": "49d3e3dd65f7ec4021b0463bcce895ff"
+  },
+  "seiva-static/img/productos/curcumina-pura-60-capsulas-450mg-ul.png": {
+    "mtime": 1786386612.8263981,
+    "ast_hash": "93bf3e31056606aa72cb9984a559e2e1",
+    "semantic_hash": "93bf3e31056606aa72cb9984a559e2e1"
+  },
+  "seiva-static/img/productos/doramil-120-capsulas-500mg-ue.webp": {
+    "mtime": 1786386617.0267885,
+    "ast_hash": "f28cbb7d75bd07309e7b4dfa81673abe",
+    "semantic_hash": "f28cbb7d75bd07309e7b4dfa81673abe"
+  },
+  "seiva-static/img/productos/espirulina-120-capsulas-500m-ue.jpeg": {
+    "mtime": 1786386617.8355308,
+    "ast_hash": "b0c47a8537a405282ff24ec06a780512",
+    "semantic_hash": "b0c47a8537a405282ff24ec06a780512"
+  },
+  "seiva-static/img/productos/espirulina-60-capsulas-500m-ue.jpeg": {
+    "mtime": 1786386614.7439291,
+    "ast_hash": "b0c47a8537a405282ff24ec06a780512",
+    "semantic_hash": "b0c47a8537a405282ff24ec06a780512"
+  },
+  "seiva-static/img/productos/espirulina-pura-150-capsulas-500m-ul.jpeg": {
+    "mtime": 1786386613.659173,
+    "ast_hash": "ea568c32132c070adbbc9ff706f3c8f5",
+    "semantic_hash": "ea568c32132c070adbbc9ff706f3c8f5"
+  },
+  "seiva-static/img/productos/espirulina-pura-60-capsulas-500m-ul.webp": {
+    "mtime": 1786386614.7120059,
+    "ast_hash": "0c18563cb5826ea95a78533cb601f392",
+    "semantic_hash": "0c18563cb5826ea95a78533cb601f392"
+  },
+  "seiva-static/img/productos/feno-grego-60-capsulas-ng.png": {
+    "mtime": 1786386615.9896474,
+    "ast_hash": "fbcc55cb2497345956e9337c8ee84eb1",
+    "semantic_hash": "fbcc55cb2497345956e9337c8ee84eb1"
+  },
+  "seiva-static/img/productos/focustdah-apoyo-cognitivo-60-capsulas-ng.jpg": {
+    "mtime": 1786386615.736842,
+    "ast_hash": "7445812f4b10fa70a009cc13b2edbbb3",
+    "semantic_hash": "7445812f4b10fa70a009cc13b2edbbb3"
+  },
+  "seiva-static/img/productos/ginkgo-biloba-con-120-capsulas-500mg-ue.png": {
+    "mtime": 1786386616.402357,
+    "ast_hash": "6d87fdc46bf9c02a0223efc2a2b4d838",
+    "semantic_hash": "6d87fdc46bf9c02a0223efc2a2b4d838"
+  },
+  "seiva-static/img/productos/glisinato-de-magnesio-120-capsulas-500mg-ue.png": {
+    "mtime": 1786386617.9454072,
+    "ast_hash": "2b5e691fa9c1f91bfc20815091d1b0fd",
+    "semantic_hash": "2b5e691fa9c1f91bfc20815091d1b0fd"
+  },
+  "seiva-static/img/productos/glisinato-de-magnesio-60-capsulas-500mg-ue.png": {
+    "mtime": 1786386614.0921218,
+    "ast_hash": "2b5e691fa9c1f91bfc20815091d1b0fd",
+    "semantic_hash": "2b5e691fa9c1f91bfc20815091d1b0fd"
+  },
+  "seiva-static/img/productos/hongo-reishi-120-capsulas-500mg-ue.png": {
+    "mtime": 1786386612.6587114,
+    "ast_hash": "bea0ad2db036634bb30adac29b418462",
+    "semantic_hash": "bea0ad2db036634bb30adac29b418462"
+  },
+  "seiva-static/img/productos/hongo-reishi-60-capsulas-500mg-ue.png": {
+    "mtime": 1786386616.450358,
+    "ast_hash": "bea0ad2db036634bb30adac29b418462",
+    "semantic_hash": "bea0ad2db036634bb30adac29b418462"
+  },
+  "seiva-static/img/productos/hot-sex-120-capsulas-500mg-ue.jpg": {
+    "mtime": 1786386617.6867979,
+    "ast_hash": "39cb248be57cfaf55d872da287884155",
+    "semantic_hash": "39cb248be57cfaf55d872da287884155"
+  },
+  "seiva-static/img/productos/hsn-silicio-60-capsulas-30g-mx.webp": {
+    "mtime": 1786386612.858104,
+    "ast_hash": "373dd5af0fd07c25a0c0eb82f727acfb",
+    "semantic_hash": "373dd5af0fd07c25a0c0eb82f727acfb"
+  },
+  "seiva-static/img/productos/l-carnitina120-capsulas-500mg-ry.jpg": {
+    "mtime": 1786386615.5826368,
+    "ast_hash": "1828b972d6f8bd5c36431462d92761cf",
+    "semantic_hash": "1828b972d6f8bd5c36431462d92761cf"
+  },
+  "seiva-static/img/productos/l-glutamina-concentrada-120-capsulas-500mg-ry.jpg": {
+    "mtime": 1786386615.6160228,
+    "ast_hash": "d37234ebcccf3b042d68807cf985be1d",
+    "semantic_hash": "d37234ebcccf3b042d68807cf985be1d"
+  },
+  "seiva-static/img/productos/l-treonato-de-magnesio-120-capsulas-500mg-ue.webp": {
+    "mtime": 1786386617.8682997,
+    "ast_hash": "c96f1c0449c02a4d2f7d06ae59651b85",
+    "semantic_hash": "c96f1c0449c02a4d2f7d06ae59651b85"
+  },
+  "seiva-static/img/productos/l-treonato-de-magnesio-60-capsulas-500mg-ue.webp": {
+    "mtime": 1786386619.145289,
+    "ast_hash": "c96f1c0449c02a4d2f7d06ae59651b85",
+    "semantic_hash": "c96f1c0449c02a4d2f7d06ae59651b85"
+  },
+  "seiva-static/img/productos/libidrol-testo-booster-120-capsulas-500mg-ue.png": {
+    "mtime": 1786386617.727795,
+    "ast_hash": "b622911ce824bebf7ce90e7dab57bbe2",
+    "semantic_hash": "b622911ce824bebf7ce90e7dab57bbe2"
+  },
+  "seiva-static/img/productos/libidrol-testo-booster-60-capsulas-500mg-ue.png": {
+    "mtime": 1786386616.8260217,
+    "ast_hash": "b622911ce824bebf7ce90e7dab57bbe2",
+    "semantic_hash": "b622911ce824bebf7ce90e7dab57bbe2"
+  },
+  "seiva-static/img/productos/lisina-prolina-glicina-120-capsulas-ry.webp": {
+    "mtime": 1786386615.0452557,
+    "ast_hash": "27a847f15243d2120721ab97f52467a9",
+    "semantic_hash": "27a847f15243d2120721ab97f52467a9"
+  },
+  "seiva-static/img/productos/lugol-yodo-oral-100-capsulas-500mg-ue.webp": {
+    "mtime": 1786386615.0775142,
+    "ast_hash": "dacc9857b8730a5b11f684c66fd1681b",
+    "semantic_hash": "dacc9857b8730a5b11f684c66fd1681b"
+  },
+  "seiva-static/img/productos/lugol-yodo-oral-60-capsulas-500mg-ue.webp": {
+    "mtime": 1786386616.6540682,
+    "ast_hash": "dacc9857b8730a5b11f684c66fd1681b",
+    "semantic_hash": "dacc9857b8730a5b11f684c66fd1681b"
+  },
+  "seiva-static/img/productos/luteina-y-zeaxantina-vit-caez-60-capsulas-ng.webp": {
+    "mtime": 1786386615.1447992,
+    "ast_hash": "e080791d8cc8219a69fc96e6e6c83f75",
+    "semantic_hash": "e080791d8cc8219a69fc96e6e6c83f75"
+  },
+  "seiva-static/img/productos/luteina-y-zeaxantina-vitaminas-ca-120-capsulas-ry.webp": {
+    "mtime": 1786386615.1806705,
+    "ast_hash": "71cd8a5b79818d70bf9bc5765262300f",
+    "semantic_hash": "71cd8a5b79818d70bf9bc5765262300f"
+  },
+  "seiva-static/img/productos/maca-peruana-con-ginseng-120-capsulas-500mg.png": {
+    "mtime": 1786386616.502099,
+    "ast_hash": "22e6558041b6b63d404b327da8598eb2",
+    "semantic_hash": "22e6558041b6b63d404b327da8598eb2"
+  },
+  "seiva-static/img/productos/maca-peruana-negra-120-capsulas-500mg.png": {
+    "mtime": 1786386613.294388,
+    "ast_hash": "77588caf275c86e2c179c48202bde66a",
+    "semantic_hash": "77588caf275c86e2c179c48202bde66a"
+  },
+  "seiva-static/img/productos/maca-peruana-negra-60-capsulas-500mg.png": {
+    "mtime": 1786386613.6209853,
+    "ast_hash": "77588caf275c86e2c179c48202bde66a",
+    "semantic_hash": "77588caf275c86e2c179c48202bde66a"
+  },
+  "seiva-static/img/productos/maca-peruana-premium-60-capsulas-550mg-ul.webp": {
+    "mtime": 1786386617.0598135,
+    "ast_hash": "e65c0fad6f3f89468859bef737ce73a9",
+    "semantic_hash": "e65c0fad6f3f89468859bef737ce73a9"
+  },
+  "seiva-static/img/productos/magnesio-citrato-100-capsulas-500mg-ue.png": {
+    "mtime": 1786386619.0019212,
+    "ast_hash": "161a2f3106d4735840c55abb97248d19",
+    "semantic_hash": "161a2f3106d4735840c55abb97248d19"
+  },
+  "seiva-static/img/productos/magnesio-citrato-120-capsulas-500mg-ue.png": {
+    "mtime": 1786386619.6659715,
+    "ast_hash": "161a2f3106d4735840c55abb97248d19",
+    "semantic_hash": "161a2f3106d4735840c55abb97248d19"
+  },
+  "seiva-static/img/productos/magnesio-citrato-120caps-potacio-120caps-combo.png": {
+    "mtime": 1786386617.1527462,
+    "ast_hash": "1846f404cbfafadb8246e0decf3869a5",
+    "semantic_hash": "1846f404cbfafadb8246e0decf3869a5"
+  },
+  "seiva-static/img/productos/magnesio-citrato-120caps-potasio-120caps-combo.png": {
+    "mtime": 1786386613.4729757,
+    "ast_hash": "a77790d85d3e527a69a556594a78a0ca",
+    "semantic_hash": "a77790d85d3e527a69a556594a78a0ca"
+  },
+  "seiva-static/img/productos/magnesio-citrato-60-capsulas-260mg-ul.webp": {
+    "mtime": 1786386618.2901073,
+    "ast_hash": "a340d9f52e34c6bf841dc63d2eb7849c",
+    "semantic_hash": "a340d9f52e34c6bf841dc63d2eb7849c"
+  },
+  "seiva-static/img/productos/magnesio-citrato-60-capsulas-500mg-ue.png": {
+    "mtime": 1786386619.7041626,
+    "ast_hash": "161a2f3106d4735840c55abb97248d19",
+    "semantic_hash": "161a2f3106d4735840c55abb97248d19"
+  },
+  "seiva-static/img/productos/magnesio-citrato-para-ninos-60-500mg-ue.png": {
+    "mtime": 1786386619.3197365,
+    "ast_hash": "2413aeb2a336c37a9838c9a9764b7100",
+    "semantic_hash": "2413aeb2a336c37a9838c9a9764b7100"
+  },
+  "seiva-static/img/productos/magnesio-citrato-polvo-300g-ul.webp": {
+    "mtime": 1786386618.1497788,
+    "ast_hash": "8f220da0f1b41727a92532e63621228d",
+    "semantic_hash": "8f220da0f1b41727a92532e63621228d"
+  },
+  "seiva-static/img/productos/magnesio-citrato-polvo-450g-one.webp": {
+    "mtime": 1786386612.7516425,
+    "ast_hash": "dbe84444e5c4c91ae1e65a621231cbb9",
+    "semantic_hash": "dbe84444e5c4c91ae1e65a621231cbb9"
+  },
+  "seiva-static/img/productos/magnesio-dimalato-60-capsulas-v7.png": {
+    "mtime": 1786386618.6066747,
+    "ast_hash": "90d052fff626eca54b655aa09c36ce2a",
+    "semantic_hash": "90d052fff626eca54b655aa09c36ce2a"
+  },
+  "seiva-static/img/productos/magnesio-polvo--rei-terra-500gr-ry.png": {
+    "mtime": 1786386617.584566,
+    "ast_hash": "b5942ea5fe5495d8589da62e19785abe",
+    "semantic_hash": "b5942ea5fe5495d8589da62e19785abe"
+  },
+  "seiva-static/img/productos/magnesio-quelato-120-capsulas-bio.jpg": {
+    "mtime": 1786386612.9067085,
+    "ast_hash": "271a1713a22cb18d9861b4c6a669fa5c",
+    "semantic_hash": "271a1713a22cb18d9861b4c6a669fa5c"
+  },
+  "seiva-static/img/productos/magnesio-quelato-60-capsulas-30gr-fl.webp": {
+    "mtime": 1786386613.1832793,
+    "ast_hash": "546925c281efb7496686d51d6c85fc93",
+    "semantic_hash": "546925c281efb7496686d51d6c85fc93"
+  },
+  "seiva-static/img/productos/magnesio-quelato-60-capsulas-350mg-ap.webp": {
+    "mtime": 1786386613.8788638,
+    "ast_hash": "7be989080e922179be937cc2376682af",
+    "semantic_hash": "7be989080e922179be937cc2376682af"
+  },
+  "seiva-static/img/productos/magnesio-quelato-60-capsulas-350mg-ul.webp": {
+    "mtime": 1786386613.3611891,
+    "ast_hash": "631c52c3ffc254d1300ee9248bb587a8",
+    "semantic_hash": "631c52c3ffc254d1300ee9248bb587a8"
+  },
+  "seiva-static/img/productos/magnesio-quelato-60-capsulas-v7.png": {
+    "mtime": 1786386618.6466115,
+    "ast_hash": "1286a3dbba271340aaf80d601afd4b1e",
+    "semantic_hash": "1286a3dbba271340aaf80d601afd4b1e"
+  },
+  "seiva-static/img/productos/matcha-con-colageno-y-vitaminca-c-ue.jpg": {
+    "mtime": 1786386619.1120026,
+    "ast_hash": "6b46b8845fc549678d024f387d0dadf5",
+    "semantic_hash": "6b46b8845fc549678d024f387d0dadf5"
+  },
+  "seiva-static/img/productos/matchacolageno-polvo-hibiscus-200g-ap.png": {
+    "mtime": 1786386617.4050725,
+    "ast_hash": "aeb585251efc506f2898d4372a9c2587",
+    "semantic_hash": "aeb585251efc506f2898d4372a9c2587"
+  },
+  "seiva-static/img/productos/matchacolageno-polvo-lima-200g-ap.png": {
+    "mtime": 1786386617.4492917,
+    "ast_hash": "cf874d835d63589bbaeb54d0681450fc",
+    "semantic_hash": "cf874d835d63589bbaeb54d0681450fc"
+  },
+  "seiva-static/img/productos/matchacolageno-polvo-natural-200g-ap.png": {
+    "mtime": 1786386617.4904444,
+    "ast_hash": "80b9340a5ce8c545eb94edc3902cec2b",
+    "semantic_hash": "80b9340a5ce8c545eb94edc3902cec2b"
+  },
+  "seiva-static/img/productos/matchacolageno-polvo-pina-menta-200g-ap.png": {
+    "mtime": 1786386617.5482004,
+    "ast_hash": "d7110296cb59e7ca4b246b1652cfeab5",
+    "semantic_hash": "d7110296cb59e7ca4b246b1652cfeab5"
+  },
+  "seiva-static/img/productos/mega-colageno-tipo-ii-hidrolizado-vitamina-ec-ry.webp": {
+    "mtime": 1786386618.1855307,
+    "ast_hash": "a8e736f0409826193281256cfb7dc067",
+    "semantic_hash": "a8e736f0409826193281256cfb7dc067"
+  },
+  "seiva-static/img/productos/melatonina-60-capsulas-v7.png": {
+    "mtime": 1786386618.7199087,
+    "ast_hash": "bc494afc5533f5b903ad8b881d5fa7a3",
+    "semantic_hash": "bc494afc5533f5b903ad8b881d5fa7a3"
+  },
+  "seiva-static/img/productos/melatonina-90-capsulas-mix.webp": {
+    "mtime": 1786386615.2980616,
+    "ast_hash": "9c885ca5dfc1120462ef2640fec49560",
+    "semantic_hash": "9c885ca5dfc1120462ef2640fec49560"
+  },
+  "seiva-static/img/productos/memo-plus-120-capsulas-500mg-ry.png": {
+    "mtime": 1786386615.860647,
+    "ast_hash": "baedbb6b1dcd7054a32cae22247aba71",
+    "semantic_hash": "baedbb6b1dcd7054a32cae22247aba71"
+  },
+  "seiva-static/img/productos/mujer-activa-colageno-vitaminas-c-120-capsulas-ry.png": {
+    "mtime": 1786386615.4633694,
+    "ast_hash": "2f8c53b565d521624e7113bb9bbbbaf9",
+    "semantic_hash": "2f8c53b565d521624e7113bb9bbbbaf9"
+  },
+  "seiva-static/img/productos/multivitaminico-green-senior-50-60-capsulas-ng.webp": {
+    "mtime": 1786386616.0587385,
+    "ast_hash": "7c5c8025e77b8c7d681a03d9d70f4916",
+    "semantic_hash": "7c5c8025e77b8c7d681a03d9d70f4916"
+  },
+  "seiva-static/img/productos/multivitaminico-polyvit-a-z-60-capsulas-ng.png": {
+    "mtime": 1786386615.6998973,
+    "ast_hash": "0adc08978340b75f78311132c6e7e334",
+    "semantic_hash": "0adc08978340b75f78311132c6e7e334"
+  },
+  "seiva-static/img/productos/nac-n-acetilcisteina-60-capsulas-bio.jpg": {
+    "mtime": 1786386616.1256957,
+    "ast_hash": "548177066f9fae017a18390679c9eb24",
+    "semantic_hash": "548177066f9fae017a18390679c9eb24"
+  },
+  "seiva-static/img/productos/nad-age-120-capsulas-500m-ue.jpg": {
+    "mtime": 1786386617.3598623,
+    "ast_hash": "b36b50945606ff6e0c08f54f1e3ac7c5",
+    "semantic_hash": "b36b50945606ff6e0c08f54f1e3ac7c5"
+  },
+  "seiva-static/img/productos/nad-resveratrol-nicotinamide-500-mg-120-capsulas-ue.png": {
+    "mtime": 1786386614.0017464,
+    "ast_hash": "cb0579e499b2866a94fa18f4ab6330ae",
+    "semantic_hash": "cb0579e499b2866a94fa18f4ab6330ae"
+  },
+  "seiva-static/img/productos/nad-resveratrol-nicotinamide-500-mg-americano-120-capsulas.webp": {
+    "mtime": 1786386614.1269393,
+    "ast_hash": "08b81347de2b699adc3a410e223cf0f8",
+    "semantic_hash": "08b81347de2b699adc3a410e223cf0f8"
+  },
+  "seiva-static/img/productos/nad-resveratrol-nicotinamide-resveratrol-500-mg-anti-aging-n.png": {
+    "mtime": 1786386614.207939,
+    "ast_hash": "c5de4ee30c3ae16d61ae623ea82b1d11",
+    "semantic_hash": "c5de4ee30c3ae16d61ae623ea82b1d11"
+  },
+  "seiva-static/img/productos/nad120caps-resveratrol-120caps-combo.png": {
+    "mtime": 1786386614.6139646,
+    "ast_hash": "500d0093cd04aae0af730d28e6e6acad",
+    "semantic_hash": "500d0093cd04aae0af730d28e6e6acad"
+  },
+  "seiva-static/img/productos/neumax-cognitivo-avanzado-90-capsulas-500mg-ry.jpg": {
+    "mtime": 1786386615.7710054,
+    "ast_hash": "037801cdf25c643797e022e55bd6b66d",
+    "semantic_hash": "037801cdf25c643797e022e55bd6b66d"
+  },
+  "seiva-static/img/productos/omega-3-120-capsulas-dpa-dha-1000mg-ue.webp": {
+    "mtime": 1786386616.9635377,
+    "ast_hash": "5aea2f622dd614bb7f9ed9a52e8bf0fe",
+    "semantic_hash": "5aea2f622dd614bb7f9ed9a52e8bf0fe"
+  },
+  "seiva-static/img/productos/omega-3-6-9---120-capsulas-1000mg-ue.png": {
+    "mtime": 1786386618.3488164,
+    "ast_hash": "dafbfe77b462e99a58db8579fa1c4071",
+    "semantic_hash": "dafbfe77b462e99a58db8579fa1c4071"
+  },
+  "seiva-static/img/productos/omega-3-6-9-magnesio-citrato-120caps-combo.png": {
+    "mtime": 1786386613.558351,
+    "ast_hash": "3ce0bbfc732dce53a93e6be1b89dc287",
+    "semantic_hash": "3ce0bbfc732dce53a93e6be1b89dc287"
+  },
+  "seiva-static/img/productos/omega-3-60-capsulas-dpa-dha-640mg-mx.webp": {
+    "mtime": 1786386619.2784152,
+    "ast_hash": "814017bd37f72011f99c386ca574b154",
+    "semantic_hash": "814017bd37f72011f99c386ca574b154"
+  },
+  "seiva-static/img/productos/omega-3-katigua-dpadhaala-1000mg-60-capsulas-kt.webp": {
+    "mtime": 1786386614.978692,
+    "ast_hash": "281e1a58c1b5700f24d7a0ba5a6e2c73",
+    "semantic_hash": "281e1a58c1b5700f24d7a0ba5a6e2c73"
+  },
+  "seiva-static/img/productos/omega-3-katigua-dpadhaala-1400mg-120-capsulas-kt.webp": {
+    "mtime": 1786386613.9490051,
+    "ast_hash": "281e1a58c1b5700f24d7a0ba5a6e2c73",
+    "semantic_hash": "281e1a58c1b5700f24d7a0ba5a6e2c73"
+  },
+  "seiva-static/img/productos/omega-3-meg-3-500mg-ap.webp": {
+    "mtime": 1786386613.3274639,
+    "ast_hash": "b07b308bb2a4c934b4da36e495910817",
+    "semantic_hash": "b07b308bb2a4c934b4da36e495910817"
+  },
+  "seiva-static/img/productos/omega-3-puro-1000mg-magnesio-citrato-120caps-combo.jpeg": {
+    "mtime": 1786386612.9416676,
+    "ast_hash": "66f63bbad821c4724da8c67f883c754d",
+    "semantic_hash": "66f63bbad821c4724da8c67f883c754d"
+  },
+  "seiva-static/img/productos/omega-3-vegano-60-capsulas-ul.webp": {
+    "mtime": 1786386618.0715735,
+    "ast_hash": "56e03f81dda9a76c92f18c2fd424ab57",
+    "semantic_hash": "56e03f81dda9a76c92f18c2fd424ab57"
+  },
+  "seiva-static/img/productos/oregano-concentrado-60-capsulas-500mg-ue.jpg": {
+    "mtime": 1786386619.485385,
+    "ast_hash": "ec7083accc88ca06f97db7b634f71454",
+    "semantic_hash": "ec7083accc88ca06f97db7b634f71454"
+  },
+  "seiva-static/img/productos/ozempic-natural-60-capsulas-2000mg-nb.jpg": {
+    "mtime": 1786386612.3765845,
+    "ast_hash": "bc205bba7f93037cc4d0c0b3e1dfd743",
+    "semantic_hash": "bc205bba7f93037cc4d0c0b3e1dfd743"
+  },
+  "seiva-static/img/productos/picolinato-de-cromo-60-capsulas-fl.webp": {
+    "mtime": 1786386612.5075054,
+    "ast_hash": "b83767157da852c2a4e51c648a97ff72",
+    "semantic_hash": "b83767157da852c2a4e51c648a97ff72"
+  },
+  "seiva-static/img/productos/picolinato-de-cromo-60-capsulas-ul.webp": {
+    "mtime": 1786386615.3310637,
+    "ast_hash": "b9759ae0f1f84f681cb01af0ae32c78c",
+    "semantic_hash": "b9759ae0f1f84f681cb01af0ae32c78c"
+  },
+  "seiva-static/img/productos/potasio-60-capsulas-528mg-ap.webp": {
+    "mtime": 1786386618.4150116,
+    "ast_hash": "f39306ed3c02854e6af63073431847dc",
+    "semantic_hash": "f39306ed3c02854e6af63073431847dc"
+  },
+  "seiva-static/img/productos/potasio-citrato-120-capsulas-500mg-ue.jpg": {
+    "mtime": 1786386618.753334,
+    "ast_hash": "75fff2d1c1d08132f23f4974eb726744",
+    "semantic_hash": "75fff2d1c1d08132f23f4974eb726744"
+  },
+  "seiva-static/img/productos/potasio-citrato-60-capsulas-500mg-ue.jpg": {
+    "mtime": 1786386619.6320581,
+    "ast_hash": "75fff2d1c1d08132f23f4974eb726744",
+    "semantic_hash": "75fff2d1c1d08132f23f4974eb726744"
+  },
+  "seiva-static/img/productos/pre-entrenamiento-en-polvo-king-monster-300g-ry.jpg": {
+    "mtime": 1786386614.5147803,
+    "ast_hash": "863ac083842f72876feeeb73f496b6b3",
+    "semantic_hash": "863ac083842f72876feeeb73f496b6b3"
+  },
+  "seiva-static/img/productos/probioticos-ultimate-10-120-capsulas-500mg-ue.jpg": {
+    "mtime": 1786386617.3256896,
+    "ast_hash": "35db5f7a1df9e050d0992c3e8088cef8",
+    "semantic_hash": "35db5f7a1df9e050d0992c3e8088cef8"
+  },
+  "seiva-static/img/productos/probioticos-ultimate-10-60-capsulas-500mg-ue.jpg": {
+    "mtime": 1786386614.907776,
+    "ast_hash": "35db5f7a1df9e050d0992c3e8088cef8",
+    "semantic_hash": "35db5f7a1df9e050d0992c3e8088cef8"
+  },
+  "seiva-static/img/productos/psyllium-60-capsulas-900m-ul.jpg": {
+    "mtime": 1786386613.3944707,
+    "ast_hash": "49c3d9ed0956830a5cf0dd9fb574a35e",
+    "semantic_hash": "49c3d9ed0956830a5cf0dd9fb574a35e"
+  },
+  "seiva-static/img/productos/resveratrol-120-caps-americano-1000mg-ba.webp": {
+    "mtime": 1786386614.1602209,
+    "ast_hash": "8412203fcd137dbc412dae133e79d4ea",
+    "semantic_hash": "8412203fcd137dbc412dae133e79d4ea"
+  },
+  "seiva-static/img/productos/resveratrol-120-capsulas-500mg-ue.png": {
+    "mtime": 1786386617.7697937,
+    "ast_hash": "915b0257c0d0d0711ad82d5782348c8b",
+    "semantic_hash": "915b0257c0d0d0711ad82d5782348c8b"
+  },
+  "seiva-static/img/productos/resveratrol-60-capsulas-500mg-ue.jpg": {
+    "mtime": 1786386619.5157058,
+    "ast_hash": "639cdf851172d6cea04c76cefd7cd6ec",
+    "semantic_hash": "639cdf851172d6cea04c76cefd7cd6ec"
+  },
+  "seiva-static/img/productos/resveratrol-premiun-gotas-30ml-ry.webp": {
+    "mtime": 1786386615.4973526,
+    "ast_hash": "e2b2055427404791f2968abe93da68d6",
+    "semantic_hash": "e2b2055427404791f2968abe93da68d6"
+  },
+  "seiva-static/img/productos/resveratrol-trans-resveratrol-30-capsulas-v7.png": {
+    "mtime": 1786386618.528118,
+    "ast_hash": "18454d00a5753ca5cfcab22d88e4630d",
+    "semantic_hash": "18454d00a5753ca5cfcab22d88e4630d"
+  },
+  "seiva-static/img/productos/selenio-quelato-60-capsulas-31945mcg-ap.webp": {
+    "mtime": 1786386613.9142172,
+    "ast_hash": "26b3ee5448858f0af2cc5a85653e776b",
+    "semantic_hash": "26b3ee5448858f0af2cc5a85653e776b"
+  },
+  "seiva-static/img/productos/selenio-quelato-60-capsulas-34mcg-ul.jpg": {
+    "mtime": 1786386618.2575772,
+    "ast_hash": "a496d7913a86a8dde7f4985add060d52",
+    "semantic_hash": "a496d7913a86a8dde7f4985add060d52"
+  },
+  "seiva-static/img/productos/shilajit-120-capsulas-500mg-ue.png": {
+    "mtime": 1786386612.6069565,
+    "ast_hash": "1c1cf87b08999cc8299f24a2da37998f",
+    "semantic_hash": "1c1cf87b08999cc8299f24a2da37998f"
+  },
+  "seiva-static/img/productos/shilajit-60-capsulas-500mg-ue.png": {
+    "mtime": 1786386618.3825853,
+    "ast_hash": "1c1cf87b08999cc8299f24a2da37998f",
+    "semantic_hash": "1c1cf87b08999cc8299f24a2da37998f"
+  },
+  "seiva-static/img/productos/shilajit-tongkat-ali-120-capsulas-500mg-ue.jpg": {
+    "mtime": 1786386617.2914588,
+    "ast_hash": "2a55d836b7643369ddc34afb3477b29b",
+    "semantic_hash": "2a55d836b7643369ddc34afb3477b29b"
+  },
+  "seiva-static/img/productos/shot-de-curcuma-glutamina-vitaminas-150gr-ry.jpg": {
+    "mtime": 1786386617.6202242,
+    "ast_hash": "144708be535f34758a32b03dfc07a551",
+    "semantic_hash": "144708be535f34758a32b03dfc07a551"
+  },
+  "seiva-static/img/productos/silicio-organico-30-capsulas-100mg-ul.webp": {
+    "mtime": 1786386615.2550623,
+    "ast_hash": "8a506356be1377a882a36560d450bb23",
+    "semantic_hash": "8a506356be1377a882a36560d450bb23"
+  },
+  "seiva-static/img/productos/simfort-probioticos-120-capsulas-500mg.png": {
+    "mtime": 1786386615.912112,
+    "ast_hash": "6e7b305fccf1e98ff29c9a5613aba011",
+    "semantic_hash": "6e7b305fccf1e98ff29c9a5613aba011"
+  },
+  "seiva-static/img/productos/skinhair-premium-gummys-30-gomitas105g-ry.jpg": {
+    "mtime": 1786386615.5485246,
+    "ast_hash": "653beacece7516b4e6a372b74b29a180",
+    "semantic_hash": "653beacece7516b4e6a372b74b29a180"
+  },
+  "seiva-static/img/productos/sucupira-ultraflex-colageno-tipo-i-tipo-ii-60-capsulas-ng.jpg": {
+    "mtime": 1786386615.9453928,
+    "ast_hash": "8dcc7eca60288219ddb42b55723c44bc",
+    "semantic_hash": "8dcc7eca60288219ddb42b55723c44bc"
+  },
+  "seiva-static/img/productos/testosterona-natural-60-capsulas-500mg-ue.webp": {
+    "mtime": 1786386619.385684,
+    "ast_hash": "c9727f43f66de77cda375a87bdad768e",
+    "semantic_hash": "c9727f43f66de77cda375a87bdad768e"
+  },
+  "seiva-static/img/productos/testosterona-power-120-capsulas-500mg-ue.png": {
+    "mtime": 1786386618.0360978,
+    "ast_hash": "ed7bedff0b4b925d563e8d7ebe495af9",
+    "semantic_hash": "ed7bedff0b4b925d563e8d7ebe495af9"
+  },
+  "seiva-static/img/productos/testosterona-power-60-capsulas-500mg-ue.png": {
+    "mtime": 1786386616.8650212,
+    "ast_hash": "ed7bedff0b4b925d563e8d7ebe495af9",
+    "semantic_hash": "ed7bedff0b4b925d563e8d7ebe495af9"
+  },
+  "seiva-static/img/productos/treonato-de-magnesio-120-capsulas-500mg-bio.jpg": {
+    "mtime": 1786386616.1934676,
+    "ast_hash": "8fdb89b6e6eb51e880be0a06c3ca2f15",
+    "semantic_hash": "8fdb89b6e6eb51e880be0a06c3ca2f15"
+  },
+  "seiva-static/img/productos/treonato-de-magnesio-60capsulas-36g-fnb.webp": {
+    "mtime": 1786386615.2144604,
+    "ast_hash": "a66fcff410a61828624e6e838d87196d",
+    "semantic_hash": "a66fcff410a61828624e6e838d87196d"
+  },
+  "seiva-static/img/productos/tribulus-terrestris-120-capsulas-500mg-ue.png": {
+    "mtime": 1786386618.0022285,
+    "ast_hash": "bb85c775560e8adbce99bd8e7e6a5c68",
+    "semantic_hash": "bb85c775560e8adbce99bd8e7e6a5c68"
+  },
+  "seiva-static/img/productos/trimagnesio-con-inositol-120-capsulas-500mg-ue.webp": {
+    "mtime": 1786386616.7504683,
+    "ast_hash": "6f050302f2f1796d63463a408a7d9108",
+    "semantic_hash": "6f050302f2f1796d63463a408a7d9108"
+  },
+  "seiva-static/img/productos/triptofano-60-capsulas-500mg-ue.webp": {
+    "mtime": 1786386616.9302897,
+    "ast_hash": "eba9048c445916cf1ccb55e561fcff73",
+    "semantic_hash": "eba9048c445916cf1ccb55e561fcff73"
+  },
+  "seiva-static/img/productos/triptofano-60-capsulas-v7.png": {
+    "mtime": 1786386618.567725,
+    "ast_hash": "80ec951ac21f8c10980d33bd8e16c783",
+    "semantic_hash": "80ec951ac21f8c10980d33bd8e16c783"
+  },
+  "seiva-static/img/productos/triptofano-zma-e-b6-120-capsulas-500mg-ue.jpg": {
+    "mtime": 1786386614.8090131,
+    "ast_hash": "78c839886b9af8941ef53663b1b3b8c0",
+    "semantic_hash": "78c839886b9af8941ef53663b1b3b8c0"
+  },
+  "seiva-static/img/productos/triptofano-zma-e-b6-60-capsulas-500mg-ue.jpg": {
+    "mtime": 1786386613.8448138,
+    "ast_hash": "78c839886b9af8941ef53663b1b3b8c0",
+    "semantic_hash": "78c839886b9af8941ef53663b1b3b8c0"
+  },
+  "seiva-static/img/productos/vinagre-de-manzana-120-capsulas-500mg-ue.png": {
+    "mtime": 1786386616.6209,
+    "ast_hash": "4e78a2a756b04a1fb9279fc4d241423f",
+    "semantic_hash": "4e78a2a756b04a1fb9279fc4d241423f"
+  },
+  "seiva-static/img/productos/vinagre-de-manzana-60-capsulas-1000mg-dn.webp": {
+    "mtime": 1786386618.2196243,
+    "ast_hash": "b4f0c626bb5562c787b72543b1101233",
+    "semantic_hash": "b4f0c626bb5562c787b72543b1101233"
+  },
+  "seiva-static/img/productos/vinagre-de-manzana-60-capsulas-500mg-ue.png": {
+    "mtime": 1786386619.5981288,
+    "ast_hash": "4e78a2a756b04a1fb9279fc4d241423f",
+    "semantic_hash": "4e78a2a756b04a1fb9279fc4d241423f"
+  },
+  "seiva-static/img/productos/vitamina-a-hasta-la-z-60-capsulas-mx.webp": {
+    "mtime": 1786386619.2430847,
+    "ast_hash": "710a21eaa21fa900c6719cd36eb9f6ae",
+    "semantic_hash": "710a21eaa21fa900c6719cd36eb9f6ae"
+  },
+  "seiva-static/img/productos/vitamina-b12-cianocobalamina-60-capsulas-ul.webp": {
+    "mtime": 1786386618.8949125,
+    "ast_hash": "ab76e8ebcc1736aeb1d485b027ecb943",
+    "semantic_hash": "ab76e8ebcc1736aeb1d485b027ecb943"
+  },
+  "seiva-static/img/productos/vitamina-c-acido-ascorbico-120-capsulas-500mg-ue.png": {
+    "mtime": 1786386614.3647304,
+    "ast_hash": "e2a13ec8231edee7b1b613c057033b64",
+    "semantic_hash": "e2a13ec8231edee7b1b613c057033b64"
+  },
+  "seiva-static/img/productos/vitamina-c-liposomal-120-capsulas-1000mg-ue.png": {
+    "mtime": 1786386613.7637076,
+    "ast_hash": "ef50f722de2d4a2b97ee74fb6befd31e",
+    "semantic_hash": "ef50f722de2d4a2b97ee74fb6befd31e"
+  },
+  "seiva-static/img/productos/vitamina-c-liposomal-60-capsulas-1000mg-ue.png": {
+    "mtime": 1786386614.046697,
+    "ast_hash": "ef50f722de2d4a2b97ee74fb6befd31e",
+    "semantic_hash": "ef50f722de2d4a2b97ee74fb6befd31e"
+  },
+  "seiva-static/img/productos/vitamina-d3-120-capsulas-10000ui-bio.jpg": {
+    "mtime": 1786386616.1585748,
+    "ast_hash": "b062e9ef1cba491015c3b1309b85f22c",
+    "semantic_hash": "b062e9ef1cba491015c3b1309b85f22c"
+  },
+  "seiva-static/img/productos/vitamina-d3-120-capsulas-5000ui-ue.png": {
+    "mtime": 1786386617.0902107,
+    "ast_hash": "68f1f64635dbe282657b431bef304da6",
+    "semantic_hash": "68f1f64635dbe282657b431bef304da6"
+  },
+  "seiva-static/img/productos/vitamina-d3-60-capsulas-5000ui-ue.png": {
+    "mtime": 1786386619.3547058,
+    "ast_hash": "68f1f64635dbe282657b431bef304da6",
+    "semantic_hash": "68f1f64635dbe282657b431bef304da6"
+  },
+  "seiva-static/img/productos/vitamina-d3-k2-120-capsulas-ue.png": {
+    "mtime": 1786386613.8101947,
+    "ast_hash": "94bfec207c599a01c3c13873994602ff",
+    "semantic_hash": "94bfec207c599a01c3c13873994602ff"
+  },
+  "seiva-static/img/productos/vitamina-d3-k2-60-capsulas-ue.png": {
+    "mtime": 1786386616.3463614,
+    "ast_hash": "94bfec207c599a01c3c13873994602ff",
+    "semantic_hash": "94bfec207c599a01c3c13873994602ff"
+  },
+  "seiva-static/img/productos/vitamina-dk-2000ui-60-capsulas-v7.webp": {
+    "mtime": 1786386618.8562422,
+    "ast_hash": "758b1248c93eeb3754183ce91dd55c43",
+    "semantic_hash": "758b1248c93eeb3754183ce91dd55c43"
+  },
+  "seiva-static/img/productos/vitamina-k2-60-capsulas-500mg-ue.png": {
+    "mtime": 1786386618.1151016,
+    "ast_hash": "78502aa682811eda69f5fa9077268c51",
+    "semantic_hash": "78502aa682811eda69f5fa9077268c51"
+  },
+  "seiva-static/img/productos/vitamina-k2-colageno-tipo-ii-magnesio-60-capsulas-ry.webp": {
+    "mtime": 1786386615.0130212,
+    "ast_hash": "9229e112eaee897a356bab9ef91b2bcf",
+    "semantic_hash": "9229e112eaee897a356bab9ef91b2bcf"
+  },
+  "seiva-static/img/productos/vitamina-k2-picolinato-de-cromo-60-capsulas-ng.jpg": {
+    "mtime": 1786386615.1100006,
+    "ast_hash": "4de446fc5b7445d3d9d9f28ebf8ae918",
+    "semantic_hash": "4de446fc5b7445d3d9d9f28ebf8ae918"
+  },
+  "seiva-static/img/productos/whey-proteina-integralmedica-900g.jpg": {
+    "mtime": 1786386613.151181,
+    "ast_hash": "1d995978b44374567d2a54a6745828f3",
+    "semantic_hash": "1d995978b44374567d2a54a6745828f3"
+  },
+  "seiva-static/img/productos/zeolita-100-capsulas-500mg-ue.png": {
+    "mtime": 1786386613.7229898,
+    "ast_hash": "e0c462319553feaf13104a0138b42b87",
+    "semantic_hash": "e0c462319553feaf13104a0138b42b87"
+  },
+  "seiva-static/img/productos/zeolita-120-capsulas-500mg-ue.png": {
+    "mtime": 1786386614.8711662,
+    "ast_hash": "e0c462319553feaf13104a0138b42b87",
+    "semantic_hash": "e0c462319553feaf13104a0138b42b87"
+  },
+  "seiva-static/img/productos/zeolita-60-capsulas-500mg-ue.png": {
+    "mtime": 1786386616.5819004,
+    "ast_hash": "e0c462319553feaf13104a0138b42b87",
+    "semantic_hash": "e0c462319553feaf13104a0138b42b87"
+  },
+  "seiva-static/img/productos/zinc-60-capsulas-28mg-mx.webp": {
+    "mtime": 1786386619.2105715,
+    "ast_hash": "9130b1e027e1b59191be4d195a48eeb0",
+    "semantic_hash": "9130b1e027e1b59191be4d195a48eeb0"
+  },
+  "seiva-static/img/productos/zinc-60-capsulas-500mg-rei.png": {
+    "mtime": 1786386612.7188265,
+    "ast_hash": "57e6e6396776ca648826bc83ba1f824a",
+    "semantic_hash": "57e6e6396776ca648826bc83ba1f824a"
+  },
+  "seivvaweb/app/public/favicon.svg": {
+    "mtime": 1787172450.516028,
+    "ast_hash": "02682ff940b53ee34eae2a9a4d8125e2",
+    "semantic_hash": "02682ff940b53ee34eae2a9a4d8125e2"
+  },
+  "seivvaweb/app/public/images/floating-berries.png": {
+    "mtime": 1786192776.2987022,
+    "ast_hash": "45542a581c38532f6ad31121304bc337",
+    "semantic_hash": "45542a581c38532f6ad31121304bc337"
+  },
+  "seivvaweb/app/public/images/floating-ginger.png": {
+    "mtime": 1786192776.358155,
+    "ast_hash": "16c0bc233931e515e8c120e978e30327",
+    "semantic_hash": "16c0bc233931e515e8c120e978e30327"
+  },
+  "seivvaweb/app/public/images/floating-leaf.png": {
+    "mtime": 1786192776.431155,
+    "ast_hash": "ed57bf29e381fd047d968567e926d207",
+    "semantic_hash": "ed57bf29e381fd047d968567e926d207"
+  },
+  "seivvaweb/app/public/images/floating-mint.png": {
+    "mtime": 1786192776.4921546,
+    "ast_hash": "538638c938c9c490dcbaa420ee77974c",
+    "semantic_hash": "538638c938c9c490dcbaa420ee77974c"
+  },
+  "seivvaweb/app/public/images/floating-orange.png": {
+    "mtime": 1786192776.5482254,
+    "ast_hash": "05df53234781a5899ad9b73e6d795fec",
+    "semantic_hash": "05df53234781a5899ad9b73e6d795fec"
+  },
+  "seivvaweb/app/public/images/hero-bottle.jpg": {
+    "mtime": 1779670272.0,
+    "ast_hash": "db02d59adf68a19dbb9bfc9f7efd4be7",
+    "semantic_hash": "db02d59adf68a19dbb9bfc9f7efd4be7"
+  },
+  "seivvaweb/app/public/images/product-ashwagandha.jpg": {
+    "mtime": 1779670280.0,
+    "ast_hash": "f0993cb1e7cbde7ab6d432811edabb14",
+    "semantic_hash": "f0993cb1e7cbde7ab6d432811edabb14"
+  },
+  "seivvaweb/app/public/images/product-curcuma.jpg": {
+    "mtime": 1779670273.0,
+    "ast_hash": "a288f114c35419d88105933d00644f07",
+    "semantic_hash": "a288f114c35419d88105933d00644f07"
+  },
+  "seivvaweb/app/public/images/product-matcha.jpg": {
+    "mtime": 1779670272.0,
+    "ast_hash": "394c3b9d3da979ba74a75893c8775d95",
+    "semantic_hash": "394c3b9d3da979ba74a75893c8775d95"
+  },
+  "seivvaweb/app/public/images/product-spirulina.jpg": {
+    "mtime": 1779670273.0,
+    "ast_hash": "fc89d5cb29ac351d447e67e4beaf3334",
+    "semantic_hash": "fc89d5cb29ac351d447e67e4beaf3334"
+  },
+  "seivvaweb/app/public/logo.png": {
+    "mtime": 1779667618.7356167,
+    "ast_hash": "2edb7a7fed18b80f29f0d483647500cc",
+    "semantic_hash": "2edb7a7fed18b80f29f0d483647500cc"
+  },
+  "cash-register-kaching-sound-effect.mp3": {
+    "mtime": 1787153960.1130998,
+    "ast_hash": "a0dd94f6729756b0d000b1d6c482a92b",
+    "semantic_hash": "a0dd94f6729756b0d000b1d6c482a92b"
+  },
+  "seiva-static/backend/_verify_img.js": {
+    "mtime": 1787448631.72787,
+    "ast_hash": "40c911c99423d6b3e6553f76d1b8bac3",
+    "semantic_hash": ""
+  },
+  "seiva-static/backend/bot-router.js": {
+    "mtime": 1787445806.4305258,
+    "ast_hash": "05374d40077b4c0417e896cd9e716bb1",
+    "semantic_hash": ""
+  },
+  "seiva-static/backend/copy-provider.custom.js": {
+    "mtime": 1787409580.941713,
+    "ast_hash": "7c17c43bcd700b086a34fa80d73095be",
+    "semantic_hash": ""
+  },
+  "seiva-static/backend/copy-provider.js": {
+    "mtime": 1787411068.2077608,
+    "ast_hash": "f562da440941e91743fbf893a659c3e1",
+    "semantic_hash": ""
+  },
+  "seiva-static/backend/copy-provider.openrouter.js": {
+    "mtime": 1787440638.9711623,
+    "ast_hash": "a2b29635d87a409c6464b164529274c7",
+    "semantic_hash": ""
+  },
+  "seiva-static/backend/copy-provider.stub.js": {
+    "mtime": 1787409591.0404377,
+    "ast_hash": "769a7accfa3f290fa284b28ae6392bb3",
+    "semantic_hash": ""
+  },
+  "seiva-static/backend/invoice-wizard.js": {
+    "mtime": 1787442572.0744915,
+    "ast_hash": "4db9a8714e79fa952d03445338bcea8a",
+    "semantic_hash": ""
+  },
+  "seiva-static/backend/product-wizard.js": {
+    "mtime": 1787449432.9154928,
+    "ast_hash": "c4b48f6201e1e6e9bfdddae150a72ada",
+    "semantic_hash": ""
+  },
+  "seivvaweb/app/src/context/CurrentProductContext.tsx": {
+    "mtime": 1787180847.2920864,
+    "ast_hash": "2dff94455b8736632db6c38150c91781",
+    "semantic_hash": ""
+  },
+  "seivvaweb/app/public/images/hero-bottle.webp": {
+    "mtime": 1787176635.112,
+    "ast_hash": "a20366e2041ef83590af2446e589ab99",
+    "semantic_hash": ""
+  }
+}

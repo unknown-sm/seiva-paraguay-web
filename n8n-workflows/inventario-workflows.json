@@ -1,0 +1,80 @@
+[
+  {
+    "id": "0TT0JrMXEVq1lh0k",
+    "name": "TOOL - buscar_producto",
+    "active": true,
+    "updatedAt": "2026-08-31T15:11:14.808Z"
+  },
+  {
+    "id": "FzqLW0Q4fnbmOXB9",
+    "name": "Seiva - Bot carga de productos (Telegram + mimo) v17",
+    "active": false,
+    "updatedAt": "2026-08-29T01:32:31.276Z"
+  },
+  {
+    "id": "QRdXsP1CKTez43W8",
+    "name": "CRM: Deal Won → NPS + Notificación",
+    "active": false,
+    "updatedAt": "2026-08-03T12:20:49.995Z"
+  },
+  {
+    "id": "TGM5gsHwi46LpghC",
+    "name": "SEIVA Bot - Product Upload",
+    "active": false,
+    "updatedAt": "2026-08-25T12:27:38.341Z"
+  },
+  {
+    "id": "WCi3j0G8UFaRCtEh",
+    "name": "TEST - toolCode retorno",
+    "active": false,
+    "updatedAt": "2026-09-01T00:56:18.516Z"
+  },
+  {
+    "id": "XyX9YTa33NKJ3Aas",
+    "name": "Test-ia",
+    "active": false,
+    "updatedAt": "2026-08-25T13:28:07.912Z"
+  },
+  {
+    "id": "cLctBPDSRXliimrV",
+    "name": "Seiva - Agente Inventario v2 (sin tools)",
+    "active": true,
+    "updatedAt": "2026-09-01T12:38:21.980Z"
+  },
+  {
+    "id": "exp8g1Rl43VQ0RJy",
+    "name": "SEIVA Bot - Conversation (IA)",
+    "active": false,
+    "updatedAt": "2026-08-24T23:28:31.780Z"
+  },
+  {
+    "id": "kfAo1Lldj77jkzBe",
+    "name": "SEIVA Bot - Router",
+    "active": false,
+    "updatedAt": "2026-08-25T12:21:41.439Z"
+  },
+  {
+    "id": "p9o9UFJE8Lxk69X9",
+    "name": "SEIVA Bot - Invoice (.txt)",
+    "active": false,
+    "updatedAt": "2026-08-23T22:26:14.664Z"
+  },
+  {
+    "id": "qKVJA0Dgk7XGfk1S",
+    "name": "CRM: Router de eventos",
+    "active": false,
+    "updatedAt": "2026-08-03T12:20:50.803Z"
+  },
+  {
+    "id": "xQxSyGkOsQGCZtN9",
+    "name": "TEST - http normal",
+    "active": false,
+    "updatedAt": "2026-08-31T15:01:28.997Z"
+  },
+  {
+    "id": "ylnX2JybaoH4wykM",
+    "name": "Seiva - Agente Inventario (mimo)",
+    "active": false,
+    "updatedAt": "2026-09-01T01:05:37.993Z"
+  }
+]

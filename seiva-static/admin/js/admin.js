@@ -683,6 +683,39 @@ document.addEventListener("DOMContentLoaded", function() {
   connectAdminEvents();
 });
 
+// ---------- GALERÍA DE IMÁGENES ----------
+// Estado en memoria de la galería del producto en edición.
+window._productGallery = [];
+
+function renderGallery() {
+  var box = document.getElementById("prod-gallery-preview");
+  var list = document.getElementById("prod-gallery-images");
+  var items = window._productGallery || [];
+  if (!list) return;
+  list.innerHTML = "";
+  if (!items.length) { if (box) box.style.display = "none"; return; }
+  items.forEach(function(url, idx) {
+    var wrap = document.createElement("div");
+    wrap.style.cssText = "position:relative;width:70px;height:70px;flex-shrink:0";
+    var img = document.createElement("img");
+    img.src = url;
+    img.style.cssText = "width:100%;height:100%;object-fit:cover;border-radius:6px;border:1px solid var(--border);background:#fff";
+    wrap.appendChild(img);
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = "✕";
+    btn.title = "Quitar imagen";
+    btn.style.cssText = "position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#c0392b;color:#fff;border:1px solid #fff;font-size:11px;line-height:1;cursor:pointer;padding:0";
+    btn.onclick = function() {
+      window._productGallery.splice(idx, 1);
+      renderGallery();
+    };
+    wrap.appendChild(btn);
+    list.appendChild(wrap);
+  });
+  if (box) box.style.display = "flex";
+}
+
 function editarProducto(id) {
   api("/productos/all").then(function(data) {
     var prod = data.find(function(p) { return p.id === id; });
@@ -721,6 +754,9 @@ function editarProducto(id) {
     document.querySelectorAll(".prod-etiqueta").forEach(function(cb) { cb.checked = (prod.etiquetas || []).indexOf(cb.value) !== -1; });
     // Preservar imagen actual para que no se pierda al guardar sin scrape
     window._scrapedImage = prod.imagen || "";
+    // Cargar galería existente
+    window._productGallery = Array.isArray(prod.galeria) ? prod.galeria.slice() : [];
+    renderGallery();
     var el;
     if (prod.imagen) {
       el = document.getElementById("prod-custom-image-img"); if (el) el.src = prod.imagen;
@@ -731,6 +767,7 @@ function editarProducto(id) {
     setTimeout(function() {
       document.getElementById("prod-categoria").value = prod.categoria_id || "";
     }, 100);
+    loadMarcasSelectProd();
     document.getElementById("modal-producto").classList.remove("hidden");
   });
 }
@@ -825,6 +862,8 @@ function nuevoProducto() {
   el = document.getElementById("prod-custom-image-preview"); if (el) el.style.display = "none";
   el = document.getElementById("prod-custom-image-img"); if (el) el.src = "";
   window._scrapedImage = null;
+  window._productGallery = [];
+  renderGallery();
   document.getElementById("modal-producto").classList.remove("hidden");
 }
 
@@ -891,6 +930,8 @@ function cerrarModalProducto() {
   el = document.getElementById("prod-custom-image-preview"); if (el) el.style.display = "none";
   el = document.getElementById("prod-custom-image-img"); if (el) el.src = "";
   window._scrapedImage = null;
+  window._productGallery = [];
+  renderGallery();
 }
 
 // ---------- PRODUCT IMAGE UPLOAD ----------
@@ -925,8 +966,47 @@ document.getElementById("btn-remove-custom-image").addEventListener("click", fun
   document.getElementById("prod-custom-image-img").src = "";
 });
 
+// Subida múltiple de galería (se agregan a las existentes)
+document.getElementById("prod-gallery-upload").addEventListener("change", function(e) {
+  var files = Array.prototype.slice.call(e.target.files || []);
+  var statusEl = document.getElementById("scrape-status");
+  if (!files.length) return;
+  if (statusEl) { statusEl.textContent = "⏳ Subiendo galería (" + files.length + ")..."; statusEl.style.color = "var(--muted)"; }
+  var done = 0;
+  files.forEach(function(file) {
+    var fd = new FormData();
+    fd.append("hero", file);
+    fetch(API + "/upload-hero", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + token },
+      body: fd
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      done++;
+      if (data && data.url) {
+        window._productGallery.push(data.url);
+        renderGallery();
+      }
+      if (done === files.length) {
+        if (statusEl) { statusEl.textContent = "✅ " + done + " imagen(es) de galería cargadas. Guardá para aplicar."; statusEl.style.color = "var(--success)"; }
+        toast("Galería cargada. Guardá para aplicar.");
+      }
+    }).catch(function(err) {
+      done++;
+      console.error("Galería upload error:", err);
+      if (done === files.length) {
+        if (statusEl) { statusEl.textContent = "❌ Error al subir galería"; statusEl.style.color = "var(--danger)"; }
+        toast("Error de red al subir galería");
+      }
+    });
+  });
+  e.target.value = "";
+});
+
 document.getElementById("modal-overlay-prod").addEventListener("click", cerrarModalProducto);
 document.getElementById("modal-close-prod").addEventListener("click", cerrarModalProducto);
+document.getElementById("btn-agregar-marca").addEventListener("click", function() {
+  nuevoMarca();
+});
 
 document.getElementById("producto-form").addEventListener("submit", async function(e) {
   e.preventDefault();
@@ -947,7 +1027,7 @@ document.getElementById("producto-form").addEventListener("submit", async functi
     seo_descripcion: document.getElementById("prod-seo_descripcion").value,
     descripcion: document.getElementById("prod-descripcion").value,
     descripcion_larga: document.getElementById("prod-descripcion_larga").value,
-    galeria: scrapedImg ? [scrapedImg] : [],
+    galeria: (window._productGallery && window._productGallery.length) ? window._productGallery : [],
     imagen: scrapedImg,
     stock: parseInt(document.getElementById("prod-stock").value) || 0,
     destacado: document.getElementById("prod-destacado").checked,
@@ -2941,6 +3021,17 @@ function loadMarcasSelect() {
     sel.innerHTML = '<option value="">Todas las marcas</option>';
     for (var m of (marcas || [])) {
       sel.innerHTML += '<option value="' + m.id + '">' + xt(m.nombre) + '</option>';
+    }
+  });
+}
+
+function loadMarcasSelectProd() {
+  api("/marcas/all").then(function(marcas) {
+    var sel = document.getElementById("prod-marca");
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— Sin marca —</option>';
+    for (var m of (marcas || [])) {
+      sel.innerHTML += '<option value="' + xt(m.nombre) + '">' + xt(m.nombre) + '</option>';
     }
   });
 }

@@ -554,6 +554,8 @@ try { db.exec("ALTER TABLE productos ADD COLUMN galeria TEXT DEFAULT '[]'"); } c
 try { db.exec("ALTER TABLE productos ADD COLUMN sku TEXT DEFAULT ''"); } catch (e) {}
 try { db.exec("ALTER TABLE productos ADD COLUMN marca TEXT DEFAULT ''"); } catch (e) {}
 try { db.exec("ALTER TABLE productos ADD COLUMN seo_descripcion TEXT DEFAULT ''"); } catch (e) {}
+try { db.exec("ALTER TABLE productos ADD COLUMN meta_titulo TEXT DEFAULT ''"); } catch (e) {}
+try { db.exec("ALTER TABLE productos ADD COLUMN meta_descripcion TEXT DEFAULT ''"); } catch (e) {}
 try { db.exec("ALTER TABLE productos ADD COLUMN crosssell TEXT DEFAULT '[]'"); } catch (e) {}
 try { db.exec("ALTER TABLE productos ADD COLUMN upsell TEXT DEFAULT '[]'"); } catch (e) {}
 try { db.exec("ALTER TABLE productos ADD COLUMN slug TEXT DEFAULT ''"); } catch (e) {}
@@ -1387,7 +1389,7 @@ app.get("/api/productos/all", auth, (req, res) => {
 
 app.post("/api/productos", auth, async (req, res) => {
   try {
-    let { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell, slug, featured_order, precio_proveedor, delivery_gratis, variantes, presentaciones } = req.body;
+    let { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, meta_titulo, meta_descripcion, crosssell, upsell, slug, featured_order, precio_proveedor, delivery_gratis, variantes, presentaciones } = req.body;
     const variantesData = variantes || presentaciones || [];
     if (!nombre || !precio) return res.status(400).json({ error: "Nombre y precio requeridos" });
 
@@ -1414,8 +1416,8 @@ app.post("/api/productos", auth, async (req, res) => {
     const finalSlug = slug || generateSlug(nombre);
     const fo = parseInt(featured_order) || 0;
     const pp = (precio_proveedor !== undefined && precio_proveedor !== null && precio_proveedor !== '') ? parseFloat(precio_proveedor) : null;
-    const result = db.prepare("INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell, slug, featured_order, precio_proveedor, delivery_gratis, presentaciones) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").run(
-      nombre, precio, precio_anterior || null, catName, subcategoria || "", descripcion || "", descripcion_larga || "", JSON.stringify(processedGaleria), JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, cid, sku || "", marca || "", seo_descripcion || "", JSON.stringify(crosssell || []), JSON.stringify(upsell || []), finalSlug, fo, pp, delivery_gratis ? 1 : 0, JSON.stringify(variantesData)
+    const result = db.prepare("INSERT INTO productos (nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, meta_titulo, meta_descripcion, crosssell, upsell, slug, featured_order, precio_proveedor, delivery_gratis, presentaciones) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)").run(
+      nombre, precio, precio_anterior || null, catName, subcategoria || "", descripcion || "", descripcion_larga || "", JSON.stringify(processedGaleria), JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, cid, sku || "", marca || "", seo_descripcion || "", meta_titulo || "", meta_descripcion || "", JSON.stringify(crosssell || []), JSON.stringify(upsell || []), finalSlug, fo, pp, delivery_gratis ? 1 : 0, JSON.stringify(variantesData)
     );
     res.json({ id: result.lastInsertRowid, slug: finalSlug });
   } catch (err) {
@@ -1426,7 +1428,7 @@ app.post("/api/productos", auth, async (req, res) => {
 
 app.put("/api/productos/:id", auth, (req, res) => {
   try {
-    const { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, crosssell, upsell, slug, featured_order, precio_proveedor, delivery_gratis, variantes } = req.body;
+    const { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, meta_titulo, meta_descripcion, crosssell, upsell, slug, featured_order, precio_proveedor, delivery_gratis, variantes } = req.body;
     const cid = categoria_id !== undefined ? categoria_id : null;
     const catName = categoria || (cid ? db.prepare("SELECT nombre FROM categorias WHERE id=?").get(cid)?.nombre : "suplementos") || "suplementos";
     const finalSlug = slug || (nombre ? generateSlug(nombre, req.params.id) : undefined);
@@ -1434,14 +1436,14 @@ app.put("/api/productos/:id", auth, (req, res) => {
     const pp = precio_proveedor !== undefined ? (precio_proveedor !== null && precio_proveedor !== '' ? parseFloat(precio_proveedor) : null) : undefined;
     
     if (finalSlug) {
-      const sql = "UPDATE productos SET nombre=?, precio=?, precio_anterior=?, categoria=?, subcategoria=?, descripcion=?, descripcion_larga=?, galeria=?, etiquetas=?, destacado=?, imagen=?, stock=?, activo=?, categoria_id=?, sku=?, marca=?, seo_descripcion=?, crosssell=?, upsell=?, slug=?, featured_order=?" + (pp !== undefined ? ", precio_proveedor=?" : "") + " WHERE id=?";
-      const params = [nombre, precio, precio_anterior || null, catName, subcategoria, descripcion || "", descripcion_larga || "", JSON.stringify(galeria || []), JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, cid, sku || "", marca || "", seo_descripcion || "", JSON.stringify(crosssell || []), JSON.stringify(upsell || []), finalSlug, fo];
+      const sql = "UPDATE productos SET nombre=?, precio=?, precio_anterior=?, categoria=?, subcategoria=?, descripcion=?, descripcion_larga=?, galeria=?, etiquetas=?, destacado=?, imagen=?, stock=?, activo=?, categoria_id=?, sku=?, marca=?, seo_descripcion=?, meta_titulo=?, meta_descripcion=?, crosssell=?, upsell=?, slug=?, featured_order=?" + (pp !== undefined ? ", precio_proveedor=?" : "") + " WHERE id=?";
+      const params = [nombre, precio, precio_anterior || null, catName, subcategoria, descripcion || "", descripcion_larga || "", JSON.stringify(galeria || []), JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, cid, sku || "", marca || "", seo_descripcion || "", meta_titulo || "", meta_descripcion || "", JSON.stringify(crosssell || []), JSON.stringify(upsell || []), finalSlug, fo];
       if (pp !== undefined) params.push(pp);
       params.push(req.params.id);
       db.prepare(sql).run(...params);
     } else {
-      const sql = "UPDATE productos SET nombre=?, precio=?, precio_anterior=?, categoria=?, subcategoria=?, descripcion=?, descripcion_larga=?, galeria=?, etiquetas=?, destacado=?, imagen=?, stock=?, activo=?, categoria_id=?, sku=?, marca=?, seo_descripcion=?, crosssell=?, upsell=?, featured_order=?" + (pp !== undefined ? ", precio_proveedor=?" : "") + " WHERE id=?";
-      const params = [nombre, precio, precio_anterior || null, catName, subcategoria, descripcion || "", descripcion_larga || "", JSON.stringify(galeria || []), JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, cid, sku || "", marca || "", seo_descripcion || "", JSON.stringify(crosssell || []), JSON.stringify(upsell || []), fo];
+      const sql = "UPDATE productos SET nombre=?, precio=?, precio_anterior=?, categoria=?, subcategoria=?, descripcion=?, descripcion_larga=?, galeria=?, etiquetas=?, destacado=?, imagen=?, stock=?, activo=?, categoria_id=?, sku=?, marca=?, seo_descripcion=?, meta_titulo=?, meta_descripcion=?, crosssell=?, upsell=?, featured_order=?" + (pp !== undefined ? ", precio_proveedor=?" : "") + " WHERE id=?";
+      const params = [nombre, precio, precio_anterior || null, catName, subcategoria, descripcion || "", descripcion_larga || "", JSON.stringify(galeria || []), JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, cid, sku || "", marca || "", seo_descripcion || "", meta_titulo || "", meta_descripcion || "", JSON.stringify(crosssell || []), JSON.stringify(upsell || []), fo];
       if (pp !== undefined) params.push(pp);
       params.push(req.params.id);
       db.prepare(sql).run(...params);
@@ -2841,7 +2843,7 @@ if (fs.existsSync(distPath)) {
     var product = null;
     try {
       product = db.prepare(
-        "SELECT nombre, precio, descripcion, seo_descripcion, imagen FROM productos WHERE activo = 1 AND (slug = ? OR id = ?) LIMIT 1"
+        "SELECT nombre, precio, descripcion, seo_descripcion, meta_titulo, meta_descripcion, imagen FROM productos WHERE activo = 1 AND (slug = ? OR id = ?) LIMIT 1"
       ).get(slug, Number(slug) || -1);
     } catch (e) { product = null; }
 
@@ -2852,9 +2854,9 @@ if (fs.existsSync(distPath)) {
     if (product && product.imagen) {
       img = product.imagen.indexOf("http") === 0 ? product.imagen : OG_BASE + product.imagen;
     }
-    var title = (product ? product.nombre : "Seiva Paraguay") + " - Seiva Paraguay";
+    var title = (product ? (product.meta_titulo || product.nombre) : "Seiva Paraguay") + " - Seiva Paraguay";
     var desc = product
-      ? (product.seo_descripcion || stripHtml(product.descripcion).substring(0, 160) || "")
+      ? (product.meta_descripcion || product.seo_descripcion || stripHtml(product.descripcion).substring(0, 160) || "")
       : "Snacks saludables y suplementos naturales. Envíos a todo Paraguay.";
     var url = OG_BASE + (req.path.charAt(req.path.length - 1) === "/" ? req.path.slice(0, -1) : req.path);
 

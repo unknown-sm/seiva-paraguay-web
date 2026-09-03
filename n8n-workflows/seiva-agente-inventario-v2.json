@@ -1,0 +1,523 @@
+{
+  "id": "cLctBPDSRXliimrV",
+  "name": "Seiva - Agente Inventario v2 (sin tools)",
+  "description": null,
+  "active": true,
+  "activeVersionId": "ad5e8c8c-c309-4f95-b3ce-94584007412d",
+  "createdAt": "2026-09-01T01:13:36.827Z",
+  "updatedAt": "2026-09-01T12:38:21.980Z",
+  "isArchived": false,
+  "versionId": "ad5e8c8c-c309-4f95-b3ce-94584007412d",
+  "versionCounter": 5,
+  "sourceWorkflowId": null,
+  "triggerCount": 1,
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message",
+          "callback_query"
+        ],
+        "additionalFields": {}
+      },
+      "id": "tg",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -600,
+        300
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "wtekAWcrcfSlrW67",
+          "name": "SEIVA Bot"
+        }
+      },
+      "webhookId": "seiva-agent-v2"
+    },
+    {
+      "parameters": {
+        "url": "https://seiva.com.py/api/productos/all",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "h_inv",
+      "name": "Cargar inventario",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -380,
+        300
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "07NLMVgZ0MQtdNGA",
+          "name": "SEIVA Backend API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const m = $('Telegram Trigger').item.json.message || $('Telegram Trigger').item.json.callback_query.message;\nconst cid = m.chat.id;\nlet txt = m.text || m.caption || '';\nconst prods = $items('Cargar inventario');\nconst lineas = prods.map(p => { const j = p.json || p;\n  return 'ID ' + j.id + ' | ' + j.nombre + ' | stock:' + j.stock + ' | precio:' + j.precio + ' | ' + (j.activo ? 'publicado' : 'oculto'); });\nconst inv = lineas.join('\\n');\nreturn [{ json: { chatId: cid, sessionId: cid, mensaje: txt, inventario: inv } }];"
+      },
+      "id": "prep",
+      "name": "Preparar entrada",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "model": "xiaomi/mimo-v2.5",
+        "options": {
+          "systemMessage": "You are a strict JSON API for SEIVA inventory management (Paraguay, currency Gs).\nOutput ONLY a valid JSON object. Never output prose, markdown, apologies or explanations.\n\nSchema: {\"accion\":string,\"id\":number|null,\"valor\":number|null,\"datos\":object,\"respuesta\":string}\n\naccion values:\n- \"ajustar_stock\": change stock. id=real product id, valor=new absolute stock.\n- \"publicar\": id=real id.\n- \"despublicar\": id=real id.\n- \"editar\": id=real id, datos={field:value}.\n- \"crear\": datos=full product object.\n- \"aclarar\": ambiguous or missing data. Ask in respuesta.\n- \"consultar\": answer questions using inventory data.\n\nRules:\n- Use ONLY the ids present in the INVENTORY list. Never invent ids.\n- If several products match, use accion \"aclarar\" and list them numbered with ids.\n- You do NOT execute anything. Just output the JSON.\n- Never claim success or use checkmarks.\n\nExamples:\nUser: \"pon el 188 en 5\" => {\"accion\":\"ajustar_stock\",\"id\":188,\"valor\":5,\"datos\":{},\"respuesta\":\"Actualizando stock del producto 188 a 5 unidades.\"}\nUser: \"cuanto stock hay\" => {\"accion\":\"consultar\",\"id\":null,\"valor\":null,\"datos\":{},\"respuesta\":\"<answer with real data>\"}",
+          "responseFormat": "json_object",
+          "temperature": 0.1,
+          "maxTokens": 800
+        }
+      },
+      "id": "model",
+      "name": "OpenRouter Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        520
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "36xo8T9UglAHMFDT",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ \"USER MESSAGE: \" + $json.mensaje + \"\\n\\nINVENTORY (real ids):\\n\" + $json.inventario }}",
+        "options": {}
+      },
+      "id": "agent",
+      "name": "Agente Inventario",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        60,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "let out = $input.first().json.output || $input.first().json.text || '';\nout = String(out).trim();\nout = out.replace(/^```json\\s*/i, '').replace(/^```\\s*/, '').replace(/```\\s*$/, '').trim();\nconst ini = out.indexOf('{');\nconst fin = out.lastIndexOf('}');\nlet d = null;\nif (ini >= 0 && fin > ini) {\n  try { d = JSON.parse(out.slice(ini, fin + 1)); } catch (e) { d = null; }\n}\nif (!d) {\n  d = { accion: 'consultar', respuesta: out };\n}\nreturn [{ json: { accion: d.accion || 'consultar', id: d.id, valor: d.valor, datos: d.datos || {}, respuesta: d.respuesta || '', chatId: $('Preparar entrada').item.json.chatId } }];"
+      },
+      "id": "parse",
+      "name": "Parsear accion",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        280,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.texto }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "resp",
+      "name": "Responder",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1200,
+        300
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "wtekAWcrcfSlrW67",
+          "name": "SEIVA Bot"
+        }
+      },
+      "webhookId": "6f6ba7d8-30cb-4b1f-be96-dfcc4adc06c1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst acc = d.accion;\nconst id = d.id;\nconst valor = d.valor;\nconst datos = d.datos || {};\nconst H = { 'Content-Type': 'application/json', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzg3NjE5ODk5LCJleHAiOjIxMDI5Nzk4OTl9.EOwKkZgszm1F8x5Z3bV9fKyiNQLe6NVTyX1e9ck1l4s' };\nconst API = 'https://seiva.com.py/api/productos';\n\n// Acciones que solo responden (no tocan el backend)\nif (acc === 'consultar' || acc === 'aclarar' || acc === 'error') {\n  return [{ json: { chatId: d.chatId, texto: d.respuesta } }];\n}\n\nlet url = '', method = 'GET', body = null;\nif (acc === 'ajustar_stock') { url = API + '/' + id; method = 'PUT'; body = { stock: Number(valor) }; }\nelse if (acc === 'editar') { url = API + '/' + id; method = 'PUT'; body = datos; }\nelse if (acc === 'publicar' || acc === 'despublicar') { url = API + '/' + id + '/toggle'; method = 'PATCH'; }\nelse if (acc === 'crear') { url = API; method = 'POST'; body = datos; }\nelse { return [{ json: { chatId: d.chatId, texto: d.respuesta || 'No entendi la accion.' } }]; }\n\nlet ok = false, detalle = '';\ntry {\n  const opts = { method: method, url: url, headers: H };\n  if (body) opts.body = body;\n  const r = await this.helpers.httpRequest(opts);\n  ok = true;\n  detalle = typeof r === 'string' ? r : JSON.stringify(r);\n} catch (e) { ok = false; detalle = 'ERROR: ' + e.message; }\n\nlet msg = '';\nif (ok) {\n  if (acc === 'ajustar_stock') msg = 'Stock actualizado correctamente.';\n  else if (acc === 'editar') msg = 'Producto editado correctamente.';\n  else if (acc === 'publicar' || acc === 'despublicar') msg = 'Estado actualizado correctamente.';\n  else if (acc === 'crear') msg = 'Producto creado correctamente.';\n} else {\n  msg = 'No pude completar la accion. ' + detalle;\n}\nreturn [{ json: { chatId: d.chatId, texto: msg } }];"
+      },
+      "id": "exec",
+      "name": "Ejecutar accion",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Cargar inventario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cargar inventario": {
+      "main": [
+        [
+          {
+            "node": "Preparar entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar entrada": {
+      "main": [
+        [
+          {
+            "node": "Agente Inventario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Inventario",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente Inventario": {
+      "main": [
+        [
+          {
+            "node": "Parsear accion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsear accion": {
+      "main": [
+        [
+          {
+            "node": "Ejecutar accion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ejecutar accion": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {},
+  "pinData": null,
+  "meta": null,
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "cLctBPDSRXliimrV",
+      "projectId": "NP66F5UnInJLE6vJ",
+      "project": {
+        "id": "NP66F5UnInJLE6vJ",
+        "name": "Luis Salazar <bonavidapy@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "320da470-085f-4ead-95c4-f4498fa8472d",
+        "createdAt": "2026-08-01T14:43:47.100Z",
+        "updatedAt": "2026-08-03T12:18:11.678Z"
+      },
+      "createdAt": "2026-09-01T01:13:36.827Z",
+      "updatedAt": "2026-09-01T01:13:36.827Z"
+    }
+  ],
+  "activeVersion": {
+    "versionId": "ad5e8c8c-c309-4f95-b3ce-94584007412d",
+    "workflowId": "cLctBPDSRXliimrV",
+    "nodes": [
+      {
+        "parameters": {
+          "updates": [
+            "message",
+            "callback_query"
+          ],
+          "additionalFields": {}
+        },
+        "id": "tg",
+        "name": "Telegram Trigger",
+        "type": "n8n-nodes-base.telegramTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          -600,
+          300
+        ],
+        "credentials": {
+          "telegramApi": {
+            "id": "wtekAWcrcfSlrW67",
+            "name": "SEIVA Bot"
+          }
+        },
+        "webhookId": "seiva-agent-v2"
+      },
+      {
+        "parameters": {
+          "url": "https://seiva.com.py/api/productos/all",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {}
+        },
+        "id": "h_inv",
+        "name": "Cargar inventario",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          -380,
+          300
+        ],
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "07NLMVgZ0MQtdNGA",
+            "name": "SEIVA Backend API"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const m = $('Telegram Trigger').item.json.message || $('Telegram Trigger').item.json.callback_query.message;\nconst cid = m.chat.id;\nlet txt = m.text || m.caption || '';\nconst prods = $items('Cargar inventario');\nconst lineas = prods.map(p => { const j = p.json || p;\n  return 'ID ' + j.id + ' | ' + j.nombre + ' | stock:' + j.stock + ' | precio:' + j.precio + ' | ' + (j.activo ? 'publicado' : 'oculto'); });\nconst inv = lineas.join('\\n');\nreturn [{ json: { chatId: cid, sessionId: cid, mensaje: txt, inventario: inv } }];"
+        },
+        "id": "prep",
+        "name": "Preparar entrada",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -160,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "model": "xiaomi/mimo-v2.5",
+          "options": {
+            "systemMessage": "You are a strict JSON API for SEIVA inventory management (Paraguay, currency Gs).\nOutput ONLY a valid JSON object. Never output prose, markdown, apologies or explanations.\n\nSchema: {\"accion\":string,\"id\":number|null,\"valor\":number|null,\"datos\":object,\"respuesta\":string}\n\naccion values:\n- \"ajustar_stock\": change stock. id=real product id, valor=new absolute stock.\n- \"publicar\": id=real id.\n- \"despublicar\": id=real id.\n- \"editar\": id=real id, datos={field:value}.\n- \"crear\": datos=full product object.\n- \"aclarar\": ambiguous or missing data. Ask in respuesta.\n- \"consultar\": answer questions using inventory data.\n\nRules:\n- Use ONLY the ids present in the INVENTORY list. Never invent ids.\n- If several products match, use accion \"aclarar\" and list them numbered with ids.\n- You do NOT execute anything. Just output the JSON.\n- Never claim success or use checkmarks.\n\nExamples:\nUser: \"pon el 188 en 5\" => {\"accion\":\"ajustar_stock\",\"id\":188,\"valor\":5,\"datos\":{},\"respuesta\":\"Actualizando stock del producto 188 a 5 unidades.\"}\nUser: \"cuanto stock hay\" => {\"accion\":\"consultar\",\"id\":null,\"valor\":null,\"datos\":{},\"respuesta\":\"<answer with real data>\"}",
+            "responseFormat": "json_object",
+            "temperature": 0.1,
+            "maxTokens": 800
+          }
+        },
+        "id": "model",
+        "name": "OpenRouter Chat Model",
+        "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+        "typeVersion": 1,
+        "position": [
+          -160,
+          520
+        ],
+        "credentials": {
+          "openRouterApi": {
+            "id": "36xo8T9UglAHMFDT",
+            "name": "OpenRouter account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "={{ \"USER MESSAGE: \" + $json.mensaje + \"\\n\\nINVENTORY (real ids):\\n\" + $json.inventario }}",
+          "options": {}
+        },
+        "id": "agent",
+        "name": "Agente Inventario",
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          60,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "let out = $input.first().json.output || $input.first().json.text || '';\nout = String(out).trim();\nout = out.replace(/^```json\\s*/i, '').replace(/^```\\s*/, '').replace(/```\\s*$/, '').trim();\nconst ini = out.indexOf('{');\nconst fin = out.lastIndexOf('}');\nlet d = null;\nif (ini >= 0 && fin > ini) {\n  try { d = JSON.parse(out.slice(ini, fin + 1)); } catch (e) { d = null; }\n}\nif (!d) {\n  d = { accion: 'consultar', respuesta: out };\n}\nreturn [{ json: { accion: d.accion || 'consultar', id: d.id, valor: d.valor, datos: d.datos || {}, respuesta: d.respuesta || '', chatId: $('Preparar entrada').item.json.chatId } }];"
+        },
+        "id": "parse",
+        "name": "Parsear accion",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          280,
+          300
+        ]
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $json.chatId }}",
+          "text": "={{ $json.texto }}",
+          "additionalFields": {
+            "appendAttribution": false
+          }
+        },
+        "id": "resp",
+        "name": "Responder",
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          1200,
+          300
+        ],
+        "credentials": {
+          "telegramApi": {
+            "id": "wtekAWcrcfSlrW67",
+            "name": "SEIVA Bot"
+          }
+        },
+        "webhookId": "6f6ba7d8-30cb-4b1f-be96-dfcc4adc06c1"
+      },
+      {
+        "parameters": {
+          "jsCode": "const d = $input.first().json;\nconst acc = d.accion;\nconst id = d.id;\nconst valor = d.valor;\nconst datos = d.datos || {};\nconst H = { 'Content-Type': 'application/json', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzg3NjE5ODk5LCJleHAiOjIxMDI5Nzk4OTl9.EOwKkZgszm1F8x5Z3bV9fKyiNQLe6NVTyX1e9ck1l4s' };\nconst API = 'https://seiva.com.py/api/productos';\n\n// Acciones que solo responden (no tocan el backend)\nif (acc === 'consultar' || acc === 'aclarar' || acc === 'error') {\n  return [{ json: { chatId: d.chatId, texto: d.respuesta } }];\n}\n\nlet url = '', method = 'GET', body = null;\nif (acc === 'ajustar_stock') { url = API + '/' + id; method = 'PUT'; body = { stock: Number(valor) }; }\nelse if (acc === 'editar') { url = API + '/' + id; method = 'PUT'; body = datos; }\nelse if (acc === 'publicar' || acc === 'despublicar') { url = API + '/' + id + '/toggle'; method = 'PATCH'; }\nelse if (acc === 'crear') { url = API; method = 'POST'; body = datos; }\nelse { return [{ json: { chatId: d.chatId, texto: d.respuesta || 'No entendi la accion.' } }]; }\n\nlet ok = false, detalle = '';\ntry {\n  const opts = { method: method, url: url, headers: H };\n  if (body) opts.body = body;\n  const r = await this.helpers.httpRequest(opts);\n  ok = true;\n  detalle = typeof r === 'string' ? r : JSON.stringify(r);\n} catch (e) { ok = false; detalle = 'ERROR: ' + e.message; }\n\nlet msg = '';\nif (ok) {\n  if (acc === 'ajustar_stock') msg = 'Stock actualizado correctamente.';\n  else if (acc === 'editar') msg = 'Producto editado correctamente.';\n  else if (acc === 'publicar' || acc === 'despublicar') msg = 'Estado actualizado correctamente.';\n  else if (acc === 'crear') msg = 'Producto creado correctamente.';\n} else {\n  msg = 'No pude completar la accion. ' + detalle;\n}\nreturn [{ json: { chatId: d.chatId, texto: msg } }];"
+        },
+        "id": "exec",
+        "name": "Ejecutar accion",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          700,
+          300
+        ]
+      }
+    ],
+    "connections": {
+      "Telegram Trigger": {
+        "main": [
+          [
+            {
+              "node": "Cargar inventario",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Cargar inventario": {
+        "main": [
+          [
+            {
+              "node": "Preparar entrada",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Preparar entrada": {
+        "main": [
+          [
+            {
+              "node": "Agente Inventario",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "OpenRouter Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Agente Inventario",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Agente Inventario": {
+        "main": [
+          [
+            {
+              "node": "Parsear accion",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parsear accion": {
+        "main": [
+          [
+            {
+              "node": "Ejecutar accion",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Ejecutar accion": {
+        "main": [
+          [
+            {
+              "node": "Responder",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodeGroups": [],
+    "authors": "Luis Salazar",
+    "name": null,
+    "description": null,
+    "autosaved": false,
+    "createdAt": "2026-09-01T12:38:21.983Z",
+    "updatedAt": "2026-09-01T12:38:21.983Z",
+    "workflowPublishHistory": [
+      {
+        "id": 273,
+        "workflowId": "cLctBPDSRXliimrV",
+        "versionId": "ad5e8c8c-c309-4f95-b3ce-94584007412d",
+        "event": "activated",
+        "userId": "320da470-085f-4ead-95c4-f4498fa8472d",
+        "createdAt": "2026-09-01T12:38:23.484Z"
+      }
+    ]
+  }
+}

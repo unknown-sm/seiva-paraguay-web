@@ -676,10 +676,16 @@
                 <option value="combos">Combos</option>
               </select>
             </div>
-            <div class="form-group" style="margin-bottom:0">
-              <label style="font-size:0.8rem">Marca</label>
-              <input type="text" id="prod-marca" class="form-input" placeholder="Ej: NutriMix, Seiva, Genérico">
-            </div>
+            <div class="form-group" style="margin-bottom:8px">
+                <label style="font-size:0.8rem">Marca</label>
+                <select id="prod-marca" class="form-select">
+                  <option value="">— Sin marca —</option>
+                </select>
+                <div style="margin-top:6px;display:flex;gap:6px;align-items:center">
+                  <button type="button" id="btn-agregar-marca" class="btn btn-sm" style="padding:4px 10px">+ Agregar Marca</button>
+                  <span id="prod-marca-info" style="font-size:0.75rem;color:var(--muted)">Seleccioná una marca existente, o creá una nueva.</span>
+                </div>
+              </div>
           </div>
 
           <!-- Inventario card -->

@@ -1,16 +1,16 @@
-# Graph Report - Pagina_seiva  (2026-09-01)
+# Graph Report - Pagina_seiva  (2026-08-25)
 
 ## Corpus Check
-- 191 files · ~1,265,317 words
+- 152 files · ~1,220,094 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1659 nodes · 2632 edges · 175 communities (127 shown, 48 thin omitted)
-- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 44 edges (avg confidence: 0.51)
+- 1391 nodes · 2340 edges · 135 communities (85 shown, 50 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 37 edges (avg confidence: 0.51)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `081b9681`
+- Built from commit: `c8c42359`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -20,7 +20,7 @@
 - backend/server.js
 - devDependencies
 - sidebar.tsx
-- alert-dialog.tsx
+- utils.ts
 - dependencies
 - compilerOptions
 - image-service.js
@@ -59,28 +59,28 @@
 - accordion.tsx
 - drawer.tsx
 - Flujo de Pedidos Ecommerce — Implementation Plan
-- brain-source.js
+- navigation-menu.tsx
 - backup.js
 - restore.js
-- scrapeProductData
+- downloadImage
 - producto-detail.js
-- api
+- empty.tsx
 - sync-stock.js
 - Seiva Paraguay — Design System
 - importFromWooCommerce
 - tsconfig.json
 - select.tsx
-- utils.ts
+- popover.tsx
 - pwa.js
 - parseProducto
 - whatsapp.js
 - Estado del proyecto
 - check-db.js
-- item.tsx
+- badge.tsx
 - Seiva Paraguay — Mejoras (Junio 2026)
 - StatsBar.tsx
 - PromosPage.tsx
-- xt
+- cmdk
 - date-fns
 - embla-carousel-react
 - gsap
@@ -128,55 +128,15 @@
 - copy-provider.openrouter.js
 - React + TypeScript + Vite
 - copy-provider.custom.js
-- formatGs
+- _verify_img.js
 - class-variance-authority
-- build_v2.js
-- build_v4.js
-- carousel.tsx
-- SEIVA — Workflows n8n
-- switchTab
-- build_v3.js
-- $
-- form.tsx
-- _chk_statsbar.js
-- fix_switch2.js
-- _crear_dm.js
-- _reset_pw.js
-- search-service.js
-- fix_json.js
-- _test_token.js
-- _chk_offers.js
-- _fix_ofertas.js
-- _restore_statsbar.js
-- toggle-group.tsx
-- fix_ctx.js
-- _test_brain.js
-- _test_router.js
-- _chk_auth.js
-- _chk_offers2.js
-- _chk_promos.js
-- _chk_slug_total.js
-- _chk_credentials.js
-- export_workflow.js
-- _verify_live.js
-- loadProductos
-- _chk_stats.js
-- _chk_uniervas.js
-- _fix_dm.js
-- alert.tsx
-- _chk_favicon.js
-- _chk_oferta.js
-- _chk_slug.js
-- _chk_slug_list.js
-- _inspect_site.js
-- clsx
 
 ## God Nodes (most connected - your core abstractions)
 1. `cn()` - 270 edges
-2. `api()` - 57 edges
+2. `api()` - 56 edges
 3. `useCart()` - 25 edges
-4. `xt()` - 24 edges
-5. `formatPrice()` - 24 edges
+4. `formatPrice()` - 24 edges
+5. `xt()` - 23 edges
 6. `compilerOptions` - 22 edges
 7. `toast()` - 21 edges
 8. `switchTab()` - 21 edges
@@ -184,8 +144,6 @@
 10. `imageSrcSet()` - 18 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `trimAudioToWav()` --indirect_call--> `out()`  [INFERRED]
-  seiva-static/admin/js/admin.js → n8n-workflows/scripts/brain-source.js
 - `filterProductos()` --references--> `CATEGORIAS`  [EXTRACTED]
   seiva-static/js/main.js → seivvaweb/app/src/pages/TiendaPage.tsx
 - `MobileTabBar()` --indirect_call--> `Home()`  [INFERRED]
@@ -194,23 +152,25 @@
   seivvaweb/app/src/components/ui/alert-dialog.tsx → seivvaweb/app/src/lib/utils.ts
 - `AlertDialogContent()` --calls--> `cn()`  [EXTRACTED]
   seivvaweb/app/src/components/ui/alert-dialog.tsx → seivvaweb/app/src/lib/utils.ts
+- `AlertDialogHeader()` --calls--> `cn()`  [EXTRACTED]
+  seivvaweb/app/src/components/ui/alert-dialog.tsx → seivvaweb/app/src/lib/utils.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (175 total, 48 thin omitted)
+## Communities (135 total, 50 thin omitted)
 
 ### Community 0 - "admin.js"
-Cohesion: 0.09
-Nodes (18): agregarFilaVenta(), editarPromo(), editEnvio(), encodeWav(), initTheme(), injectGA(), loadGAScript(), loadMarcasSelect() (+10 more)
+Cohesion: 0.05
+Nodes (96): abrirModalDescMarca(), addBundleProductRow(), addTierRow(), agregarFilaVenta(), api(), calcularPrecioBundle(), cambiarEstadoPedido(), clearErrorLogs() (+88 more)
 
 ### Community 1 - "cn"
-Cohesion: 0.06
-Nodes (51): Avatar(), AvatarFallback(), AvatarImage(), BreadcrumbEllipsis(), BreadcrumbItem(), BreadcrumbLink(), BreadcrumbList(), BreadcrumbPage() (+43 more)
+Cohesion: 0.05
+Nodes (53): Avatar(), AvatarFallback(), AvatarImage(), BreadcrumbEllipsis(), BreadcrumbItem(), BreadcrumbLink(), BreadcrumbList(), BreadcrumbPage() (+45 more)
 
 ### Community 2 - "backend/server.js"
 Cohesion: 0.04
-Nodes (42): ADMIN_HASH, adminPath, app, BACKUP_DIR, bcrypt, brandMap, carritoLimiter, catCount (+34 more)
+Nodes (41): ADMIN_HASH, adminPath, app, BACKUP_DIR, bcrypt, brandMap, carritoLimiter, catCount (+33 more)
 
 ### Community 3 - "devDependencies"
 Cohesion: 0.04
@@ -218,11 +178,11 @@ Nodes (44): autoprefixer, eslint, @eslint/js, eslint-plugin-react-hooks, eslint-
 
 ### Community 4 - "sidebar.tsx"
 Cohesion: 0.06
-Nodes (39): Sheet(), SheetContent(), SheetDescription(), SheetFooter(), SheetHeader(), SheetOverlay(), SheetTitle(), Sidebar() (+31 more)
+Nodes (38): Sheet(), SheetContent(), SheetDescription(), SheetFooter(), SheetHeader(), SheetOverlay(), SheetTitle(), Sidebar() (+30 more)
 
-### Community 5 - "alert-dialog.tsx"
-Cohesion: 0.11
-Nodes (19): AlertDialogAction(), AlertDialogCancel(), AlertDialogContent(), AlertDialogDescription(), AlertDialogFooter(), AlertDialogHeader(), AlertDialogOverlay(), AlertDialogTitle() (+11 more)
+### Community 5 - "utils.ts"
+Cohesion: 0.07
+Nodes (27): Alert(), AlertDescription(), AlertTitle(), alertVariants, AlertDialogAction(), AlertDialogCancel(), AlertDialogContent(), AlertDialogDescription() (+19 more)
 
 ### Community 6 - "dependencies"
 Cohesion: 0.06
@@ -234,11 +194,11 @@ Nodes (28): DOM, DOM.Iterable, ES2022, src, vite/client, compilerOptions, allowI
 
 ### Community 8 - "image-service.js"
 Cohesion: 0.11
-Nodes (27): collectFilenames(), { DatabaseSync }, fs, imageService, main(), path, ALLOWED_EXT, buildSources() (+19 more)
+Nodes (26): collectFilenames(), { DatabaseSync }, fs, imageService, main(), path, ALLOWED_EXT, buildSources() (+18 more)
 
 ### Community 9 - "react"
-Cohesion: 0.12
-Nodes (17): react, react, ChartConfig, ChartContainer(), ChartContext, ChartContextProps, ChartLegendContent(), ChartTooltipContent() (+9 more)
+Cohesion: 0.06
+Nodes (41): react, react, Carousel(), CarouselApi, CarouselContent(), CarouselContext, CarouselContextProps, CarouselItem() (+33 more)
 
 ### Community 10 - "app.js"
 Cohesion: 0.14
@@ -253,8 +213,8 @@ Cohesion: 0.11
 Nodes (17): App(), Footer, MobileTabBar(), ScrollToTop(), CurrentProductContext, CurrentProductContextValue, CurrentProductProvider(), useCurrentProduct() (+9 more)
 
 ### Community 13 - "field.tsx"
-Cohesion: 0.16
-Nodes (12): Field(), FieldContent(), FieldDescription(), FieldError(), FieldGroup(), FieldLabel(), FieldLegend(), FieldSeparator() (+4 more)
+Cohesion: 0.12
+Nodes (17): ButtonGroup(), ButtonGroupSeparator(), ButtonGroupText(), buttonGroupVariants, Field(), FieldContent(), FieldDescription(), FieldError() (+9 more)
 
 ### Community 14 - "command.tsx"
 Cohesion: 0.12
@@ -314,7 +274,7 @@ Nodes (44): provider, askNextField(), clear(), COPY_FIELDS, copyProvider, escape
 
 ### Community 28 - "dependencies"
 Cohesion: 0.15
-Nodes (13): cmdk, @radix-ui/react-context-menu, @radix-ui/react-menubar, @radix-ui/react-scroll-area, @radix-ui/react-select, react-dom, dependencies, cmdk (+5 more)
+Nodes (13): clsx, @radix-ui/react-context-menu, @radix-ui/react-menubar, @radix-ui/react-scroll-area, @radix-ui/react-select, react-dom, dependencies, clsx (+5 more)
 
 ### Community 29 - "public/manifest.json"
 Cohesion: 0.15
@@ -376,9 +336,9 @@ Nodes (6): DrawerContent(), DrawerDescription(), DrawerFooter(), DrawerHeader(),
 Cohesion: 0.14
 Nodes (13): Admin Panel, Backend, File Map, Flujo de Pedidos Ecommerce — Implementation Plan, Frontend, Post-Implementation Suggestions (from Superpowers), Spec Coverage Check, Task 1: Backend — Crear tabla pedidos y endpoints (+5 more)
 
-### Community 44 - "brain-source.js"
-Cohesion: 0.13
-Nodes (31): clearSession(), completarGaleria(), continuarCrear(), doStock(), draft, executeAction(), fmt(), generarFicha() (+23 more)
+### Community 44 - "navigation-menu.tsx"
+Cohesion: 0.22
+Nodes (9): NavigationMenu(), NavigationMenuContent(), NavigationMenuIndicator(), NavigationMenuItem(), NavigationMenuLink(), NavigationMenuList(), NavigationMenuTrigger(), navigationMenuTriggerStyle (+1 more)
 
 ### Community 45 - "backup.js"
 Cohesion: 0.36
@@ -388,17 +348,17 @@ Nodes (7): backup(), downloadImage(), fetchAPI(), fs, https, path, saveJSON()
 Cohesion: 0.29
 Nodes (7): { DatabaseSync }, db, DB_DIR, fs, path, readJSON(), restore()
 
-### Community 48 - "scrapeProductData"
-Cohesion: 0.22
-Nodes (9): auth(), downloadImage(), formatDescription(), formatDescriptionLarga(), isValidScrapeUrl(), logError(), parsePrecio(), sanitizeHtml() (+1 more)
+### Community 48 - "downloadImage"
+Cohesion: 0.25
+Nodes (8): auth(), downloadImage(), formatDescription(), formatDescriptionLarga(), isValidScrapeUrl(), logError(), sanitizeHtml(), scrapeProductData()
 
 ### Community 49 - "producto-detail.js"
 Cohesion: 0.46
 Nodes (7): fetchProduct(), formatPrice(), getApiBase(), getProductId(), init(), renderProduct(), showNotFound()
 
-### Community 50 - "api"
-Cohesion: 0.12
-Nodes (31): api(), cambiarEstadoPedido(), clearErrorLogs(), clearHeroProduct(), deleteCategoria(), deletePagina(), editarMarca(), editarUsuario() (+23 more)
+### Community 50 - "empty.tsx"
+Cohesion: 0.29
+Nodes (7): Empty(), EmptyContent(), EmptyDescription(), EmptyHeader(), EmptyMedia(), emptyMediaVariants, EmptyTitle()
 
 ### Community 51 - "sync-stock.js"
 Cohesion: 0.38
@@ -420,13 +380,9 @@ Nodes (5): compilerOptions, baseUrl, paths, files, references
 Cohesion: 0.18
 Nodes (7): SelectContent(), SelectItem(), SelectLabel(), SelectScrollDownButton(), SelectScrollUpButton(), SelectSeparator(), SelectTrigger()
 
-### Community 56 - "utils.ts"
-Cohesion: 0.08
-Nodes (10): Badge(), badgeVariants, Checkbox(), HoverCardContent(), PopoverContent(), Progress(), ResizableHandle(), ResizablePanelGroup() (+2 more)
-
 ### Community 57 - "pwa.js"
-Cohesion: 0.60
-Nodes (5): init(), playCashSound(), playSynthesizedSound(), subscribeUser(), urlBase64ToUint8Array()
+Cohesion: 0.83
+Nodes (3): init(), playCashSound(), playSynthesizedSound()
 
 ### Community 58 - "parseProducto"
 Cohesion: 0.50
@@ -440,10 +396,6 @@ Nodes (3): crearBotonWhatsApp(), generarLinkWhatsApp(), initWhatsAppButtons()
 Cohesion: 0.22
 Nodes (8): Bugs, Estado del proyecto, Fase 1 - Auditoría ✅, Fase 2 - Corrección de bugs (pendiente), Fase 3 - Optimización de velocidad (pendiente), Hallazgos, Seiva Paraguay - WordPress WooCommerce, Server
 
-### Community 65 - "item.tsx"
-Cohesion: 0.13
-Nodes (17): ButtonGroup(), ButtonGroupSeparator(), ButtonGroupText(), buttonGroupVariants, Item(), ItemActions(), ItemContent(), ItemDescription() (+9 more)
-
 ### Community 66 - "Seiva Paraguay — Mejoras (Junio 2026)"
 Cohesion: 0.29
 Nodes (6): M1: Prioridad de Marcas, M2: Fix Bug Descuentos, M3: Descuentos por Marca, M4: Homepage WhatsApp → Carrito, M5: WhatsApp Mejorado + Carrito Abandonado, Seiva Paraguay — Mejoras (Junio 2026)
@@ -451,10 +403,6 @@ Nodes (6): M1: Prioridad de Marcas, M2: Fix Bug Descuentos, M3: Descuentos por M
 ### Community 69 - "PromosPage.tsx"
 Cohesion: 0.38
 Nodes (6): formatBenefit(), formatCondition(), Promo, PromosPage(), tipoIcons, tipoLabels
-
-### Community 70 - "xt"
-Cohesion: 0.19
-Nodes (15): abrirModalDescMarca(), addTierRow(), editarProducto(), kpiIcon(), loadCategoriasSelect(), loadDashboard(), loadMarcasSelectProd(), nuevoDescuentoMarca() (+7 more)
 
 ### Community 127 - "Seiva Paraguay - WordPress WooCommerce"
 Cohesion: 0.33
@@ -472,181 +420,25 @@ Nodes (4): buildUserPrompt(), callOpenRouter(), generateCopy(), parseCopy()
 Cohesion: 0.50
 Nodes (3): Expanding the ESLint configuration, React Compiler, React + TypeScript + Vite
 
-### Community 132 - "formatGs"
-Cohesion: 0.18
-Nodes (15): addBundleProductRow(), calcularPrecioBundle(), editarBundle(), eliminarUsuario(), formatDate(), formatGs(), loadUsuarios(), nuevoBundle() (+7 more)
-
-### Community 135 - "build_v2.js"
-Cohesion: 0.14
-Nodes (11): connections, CRED_HTTP, CRED_OR, CRED_TG, fs, https, JWT, K (+3 more)
-
-### Community 136 - "build_v4.js"
-Cohesion: 0.14
-Nodes (11): brain, brainSrc, connections, CRED_TG, fs, https, n8nLines, nodes (+3 more)
-
-### Community 137 - "carousel.tsx"
-Cohesion: 0.20
-Nodes (13): Carousel(), CarouselApi, CarouselContent(), CarouselContext, CarouselContextProps, CarouselItem(), CarouselNext(), CarouselOptions (+5 more)
-
-### Community 138 - "SEIVA — Workflows n8n"
-Cohesion: 0.15
-Nodes (12): Archivos, Arquitectura (8 nodos, lineal), Comandos útiles, Endpoints del backend que usa, Entorno n8n, Formato que devuelve el agente, Lecciones / pitfalls de n8n 2.36.8, Puntos críticos (no romper) (+4 more)
-
-### Community 139 - "switchTab"
-Cohesion: 0.15
-Nodes (13): deleteEnvio(), eliminarBundle(), loadAnalytics(), loadBundles(), loadContenido(), loadEnvios(), loadHeroProduct(), loadHistorico() (+5 more)
-
-### Community 140 - "build_v3.js"
-Cohesion: 0.17
-Nodes (9): connections, CRED_TG, fs, https, K, nodes, OUT, path (+1 more)
-
-### Community 141 - "$"
-Cohesion: 0.20
-Nodes (10): $, base, bySlug, candidates, cheerio, fs, html, idFromAny (+2 more)
-
-### Community 142 - "form.tsx"
-Cohesion: 0.25
-Nodes (9): FormControl(), FormDescription(), FormFieldContext, FormFieldContextValue, FormItemContext, FormItemContextValue, FormLabel(), FormMessage() (+1 more)
-
-### Community 143 - "_chk_statsbar.js"
-Cohesion: 0.22
-Nodes (8): {DatabaseSync}, db, fs, keys, match, path, row, serverJs
-
-### Community 144 - "fix_switch2.js"
-Cohesion: 0.25
-Nodes (6): CODE, fs, https, JWT, K, WF
-
-### Community 145 - "_crear_dm.js"
-Cohesion: 0.25
-Nodes (7): creado, {DatabaseSync}, db, incl, insert, m, res
-
-### Community 146 - "_reset_pw.js"
-Cohesion: 0.25
-Nodes (7): bcrypt, crypto, {DatabaseSync}, db, hash, r, u
-
-### Community 147 - "search-service.js"
-Cohesion: 0.46
-Nodes (6): buildFtsQuery(), levenshtein(), normalize(), search(), similarity(), suggest()
-
-### Community 148 - "fix_json.js"
-Cohesion: 0.29
-Nodes (5): fs, https, K, SYS, WF
-
-### Community 149 - "_test_token.js"
-Cohesion: 0.33
-Nodes (5): b64url(), crypto, fresh, now, sign()
-
-### Community 150 - "_chk_offers.js"
-Cohesion: 0.29
-Nodes (6): count, {DatabaseSync}, db, dc, et, ue
-
-### Community 151 - "_fix_ofertas.js"
-Cohesion: 0.29
-Nodes (6): all, {DatabaseSync}, db, dejar, fs, update
-
-### Community 152 - "_restore_statsbar.js"
-Cohesion: 0.29
-Nodes (6): {DatabaseSync}, db, defaultStats, r, upsert, verify
-
-### Community 153 - "toggle-group.tsx"
-Cohesion: 0.43
-Nodes (5): ToggleGroup(), ToggleGroupContext, ToggleGroupItem(), Toggle(), toggleVariants
-
-### Community 154 - "fix_ctx.js"
-Cohesion: 0.33
-Nodes (4): fs, https, JWT, K
-
-### Community 155 - "_test_brain.js"
-Cohesion: 0.33
-Nodes (4): fs, prods, sessionStore, w
-
-### Community 156 - "_test_router.js"
-Cohesion: 0.33
-Nodes (5): cases, fs, prods, router, w
-
-### Community 157 - "_chk_auth.js"
-Cohesion: 0.33
-Nodes (5): crypto, {DatabaseSync}, db, fs, jwt
-
-### Community 158 - "_chk_offers2.js"
-Cohesion: 0.33
-Nodes (5): count, {DatabaseSync}, db, et, ue
-
-### Community 159 - "_chk_promos.js"
-Cohesion: 0.33
-Nodes (5): {DatabaseSync}, db, dm, marcas, promos
-
-### Community 160 - "_chk_slug_total.js"
-Cohesion: 0.33
-Nodes (5): conSlug, {DatabaseSync}, db, sinSlug, total
-
-### Community 161 - "_chk_credentials.js"
-Cohesion: 0.40
-Nodes (3): fs, https, K
-
-### Community 162 - "export_workflow.js"
-Cohesion: 0.40
-Nodes (3): fs, https, K
-
-### Community 163 - "_verify_live.js"
-Cohesion: 0.40
-Nodes (3): fs, JWT, N8N_LINES
-
-### Community 164 - "loadProductos"
-Cohesion: 0.40
-Nodes (5): eliminarProducto(), loadProductos(), renderProductos(), toggleProducto(), updateSortIndicators()
-
-### Community 165 - "_chk_stats.js"
-Cohesion: 0.40
-Nodes (4): {DatabaseSync}, db, rows, sb
-
-### Community 166 - "_chk_uniervas.js"
-Cohesion: 0.40
-Nodes (4): con120, {DatabaseSync}, db, todos
-
-### Community 167 - "_fix_dm.js"
-Cohesion: 0.40
-Nodes (4): c, {DatabaseSync}, db, n
-
-### Community 168 - "alert.tsx"
-Cohesion: 0.50
-Nodes (4): Alert(), AlertDescription(), AlertTitle(), alertVariants
-
-### Community 169 - "_chk_favicon.js"
-Cohesion: 0.50
-Nodes (3): {DatabaseSync}, db, r
-
-### Community 170 - "_chk_oferta.js"
-Cohesion: 0.50
-Nodes (3): {DatabaseSync}, db, rows
-
-### Community 171 - "_chk_slug.js"
-Cohesion: 0.50
-Nodes (3): {DatabaseSync}, db, rows
-
-### Community 172 - "_chk_slug_list.js"
-Cohesion: 0.50
-Nodes (3): {DatabaseSync}, db, rows
-
 ## Knowledge Gaps
-- **605 isolated node(s):** `fs`, `path`, `https`, `name`, `version` (+600 more)
+- **424 isolated node(s):** `fs`, `path`, `https`, `name`, `version` (+419 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **48 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **50 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `cn` to `item.tsx`, `toggle-group.tsx`, `sidebar.tsx`, `alert-dialog.tsx`, `alert.tsx`, `accordion.tsx`, `carousel.tsx`, `react`, `drawer.tsx`, `field.tsx`, `command.tsx`, `form.tsx`, `menubar.tsx`, `select.tsx`, `context-menu.tsx`, `utils.ts`, `dropdown-menu.tsx`, `input-group.tsx`?**
-  _High betweenness centrality (0.118) - this node is a cross-community bridge._
-- **Why does `dependencies` connect `dependencies` to `devDependencies`, `class-variance-authority`, `react`, `clsx`, `date-fns`, `embla-carousel-react`, `gsap`, `@gsap/react`, `@hookform/resolvers`, `input-otp`, `lucide-react`, `next-themes`, `@radix-ui/react-accordion`, `@radix-ui/react-alert-dialog`, `@radix-ui/react-aspect-ratio`, `@radix-ui/react-avatar`, `@radix-ui/react-checkbox`, `@radix-ui/react-collapsible`, `@radix-ui/react-dialog`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-hover-card`, `@radix-ui/react-label`, `@radix-ui/react-navigation-menu`, `@radix-ui/react-popover`, `@radix-ui/react-progress`, `@radix-ui/react-radio-group`, `@radix-ui/react-separator`, `@radix-ui/react-slider`, `@radix-ui/react-slot`, `@radix-ui/react-switch`, `@radix-ui/react-tabs`, `@radix-ui/react-toggle`, `@radix-ui/react-toggle-group`, `@radix-ui/react-tooltip`, `react-day-picker`, `react-hook-form`, `react-resizable-panels`, `react-router`, `react-router-dom`, `recharts`, `sonner`, `tailwind-merge`, `vaul`, `zod`?**
-  _High betweenness centrality (0.051) - this node is a cross-community bridge._
-- **Why does `react` connect `react` to `sidebar.tsx`, `alert-dialog.tsx`, `carousel.tsx`, `form.tsx`, `toggle-group.tsx`, `dependencies`?**
-  _High betweenness centrality (0.047) - this node is a cross-community bridge._
+- **Why does `cn()` connect `cn` to `badge.tsx`, `sidebar.tsx`, `utils.ts`, `accordion.tsx`, `react`, `drawer.tsx`, `navigation-menu.tsx`, `field.tsx`, `command.tsx`, `empty.tsx`, `menubar.tsx`, `select.tsx`, `context-menu.tsx`, `dropdown-menu.tsx`, `popover.tsx`, `input-group.tsx`?**
+  _High betweenness centrality (0.148) - this node is a cross-community bridge._
+- **Why does `dependencies` connect `dependencies` to `devDependencies`, `class-variance-authority`, `react`, `cmdk`, `date-fns`, `embla-carousel-react`, `gsap`, `@gsap/react`, `@hookform/resolvers`, `input-otp`, `lucide-react`, `next-themes`, `@radix-ui/react-accordion`, `@radix-ui/react-alert-dialog`, `@radix-ui/react-aspect-ratio`, `@radix-ui/react-avatar`, `@radix-ui/react-checkbox`, `@radix-ui/react-collapsible`, `@radix-ui/react-dialog`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-hover-card`, `@radix-ui/react-label`, `@radix-ui/react-navigation-menu`, `@radix-ui/react-popover`, `@radix-ui/react-progress`, `@radix-ui/react-radio-group`, `@radix-ui/react-separator`, `@radix-ui/react-slider`, `@radix-ui/react-slot`, `@radix-ui/react-switch`, `@radix-ui/react-tabs`, `@radix-ui/react-toggle`, `@radix-ui/react-toggle-group`, `@radix-ui/react-tooltip`, `react-day-picker`, `react-hook-form`, `react-resizable-panels`, `react-router`, `react-router-dom`, `recharts`, `sonner`, `tailwind-merge`, `vaul`, `zod`?**
+  _High betweenness centrality (0.077) - this node is a cross-community bridge._
+- **Why does `react` connect `react` to `cn`, `sidebar.tsx`, `dependencies`, `utils.ts`?**
+  _High betweenness centrality (0.068) - this node is a cross-community bridge._
 - **What connects `fs`, `path`, `https` to the rest of the system?**
-  _605 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _424 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `admin.js` be split into smaller, more focused modules?**
-  _Cohesion score 0.08669354838709678 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05004170141784821 - nodes in this community are weakly interconnected._
 - **Should `cn` be split into smaller, more focused modules?**
-  _Cohesion score 0.058699101004759384 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05223880597014925 - nodes in this community are weakly interconnected._
 - **Should `backend/server.js` be split into smaller, more focused modules?**
-  _Cohesion score 0.0392156862745098 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.04 - nodes in this community are weakly interconnected._

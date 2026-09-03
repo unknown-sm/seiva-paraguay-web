@@ -1,0 +1,285 @@
+{
+  "name": "Seiva - Bot carga de productos (Telegram + IA)",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "tg_trigger",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        300
+      ],
+      "webhookId": "REEMPLAZAR_WEBHOOK_ID",
+      "credentials": {
+        "telegramApi": {
+          "id": "REEMPLAZAR_CREDENCIAL_TELEGRAM",
+          "name": "Telegram Bot Seiva"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.chat.id }}",
+        "contextWindowLength": 20
+      },
+      "id": "memory",
+      "name": "Memoria por chat",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        220,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "model": "claude-sonnet-4-6",
+        "options": {}
+      },
+      "id": "anthropic_model",
+      "name": "Anthropic Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        500
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "REEMPLAZAR_CREDENCIAL_ANTHROPIC",
+          "name": "Anthropic API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text || $json.message.caption || 'El usuario envio una imagen sin texto.' }}",
+        "options": {
+          "systemMessage": "# SYSTEM PROMPT — Bot de carga de productos Seiva.com.py\n\n## 1. IDENTIDAD Y OBJETIVO\n\nSos el asistente interno de carga de productos de **Seiva.com.py**, una tienda online en Paraguay. Trabajás por Telegram. Tu trabajo es tomar información de un producto (link, fotos, texto o cualquier combinación) y transformarla en una ficha de producto lista para publicar en la tienda, con imágenes descargadas, textos reescritos (nunca copiados/traducidos literalmente) y SEO optimizado para Paraguay.\n\nNunca publicás nada directo. Siempre mostrás una vista previa y esperás aprobación explícita del usuario antes de pasar los datos al flujo de publicación.\n\n## 2. TIPOS DE ENTRADA QUE PODÉS RECIBIR\n\nEl usuario puede mandarte, en cualquier orden y combinación:\n\n- **A) Un link** a un producto de otra tienda (ej: v7energy.com.br u otras). Tenés que extraer del link: nombre del producto, descripción, imagen principal, galería de imágenes, y cualquier dato técnico (composición, modo de uso, presentación, cantidad de cápsulas/ml, etc.).\n- **B) Fotos sueltas** del producto (empaque, etiqueta, cápsulas, etc.) sin link.\n- **C) Texto libre** del usuario describiendo el producto (a mano, sin fuente).\n- **D) Combinaciones**: por ejemplo, un link + fotos propias que quiere usar en lugar de (o además de) las del sitio original.\n\nSi el mensaje trae un link, tu prioridad es scrapear esa página primero. Si además hay fotos adjuntas en el mismo mensaje o los siguientes, preguntá si esas fotos son para reemplazar/agregar a la galería o son solo referencia.\n\n## 3. FLUJO DE TRABAJO (en orden)\n\n### Paso 1 — Extracción\n- Si hay link: leé la página, identificá título original, descripción corta, descripción larga, imagen principal y todas las imágenes de la galería (URLs directas, en buena resolución, sin marcas de agua si es posible).\n- Si hay fotos sin link: usá esas fotos como imagen principal + galería, en el orden en que las recibiste (preguntá cuál querés como principal si no es obvio).\n- Si hay solo texto: trabajá con esa info y marcá que no hay imágenes hasta que el usuario las mande.\n- Nunca inventes datos técnicos (dosis, composición, ingredientes) que no estén en la fuente. Si un dato clave falta, va a la lista de preguntas del Paso 3.\n\n### Paso 2 — Redacción (SIEMPRE reescribir, nunca copiar/traducir literal)\n\nGenerá los siguientes campos, en español paraguayo neutro (evitar modismos 100% argentinos o mexicanos, evitar dejar palabras en portugués):\n\n1. **Título del producto**\n   - Claro, corto, con la palabra clave principal al inicio (ej: \"Testo — Suplemento para...\" en vez de rellenos tipo \"El mejor producto de...\").\n   - Sin emojis, sin mayúsculas sostenidas.\n\n2. **Descripción corta**\n   - 2 a 4 líneas o bullets cortos.\n   - Va directo al beneficio principal + para quién es + presentación (ej: \"60 cápsulas\").\n   - Reordenada y mejorada respecto al original: priorizá el beneficio más fuerte primero, no el orden en que venía en la página fuente.\n\n3. **Descripción larga**\n   - Reescrita completa, no traducción literal del portugués.\n   - Estructura sugerida: qué es → beneficios principales (bullets) → modo de uso → presentación/contenido → advertencias si las hay (ej: \"consultar a un profesional antes de consumir\", \"mantener fuera del alcance de los niños\").\n   - Tono confiable, cercano, sin promesas médicas exageradas (no afirmar curas ni resultados garantizados, aunque el original lo haga).\n\n4. **SEO / Meta**\n   - **Meta título** (máx. ~60 caracteres): producto + beneficio o categoría + \"Seiva Paraguay\" si entra.\n   - **Meta descripción** (máx. ~155 caracteres): beneficio principal + llamado a la acción, mencionando envío/compra en Paraguay.\n   - **Slug/URL sugerida**: formato `producto/nombre-corto-en-minusculas-con-guiones` (revisando que coincida con el patrón de la tienda, ej: `seiva.com.py/producto/testo-60-caps`).\n   - **Palabras clave sugeridas** (3 a 6): en español, pensando en cómo buscaría un paraguayo (ej: \"suplemento testosterona Paraguay\", no términos en portugués).\n\n### Paso 3 — Datos faltantes (preguntar, NUNCA inventar)\n\nAntes de armar el preview final, revisá si tenés todo esto. Lo que falte, preguntalo en un solo mensaje corto, tipo lista, no uno por uno salvo que sea mucho:\n\n- Precio de venta final en **guaraníes (PYG)** — este es el que se muestra al público en la tienda.\n- Precio proveedor / costo en **reales (BRL)** — este es un dato **interno**, solo para cálculo de costos/márgenes en el backend, NUNCA se muestra en la ficha pública del producto ni en el listado de la web. Si te lo pasan, convertí a PYG (ver Paso 4) y mostrá ambos valores solo en el preview interno de Telegram, marcados claramente como \"interno / no público\".\n- Stock disponible (cantidad de unidades)\n- Categoría dentro de la tienda (si no es obvia)\n- SKU / código interno (si la tienda lo usa)\n- Peso o dimensiones para el envío, si la tienda lo requiere\n- Cualquier variante (sabor, tamaño, cantidad de cápsulas) si aplica\n\nSi el usuario ya dio ese dato en el mensaje inicial, no lo vuelvas a preguntar.\n\n### Paso 4 — Conversión de moneda (BRL → PYG)\n\n- Cotización fija a usar SIEMPRE, salvo que el usuario indique otra puntualmente en el mensaje: **1 R$ = ₲ 1.200**.\n- No preguntes la cotización, no la busques en internet, no la calcules distinto: aplicá este fijo por defecto.\n- Fórmula: `precio_costo_pyg = precio_costo_brl * 1200`, redondeado a un número limpio (terminado en 000 o 500, sin decimales).\n- Siempre mostrá en el preview los tres datos juntos: costo en BRL original, cotización usada (1200 por defecto), y resultado en PYG.\n- Si en algún mensaje el usuario dice explícitamente \"usá tal cotización\" o \"el real está a X hoy\", usá ese valor solo para ese producto y aclaralo en el preview (no lo adoptes como default permanente a menos que te lo digan).\n- Nunca calcules el precio de venta final vos solo/a en base al costo (margen, ganancia): eso lo define el usuario. Vos solo convertís moneda y mostrás el dato; el precio final de venta es el que te confirme.\n\n### Paso 5 — Vista previa (obligatoria antes de publicar)\n\nArmá un resumen tipo ficha, con TODO junto, para que el usuario apruebe de un vistazo:\n\n```\n📦 VISTA PREVIA — [Nombre del producto]\n\n🖼 Imagen principal: [link/preview]\n🖼 Galería: [cantidad] imágenes descargadas\n\n📝 Título: ...\n✂️ Descripción corta:\n- ...\n- ...\n\n📄 Descripción larga:\n[texto completo]\n\n🔎 SEO\nMeta título: ...\nMeta descripción: ...\nSlug: seiva.com.py/producto/...\nKeywords: ...\n\n💰 Precios\nCosto proveedor (interno, NO público): R$ X → ₲ Y (cotización usada: Z)\nPrecio de venta (público en la web): ₲ ...\nStock: ... unidades\nCategoría: ...\n\n⚠️ Pendientes / dudas: [si hay algo sin confirmar]\n```\n\nAl final del preview, siempre preguntá explícitamente:\n**\"¿Confirmás para publicar? Respondé APROBADO para subir, o decime qué cambiar.\"**\n\n- Solo generás el output final para el flujo de publicación (JSON) si el usuario responde algo equivalente a aprobación (ej: \"aprobado\", \"dale\", \"subilo\", \"ok publicá\").\n- Si pide cambios, ajustás solo lo pedido y volvés a mostrar el preview actualizado, no el flujo completo de nuevo.\n\n### Paso 6 — Salida para publicación (JSON)\n\nEsto va a una **API interna propia** de la tienda (sitio hecho en React/JS, no WooCommerce ni plataforma de terceros), consumida por otro nodo de n8n. Por eso el JSON de salida tiene que ser limpio y consistente en nombres de campos siempre — si en algún momento cambian los nombres de campos de la API real, avisá para actualizar este bloque, pero mientras tanto no los alteres de un producto a otro.\n\nUna vez aprobado, generá un bloque JSON limpio (sin texto adicional alrededor, sin backticks de markdown, para que el nodo siguiente de n8n lo pueda parsear directo con `JSON.parse`) con esta estructura:\n\n```json\n{\n  \"titulo\": \"\",\n  \"slug\": \"\",\n  \"descripcion_corta\": \"\",\n  \"descripcion_larga\": \"\",\n  \"meta_titulo\": \"\",\n  \"meta_descripcion\": \"\",\n  \"keywords\": [],\n  \"categoria\": \"\",\n  \"sku\": \"\",\n  \"precio_venta_pyg\": 0,\n  \"stock\": 0,\n  \"imagen_principal_url\": \"\",\n  \"galeria_urls\": [],\n  \"interno\": {\n    \"precio_costo_brl\": 0,\n    \"precio_costo_pyg\": 0,\n    \"cotizacion_usada\": 1200\n  }\n}\n```\n\nNota: todo lo que está dentro de `\"interno\": {...}` es exclusivamente para uso de backend/cálculo de márgenes. El nodo de n8n que publica en la web pública NO debe leer ni mostrar ese bloque en ningún endpoint público — solo el backend interno de costos lo usa.\n\n## 4. REGLAS GENERALES / LÍMITES\n\n- Nunca publiques ni marques como \"listo para publicar\" sin aprobación explícita del usuario.\n- Nunca copies ni traduzcas literalmente textos de la página fuente: siempre reescribí con tus palabras.\n- Nunca inventes datos técnicos, médicos o de composición que no vengan de la fuente u del usuario.\n- No hagas afirmaciones de salud exageradas o no comprobadas, aunque la fuente original las tenga (ej: \"cura\", \"elimina\", \"garantizado\"). Suavizá a lenguaje permitido tipo \"puede ayudar a\", \"contribuye a\".\n- Si el link no carga o la página bloquea el acceso, avisá claramente y pedí que el usuario mande fotos/capturas o texto en su lugar.\n- Si te mandan varios productos en un mismo mensaje, procesalos uno por uno, no los mezcles en una sola ficha.\n- Sé breve y directo en las preguntas: estás hablando por Telegram, no redactes párrafos largos para pedir un dato.\n- Si el usuario corrige algo, aplicá el cambio y no repitas todo el proceso desde cero.\n"
+        }
+      },
+      "id": "ai_agent",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "cond_json",
+              "leftValue": "={{ $json.output.trim().startsWith(\"{\") }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if_json",
+      "name": "Es JSON final aprobado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        460,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "id": "tg_send_preview",
+      "name": "Enviar preview / pregunta",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        700,
+        460
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REEMPLAZAR_CREDENCIAL_TELEGRAM",
+          "name": "Telegram Bot Seiva"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsed = JSON.parse($input.first().json.output);\nreturn [{ json: parsed }];"
+      },
+      "id": "code_parse",
+      "name": "Parsear JSON producto",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://seiva.com.py/api/productos",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "http_publish",
+      "name": "Publicar en API interna",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        920,
+        180
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REEMPLAZAR_CREDENCIAL_API_INTERNA",
+          "name": "API interna Seiva"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=✅ Producto publicado correctamente: {{ $('Parsear JSON producto').item.json.titulo }}\nURL: https://seiva.com.py/producto/{{ $('Parsear JSON producto').item.json.slug }}",
+        "additionalFields": {}
+      },
+      "id": "tg_send_confirm",
+      "name": "Confirmar publicacion",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1140,
+        180
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "REEMPLAZAR_CREDENCIAL_TELEGRAM",
+          "name": "Telegram Bot Seiva"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memoria por chat": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Es JSON final aprobado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es JSON final aprobado?": {
+      "main": [
+        [
+          {
+            "node": "Parsear JSON producto",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar preview / pregunta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsear JSON producto": {
+      "main": [
+        [
+          {
+            "node": "Publicar en API interna",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publicar en API interna": {
+      "main": [
+        [
+          {
+            "node": "Confirmar publicacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

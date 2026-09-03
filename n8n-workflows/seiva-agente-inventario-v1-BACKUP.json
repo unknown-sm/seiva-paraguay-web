@@ -1,0 +1,611 @@
+{
+  "id": "ylnX2JybaoH4wykM",
+  "name": "Seiva - Agente Inventario (mimo)",
+  "description": null,
+  "active": false,
+  "activeVersionId": null,
+  "createdAt": "2026-08-29T01:45:41.756Z",
+  "updatedAt": "2026-09-01T01:05:37.993Z",
+  "isArchived": false,
+  "versionId": "b7f878cf-f880-460e-90c2-49b7b528c5f7",
+  "versionCounter": 61,
+  "sourceWorkflowId": null,
+  "triggerCount": 1,
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message",
+          "callback_query"
+        ],
+        "additionalFields": {}
+      },
+      "id": "tg",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        400
+      ],
+      "webhookId": "b7e1f4a2-9c3d-4e5f-8a1b-6d2e4c7f9a0b",
+      "credentials": {
+        "telegramApi": {
+          "id": "wtekAWcrcfSlrW67",
+          "name": "SEIVA Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.message && $json.message.photo && $json.message.photo.length > 0 }}",
+              "rightValue": true,
+              "operator": {
+                "type": "equal"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "hp",
+      "name": "¿Tiene foto?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        272,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/bot7501896249:***/getFile?file_id={{ $json.message.photo[$json.message.photo.length-1].file_id }}",
+        "options": {}
+      },
+      "id": "gf",
+      "name": "getFile",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        528,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/file/bot7501896249:AAFieGIF2BkpZNSD1iVR7lamy2CQqmgpz1g/{{ $(\"getFile\").item.json.result.file_path }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "dl",
+      "name": "Descargar foto",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        784,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://seiva.com.py/api/product-image",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "formDataMultipart",
+        "options": {}
+      },
+      "id": "up",
+      "name": "Subir imagen backend",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        400
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "07NLMVgZ0MQtdNGA",
+          "name": "SEIVA Backend API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const sd=$getWorkflowStaticData('global'); const cid=$('Telegram Trigger').item.json.message.chat.id; const path=$('Subir imagen backend').item.json.path||''; sd['foto_'+cid]=path; return [{json:{chatId:cid,imagenPath:path}}];"
+      },
+      "id": "sf",
+      "name": "Guardar foto (static)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const m = $('Telegram Trigger').item.json.message;\nconst cid = m.chat.id;\nconst sd = $getWorkflowStaticData('global');\nconst foto = sd['foto_' + cid] || '';\nlet txt = m.text || m.caption || '';\nif (foto) txt += '\\n\\n[IMAGEN DISPONIBLE]: ' + foto;\n// Inventario cargado por el nodo HTTP Request\nlet inv = '';\ntry {\n  const prods = $items('Cargar inventario');\n  const arr = Array.isArray(prods) ? prods : [];\n  const lineas = arr.map(p => {\n    const j = p.json || p;\n    return 'ID ' + j.id + ' | ' + j.nombre + ' | stock:' + j.stock + ' | precio:' + j.precio + ' | ' + (j.activo ? 'publicado' : 'oculto');\n  });\n  inv = lineas.join('\\n');\n} catch (e) { inv = '(no disponible)'; }\nconst ctx = 'INVENTARIO ACTUAL (usa estos IDs reales, no los inventes):\\n' + inv;\nreturn [{ json: { chatId: cid, sessionId: cid, texto: txt, foto: foto, inventario: ctx } }];"
+      },
+      "id": "pe",
+      "name": "Preparar entrada",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "id": "mem",
+      "name": "Memoria (chat)",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        1568,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "model": "xiaomi/mimo-v2.5",
+        "options": {}
+      },
+      "id": "model",
+      "name": "OpenRouter Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        624
+      ],
+      "credentials": {
+        "openRouterApi": {
+          "id": "36xo8T9UglAHMFDT",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.texto + \"\\n\\n\" + $json.inventario }}",
+        "options": {
+          "systemMessage": "# ERES el asistente de gestión de inventario de SEIVA (tienda de suplementos, Paraguay, moneda Gs.).\nTu trabajo: entender el mensaje del usuario en lenguaje natural y ACTUAR usando las herramientas disponibles.\n\nREGLAS:\n- Para CREAR un producto: primero presentá un resumen claro (nombre, precio, stock, marca, imagen) y PREGUNTÁ \"Responde APROBAR para crear o indicá qué cambiar\". SOLO llamá la herramienta crear_producto cuando el usuario confirme explícitamente (APROBAR / sí creá / adelante).\n- Para ELIMINAR: pedí confirmación explícita antes de llamar eliminar_producto.\n- STOCK / PUBLICAR / EDITAR: podés ejecutar directo, pero confirm���� con un resumen antes y después.\n- Si el usuario manda una IMAGEN, el sistema ya la subió y te da la ruta en el mensaje como [IMAGEN DISPONIBLE...]. Usala como imagen_principal_url al crear.\n- Si falta precio o stock y es creación, pedí los datos.\n- Si el scrape de un link falla, decilo y pedí los datos al usuario.\n- Siempre respondé en español, breve y claro. Confirmá la acción realizada con los datos del backend.\n\nHERRAMIENTAS:\n- buscar_producto(): GET todos los productos. Usala para encontrar el ID por nombre antes de editar/publicar/eliminar/ajustar stock.\n- crear_producto(producto): POST crea producto. producto = {nombre, precio, stock, categoria:\"suplementos\", activo:true, imagen, descripcion, descripcion_larga, marca, sku, galeria}. SOLO tras confirmación.\n- editar_producto({id, body}): PUT edita. body = cualquiera de {nombre, precio, stock, activo, descripcion, descripcion_larga, imagen, marca, sku, categoria}.\n- toggle_publicar({id}): PATCH publica/despublica (invierte activo).\n- ajustar_stock({id, body}): PUT con body={stock:N} para fijar stock absoluto.\n- consultar_inventario(): GET productos activos para listar/consultar stock.\n- eliminar_producto({id}): DELETE. SOLO tras confirmación explícita.\n\nSCRAPING: If the user sends a link, use the tool scrapear_link with the url to download the HTML and extract title, price, description, brand and images. If the HTML is a cookie/login popup (blocked), tell the user the site blocked the scrape and ask for the data manually or for a photo.\n\nFORMATO OBLIGATORIO DE DESCRIPCION:\nCuando generes la ficha de un producto, la descripcion corta y larga DEBEN seguir exactamente esta estructura (adaptada al producto, no copies el ejemplo):\n\nTITULO (campo titulo):\n  {Nombre del producto} {presentacion} - {Marca}\n  Ejemplo: Colostro Bovino 500mg - 60 Capsulas - V7 Energy\n\nDESCRIPCION CORTA (campo descripcion_corta) - Beneficios principales:\n  Una linea por beneficio, cada una con emoji y punto. Maximo 5 beneficios. Formato:\n  Beneficios principales\n  [emoji] Apoya/Contribuye/Aporta/... {beneficio}.\n  Ejemplo:\n  Beneficios principales\n  [rayo] Apoya la energia y el metabolismo energetico.\n  [brazo] Contribuye al funcionamiento muscular.\n\nDESCRIPCION LARGA (campo descripcion_larga):\n  Parrafo introductorio: {Nombre} es un suplemento nutricional formulado con {ingredientes principales}, nutrientes que {beneficios}. Ideal como apoyo nutricional para {publico objetivo}.\n  Luego estas secciones en este orden:\n  1) Ingredientes: lista separada por comas de los componentes.\n  2) (Si corresponde) lineas de sellos como: Sin gluten. / Sin azucar. / Apto veganos. etc.\n  3) Modo de uso: Cantidad por dia, indicacion de medico/nutricionista, edad minima (Indicado para mayores de X anos).\n  4) Importante: texto fijo legal: \"Este producto es un suplemento alimenticio y no un medicamento. No exceder la cantidad recomendada. Mantener fuera del alcance de los ninos y conservar en un lugar fresco, seco y protegido de la luz.\"\n  NO incluyas el bloque SEO en la descripcion larga (el SEO va en meta_titulo y meta_descripcion).\n\nSEO:\n  meta_titulo: {Nombre} {presentacion} | {Beneficio principal}\n  meta_descripcion: {Nombre} con {ingredientes}. {Beneficios}. Suplemento nutricional en Paraguay.\n\nUsa emojis reales (⚡ 💪 🏋️ �������) en los beneficios. No inventes datos: si falta un dato (ingredientes, modo de uso), PREGUNTA al usuario antes de generar la ficha, o usa el scrape del link.\n\nREGLA CRITICA SOBRE IDs:\n- NUNCA inventes ni adivines el id de un producto.\n- Antes de editar stock, publicar, despublicar o eliminar: llama PRIMERO a consultar_inventario (o buscar_producto) para obtener el id REAL del producto por su nombre.\n- Luego usa ese id exacto en las herramientas.\n- Las herramientas devuelven el HTTP status. Si responde 404 o 500, decile al usuario que fallo y no confirmes exito.\n- NUNCA digas \"listo\" o \"actualizado\" si la herramienta devolvio un error.\nANTI-BUCLE:\n- Si una herramienta falla o devuelve algo inesperado, NO la llames mas de 2 veces seguidas.\n- Si no podes completar la accion, responde al usuario explicando el problema concreto y pedi los datos que faltan.\n- Nunca repitas la misma llamada con los mismos parametros.\nINVENTARIO EN CONTEXTO:\n- En cada mensaje recibis el inventario completo en el campo \"inventario\", con los IDs reales de los productos.\n- USA esos IDs directamente. NO llames herramientas para buscar IDs. No los inventes.\n- Si el inventario dice \"(no disponible)\", avisa que no podes consultar y pedi el ID al usuario.\nAMBIGUEDAD - REGLA OBLIGATORIA:\n- Si el nombre que menciona el usuario coincide con MAS DE UN producto del inventario, NO adivines.\n- Lista los candidatos numerados asi:\n  Encontre N productos que coinciden con \"nombre\":\n  1. ID xxx - Nombre completo (stock N, $precio)\n  2. ID yyy - Nombre completo (stock N, $precio)\n  Cual queres usar? Decime el numero o el ID.\n- SOLO ejecutes la accion cuando el usuario confirme cual es (por numero o ID).\n- Lo mismo aplica para editar, publicar, despublicar y eliminar.\n- Si el usuario ya dio el ID exacto, actua directo sin preguntar.\nFORMATO DE PARAMETROS - OBLIGATORIO:\n- Las herramientas reciben un objeto JSON PLANO. Ejemplos correctos:\n  ajustar_stock: {\"id\": 188, \"stock\": 5}\n  editar_producto: {\"id\": 188, \"body\": {\"precio\": 70000}}\n  toggle_publicar: {\"id\": 188}\n  eliminar_producto: {\"id\": 188}\n- NO anides los valores dentro de objetos extras (ej: no uses {\"ID\":188,\"BODY\":{\"STOCK\":5}}).\n\nVERIFICACION DE RESULTADO - OBLIGATORIO:\n- Las herramientas devuelven \"RESULTADO_HTTP ...\" cuando funcionan, o \"ERROR: ...\" cuando fallan.\n- Solo confirmes exito al usuario si la herramienta devolvio RESULTADO_HTTP.\n- Si devuelve ERROR, informa el error textualmente. NUNCA digas \"listo\", \"actualizado\" o uses checkmarks sin RESULTADO_HTTP.\n- Si despues de 2 intentos falla, pedi el ID al usuario.",
+          "maxIterations": 5,
+          "returnIntermediateSteps": false
+        }
+      },
+      "id": "agent",
+      "name": "Agente Inventario",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1824,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $(\"Preparar entrada\").item.json.chatId }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "id": "resp",
+      "name": "Responder",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2080,
+        400
+      ],
+      "webhookId": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f80",
+      "credentials": {
+        "telegramApi": {
+          "id": "wtekAWcrcfSlrW67",
+          "name": "SEIVA Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Busca productos en el inventario de SEIVA. Devuelve lista con id, nombre, precio, stock y activo. No requiere parametros."
+      },
+      "id": "tc_buscar",
+      "name": "buscar_producto",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        1728,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Crea un producto nuevo en SEIVA. Parametro: body = objeto JSON con los datos del producto (titulo, slug, descripcion_corta, descripcion_larga, meta_titulo, meta_descripcion, keywords, categoria, sku, precio_venta_pyg, stock, imagen_principal_url, galeria_urls, interno).",
+        "code": "const find = (o, names, depth) => {\n  if (!o || depth > 3) return undefined;\n  for (const n of names) {\n    if (o[n] !== undefined) return o[n];\n    const f = Object.keys(o).find(x => x.toLowerCase() === n.toLowerCase());\n    if (f) return o[f];\n  }\n  for (const k of Object.keys(o)) {\n    if (o[k] && typeof o[k] === 'object') {\n      const r = find(o[k], names, depth + 1);\n      if (r !== undefined) return r;\n    }\n  }\n  return undefined;\n};\nconst body = find($input, ['body','BODY','datos','data'], 0) || $input;\nconst _r = await this.helpers.httpRequest({\n  method: 'POST',\n  url: 'https://seiva.com.py/api/productos',\n  headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzg3NjE5ODk5LCJleHAiOjIxMDI5Nzk4OTl9.EOwKkZgszm1F8x5Z3bV9fKyiNQLe6NVTyX1e9ck1l4s' }, body: body\n});\nreturn 'RESULTADO_HTTP ' + (typeof _r === 'string' ? _r.slice(0, 800) : JSON.stringify(_r).slice(0, 800));"
+      },
+      "id": "tc_crear_producto",
+      "name": "crear_producto",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        1888,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Edita un producto existente. Parametros: id (numero) y body (objeto JSON con los campos a cambiar).",
+        "code": "const find = (o, names, depth) => {\n  if (!o || depth > 3) return undefined;\n  for (const n of names) {\n    if (o[n] !== undefined) return o[n];\n    const f = Object.keys(o).find(x => x.toLowerCase() === n.toLowerCase());\n    if (f) return o[f];\n  }\n  for (const k of Object.keys(o)) {\n    if (o[k] && typeof o[k] === 'object') {\n      const r = find(o[k], names, depth + 1);\n      if (r !== undefined) return r;\n    }\n  }\n  return undefined;\n};\nconst id = find($input, ['id','ID','producto_id'], 0);\nconst body = find($input, ['body','BODY','datos','data'], 0) || $input;\nif (id === undefined) return 'ERROR: falta el id del producto.';\nconst _r = await this.helpers.httpRequest({\n  method: 'PUT',\n  url: 'https://seiva.com.py/api/productos/' + id,\n  headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzg3NjE5ODk5LCJleHAiOjIxMDI5Nzk4OTl9.EOwKkZgszm1F8x5Z3bV9fKyiNQLe6NVTyX1e9ck1l4s' }, body: body\n});\nreturn 'RESULTADO_HTTP ' + (typeof _r === 'string' ? _r.slice(0, 800) : JSON.stringify(_r).slice(0, 800));"
+      },
+      "id": "tc_editar_producto",
+      "name": "editar_producto",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        1728,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Publica o despublica un producto (invierte el estado activo). Parametro: id (numero).",
+        "code": "const find = (o, names, depth) => {\n  if (!o || depth > 3) return undefined;\n  for (const n of names) {\n    if (o[n] !== undefined) return o[n];\n    const f = Object.keys(o).find(x => x.toLowerCase() === n.toLowerCase());\n    if (f) return o[f];\n  }\n  for (const k of Object.keys(o)) {\n    if (o[k] && typeof o[k] === 'object') {\n      const r = find(o[k], names, depth + 1);\n      if (r !== undefined) return r;\n    }\n  }\n  return undefined;\n};\nconst id = find($input, ['id','ID','producto_id'], 0);\nif (id === undefined) return 'ERROR: falta el id del producto.';\nconst _r = await this.helpers.httpRequest({\n  method: 'PATCH',\n  url: 'https://seiva.com.py/api/productos/' + id + '/toggle',\n  headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzg3NjE5ODk5LCJleHAiOjIxMDI5Nzk4OTl9.EOwKkZgszm1F8x5Z3bV9fKyiNQLe6NVTyX1e9ck1l4s' }\n});\nreturn 'RESULTADO_HTTP ' + (typeof _r === 'string' ? _r.slice(0, 800) : JSON.stringify(_r).slice(0, 800));"
+      },
+      "id": "tc_toggle_publicar",
+      "name": "toggle_publicar",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        1552,
+        960
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Ajusta el stock de un producto. Parametros: id (numero) y stock (numero, valor absoluto).",
+        "code": "const find = (o, names, depth) => {\n  if (!o || depth > 3) return undefined;\n  for (const n of names) {\n    if (o[n] !== undefined) return o[n];\n    const f = Object.keys(o).find(x => x.toLowerCase() === n.toLowerCase());\n    if (f) return o[f];\n  }\n  for (const k of Object.keys(o)) {\n    if (o[k] && typeof o[k] === 'object') {\n      const r = find(o[k], names, depth + 1);\n      if (r !== undefined) return r;\n    }\n  }\n  return undefined;\n};\nconst id = find($input, ['id','ID','producto_id','productId'], 0);\nconst stock = find($input, ['stock','STOCK','cantidad','quantity','nuevo_stock'], 0);\nif (id === undefined) return 'ERROR: falta el id del producto.';\nif (stock === undefined) return 'ERROR: falta el stock. Recibi: ' + JSON.stringify($input);\nconst _r = await this.helpers.httpRequest({\n  method: 'PUT',\n  url: 'https://seiva.com.py/api/productos/' + id,\n  headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzg3NjE5ODk5LCJleHAiOjIxMDI5Nzk4OTl9.EOwKkZgszm1F8x5Z3bV9fKyiNQLe6NVTyX1e9ck1l4s' }, body: { stock: Number(stock) }\n});\nreturn 'RESULTADO_HTTP ' + (typeof _r === 'string' ? _r.slice(0, 800) : JSON.stringify(_r).slice(0, 800));"
+      },
+      "id": "tc_ajustar_stock",
+      "name": "ajustar_stock",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        1888,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Consulta todo el inventario de SEIVA. No requiere parametros. Devuelve id, nombre, precio, stock y activo de todos los productos."
+      },
+      "id": "tc_consultar_inventario",
+      "name": "consultar_inventario",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        1744,
+        960
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Elimina un producto. Parametro: id (numero). Pedir confirmacion al usuario antes de usarla.",
+        "code": "const find = (o, names, depth) => {\n  if (!o || depth > 3) return undefined;\n  for (const n of names) {\n    if (o[n] !== undefined) return o[n];\n    const f = Object.keys(o).find(x => x.toLowerCase() === n.toLowerCase());\n    if (f) return o[f];\n  }\n  for (const k of Object.keys(o)) {\n    if (o[k] && typeof o[k] === 'object') {\n      const r = find(o[k], names, depth + 1);\n      if (r !== undefined) return r;\n    }\n  }\n  return undefined;\n};\nconst id = find($input, ['id','ID','producto_id'], 0);\nif (id === undefined) return 'ERROR: falta el id del producto.';\nconst _r = await this.helpers.httpRequest({\n  method: 'DELETE',\n  url: 'https://seiva.com.py/api/productos/' + id,\n  headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJpZCI6MSwiaWF0IjoxNzg3NjE5ODk5LCJleHAiOjIxMDI5Nzk4OTl9.EOwKkZgszm1F8x5Z3bV9fKyiNQLe6NVTyX1e9ck1l4s' }\n});\nreturn 'RESULTADO_HTTP ' + (typeof _r === 'string' ? _r.slice(0, 800) : JSON.stringify(_r).slice(0, 800));"
+      },
+      "id": "tc_eliminar_producto",
+      "name": "eliminar_producto",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        1552,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Descarga el HTML de un link de producto para extraer titulo, precio, descripcion, marca e imagenes. Parametro: url (string, link completo)."
+      },
+      "id": "tc_scrapear_link",
+      "name": "scrapear_link",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        1552,
+        784
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://seiva.com.py/api/productos/all",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "h_inv",
+      "name": "Cargar inventario",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        704,
+        240
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "07NLMVgZ0MQtdNGA",
+          "name": "SEIVA Backend API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Cargar inventario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Tiene foto?": {
+      "main": [
+        [
+          {
+            "node": "getFile",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "getFile": {
+      "main": [
+        [
+          {
+            "node": "Descargar foto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar foto": {
+      "main": [
+        [
+          {
+            "node": "Subir imagen backend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Subir imagen backend": {
+      "main": [
+        [
+          {
+            "node": "Guardar foto (static)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar foto (static)": {
+      "main": [
+        [
+          {
+            "node": "Preparar entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar entrada": {
+      "main": [
+        [
+          {
+            "node": "Agente Inventario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Inventario",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memoria (chat)": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente Inventario",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "buscar_producto": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Inventario",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "crear_producto": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Inventario",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "editar_producto": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Inventario",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "toggle_publicar": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Inventario",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ajustar_stock": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Inventario",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "consultar_inventario": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Inventario",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "eliminar_producto": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Inventario",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente Inventario": {
+      "main": [
+        [
+          {
+            "node": "Responder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "scrapear_link": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Inventario",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cargar inventario": {
+      "main": [
+        [
+          {
+            "node": "Preparar entrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "nodeGroups": [],
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": {},
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [],
+  "shared": [
+    {
+      "role": "workflow:owner",
+      "workflowId": "ylnX2JybaoH4wykM",
+      "projectId": "NP66F5UnInJLE6vJ",
+      "project": {
+        "id": "NP66F5UnInJLE6vJ",
+        "name": "Luis Salazar <bonavidapy@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "customTelemetryTags": [],
+        "creatorId": "320da470-085f-4ead-95c4-f4498fa8472d",
+        "createdAt": "2026-08-01T14:43:47.100Z",
+        "updatedAt": "2026-08-03T12:18:11.678Z"
+      },
+      "createdAt": "2026-08-29T01:45:41.756Z",
+      "updatedAt": "2026-08-29T01:45:41.756Z"
+    }
+  ],
+  "activeVersion": null
+}
