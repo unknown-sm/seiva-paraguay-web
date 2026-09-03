@@ -59,6 +59,7 @@ function parseDraft(s) { const d = s.draft || '{}'; if (typeof d === 'object') r
 
 // ---- LLM (interpreta o genera copy) ----
 async function llm(system, user) {
+  const OR_KEY = $secrets.OR_KEY || '';
   const r = await _http({
     method: 'POST', url: OR_URL,
     headers: { Authorization: 'Bearer ' + OR_KEY, 'Content-Type': 'application/json' },

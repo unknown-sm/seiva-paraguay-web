@@ -1,0 +1,56 @@
+name: CI - Deploy (backend + n8n)
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  N8N_KEY: ${{ secrets.N8N_KEY }}
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+jobs:
+  # -------------------------------------------------
+  # 1) Construir y hacer push de la imagen Docker del backend
+  # -------------------------------------------------
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Construir imagen Docker
+        run: |
+          cd seiva-static/backend
+          docker build -t seiva-app .
+
+      - name: Iniciar sesión en Docker Hub
+        run: |
+          docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_TOKEN
+
+      - name: Hacer push de la imagen
+        run: |
+          docker tag seiva-app latest
+          docker push latest
+
+  # -------------------------------------------------
+  # 2) Reconstruir el contenedor y actualizar el workflow de n8n
+  # -------------------------------------------------
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar dependencias del backend
+        run: |
+          cd seiva-static/backend
+          npm ci --production
+
+      - name: Actualizar el workflow de n8n (Cerebro v4)
+        run: |
+          node n8n-workflows/scripts/build_v4.js --deploy
+        env:
+          N8N_KEY: ${{ secrets.N8N_KEY }}
