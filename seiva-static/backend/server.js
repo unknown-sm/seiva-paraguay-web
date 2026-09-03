@@ -1411,8 +1411,21 @@ app.post("/api/productos", auth, async (req, res) => {
       }
     }
 
-    const cid = categoria_id || null;
-    const catName = categoria || (cid ? db.prepare("SELECT nombre FROM categorias WHERE id=?").get(cid)?.nombre : "suplementos") || "suplementos";
+    let cid = categoria_id || null;
+    let catName = categoria || (cid ? db.prepare("SELECT nombre FROM categorias WHERE id=?").get(cid)?.nombre : "suplementos") || "suplementos";
+    // Si no vino categoria_id pero sí el nombre de categoría, resolvemos el ID
+    // para asociar el producto a la categoría (antes quedaba categoria_id = NULL).
+    if (!cid && catName) {
+      const catRow = db.prepare("SELECT id FROM categorias WHERE LOWER(nombre) = LOWER(?) AND activo = 1 LIMIT 1").get(catName);
+      if (catRow) cid = catRow.id;
+    }
+    // Normalizar marca: trim + resolver a la forma canónica de la tabla marcas
+    // (para que "unilife" matchee "Unilife" y se asocie correctamente).
+    if (marca) {
+      marca = String(marca).trim();
+      const mRow = db.prepare("SELECT nombre FROM marcas WHERE LOWER(nombre) = LOWER(?) LIMIT 1").get(marca);
+      if (mRow) marca = mRow.nombre;
+    }
     const finalSlug = slug || generateSlug(nombre);
     const fo = parseInt(featured_order) || 0;
     const pp = (precio_proveedor !== undefined && precio_proveedor !== null && precio_proveedor !== '') ? parseFloat(precio_proveedor) : null;
@@ -1429,8 +1442,17 @@ app.post("/api/productos", auth, async (req, res) => {
 app.put("/api/productos/:id", auth, (req, res) => {
   try {
     const { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, meta_titulo, meta_descripcion, crosssell, upsell, slug, featured_order, precio_proveedor, delivery_gratis, variantes } = req.body;
-    const cid = categoria_id !== undefined ? categoria_id : null;
-    const catName = categoria || (cid ? db.prepare("SELECT nombre FROM categorias WHERE id=?").get(cid)?.nombre : "suplementos") || "suplementos";
+    let cid = categoria_id !== undefined ? categoria_id : null;
+    let catName = categoria || (cid ? db.prepare("SELECT nombre FROM categorias WHERE id=?").get(cid)?.nombre : "suplementos") || "suplementos";
+    if (!cid && catName) {
+      const catRow = db.prepare("SELECT id FROM categorias WHERE LOWER(nombre) = LOWER(?) AND activo = 1 LIMIT 1").get(catName);
+      if (catRow) cid = catRow.id;
+    }
+    if (marca) {
+      marca = String(marca).trim();
+      const mRow = db.prepare("SELECT nombre FROM marcas WHERE LOWER(nombre) = LOWER(?) LIMIT 1").get(marca);
+      if (mRow) marca = mRow.nombre;
+    }
     const finalSlug = slug || (nombre ? generateSlug(nombre, req.params.id) : undefined);
     const fo = parseInt(featured_order) || 0;
     const pp = precio_proveedor !== undefined ? (precio_proveedor !== null && precio_proveedor !== '' ? parseFloat(precio_proveedor) : null) : undefined;
