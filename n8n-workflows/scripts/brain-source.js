@@ -28,6 +28,15 @@ async function http(method, url, body) {
 function out(texto) { return [{ json: { chatId: cid, texto } }]; }
 const fmt = n => Number(n || 0).toLocaleString('es-PY');
 const nums = t => (t.match(/\d+/g) || []).map(Number);
+// Convierte HTML de descripciones a texto seguro para Telegram. El parse_mode
+// HTML de Telegram NO soporta <br> (ni <p>/<ul>/<li>), así que acá pasamos
+// <br> → \n y limpiamos el resto de tags. La BD guarda <br> para la web.
+const tgSafe = s => String(s || '')
+  .replace(/<br\s*\/?>/gi, '\n')
+  .replace(/<\/p>/gi, '\n')
+  .replace(/<li[^>]*>/gi, '\n• ')
+  .replace(/<[^>]+>/g, '')
+  .replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 
 // ---- Mensaje entrante ----
 const tg = $('Telegram Trigger').item.json;
@@ -452,7 +461,8 @@ async function continuarCrear(d, t, photoMsg, linkMsg) {
   if (producto.galeria.length) resumen += 'Galería: ' + producto.galeria.length + ' fotos\n';
   // Descripción corta (preview): si está vacía, avisamos en lugar de mostrar vacío.
   if (producto.descripcion) {
-    resumen += '\n📝 <b>Descripción corta:</b>\n' + String(producto.descripcion).slice(0, 250) + (String(producto.descripcion).length > 250 ? '…' : '') + '\n';
+    const descTg = tgSafe(producto.descripcion);
+    resumen += '\n📝 <b>Descripción corta:</b>\n' + descTg.slice(0, 250) + (descTg.length > 250 ? '…' : '') + '\n';
   }
   if (producto.descripcion_larga) {
     const larga = String(producto.descripcion_larga).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 300);
