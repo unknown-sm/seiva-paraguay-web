@@ -144,29 +144,7 @@ export default function Categories() {
                     }}
                   />
                 </div>
-                  {/* Badges - positioned at top-left of image */}
-                  <div className="absolute top-3 left-3 flex flex-wrap gap-1 z-10 pointer-events-none">
-                  {product.precio_anterior && (
-                    <span className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#E63946', color: '#FFFFFF' }}>
-                      OFERTA
-                    </span>
-                  )}
-                  {product.stock <= 0 && (
-                    <span className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}>
-                      AGOTADO
-                    </span>
-                  )}
-                  {(() => {
-                    const badges = getProductBadges(product)
-                    if (!badges.length) return null
-                    return badges.map(b => (
-                      <span key={b.label} className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: b.color, color: '#fff' }}>
-                        {b.label}
-                      </span>
-                    ))
-                  })()}
                 </div>
-              </div>
 
                 <h3
                   className="font-body font-semibold text-sm sm:text-base mt-4 leading-snug"
