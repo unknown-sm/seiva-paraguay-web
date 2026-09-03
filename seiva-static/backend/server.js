@@ -1216,6 +1216,25 @@ function backfillSlugs() {
   }
 }
 
+// Asocia categoria_id a productos existentes que solo tienen el nombre de categoría.
+function backfillCategoriaId() {
+  try {
+    const cats = db.prepare("SELECT id, nombre FROM categorias WHERE activo = 1").all();
+    const catMap = {};
+    for (const c of cats) catMap[String(c.nombre).toLowerCase()] = c.id;
+    const prods = db.prepare("SELECT id, categoria FROM productos WHERE (categoria_id IS NULL OR categoria_id = '' OR categoria_id = 0) AND categoria IS NOT NULL AND categoria != ''").all();
+    let n = 0;
+    for (const p of prods) {
+      const cid = catMap[String(p.categoria).toLowerCase()];
+      if (cid) {
+        db.prepare("UPDATE productos SET categoria_id = ? WHERE id = ?").run(cid, p.id);
+        n++;
+      }
+    }
+    if (n > 0) console.log(`[Backfill] ${n} productos asociados a su categoría`);
+  } catch (e) { console.warn("[Backfill] categorias skip:", e.message); }
+}
+
 // ---------- UPLOADS ----------
 app.get("/api/ping", (req, res) => res.json({ pong: true, ts: Date.now() }));
 
@@ -2947,8 +2966,9 @@ if (fs.existsSync(distPath)) {
   console.log("Serving static files from " + sitePath);
 }
 
-// Backfill slugs al iniciar
+// Backfill slugs y categorías al iniciar
 backfillSlugs();
+backfillCategoriaId();
 
 app.listen(PORT, () => {
   console.log("Seiva backend running on http://localhost:" + PORT);
