@@ -158,6 +158,25 @@ async function handleConfirm() {
       }
     }
     if (/^(cancelar|cancela|no|abortar|salir|descartar)$/i.test(tn)) { await clearSession(); return out('❌ Creación cancelada.'); }
+    // Edición de campos en el preview: "nombre: X" · "precio: X" · "marca: X" · "stock: X".
+    const edNombre = t.match(/\bnombre\s*[:\=]\s*(.+?)(?=\s+(?:precio|stock|categoria|proveedor|costo|marca)\b|$)/i);
+    const edPrecio = t.match(/\bprecio\s*(?:de\s*venta)?\s*[:\=]?\s*(\d+(?:[.,]\d+)?\s*(?:mil|k\b)?)/i);
+    const edMarca = t.match(/\bmarca\s*[:\=]\s*(.+?)(?=\s+(?:precio|stock|categoria|proveedor|costo|nombre)\b|$)/i);
+    const edStock = t.match(/\bstock\s*[:\=]?\s*(\d+)/i);
+    if (edNombre || edPrecio || edMarca || edStock) {
+      const p = Object.assign({}, draft.producto || {});
+      const cambios = [];
+      if (edNombre) { p.nombre = edNombre[1].trim(); cambios.push('nombre → ' + p.nombre); }
+      if (edPrecio) {
+        let v = parseFloat(String(edPrecio[1]).replace(',', '.'));
+        if (/\d\s*(?:mil|k\b)/i.test(edPrecio[1])) v *= 1000;
+        if (!isNaN(v)) { p.precio = v; cambios.push('precio → ' + fmt(v) + ' Gs'); }
+      }
+      if (edMarca) { p.marca = edMarca[1].trim(); cambios.push('marca → ' + p.marca); }
+      if (edStock) { p.stock = parseInt(edStock[1]); cambios.push('stock → ' + p.stock); }
+      await setSession('crear_confirm', { producto: p });
+      return out('✅ Actualizado:\n' + cambios.map(c => '• ' + c).join('\n') + '\n\nRespondé <b>APROBAR</b> para crearlo, o <b>CANCELAR</b>.');
+    }
     // Si mandó un comando nuevo (lista, stock, etc.), soltamos la confirmación y reprocesamos.
     if (/(\blista\b|\blistar\b|\bstock\b|\bbusca\b|\bbuscar\b|\bprecio\b|\belimin\b|\bnuevo\b|\bpublic\b|\bocult\b|\bayuda\b|\bhelp\b|\bmenu\b)/i.test(t)) {
       await clearSession(); return null;
@@ -376,9 +395,21 @@ async function startCrear(campos, textoMsg, photoMsg, linkMsg) {
   // Tolerante a typos comunes: "proovedor" (doble o), "provedor", "fornecedor".
   let prM = t.match(/\b(?:precio\s+)?(?:proveedor|proovedor|provedor|fornecedor|costo)\s*[:\=]?\s*(\d+(?:[.,]\d+)?)/i);
   if (prM) d.precio_proveedor = num(prM[1]);
+  // "80 reales" / "80 reais" (sin keyword "proveedor") → precio proveedor en R$.
+  if (d.precio_proveedor === undefined) {
+    const re = t.match(/(\d+(?:[.,]\d+)?)\s*(?:reales?|reais?)\b/i);
+    if (re) d.precio_proveedor = num(re[1]);
+  }
 
   let mm = (t.match(/\b(?:marca|brand)\s*(?:de\s+|es\s+)?[:\=]?\s*([^,;]+?)(?=\s+(?:precio|stock|categoria|proveedor|costo)\b|$)/i) || [])[1];
   if (mm) d.marca = mm.trim();
+  // nombre explícito: "nombre: X" o "nombre X". Sobrescribe el nombre scrapeado
+  // (que a veces da genérico como "Suplemento Nutricional").
+  let nmEx = (t.match(/\bnombre\s*[:\=]\s*(.+?)(?=\s+(?:precio|stock|categoria|proveedor|costo|marca)\b|$)/i) || [])[1];
+  if (nmEx) {
+    nmEx = nmEx.replace(/https?:\/\/[^\s]+/gi, ' ').replace(/[:=,;|]+/g, ' ').replace(/\s+/g, ' ').trim();
+    if (nmEx && nmEx.length >= 2) d.nombre = nmEx;
+  }
   if (!d.nombre) {
     let n = t.replace(/^(?:crear|crea|nuevo|agregar|alta|cargar|subir)\s*(?:producto)?\s*[:\-]?\s*/i, '')
       .replace(/\bprecio\s*(?:es|de|venta)?\s*[:\=]?\s*\d+(?:[.,]\d+)?\s*(?:mil|k\b)?/i, ' ')
