@@ -12,6 +12,7 @@ const { rateLimit, ipKeyGenerator } = require("express-rate-limit");
 const multer = require("multer");
 const imageService = require("./image-service");
 const compression = require("compression");
+const adminAssistant = require("./admin-assistant");
 require("dotenv").config();
 
 const app = express();
@@ -1557,6 +1558,22 @@ app.delete("/api/productos/:id", auth, (req, res) => {
   } catch (e) {
     console.error("[DELETE producto]", e.message);
     res.status(500).json({ error: "Error al eliminar producto: " + e.message });
+  }
+});
+
+// ---------- ASISTENTE ADMIN (lenguaje natural) ----------
+app.post("/api/admin/command", auth, async (req, res) => {
+  try {
+    const texto = String((req.body && req.body.texto) || "").trim();
+    if (!texto) return res.status(400).json({ error: "texto requerido" });
+    // Inventario compacto para que el LLM resuelva nombres → id.
+    const prods = db.prepare("SELECT id, nombre, stock, precio, marca FROM productos ORDER BY id DESC LIMIT 200").all();
+    const action = await adminAssistant.interpretCommand(texto, prods);
+    const result = await adminAssistant.executeAction(action, db);
+    res.json({ action, result });
+  } catch (e) {
+    console.error("[AdminAssistant]", e.message);
+    res.status(500).json({ error: "Error en el asistente: " + e.message });
   }
 });
 

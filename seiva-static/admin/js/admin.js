@@ -197,7 +197,8 @@ function switchTab(tabId, skipUrl) {
     "tab-contenido": "Contenido",
     "tab-paginas": "P&aacute;ginas",
     "tab-analytics": "Analytics",
-    "tab-logs": "Log de Errores"
+    "tab-logs": "Log de Errores",
+    "tab-asistente": "Asistente IA"
   };
   document.getElementById("page-title").textContent = titles[tabId] || "Dashboard";
   document.title = (titles[tabId] || "Dashboard") + " — Seiva Admin";
@@ -3316,5 +3317,72 @@ function clearErrorLogs() {
   api("/error-logs", { method: "DELETE" }).then(function() {
     toast("Logs limpiados");
     loadErrorLogs();
+  });
+}
+
+// ---------- ASISTENTE IA (lenguaje natural) ----------
+function asistenteAgregar(rol, texto) {
+  var el = document.getElementById("asistente-chat");
+  if (!el) return;
+  var div = document.createElement("div");
+  div.style.cssText = "padding:10px 12px;border-radius:8px;white-space:pre-wrap;word-break:break-word;";
+  if (rol === "user") {
+    div.style.cssText += "background:var(--accent);color:#fff;align-self:flex-end;max-width:85%;";
+    div.textContent = texto;
+  } else if (rol === "bot") {
+    div.style.cssText += "background:var(--border);color:var(--text);align-self:flex-start;max-width:85%;";
+    div.innerHTML = texto;
+  } else {
+    div.style.cssText += "background:transparent;color:var(--muted);align-self:flex-start;font-size:0.85em;";
+    div.innerHTML = texto;
+  }
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function asistenteRellenar(texto) {
+  var inp = document.getElementById("asistente-input");
+  if (inp) { inp.value = texto; inp.focus(); }
+}
+
+function asistenteEnviar() {
+  var inp = document.getElementById("asistente-input");
+  var btn = document.getElementById("btn-asistente-enviar");
+  if (!inp) return;
+  var texto = inp.value.trim();
+  if (!texto) return;
+  inp.value = "";
+  asistenteAgregar("user", texto);
+  asistenteAgregar("sys", "&#129302; pensando...");
+  if (btn) btn.disabled = true;
+  api("/admin/command", { method: "POST", body: JSON.stringify({ texto: texto }) }).then(function(resp) {
+    // quitar el "pensando..."
+    var chat = document.getElementById("asistente-chat");
+    var last = chat && chat.lastChild;
+    if (last) chat.removeChild(last);
+    var r = resp.result || {};
+    var acc = resp.action || {};
+    // mostrar la acción interpretada (transparente)
+    var accTxt = xt((acc.accion || "desconocido") + (acc.id ? " #" + acc.id : "") + (acc.nombre ? " \"" + acc.nombre + "\"" : ""));
+    asistenteAgregar("sys", "Acción: <b>" + accTxt + "</b>");
+    asistenteAgregar(r.ok ? "bot" : "bot", xt(r.mensaje || "Listo."));
+    if (r.productos && r.productos.length) {
+      var html = "";
+      r.productos.forEach(function(p) {
+        html += '• <b>#' + p.id + '</b> ' + xt(p.nombre) + ' — ' + formatGs(p.precio) + ' · stock ' + p.stock + (p.marca ? ' · ' + xt(p.marca) : '') + ' ' + (p.activo ? '&#9989;' : '&#9203;') + '\n';
+      });
+      var div = document.createElement("div");
+      div.style.cssText = "padding:10px 12px;border-radius:8px;white-space:pre-wrap;word-break:break-word;background:var(--border);color:var(--text);align-self:flex-start;max-width:85%;";
+      div.innerHTML = html;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+    if (btn) btn.disabled = false;
+  }).catch(function(e) {
+    var chat = document.getElementById("asistente-chat");
+    var last = chat && chat.lastChild;
+    if (last) chat.removeChild(last);
+    asistenteAgregar("bot", '<span style="color:#c0392b">Error: ' + xt(e.message) + '</span>');
+    if (btn) btn.disabled = false;
   });
 }

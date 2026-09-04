@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es" data-theme="light">
 <head>
   <meta charset="UTF-8">
@@ -48,6 +48,7 @@
       <button class="sidebar-link" data-tab="tab-contenido"><span class="sidebar-icon">&#128221;</span><span class="sidebar-label">Contenido</span></button>
       <button class="sidebar-link" data-tab="tab-analytics"><span class="sidebar-icon">&#128200;</span><span class="sidebar-label">Analytics</span></button>
       <button class="sidebar-link" data-tab="tab-logs"><span class="sidebar-icon">&#128196;</span><span class="sidebar-label">Log de Errores</span></button>
+      <button class="sidebar-link" data-tab="tab-asistente"><span class="sidebar-icon">&#129302;</span><span class="sidebar-label">Asistente IA</span></button>
     </nav>
     <div class="sidebar-footer">
       <button id="btn-theme-toggle" class="sidebar-link"><span class="sidebar-icon" id="theme-icon">&#127769;</span><span class="sidebar-label">Modo oscuro</span></button>
@@ -524,6 +525,28 @@
           </div>
         </div>
         <div class="card-body" id="error-logs-list"></div>
+      </div>
+    </div>
+
+    <div id="tab-asistente" class="tab-content">
+      <div class="card" style="max-width:760px">
+        <div class="card-header" style="justify-content:space-between">
+          <h3>&#129302; Asistente de Inventario</h3>
+          <span style="color:var(--muted);font-size:0.8rem">Lenguaje natural</span>
+        </div>
+        <div class="card-body">
+          <p class="help-text" style="margin-bottom:12px">Escribí lo que querés hacer. Ej: <b>"precio 204 120000"</b>, <b>"stock del magnesio en 10"</b>, <b>"publicar 204"</b>, <b>"buscar luteina"</b>, <b>"lista"</b>.</p>
+          <div id="asistente-chat" style="max-height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:12px"></div>
+          <div style="display:flex;gap:8px">
+            <input type="text" id="asistente-input" class="form-input" placeholder="Ej: cambiale el precio al 204 a 120 mil" style="flex:1" onkeydown="if(event.key==='Enter'){asistenteEnviar();}">
+            <button id="btn-asistente-enviar" class="btn btn-primary" onclick="asistenteEnviar()">Enviar</button>
+          </div>
+          <div id="asistente-sugerencias" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px">
+            <button class="btn btn-sm btn-secondary" onclick="asistenteRellenar('lista')">lista</button>
+            <button class="btn btn-sm btn-secondary" onclick="asistenteRellenar('buscar magnesio')">buscar magnesio</button>
+            <button class="btn btn-sm btn-secondary" onclick="asistenteRellenar('stock bajo')">stock bajo</button>
+          </div>
+        </div>
       </div>
     </div>
   </main>
