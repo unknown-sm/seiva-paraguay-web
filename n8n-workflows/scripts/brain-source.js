@@ -365,13 +365,26 @@ async function startCrear(campos, textoMsg, photoMsg, linkMsg) {
     d.imagen = linkMsg;
   }
 
-  // foto → imagen principal
-  if (photoMsg && !d.imagen) {
-    d.imagen = await telegramFileUrl(photoMsg.file_id);
+  // foto → imagen principal (la primera) o galería (las siguientes)
+  if (photoMsg) {
+    const furl = await telegramFileUrl(photoMsg.file_id);
+    if (furl) {
+      if (!d.imagen) {
+        d.imagen = furl;
+      } else if (d.imagen !== furl) {
+        d.galeria = Array.isArray(d.galeria) ? d.galeria : [];
+        if (d.galeria.indexOf(furl) === -1) d.galeria.push(furl);
+      }
+    }
   }
 
   // datos del texto
   const t = textoMsg || '';
+
+  // "sin marca" / "no tiene marca" → marca vacía (no re-preguntar)
+  if (/(sin marca|no tiene marca|sinmarca|sin\s+marca|ninguna marca)/i.test(t)) d._marca_ok = true;
+  // "listo" / "ya" / "no más fotos" → terminar la galería
+  if (/^(listo|ya|ya esta|ya está|ok|finito|no mas|no más|no tengo mas|no tengo más)$/i.test(t.trim()) || /(no mas fotos|no más fotos|sin mas fotos|sin más fotos|ya no mas|ya no más|terminado)/i.test(t)) d._fotos_ok = true;
 
   // helper: entiende "85mil", "85 mil", "85k", "85.000", "16 reales" (ignora la unidad)
   function num(s) {
@@ -455,6 +468,12 @@ async function continuarCrear(d, t, photoMsg, linkMsg) {
       ? (' El costo proveedor es R$ ' + d.precio_proveedor + ' (eso lo guardo), pero el precio de venta en guaraníes lo ponés vos.')
       : '';
     return preguntar('precio', d, 'Falta el <b>precio de venta en guaraníes</b>. Escribí: <code>precio 60000</code>.' + nota);
+  }
+  if (!d.marca && !d._marca_ok) {
+    return preguntar('marca', d, '¿Qué <b>marca</b> es? Escribí <code>marca Unilife</code>, o <code>sin marca</code> si no tiene.');
+  }
+  if (d.imagen && !d._fotos_ok) {
+    return preguntar('fotos', d, '¿Tenés <b>más fotos</b> para la galería? Mandalas (una por mensaje) o escribí <code>listo</code>.');
   }
   if (d.stock === null || d.stock === undefined) { d.stock = 0; }
 
