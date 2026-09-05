@@ -422,6 +422,19 @@ async function startCrear(campos, textoMsg, photoMsg, linkMsg) {
 
   let mm = (t.match(/\b(?:marca|brand)\s*(?:de\s+|es\s+)?[:\=]?\s*([^,;]+?)(?=\s+(?:precio|stock|categoria|proveedor|costo)\b|$)/i) || [])[1];
   if (mm) d.marca = mm.trim();
+  // Si estábamos preguntando la marca y el usuario respondió SIN la keyword
+  // "marca" (ej: "MAGFUSION-10"), usamos todo el texto como marca.
+  if (d._preguntando === 'marca' && !d.marca) {
+    const rawMarca = t.replace(/^marca\s*[:\=]?\s*/i, '').trim();
+    if (rawMarca && rawMarca.length >= 2 && !/^(sin marca|no tiene marca|no tiene|ninguna|no se|no sé|nada)$/i.test(rawMarca)) {
+      d.marca = rawMarca;
+    }
+  }
+  // Si estábamos preguntando el precio y respondió un número suelto → precio.
+  if (d._preguntando === 'precio' && (d.precio === null || d.precio === undefined)) {
+    const numSuelto = t.match(/^\s*(\d+(?:[.,]\d+)?\s*(?:mil|k\b)?)\s*$/i);
+    if (numSuelto) d.precio = num(numSuelto[1]);
+  }
   // nombre explícito: "nombre: X" o "nombre X". Sobrescribe el nombre scrapeado
   // (que a veces da genérico como "Suplemento Nutricional").
   let nmEx = (t.match(/\bnombre\s*[:\=]\s*(.+?)(?=\s+(?:precio|stock|categoria|proveedor|costo|marca)\b|$)/i) || [])[1];
@@ -563,6 +576,9 @@ async function continuarCrear(d, t, photoMsg, linkMsg) {
 }
 
 function preguntar(campo, d, msg) {
+  // Guardamos QUÉ campo estamos preguntando, para que la próxima respuesta
+  // se interprete como ese campo aunque el usuario no escriba la keyword.
+  d._preguntando = campo;
   setSession('crear_parcial', d);
   return out('⚠️ ' + msg);
 }
