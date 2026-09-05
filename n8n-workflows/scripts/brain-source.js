@@ -16,7 +16,6 @@ const OR_KEY = '__OR_KEY__';
 const TG_TOKEN = '__TG_TOKEN__';
 const OR_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const MODEL = 'xiaomi/mimo-v2.5';
-const MODEL_FAST = 'google/gemini-2.0-flash-001';
 const _http = this.helpers.httpRequest;
 
 // ---- HTTP genérico contra el backend (mismo token) ----
@@ -124,7 +123,7 @@ async function interpretarCampos(texto) {
       headers: { Authorization: 'Bearer ' + OR_KEY, 'Content-Type': 'application/json' },
       json: true,
       body: {
-        model: MODEL_FAST,
+        model: MODEL,
         response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: sys },
@@ -1387,7 +1386,7 @@ async function interpretarAccion(texto, prods) {
       headers: { Authorization: 'Bearer ' + OR_KEY, 'Content-Type': 'application/json' },
       json: true,
       body: {
-        model: MODEL_FAST,
+        model: MODEL,
         response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: sys },
