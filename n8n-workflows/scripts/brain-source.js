@@ -263,6 +263,34 @@ async function handleConfirm() {
     return startCrear(draft, text, photo, link);
   }
 
+  // 'galeria_parcial': recibiendo fotos para la galería de un producto existente.
+  if (state === 'galeria_parcial') {
+    if (photo) {
+      const p = prods.find(x => x.id === draft.id);
+      if (!p) { await clearSession(); return out('❌ No encontré el producto #' + draft.id + '.'); }
+      const furl = await telegramFileUrl(photo.file_id);
+      if (!furl) return out('❌ No pude leer la foto. Probá de nuevo.');
+      let gal = [];
+      try { gal = Array.isArray(p.galeria) ? p.galeria : (JSON.parse(p.galeria || '[]') || []); } catch (e) { gal = []; }
+      if (gal.indexOf(furl) === -1) gal.push(furl);
+      const body = Object.assign({}, p, { galeria: gal });
+      delete body.price_tiers; delete body.marca_descuento;
+      try {
+        await http('PUT', API_P + '/' + draft.id, body);
+        await setSession('galeria_parcial', { id: draft.id });
+        return out('🖼️ Foto agregada. Van <b>' + gal.length + '</b> en la galería. Mandá más o escribí <b>listo</b>.');
+      } catch (e) {
+        return out('❌ No pude guardar la foto: ' + e.message);
+      }
+    }
+    if (/^(listo|ya|ok|fin|terminar|finish)$/i.test(t.trim())) {
+      await clearSession();
+      return out('✅ Galería actualizada.');
+    }
+    if (/^(cancelar|abortar)$/i.test(t)) { await clearSession(); return out('❌ Cancelado.'); }
+    return out('Mandá fotos (una por mensaje) o escribí <b>listo</b> para terminar.');
+  }
+
   return null;
 }
 
@@ -1344,6 +1372,83 @@ function porNombre() {
 
 const rn = porNombre();
 if (rn) return rn;
+
+// ============================================================================
+// Interpretación IA del intento (modelo rápido) — entiende lenguaje natural.
+// Si nada determinista matcheó, la IA interpreta y ejecuta la acción.
+// ============================================================================
+async function interpretarAccion(texto, prods) {
+  if (!OR_KEY || !texto || !String(texto).trim()) return null;
+  try {
+    const sys = 'Sos el asistente de inventario de Seiva Paraguay. Interpretá el comando y respondé SOLO JSON.\nAcciones (campo "accion"):\n- "editar": { "accion":"editar", "id":<num>, "campos":{ "precio":<num>, "stock":<num>, "marca":"<str>", "nombre":"<str>", "categoria":"<str>" } }\n- "stock": { "accion":"stock", "id":<num>, "valor":<num>, "modo":"set"|"sumar"|"restar" }\n- "publicar": { "accion":"publicar", "id":<num> }\n- "despublicar": { "accion":"despublicar", "id":<num> }\n- "eliminar": { "accion":"eliminar", "id":<num> }\n- "buscar": { "accion":"buscar", "nombre":"<texto>" }\n- "consultar": { "accion":"consultar", "id":<num> }\n- "lista": { "accion":"lista" }\n- "agregar_galeria": { "accion":"agregar_galeria", "id":<num o null si "el último/ultimo producto"> }\n- "desconocido": { "accion":"desconocido" }\nReglas: "el último producto" o "el producto que acabo de crear" → id null. "agregar fotos/imagenes/galeria a X" → agregar_galeria. Respondé SOLO JSON.';
+    const inv = (prods || []).slice(0, 100).map(p => '#' + p.id + ' ' + p.nombre + ' (stock ' + p.stock + ', ' + p.precio + ')').join('\n');
+    const r = await _http({
+      method: 'POST', url: OR_URL,
+      headers: { Authorization: 'Bearer ' + OR_KEY, 'Content-Type': 'application/json' },
+      json: true,
+      body: {
+        model: MODEL_FAST,
+        response_format: { type: 'json_object' },
+        messages: [
+          { role: 'system', content: sys },
+          { role: 'user', content: 'Inventario:\n' + inv + '\n\nComando: ' + String(texto) }
+        ],
+        temperature: 0.1, max_tokens: 300
+      }
+    });
+    const c = r && r.choices && r.choices[0] && r.choices[0].message ? r.choices[0].message.content : '';
+    const j = parseJSON(c);
+    return (j && j.accion) ? j : null;
+  } catch (e) { return null; }
+}
+
+async function ejecutarAccionIA(a) {
+  const acc = a.accion;
+  // "el último producto" → id null → usamos el más reciente (prods viene DESC).
+  let id = a.id ? Number(a.id) : null;
+  if (!id && prods.length && /^(editar|stock|publicar|despublicar|eliminar|consultar|agregar_galeria)$/.test(acc)) {
+    id = prods[0].id;
+  }
+
+  if (acc === 'agregar_galeria') {
+    const p = prods.find(x => x.id === id);
+    if (!p) return out('❌ No encontré el producto #' + (id || '?') + '.');
+    await setSession('galeria_parcial', { id });
+    return out('📸 Mandame las fotos para la galería de <b>#' + id + '</b> (' + p.nombre + '). Una por mensaje. Escribí <b>listo</b> al terminar.');
+  }
+  if (acc === 'buscar') {
+    const q = String(a.nombre || '').trim();
+    if (!q) return out('¿Qué buscás?');
+    const m = prods.filter(p => (p.nombre || '').toLowerCase().includes(q.toLowerCase()));
+    if (!m.length) return out('🔎 No encontré "<b>' + q + '</b>".');
+    let o = '🔎 <b>' + m.length + '</b> resultado(s):\n';
+    m.slice(0, 10).forEach(p => { o += '<b>#' + p.id + '</b> ' + p.nombre + ' · stock ' + p.stock + ' · ' + fmt(p.precio) + ' Gs\n'; });
+    return out(o);
+  }
+  if (acc === 'lista') {
+    if (!prods.length) return out('📦 No hay productos.');
+    let o = '📦 <b>Productos (' + Math.min(prods.length, 40) + ' de ' + prods.length + '):</b>\n';
+    prods.slice(0, 40).forEach(p => { o += (p.activo ? '✅' : '⏸️') + ' <b>#' + p.id + '</b> ' + p.nombre + ' · ' + fmt(p.precio) + ' Gs · stock ' + p.stock + '\n'; });
+    return out(o);
+  }
+  if (acc === 'consultar') {
+    const p = prods.find(x => x.id === id);
+    if (!p) return out('❌ No encontré el producto #' + id + '.');
+    return out('#' + p.id + ' <b>' + p.nombre + '</b>\nPrecio: ' + fmt(p.precio) + ' Gs · Stock: ' + p.stock + ' · Marca: ' + (p.marca || '-') + ' · ' + (p.activo ? '✅ publicado' : '⏸️ oculto'));
+  }
+  if (acc === 'stock') return executeAction({ accion: 'ajustar_stock', id, valor: Number(a.valor), modo: a.modo || 'set' });
+  if (acc === 'publicar') return executeAction({ accion: 'publicar', id });
+  if (acc === 'despublicar') return executeAction({ accion: 'despublicar', id });
+  if (acc === 'eliminar') return executeAction({ accion: 'eliminar', id });
+  if (acc === 'editar') return executeAction({ accion: 'editar', id, campos: a.campos || {} });
+  return null;
+}
+
+const ia = await interpretarAccion(text, prods);
+if (ia && ia.accion && ia.accion !== 'desconocido') {
+  const rr = await ejecutarAccionIA(ia);
+  if (rr) return rr;
+}
 
 return out('❓ No entendí. Probá "ayuda".');
 
