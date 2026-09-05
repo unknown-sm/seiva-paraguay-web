@@ -16,6 +16,7 @@ const OR_KEY = '__OR_KEY__';
 const TG_TOKEN = '__TG_TOKEN__';
 const OR_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const MODEL = 'xiaomi/mimo-v2.5';
+const MODEL_FAST = 'google/gemini-2.0-flash-001';
 const _http = this.helpers.httpRequest;
 
 // ---- HTTP genérico contra el backend (mismo token) ----
@@ -109,6 +110,33 @@ function parseJSON(s) {
   const i = s.indexOf('{'), f = s.lastIndexOf('}');
   if (i >= 0 && f > i) { try { return JSON.parse(s.slice(i, f + 1)); } catch (e) { return null; } }
   try { return JSON.parse(s); } catch (e) { return null; }
+}
+
+// Interpretación por IA (modelo rápido) del mensaje completo: extrae los campos
+// del producto en una sola pasada, para entender lenguaje natural sin preguntar
+// campo por campo. Devuelve {} si no hay key o falla.
+async function interpretarCampos(texto) {
+  if (!OR_KEY || !texto || !String(texto).trim()) return {};
+  try {
+    const sys = 'Extraé de este mensaje los datos de un producto. Respondé SOLO JSON con estas claves (omití las que no estén): {"nombre":"...","marca":"...","precio":<num>,"stock":<num>,"precio_proveedor":<num>,"categoria":"..."}.\nReglas: precio es el precio de VENTA en guaraníes ("250 mil" → 250000). precio_proveedor es el costo en REALES brasileños ("80 reales" → 80), NO lo confundas con el precio de venta. nombre sin la marca al final.';
+    const r = await _http({
+      method: 'POST', url: OR_URL,
+      headers: { Authorization: 'Bearer ' + OR_KEY, 'Content-Type': 'application/json' },
+      json: true,
+      body: {
+        model: MODEL_FAST,
+        response_format: { type: 'json_object' },
+        messages: [
+          { role: 'system', content: sys },
+          { role: 'user', content: String(texto) }
+        ],
+        temperature: 0.1, max_tokens: 300
+      }
+    });
+    const c = r && r.choices && r.choices[0] && r.choices[0].message ? r.choices[0].message.content : '';
+    const j = parseJSON(c);
+    return (j && typeof j === 'object') ? j : {};
+  } catch (e) { return {}; }
 }
 
 // ---- Log de cambios: tabla audit_log del backend ----
@@ -470,6 +498,21 @@ async function startCrear(campos, textoMsg, photoMsg, linkMsg) {
         d.marca = posibleMarca;
         d.nombre = nm[1].trim();
       }
+    }
+  }
+
+  // Interpretación IA del mensaje completo (modelo rápido): entiende lenguaje
+  // natural y rellena los campos que el regex no capturó. Solo en el mensaje
+  // inicial (no cuando ya estamos preguntando un campo puntual).
+  if (!d._preguntando && t && t.trim()) {
+    const ia = await interpretarCampos(t);
+    if (ia) {
+      if (!d.nombre && ia.nombre) d.nombre = String(ia.nombre).trim();
+      if ((d.precio === null || d.precio === undefined) && ia.precio != null && !isNaN(Number(ia.precio))) d.precio = Number(ia.precio);
+      if (!d.marca && ia.marca) d.marca = String(ia.marca).trim();
+      if ((d.stock === null || d.stock === undefined) && ia.stock != null && !isNaN(Number(ia.stock))) d.stock = Number(ia.stock);
+      if ((d.precio_proveedor === null || d.precio_proveedor === undefined) && ia.precio_proveedor != null && !isNaN(Number(ia.precio_proveedor))) d.precio_proveedor = Number(ia.precio_proveedor);
+      if (!d.categoria && ia.categoria) d.categoria = String(ia.categoria).trim();
     }
   }
 
