@@ -142,6 +142,12 @@ async function handleConfirm() {
   if (state === 'crear_confirm') {
     // Normalizar: quitar puntuación (ej "si}" → "si") para ser tolerante a typos.
     const tn = t.replace(/[^a-z0-9áéíóúñ\s]/gi, ' ').replace(/\s+/g, ' ').trim();
+    // Si mandó un LINK o una FOTO (producto nuevo) estando en confirmación,
+    // soltamos la confirmación vieja y lo procesamos como creación nueva.
+    if (link || photo) {
+      await clearSession();
+      return null;
+    }
     if (/^(aprobar|aprobado|confirmo|confirmar|sí|si|sip|dale|ok|crear|va|vamos|yes|claro)$/i.test(tn)) {
       try {
         // Diagnóstico: ver QUÉ se va a enviar al backend.
@@ -175,7 +181,7 @@ async function handleConfirm() {
       if (edMarca) { p.marca = edMarca[1].trim(); cambios.push('marca → ' + p.marca); }
       if (edStock) { p.stock = parseInt(edStock[1]); cambios.push('stock → ' + p.stock); }
       await setSession('crear_confirm', { producto: p });
-      return out('✅ Actualizado:\n' + cambios.map(c => '• ' + c).join('\n') + '\n\nRespondé <b>APROBAR</b> para crearlo, o <b>CANCELAR</b>.');
+      return out('✅ Actualizado:\n' + cambios.map(c => '• ' + c).join('\n') + '\n\n¿Algo más? Escribí <code>nombre: X</code>, <code>precio: X</code>, <code>marca: X</code> o <code>stock: X</code>. Si está bien: <b>APROBAR</b>. Para descartar: <b>CANCELAR</b>.');
     }
     // Si mandó un comando nuevo (lista, stock, etc.), soltamos la confirmación y reprocesamos.
     if (/(\blista\b|\blistar\b|\bstock\b|\bbusca\b|\bbuscar\b|\bprecio\b|\belimin\b|\bnuevo\b|\bpublic\b|\bocult\b|\bayuda\b|\bhelp\b|\bmenu\b)/i.test(t)) {
@@ -552,7 +558,7 @@ async function continuarCrear(d, t, photoMsg, linkMsg) {
     const larga = String(producto.descripcion_larga).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 300);
     resumen += '\n📄 <b>Descripción larga (preview):</b> ' + larga + '…\n';
   }
-  resumen += '\nRespondé <b>APROBAR</b> para crearlo, o <b>CANCELAR</b>.';
+  resumen += '\n¿Querés cambiar algo? Escribí <code>nombre: X</code>, <code>precio: X</code>, <code>marca: X</code> o <code>stock: X</code>.\nSi está bien: <b>APROBAR</b>. Para descartar: <b>CANCELAR</b>.';
   return out(resumen);
 }
 
