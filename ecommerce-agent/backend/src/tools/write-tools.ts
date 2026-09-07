@@ -1,10 +1,6 @@
-import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { AppError } from '../errors.js';
-import type { PendingAction } from '../types.js';
 import type { ToolDefinition, ToolRegistry } from '../agent/tool-registry.js';
-
-const CONFIRM_MINUTES = 15;
 
 const updateStockSchema = z.object({
   product_id: z.string().min(1),
@@ -12,15 +8,16 @@ const updateStockSchema = z.object({
 });
 
 /**
- * W2: cambio de stock. NUNCA escribe directo: crea una acción pendiente con
- * el diff antes→después y devuelve confirmation_required. La escritura real
- * ocurre en POST /agent/v1/actions/:id/confirm (botones inline de Telegram).
+ * W1: cambio de stock directo. El dueño del bot decidió ejecutar sin
+ * confirmación por botones (allowlist de un solo chat). La escritura usa
+ * el endpoint dirigido de la tienda (solo columna stock) y el pipeline
+ * audita el diff antes→después en audit_log.
  */
 const updateProductStock: ToolDefinition<z.infer<typeof updateStockSchema>> = {
   name: 'update_product_stock',
   description:
-    'Propone cambiar el stock de un producto. NO aplica el cambio: devuelve una acción pendiente que el usuario confirma con botones (expira en 15 minutos). Usala cuando el usuario pida cambiar/modificar el stock de un producto.',
-  permissionClass: 'W2',
+    'Cambia el stock de un producto. Se aplica directamente. Argumentos: product_id (ID numérico) y new_stock (entero >= 0). Devuelve el resultado con el valor anterior y el nuevo.',
+  permissionClass: 'W1',
   paramSchema: updateStockSchema,
   handler: async (params, ctx) => {
     const product = await ctx.adapter.getProduct(params.product_id);
@@ -40,46 +37,20 @@ const updateProductStock: ToolDefinition<z.infer<typeof updateStockSchema>> = {
       };
     }
 
-    const action: PendingAction = {
-      id: `act_${randomUUID().replace(/-/g, '').slice(0, 12)}`,
-      sessionKey: ctx.sessionKey,
-      userId: ctx.userId,
-      tool: 'update_product_stock',
-      params,
-      preview: {
-        product_id: product.id,
-        name: product.name,
-        before: product.stock,
-        after: params.new_stock,
-      },
-      status: 'pending',
-      createdBy: ctx.userId,
-      expiresAt: new Date(Date.now() + CONFIRM_MINUTES * 60_000).toISOString(),
-      createdAt: new Date().toISOString(),
-    };
-    await ctx.stores.pendingActions.create(action);
-    await ctx.stores.audit.append({
-      sessionKey: ctx.sessionKey,
-      userId: ctx.userId,
-      tool: 'update_product_stock:pending',
-      params,
-      status: 'confirmation_required',
-      entityType: 'pending_action',
-      entityId: action.id,
-    });
+    const before = product.stock;
+    const updated = await ctx.adapter.updateProductStock(params.product_id, params.new_stock);
 
     return {
       data: {
-        confirmation_required: true,
-        action_id: action.id,
-        expires_at: action.expiresAt,
-        preview: action.preview,
-        instruction:
-          `Mostrale al usuario el resumen del cambio (stock ${product.stock} → ${params.new_stock}) ` +
-          `con los botones de confirmar/cancelar que acompañan tu mensaje. Incluí el id de acción ${action.id} en tu respuesta.`,
+        updated: true,
+        message: `Stock actualizado: ${updated.name} #${updated.id}: ${before} → ${updated.stock}`,
+        before,
+        after: updated.stock,
+        product: updated,
       },
-      entityType: 'pending_action',
-      entityId: action.id,
+      entityType: 'product',
+      entityId: updated.id,
+      diff: { stock: { before, after: updated.stock } },
     };
   },
 };
