@@ -66,4 +66,11 @@ export interface EcommerceAdapter {
   getSalesReport(range: PeriodRange, previous: PeriodRange | null, groupBy: 'product' | 'category' | 'day'): Promise<SalesReport>;
 
   getInventoryReport(threshold: number): Promise<InventoryReport>;
+
+  /**
+   * Fase 2 (escritura): cambia SOLO el stock de un producto. Debe usar el
+   * endpoint de actualización dirigida de la tienda (nunca un PUT completo
+   * que pise el resto de los campos). Devuelve el resumen actualizado.
+   */
+  updateProductStock(id: string, stock: number): Promise<ProductSummary>;
 }

@@ -3,6 +3,7 @@ import { buildApp } from './app.js';
 import { createPool, migrate } from './db.js';
 import { ToolRegistry } from './agent/tool-registry.js';
 import { registerReadTools } from './tools/read-tools.js';
+import { registerWriteTools } from './tools/write-tools.js';
 import { RateLimiter } from './rateLimit.js';
 import { MockEcommerceAdapter } from './ecommerce/mock-adapter.js';
 import { StoreApiAdapter } from './ecommerce/store-api-adapter.js';
@@ -24,12 +25,19 @@ async function main(): Promise<void> {
 
   // Datos de productos: si STORE_API_URL apunta a la tienda, lee el catálogo
   // real vía su API pública (solo lectura); si no, usa el adapter mock.
+  // STORE_API_USER/PASSWORD habilitan la escritura confirmada (Fase 2).
   const adapter = config.storeApiUrl
-    ? new StoreApiAdapter(config.storeApiUrl)
+    ? new StoreApiAdapter(
+        config.storeApiUrl,
+        config.storeApiUser && config.storeApiPassword
+          ? { username: config.storeApiUser, password: config.storeApiPassword }
+          : undefined
+      )
     : new MockEcommerceAdapter();
 
   const registry = new ToolRegistry();
   registerReadTools(registry);
+  registerWriteTools(registry);
 
   const limiter = new RateLimiter(config.rateLimitPerMinute);
 

@@ -7,6 +7,7 @@ import type {
   SalesReport,
   SalesTotals,
 } from './adapter.js';
+import { AppError } from '../errors.js';
 
 interface MockOrder {
   date: Date;
@@ -222,5 +223,14 @@ export class MockEcommerceAdapter implements EcommerceAdapter {
         .slice(0, 10),
       generatedAt: new Date().toISOString(),
     };
+  }
+
+  async updateProductStock(id: string, stock: number): Promise<ProductSummary> {
+    const product = PRODUCTS.find((p) => p.id === id);
+    if (!product) {
+      throw new AppError('NOT_FOUND', `No encontré el producto '${id}'`);
+    }
+    product.stock = stock;
+    return toSummary(product);
   }
 }

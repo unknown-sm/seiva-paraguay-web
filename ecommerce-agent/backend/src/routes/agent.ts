@@ -122,6 +122,52 @@ export async function agentRoutes(app: FastifyInstance, deps: AgentRouteDeps): P
       entityType: 'pending_action',
       entityId: action.id,
     });
+
+    // Fase 2: ejecución real de la acción confirmada.
+    if (action.tool === 'update_product_stock') {
+      const p = z.object({ product_id: z.string().min(1), new_stock: z.coerce.number().int().min(0) }).safeParse(action.params);
+      if (!p.success) {
+        throw new AppError('INVALID_STATE', 'Params de la acción inválidos');
+      }
+      const preview = (action.preview ?? {}) as { name?: string; before?: number };
+      try {
+        const updated = await deps.adapter.updateProductStock(p.data.product_id, p.data.new_stock);
+        await deps.stores.audit.append({
+          sessionKey: action.sessionKey,
+          userId: action.userId,
+          tool: action.tool,
+          params: action.params,
+          status: 'ok',
+          entityType: 'product',
+          entityId: updated.id,
+          diff: { stock: { before: preview.before ?? null, after: updated.stock } },
+        });
+        return {
+          ok: true,
+          data: {
+            action_id: action.id,
+            status: 'confirmed',
+            executed: true,
+            summary: `Stock actualizado: ${updated.name} #${updated.id} → ${updated.stock}`,
+            product: updated,
+          },
+        };
+      } catch (e) {
+        const appErr = e instanceof AppError ? e : new AppError('INTERNAL', 'Error ejecutando el cambio de stock');
+        await deps.stores.audit.append({
+          sessionKey: action.sessionKey,
+          userId: action.userId,
+          tool: action.tool,
+          params: action.params,
+          status: 'error',
+          error: { code: appErr.code, message: appErr.message },
+          entityType: 'product',
+          entityId: p.data.product_id,
+        });
+        throw appErr;
+      }
+    }
+
     return {
       ok: true,
       data: {

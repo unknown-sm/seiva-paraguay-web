@@ -79,11 +79,43 @@ function toFull(p: StoreProduct): Product {
 
 export class StoreApiAdapter implements EcommerceAdapter {
   private readonly baseUrl: string;
+  private readonly auth?: { username: string; password: string };
+  private token: { value: string; expiresAt: number } | null = null;
   private cache: { products: StoreProduct[]; fetchedAt: number } | null = null;
   private inflight: Promise<StoreProduct[]> | null = null;
 
-  constructor(baseUrl: string) {
+  constructor(baseUrl: string, auth?: { username: string; password: string }) {
     this.baseUrl = baseUrl.replace(/\/+$/, '');
+    this.auth = auth;
+  }
+
+  /** Login contra /api/auth/login con cache del JWT (dura 24h en la tienda). */
+  private async ensureToken(): Promise<string> {
+    if (!this.auth) {
+      throw new AppError('INTERNAL', 'La tool de escritura requiere credenciales de la tienda', {
+        hint: 'Configurá STORE_API_USER y STORE_API_PASSWORD en el backend del agente.',
+      });
+    }
+    if (this.token && Date.now() < this.token.expiresAt) return this.token.value;
+
+    const res = await fetch(`${this.baseUrl}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', accept: 'application/json' },
+      body: JSON.stringify(this.auth),
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) {
+      throw new AppError('UNAUTHORIZED', `Login de la tienda falló (${res.status})`, {
+        hint: 'Verificá STORE_API_USER / STORE_API_PASSWORD.',
+      });
+    }
+    const data = (await res.json()) as { token?: string };
+    if (!data.token) {
+      throw new AppError('UNAUTHORIZED', 'La tienda no devolvió token');
+    }
+    // Renovar con margen: expira a las 23h del ciclo de 24h de la tienda.
+    this.token = { value: data.token, expiresAt: Date.now() + 23 * 3600_000 };
+    return this.token.value;
   }
 
   private async fetchProducts(): Promise<StoreProduct[]> {
@@ -167,5 +199,32 @@ export class StoreApiAdapter implements EcommerceAdapter {
       topRotation: [],
       generatedAt: new Date().toISOString(),
     };
+  }
+
+  async updateProductStock(id: string, stock: number): Promise<ProductSummary> {
+    const token = await this.ensureToken();
+    // stock-batch actualiza SOLO la columna stock; nunca pisa otros campos.
+    const res = await fetch(`${this.baseUrl}/api/productos/stock-batch`, {
+      method: 'PATCH',
+      headers: {
+        authorization: `Bearer ${token}`,
+        'content-type': 'application/json',
+        accept: 'application/json',
+      },
+      body: JSON.stringify({ updates: [{ id: Number(id), stock }] }),
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      throw new AppError('INTERNAL', `La tienda rechazó el cambio de stock (${res.status})`, {
+        hint: body.slice(0, 200) || 'Reintentá; si persiste, revisá permisos del usuario de la tienda.',
+      });
+    }
+    this.cache = null; // forzar re-lectura
+    const updated = await this.getProduct(id);
+    if (!updated) {
+      throw new AppError('INTERNAL', `Stock enviado pero el producto ${id} ya no aparece en el catálogo`);
+    }
+    return updated;
   }
 }

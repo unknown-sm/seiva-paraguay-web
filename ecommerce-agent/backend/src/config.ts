@@ -6,6 +6,8 @@ export interface Config {
   databaseUrl: string | undefined;
   mockMode: boolean;
   storeApiUrl: string | undefined;
+  storeApiUser: string | undefined;
+  storeApiPassword: string | undefined;
   rateLimitPerMinute: number;
   logLevel: string;
 }
@@ -23,6 +25,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     databaseUrl,
     mockMode,
     storeApiUrl: env.STORE_API_URL?.trim() || undefined,
+    storeApiUser: env.STORE_API_USER?.trim() || undefined,
+    storeApiPassword: env.STORE_API_PASSWORD?.trim() || undefined,
     rateLimitPerMinute: Number(env.RATE_LIMIT_PER_MINUTE ?? 60),
     logLevel: env.LOG_LEVEL ?? 'info',
   };
