@@ -5,6 +5,7 @@ import { ToolRegistry } from './agent/tool-registry.js';
 import { registerReadTools } from './tools/read-tools.js';
 import { RateLimiter } from './rateLimit.js';
 import { MockEcommerceAdapter } from './ecommerce/mock-adapter.js';
+import { StoreApiAdapter } from './ecommerce/store-api-adapter.js';
 import { createMemoryStores } from './stores/memory.js';
 import { createPostgresStores } from './stores/postgres.js';
 
@@ -15,9 +16,11 @@ async function main(): Promise<void> {
     ? createMemoryStores()
     : createPostgresStores(createPool(config.databaseUrl!));
 
-  // Fase 1: adapter mock. La implementación real sobre los servicios del
-  // ecommerce reemplaza esta línea sin tocar el resto del sistema.
-  const adapter = new MockEcommerceAdapter();
+  // Datos de productos: si STORE_API_URL apunta a la tienda, lee el catálogo
+  // real vía su API pública (solo lectura); si no, usa el adapter mock.
+  const adapter = config.storeApiUrl
+    ? new StoreApiAdapter(config.storeApiUrl)
+    : new MockEcommerceAdapter();
 
   const registry = new ToolRegistry();
   registerReadTools(registry);

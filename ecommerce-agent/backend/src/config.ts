@@ -5,6 +5,7 @@ export interface Config {
   apiKeys: string[];
   databaseUrl: string | undefined;
   mockMode: boolean;
+  storeApiUrl: string | undefined;
   rateLimitPerMinute: number;
   logLevel: string;
 }
@@ -21,6 +22,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
         .filter(Boolean),
     databaseUrl,
     mockMode,
+    storeApiUrl: env.STORE_API_URL?.trim() || undefined,
     rateLimitPerMinute: Number(env.RATE_LIMIT_PER_MINUTE ?? 60),
     logLevel: env.LOG_LEVEL ?? 'info',
   };
