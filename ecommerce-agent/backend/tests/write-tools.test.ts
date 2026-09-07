@@ -61,3 +61,64 @@ describe('update_product_stock (W1 directo)', () => {
     expect(outcome.response.error?.code).toBe('VALIDATION');
   });
 });
+
+describe('update_product_price (W2 directo)', () => {
+  it('aplica el precio y audita diff', async () => {
+    const deps = buildDeps({ countingAdapter: true });
+    const precioOriginal = (await deps.adapter.getProduct(PRODUCT_ID))!.price;
+    const nuevo = precioOriginal + 1000;
+    const outcome = await runTool(
+      { toolName: 'update_product_price', params: { product_id: PRODUCT_ID, new_price: nuevo }, sessionKey: 'tg_1', requestId: 'p1' },
+      deps
+    );
+    expect(outcome.response.ok).toBe(true);
+    const data = outcome.response.data as { updated: boolean; before: number; after: number };
+    expect(data.before).toBe(precioOriginal);
+    expect(data.after).toBe(nuevo);
+    expect(deps.adapter.calls.updateProductPrice).toBe(1);
+    const entries = await deps.stores.audit.query({ sessionKey: 'tg_1' });
+    expect(entries.some((e) => e.diff && 'price' in e.diff)).toBe(true);
+  });
+
+  it('precio igual devuelve no_change sin escribir', async () => {
+    const deps = buildDeps({ countingAdapter: true });
+    const precioActual = (await deps.adapter.getProduct(PRODUCT_ID))!.price;
+    const outcome = await runTool(
+      { toolName: 'update_product_price', params: { product_id: PRODUCT_ID, new_price: precioActual }, sessionKey: 'tg_1' },
+      deps
+    );
+    expect((outcome.response.data as { no_change?: boolean }).no_change).toBe(true);
+    expect(deps.adapter.calls.updateProductPrice).toBe(0);
+  });
+});
+
+describe('set_product_active (W2 directo)', () => {
+  it('despublica y audita el cambio de estado', async () => {
+    const deps = buildDeps({ countingAdapter: true });
+    const outcome = await runTool(
+      { toolName: 'set_product_active', params: { product_id: PRODUCT_ID, active: false }, sessionKey: 'tg_1' },
+      deps
+    );
+    expect(outcome.response.ok).toBe(true);
+    expect((outcome.response.data as { status: string }).status).toBe('draft');
+    expect(deps.adapter.calls.setProductActive).toBe(1);
+    // volver a publicar para no ensuciar otros tests
+    await runTool(
+      { toolName: 'set_product_active', params: { product_id: PRODUCT_ID, active: true }, sessionKey: 'tg_1' },
+      deps
+    );
+  });
+
+  it('mismo estado devuelve no_change', async () => {
+    const deps = buildDeps({ countingAdapter: true });
+    await runTool(
+      { toolName: 'set_product_active', params: { product_id: PRODUCT_ID, active: true }, sessionKey: 'tg_1' },
+      deps
+    );
+    const outcome = await runTool(
+      { toolName: 'set_product_active', params: { product_id: PRODUCT_ID, active: true }, sessionKey: 'tg_1' },
+      deps
+    );
+    expect((outcome.response.data as { no_change?: boolean }).no_change).toBe(true);
+  });
+});

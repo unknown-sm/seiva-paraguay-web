@@ -22,18 +22,26 @@ interface StoreProduct {
   nombre: string;
   sku?: string | null;
   precio: number;
+  precio_anterior?: number | null;
   stock: number;
   activo: boolean;
   marca?: string | null;
   categoria?: string | null;
+  categoria_id?: number | null;
   subcategoria?: string | null;
   slug?: string | null;
   descripcion?: string | null;
   descripcion_larga?: string | null;
   imagen?: string | null;
   galeria?: string[];
+  etiquetas?: string[];
+  destacado?: boolean | number;
+  featured_order?: number;
   meta_titulo?: string | null;
   meta_descripcion?: string | null;
+  seo_descripcion?: string | null;
+  crosssell?: number[];
+  upsell?: number[];
 }
 
 const CACHE_TTL_MS = 30_000;
@@ -270,5 +278,100 @@ export class StoreApiAdapter implements EcommerceAdapter {
       throw new AppError('INTERNAL', `Stock enviado pero el producto ${id} ya no aparece en el catálogo`);
     }
     return updated;
+  }
+
+  /**
+   * La tienda no tiene endpoint dirigido de precio: read-modify-write con el
+   * PUT completo, reenviando TODOS los campos actuales salvo los que el PUT
+   * no debe tocar (variantes, precio_proveedor, delivery_gratis: quedan
+   * undefined y el backend de la tienda los omite). Verificación después.
+   */
+  async updateProductPrice(id: string, price: number): Promise<ProductSummary> {
+    const current = await this.getProduct(id);
+    if (!current) {
+      throw new AppError('NOT_FOUND', `No encontré el producto '${id}'`);
+    }
+    const full = await this.fetchFullRaw(id);
+    const token = await this.ensureToken();
+
+    const body: Record<string, unknown> = {
+      nombre: full.nombre,
+      precio: price,
+      precio_anterior: full.precio_anterior ?? null,
+      categoria: full.categoria,
+      subcategoria: full.subcategoria ?? '',
+      descripcion: full.descripcion ?? '',
+      descripcion_larga: full.descripcion_larga ?? '',
+      galeria: full.galeria ?? [],
+      etiquetas: full.etiquetas ?? [],
+      destacado: !!full.destacado,
+      imagen: full.imagen ?? '',
+      stock: full.stock ?? 0,
+      activo: !!full.activo,
+      categoria_id: full.categoria_id ?? null,
+      sku: full.sku ?? '',
+      marca: full.marca ?? '',
+      seo_descripcion: full.seo_descripcion ?? '',
+      meta_titulo: full.meta_titulo ?? '',
+      meta_descripcion: full.meta_descripcion ?? '',
+      crosssell: full.crosssell ?? [],
+      upsell: full.upsell ?? [],
+      slug: full.slug ?? '',
+      featured_order: full.featured_order ?? 0,
+    };
+
+    const res = await fetch(`${this.baseUrl}/api/productos/${id}`, {
+      method: 'PUT',
+      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json', accept: 'application/json' },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (!res.ok) {
+      const errBody = await res.text().catch(() => '');
+      throw new AppError('INTERNAL', `La tienda rechazó el cambio de precio (${res.status})`, {
+        hint: errBody.slice(0, 200) || 'Reintentá; si persiste, revisá permisos del usuario de la tienda.',
+      });
+    }
+
+    this.cache = null;
+    const updated = await this.getProduct(id);
+    if (!updated || updated.price !== price) {
+      throw new AppError('INTERNAL', `El cambio de precio no se reflejó en el producto ${id}`);
+    }
+    return updated;
+  }
+
+  async setProductActive(id: string, active: boolean): Promise<ProductSummary> {
+    const current = await this.getProduct(id);
+    if (!current) {
+      throw new AppError('NOT_FOUND', `No encontré el producto '${id}'`);
+    }
+    // Toggle de la tienda es un flip: si ya está en el estado pedido, no tocar.
+    if (current.status === (active ? 'published' : 'draft')) {
+      return current;
+    }
+    const token = await this.ensureToken();
+    const res = await fetch(`${this.baseUrl}/api/productos/${id}/toggle`, {
+      method: 'PATCH',
+      headers: { authorization: `Bearer ${token}`, accept: 'application/json' },
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) {
+      throw new AppError('INTERNAL', `La tienda rechazó el cambio de estado (${res.status})`);
+    }
+    this.cache = null;
+    const updated = await this.getProduct(id);
+    if (!updated || updated.status !== (active ? 'published' : 'draft')) {
+      throw new AppError('INTERNAL', `El cambio de estado no se reflejó en el producto ${id}`);
+    }
+    return updated;
+  }
+
+  /** Producto crudo completo (para el read-modify-write del precio). */
+  private async fetchFullRaw(id: string): Promise<StoreProduct> {
+    const all = await this.fetchProducts();
+    const found = all.find((p) => String(p.id) === id);
+    if (!found) throw new AppError('NOT_FOUND', `No encontré el producto '${id}'`);
+    return found;
   }
 }

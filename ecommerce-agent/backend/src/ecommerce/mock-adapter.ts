@@ -233,4 +233,22 @@ export class MockEcommerceAdapter implements EcommerceAdapter {
     product.stock = stock;
     return toSummary(product);
   }
+
+  async updateProductPrice(id: string, price: number): Promise<ProductSummary> {
+    const product = PRODUCTS.find((p) => p.id === id);
+    if (!product) {
+      throw new AppError('NOT_FOUND', `No encontré el producto '${id}'`);
+    }
+    product.price = price;
+    return toSummary(product);
+  }
+
+  async setProductActive(id: string, active: boolean): Promise<ProductSummary> {
+    const product = PRODUCTS.find((p) => p.id === id);
+    if (!product) {
+      throw new AppError('NOT_FOUND', `No encontré el producto '${id}'`);
+    }
+    product.status = active ? 'published' : 'draft';
+    return toSummary(product);
+  }
 }

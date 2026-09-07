@@ -73,4 +73,17 @@ export interface EcommerceAdapter {
    * que pise el resto de los campos). Devuelve el resumen actualizado.
    */
   updateProductStock(id: string, stock: number): Promise<ProductSummary>;
+
+  /**
+   * Fase 2 (escritura): cambia SOLO el precio. La tienda no tiene endpoint
+   * dirigido para precio: implementar como read-modify-write (leer producto
+   * completo, reenviar todo igual con el precio nuevo) y verificar después.
+   */
+  updateProductPrice(id: string, price: number): Promise<ProductSummary>;
+
+  /**
+   * Fase 2 (escritura): publica o despublica un producto (endpoint toggle
+   * de la tienda). Devuelve el resumen con el estado resultante.
+   */
+  setProductActive(id: string, active: boolean): Promise<ProductSummary>;
 }

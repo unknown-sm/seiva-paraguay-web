@@ -8,12 +8,28 @@ import { RateLimiter } from '../src/rateLimit.js';
 import type { EcommerceAdapter } from '../src/ecommerce/adapter.js';
 
 export interface CountingAdapter extends EcommerceAdapter {
-  calls: { searchProducts: number; getProduct: number; getSalesReport: number; getInventoryReport: number; updateProductStock: number };
+  calls: {
+    searchProducts: number;
+    getProduct: number;
+    getSalesReport: number;
+    getInventoryReport: number;
+    updateProductStock: number;
+    updateProductPrice: number;
+    setProductActive: number;
+  };
 }
 
 export function buildDeps(opts?: { rateLimit?: number; countingAdapter?: boolean }): RunToolDeps & { adapter: CountingAdapter } {
   const base = new MockEcommerceAdapter();
-  const calls = { searchProducts: 0, getProduct: 0, getSalesReport: 0, getInventoryReport: 0, updateProductStock: 0 };
+  const calls = {
+    searchProducts: 0,
+    getProduct: 0,
+    getSalesReport: 0,
+    getInventoryReport: 0,
+    updateProductStock: 0,
+    updateProductPrice: 0,
+    setProductActive: 0,
+  };
   const adapter: CountingAdapter = {
     calls,
     searchProducts: (...args) => {
@@ -35,6 +51,14 @@ export function buildDeps(opts?: { rateLimit?: number; countingAdapter?: boolean
     updateProductStock: (...args) => {
       calls.updateProductStock++;
       return base.updateProductStock(...args);
+    },
+    updateProductPrice: (...args) => {
+      calls.updateProductPrice++;
+      return base.updateProductPrice(...args);
+    },
+    setProductActive: (...args) => {
+      calls.setProductActive++;
+      return base.setProductActive(...args);
     },
   };
 
