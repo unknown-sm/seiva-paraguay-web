@@ -1,6 +1,6 @@
 import { loadConfig } from './config.js';
 import { buildApp } from './app.js';
-import { createPool } from './db.js';
+import { createPool, migrate } from './db.js';
 import { ToolRegistry } from './agent/tool-registry.js';
 import { registerReadTools } from './tools/read-tools.js';
 import { RateLimiter } from './rateLimit.js';
@@ -12,9 +12,15 @@ import { createPostgresStores } from './stores/postgres.js';
 async function main(): Promise<void> {
   const config = loadConfig();
 
-  const stores = config.mockMode
-    ? createMemoryStores()
-    : createPostgresStores(createPool(config.databaseUrl!));
+  const pool = config.mockMode ? null : createPool(config.databaseUrl!);
+  const stores = config.mockMode ? createMemoryStores() : createPostgresStores(pool!);
+  if (pool) {
+    // Migraciones idempotentes al arranque (registradas en schema_migrations).
+    const applied = await migrate(pool);
+    if (applied.length) {
+      console.log(`Migraciones aplicadas: ${applied.join(', ')}`);
+    }
+  }
 
   // Datos de productos: si STORE_API_URL apunta a la tienda, lee el catálogo
   // real vía su API pública (solo lectura); si no, usa el adapter mock.
