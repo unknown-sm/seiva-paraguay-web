@@ -45,6 +45,37 @@ function normalize(text: string): string {
     .replace(/[\u0300-\u036f]/g, '');
 }
 
+function levenshtein(a: string, b: string): number {
+  const m = a.length;
+  const n = b.length;
+  if (!m) return n;
+  if (!n) return m;
+  let prev = Array.from({ length: n + 1 }, (_, i) => i);
+  for (let i = 1; i <= m; i++) {
+    const cur = [i];
+    for (let j = 1; j <= n; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    prev = cur;
+  }
+  return prev[n];
+}
+
+/**
+ * Match con tolerancia a typos de carga (ej: "Colostro" vs "calostro"):
+ * substring directo, o distancia de edición <= 1-2 contra cada palabra
+ * del nombre/SKU/marca.
+ */
+function termMatches(term: string, haystack: string): boolean {
+  if (haystack.includes(term)) return true;
+  const maxDist = term.length >= 6 ? 2 : 1;
+  for (const word of haystack.split(/[^a-z0-9]+/)) {
+    if (Math.abs(word.length - term.length) > maxDist) continue;
+    if (levenshtein(word, term) <= maxDist) return true;
+  }
+  return false;
+}
+
 function toSummary(p: StoreProduct): ProductSummary {
   return {
     id: String(p.id),
@@ -125,8 +156,21 @@ export class StoreApiAdapter implements EcommerceAdapter {
     }
     if (this.inflight) return this.inflight;
 
-    this.inflight = fetch(`${this.baseUrl}/api/productos`, {
-      headers: { accept: 'application/json' },
+    // Con credenciales: catálogo completo (/all, incluye inactivos).
+    // Sin credenciales: listado público (solo activos).
+    const headers: Record<string, string> = { accept: 'application/json' };
+    let path = '/api/productos';
+    if (this.auth) {
+      try {
+        headers.authorization = `Bearer ${await this.ensureToken()}`;
+        path = '/api/productos/all';
+      } catch {
+        // Sin login válido caemos al listado público (solo lectura).
+      }
+    }
+
+    this.inflight = fetch(`${this.baseUrl}${path}`, {
+      headers,
       signal: AbortSignal.timeout(10_000),
     })
       .then(async (res) => {
@@ -164,7 +208,7 @@ export class StoreApiAdapter implements EcommerceAdapter {
       const haystack = normalize(
         `${p.nombre} ${p.sku || ''} ${p.marca || ''} ${p.slug || ''} ${p.categoria || ''} ${p.subcategoria || ''}`
       );
-      return terms.every((t) => haystack.includes(t));
+      return terms.every((t) => termMatches(t, haystack));
     });
 
     // In-stock primero (criterio del propio listado de la tienda), luego id desc.
