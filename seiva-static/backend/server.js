@@ -262,6 +262,25 @@ setInterval(dailyBackup, 24 * 60 * 60 * 1000);
 
 const db = new DatabaseSync(DB_PATH);
 
+// Snapshot consistente de la BD para el backup offsite (cron local).
+// VACUUM INTO crea una copia limpia sin bloquear; el temporal usa .tmp
+// para no entrar en la rotacion de dailyBackup (que filtra *.sqlite).
+app.get("/api/admin/db-backup", auth, (req, res) => {
+  const tmp = path.join(BACKUP_DIR, `download-${Date.now()}.sqlite.tmp`);
+  try {
+    fs.mkdirSync(BACKUP_DIR, { recursive: true });
+    db.exec("VACUUM INTO '" + tmp.replace(/'/g, "''") + "'");
+    res.download(tmp, `seiva-db-${new Date().toISOString().slice(0, 10)}.sqlite`, (err) => {
+      try { fs.unlinkSync(tmp); } catch (_) {}
+      if (err && !res.headersSent) console.warn("[db-backup] envio interrumpido:", err.message);
+    });
+  } catch (e) {
+    try { fs.unlinkSync(tmp); } catch (_) {}
+    logError("error", "GET /api/admin/db-backup", e.message);
+    res.status(500).json({ error: "Backup fallo: " + e.message });
+  }
+});
+
 // Initialize Telegram Bot
 // [MIGRATION] Bot moved to n8n (2026-08-23). init() disabled so the webhook
 // stops handling updates; n8n now owns the Telegram webhook. Re-enable by

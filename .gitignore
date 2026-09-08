@@ -18,3 +18,5 @@ ruvector.db
 #seiva-static/backend/data/database.sqlite
 *.sqlite-shm
 *.sqlite-wal
+# Backups de produccion descargados localmente (cron diario)
+backups-prod/
