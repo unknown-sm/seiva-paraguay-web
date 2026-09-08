@@ -1,16 +1,16 @@
-# Graph Report - Pagina_seiva  (2026-09-07)
+# Graph Report - Pagina_seiva  (2026-09-01)
 
 ## Corpus Check
-- 222 files · ~1,300,367 words
+- 191 files · ~1,265,317 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1937 nodes · 3185 edges · 192 communities (144 shown, 48 thin omitted)
-- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 53 edges (avg confidence: 0.51)
+- 1659 nodes · 2632 edges · 175 communities (127 shown, 48 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 44 edges (avg confidence: 0.51)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f51982ad`
+- Built from commit: `081b9681`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -35,7 +35,7 @@
 - ProductoPage.tsx
 - telegram-bot.js
 - mobile-opencode/package.json
-- mock-adapter.ts
+- menubar.tsx
 - import-products.js
 - api.ts
 - context-menu.tsx
@@ -69,7 +69,7 @@
 - Seiva Paraguay — Design System
 - importFromWooCommerce
 - tsconfig.json
-- ecommerce-agent/backend/package.json
+- select.tsx
 - utils.ts
 - pwa.js
 - parseProducto
@@ -128,38 +128,38 @@
 - copy-provider.openrouter.js
 - React + TypeScript + Vite
 - copy-provider.custom.js
-- formatDate
-- tool-registry.ts
+- formatGs
+- class-variance-authority
 - build_v2.js
 - build_v4.js
 - carousel.tsx
 - SEIVA — Workflows n8n
 - switchTab
 - build_v3.js
-- Sistema de Administración de Ecommerce mediante Agente IA (Telegram + n8n)
-- run-tool.ts
+- $
+- form.tsx
 - _chk_statsbar.js
 - fix_switch2.js
 - _crear_dm.js
 - _reset_pw.js
 - search-service.js
 - fix_json.js
-- server.ts
+- _test_token.js
 - _chk_offers.js
 - _fix_ofertas.js
 - _restore_statsbar.js
-- read-tools.ts
+- toggle-group.tsx
 - fix_ctx.js
-- agent.ts
-- compilerOptions
+- _test_brain.js
+- _test_router.js
 - _chk_auth.js
 - _chk_offers2.js
 - _chk_promos.js
 - _chk_slug_total.js
-- PROMPT DEL BOT CEREBRO — Seiva Paraguay v4
+- _chk_credentials.js
 - export_workflow.js
-- errors.ts
-- navigation-menu.tsx
+- _verify_live.js
+- loadProductos
 - _chk_stats.js
 - _chk_uniervas.js
 - _fix_dm.js
@@ -168,37 +168,20 @@
 - _chk_oferta.js
 - _chk_slug.js
 - _chk_slug_list.js
-- n8n — workflows
+- _inspect_site.js
 - clsx
-- 3. Evaluación crítica de tu planteamiento (lo primero que pediste)
-- empty.tsx
-- backend — Agent API
-- ecommerce-agent
-- admin-assistant.js
-- _redact_json.js
-- 10. Diseño de memoria
-- _fichas_db.js
-- 16. Sistema de imágenes
-- 4. Arquitectura recomendada
-- 6. Diseño del agente IA
-- 7. Sistema de Tools
-- 9. Diseño de la Agent API
-- loadMarcasSelect
-- 15. Sistema de scraping
-- _syntax_check.js
-- cmdk
 
 ## God Nodes (most connected - your core abstractions)
 1. `cn()` - 270 edges
-2. `api()` - 58 edges
-3. `Sistema de Administración de Ecommerce mediante Agente IA (Telegram + n8n)` - 31 edges
-4. `xt()` - 25 edges
-5. `useCart()` - 25 edges
-6. `formatPrice()` - 24 edges
-7. `compilerOptions` - 22 edges
-8. `toast()` - 21 edges
-9. `switchTab()` - 21 edges
-10. `EcommerceAdapter` - 18 edges
+2. `api()` - 57 edges
+3. `useCart()` - 25 edges
+4. `xt()` - 24 edges
+5. `formatPrice()` - 24 edges
+6. `compilerOptions` - 22 edges
+7. `toast()` - 21 edges
+8. `switchTab()` - 21 edges
+9. `onMessage()` - 18 edges
+10. `imageSrcSet()` - 18 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `trimAudioToWav()` --indirect_call--> `out()`  [INFERRED]
@@ -215,19 +198,19 @@
 ## Import Cycles
 - None detected.
 
-## Communities (192 total, 48 thin omitted)
+## Communities (175 total, 48 thin omitted)
 
 ### Community 0 - "admin.js"
-Cohesion: 0.08
-Nodes (22): addBundleProductRow(), agregarFilaVenta(), calcularPrecioBundle(), cerrarModalProducto(), editarBundle(), editarProducto(), editEnvio(), encodeWav() (+14 more)
+Cohesion: 0.09
+Nodes (18): agregarFilaVenta(), editarPromo(), editEnvio(), encodeWav(), initTheme(), injectGA(), loadGAScript(), loadMarcasSelect() (+10 more)
 
 ### Community 1 - "cn"
-Cohesion: 0.05
-Nodes (53): Avatar(), AvatarFallback(), AvatarImage(), BreadcrumbEllipsis(), BreadcrumbItem(), BreadcrumbLink(), BreadcrumbList(), BreadcrumbPage() (+45 more)
+Cohesion: 0.06
+Nodes (51): Avatar(), AvatarFallback(), AvatarImage(), BreadcrumbEllipsis(), BreadcrumbItem(), BreadcrumbLink(), BreadcrumbList(), BreadcrumbPage() (+43 more)
 
 ### Community 2 - "backend/server.js"
 Cohesion: 0.04
-Nodes (43): ADMIN_HASH, adminAssistant, adminPath, app, BACKUP_DIR, bcrypt, brandMap, carritoLimiter (+35 more)
+Nodes (42): ADMIN_HASH, adminPath, app, BACKUP_DIR, bcrypt, brandMap, carritoLimiter, catCount (+34 more)
 
 ### Community 3 - "devDependencies"
 Cohesion: 0.04
@@ -243,11 +226,11 @@ Nodes (19): AlertDialogAction(), AlertDialogCancel(), AlertDialogContent(), Aler
 
 ### Community 6 - "dependencies"
 Cohesion: 0.06
-Nodes (30): bcryptjs, cheerio, compression, cors, express-rate-limit, helmet, jsonwebtoken, multer (+22 more)
+Nodes (30): bcryptjs, cheerio, compression, cors, dotenv, express-rate-limit, helmet, jsonwebtoken (+22 more)
 
 ### Community 7 - "compilerOptions"
 Cohesion: 0.07
-Nodes (28): DOM, DOM.Iterable, ES2022, vite/client, compilerOptions, allowImportingTsExtensions, baseUrl, erasableSyntaxOnly (+20 more)
+Nodes (28): DOM, DOM.Iterable, ES2022, src, vite/client, compilerOptions, allowImportingTsExtensions, baseUrl (+20 more)
 
 ### Community 8 - "image-service.js"
 Cohesion: 0.11
@@ -255,7 +238,7 @@ Nodes (27): collectFilenames(), { DatabaseSync }, fs, imageService, main(), path
 
 ### Community 9 - "react"
 Cohesion: 0.12
-Nodes (16): react, react, ChartConfig, ChartContainer(), ChartContext, ChartContextProps, ChartLegendContent(), ChartTooltipContent() (+8 more)
+Nodes (17): react, react, ChartConfig, ChartContainer(), ChartContext, ChartContextProps, ChartLegendContent(), ChartTooltipContent() (+9 more)
 
 ### Community 10 - "app.js"
 Cohesion: 0.14
@@ -270,8 +253,8 @@ Cohesion: 0.11
 Nodes (17): App(), Footer, MobileTabBar(), ScrollToTop(), CurrentProductContext, CurrentProductContextValue, CurrentProductProvider(), useCurrentProduct() (+9 more)
 
 ### Community 13 - "field.tsx"
-Cohesion: 0.10
-Nodes (22): Field(), FieldContent(), FieldDescription(), FieldError(), FieldGroup(), FieldLabel(), FieldLegend(), FieldSeparator() (+14 more)
+Cohesion: 0.16
+Nodes (12): Field(), FieldContent(), FieldDescription(), FieldError(), FieldGroup(), FieldLabel(), FieldLegend(), FieldSeparator() (+4 more)
 
 ### Community 14 - "command.tsx"
 Cohesion: 0.12
@@ -297,9 +280,9 @@ Nodes (51): chatIdOf(), handleUpdate(), invoiceWizard, productWizard, tg, applyU
 Cohesion: 0.12
 Nodes (16): dependencies, express, node-pty, socket.io, strip-ansi, description, express, main (+8 more)
 
-### Community 20 - "mock-adapter.ts"
-Cohesion: 0.13
-Nodes (19): InventoryReport, PeriodRange, Product, ProductSummary, SalesReport, SalesTotals, MockEcommerceAdapter, MockOrder (+11 more)
+### Community 20 - "menubar.tsx"
+Cohesion: 0.12
+Nodes (11): Menubar(), MenubarCheckboxItem(), MenubarContent(), MenubarItem(), MenubarLabel(), MenubarRadioItem(), MenubarSeparator(), MenubarShortcut() (+3 more)
 
 ### Community 21 - "import-products.js"
 Cohesion: 0.12
@@ -331,7 +314,7 @@ Nodes (44): provider, askNextField(), clear(), COPY_FIELDS, copyProvider, escape
 
 ### Community 28 - "dependencies"
 Cohesion: 0.15
-Nodes (13): class-variance-authority, @radix-ui/react-context-menu, @radix-ui/react-menubar, @radix-ui/react-scroll-area, @radix-ui/react-select, react-dom, dependencies, class-variance-authority (+5 more)
+Nodes (13): cmdk, @radix-ui/react-context-menu, @radix-ui/react-menubar, @radix-ui/react-scroll-area, @radix-ui/react-select, react-dom, dependencies, cmdk (+5 more)
 
 ### Community 29 - "public/manifest.json"
 Cohesion: 0.15
@@ -394,8 +377,8 @@ Cohesion: 0.14
 Nodes (13): Admin Panel, Backend, File Map, Flujo de Pedidos Ecommerce — Implementation Plan, Frontend, Post-Implementation Suggestions (from Superpowers), Spec Coverage Check, Task 1: Backend — Crear tabla pedidos y endpoints (+5 more)
 
 ### Community 44 - "brain-source.js"
-Cohesion: 0.21
-Nodes (26): clearSession(), completarGaleria(), continuarCrear(), doStock(), ejecutarAccionIA(), executeAction(), extraerNombre(), fichaEspecifica() (+18 more)
+Cohesion: 0.13
+Nodes (31): clearSession(), completarGaleria(), continuarCrear(), doStock(), draft, executeAction(), fmt(), generarFicha() (+23 more)
 
 ### Community 45 - "backup.js"
 Cohesion: 0.36
@@ -410,12 +393,12 @@ Cohesion: 0.22
 Nodes (9): auth(), downloadImage(), formatDescription(), formatDescriptionLarga(), isValidScrapeUrl(), logError(), parsePrecio(), sanitizeHtml() (+1 more)
 
 ### Community 49 - "producto-detail.js"
-Cohesion: 0.42
-Nodes (8): fetchProduct(), formatPrice(), getApiBase(), getProductId(), init(), renderProduct(), sanitizeDescriptionHtml(), showNotFound()
+Cohesion: 0.46
+Nodes (7): fetchProduct(), formatPrice(), getApiBase(), getProductId(), init(), renderProduct(), showNotFound()
 
 ### Community 50 - "api"
-Cohesion: 0.11
-Nodes (32): api(), cambiarEstadoPedido(), clearErrorLogs(), clearHeroProduct(), deleteCategoria(), deletePagina(), editarMarca(), editarUsuario() (+24 more)
+Cohesion: 0.12
+Nodes (31): api(), cambiarEstadoPedido(), clearErrorLogs(), clearHeroProduct(), deleteCategoria(), deletePagina(), editarMarca(), editarUsuario() (+23 more)
 
 ### Community 51 - "sync-stock.js"
 Cohesion: 0.38
@@ -433,13 +416,13 @@ Nodes (6): extractBrand(), importFromWooCommerce(), inferSubcat(), normalizarMar
 Cohesion: 0.33
 Nodes (5): compilerOptions, baseUrl, paths, files, references
 
-### Community 55 - "ecommerce-agent/backend/package.json"
-Cohesion: 0.06
-Nodes (33): dependencies, dotenv, fastify, pg, zod, description, devDependencies, tsx (+25 more)
+### Community 55 - "select.tsx"
+Cohesion: 0.18
+Nodes (7): SelectContent(), SelectItem(), SelectLabel(), SelectScrollDownButton(), SelectScrollUpButton(), SelectSeparator(), SelectTrigger()
 
 ### Community 56 - "utils.ts"
-Cohesion: 0.07
-Nodes (15): Badge(), badgeVariants, Checkbox(), HoverCardContent(), PopoverContent(), Progress(), ResizableHandle(), ResizablePanelGroup() (+7 more)
+Cohesion: 0.08
+Nodes (10): Badge(), badgeVariants, Checkbox(), HoverCardContent(), PopoverContent(), Progress(), ResizableHandle(), ResizablePanelGroup() (+2 more)
 
 ### Community 57 - "pwa.js"
 Cohesion: 0.60
@@ -470,8 +453,8 @@ Cohesion: 0.38
 Nodes (6): formatBenefit(), formatCondition(), Promo, PromosPage(), tipoIcons, tipoLabels
 
 ### Community 70 - "xt"
-Cohesion: 0.14
-Nodes (22): abrirModalDescMarca(), addTierRow(), asistenteAgregar(), asistenteEnviar(), eliminarBundle(), eliminarDescuentoMarca(), formatGs(), kpiIcon() (+14 more)
+Cohesion: 0.19
+Nodes (15): abrirModalDescMarca(), addTierRow(), editarProducto(), kpiIcon(), loadCategoriasSelect(), loadDashboard(), loadMarcasSelectProd(), nuevoDescuentoMarca() (+7 more)
 
 ### Community 127 - "Seiva Paraguay - WordPress WooCommerce"
 Cohesion: 0.33
@@ -489,13 +472,9 @@ Nodes (4): buildUserPrompt(), callOpenRouter(), generateCopy(), parseCopy()
 Cohesion: 0.50
 Nodes (3): Expanding the ESLint configuration, React Compiler, React + TypeScript + Vite
 
-### Community 132 - "formatDate"
-Cohesion: 0.22
-Nodes (11): eliminarCarrito(), eliminarUsuario(), formatDate(), loadCarritos(), loadHistorico(), loadUsuarios(), renderCarritos(), renderHistorico() (+3 more)
-
-### Community 133 - "tool-registry.ts"
-Cohesion: 0.14
-Nodes (17): RunToolOutcome, ToolContext, ToolHandlerResult, AuditStore, IdempotencyStore, PendingActionStore, SessionStore, Stores (+9 more)
+### Community 132 - "formatGs"
+Cohesion: 0.18
+Nodes (15): addBundleProductRow(), calcularPrecioBundle(), editarBundle(), eliminarUsuario(), formatDate(), formatGs(), loadUsuarios(), nuevoBundle() (+7 more)
 
 ### Community 135 - "build_v2.js"
 Cohesion: 0.14
@@ -514,20 +493,20 @@ Cohesion: 0.15
 Nodes (12): Archivos, Arquitectura (8 nodos, lineal), Comandos útiles, Endpoints del backend que usa, Entorno n8n, Formato que devuelve el agente, Lecciones / pitfalls de n8n 2.36.8, Puntos críticos (no romper) (+4 more)
 
 ### Community 139 - "switchTab"
-Cohesion: 0.20
-Nodes (10): deleteEnvio(), loadAnalytics(), loadEnvios(), loadPagos(), loadStockAlertas(), renderEnvios(), renderStockAlertas(), setPagoVal() (+2 more)
+Cohesion: 0.15
+Nodes (13): deleteEnvio(), eliminarBundle(), loadAnalytics(), loadBundles(), loadContenido(), loadEnvios(), loadHeroProduct(), loadHistorico() (+5 more)
 
 ### Community 140 - "build_v3.js"
 Cohesion: 0.17
 Nodes (9): connections, CRED_TG, fs, https, K, nodes, OUT, path (+1 more)
 
-### Community 141 - "Sistema de Administración de Ecommerce mediante Agente IA (Telegram + n8n)"
-Cohesion: 0.09
-Nodes (23): 11. Seguridad, 12. Sistema de confirmaciones, 13. (Integrada en 12), 14. Auditoría, 17. Sistema de SEO, 18. Inventario, 19. Reportes de ventas, 1. Resumen de la idea (+15 more)
-
-### Community 142 - "run-tool.ts"
+### Community 141 - "$"
 Cohesion: 0.20
-Nodes (12): assertPermission(), describeZodError(), idempotencyKey(), REJECTED_CODES, runTool(), RunToolDeps, RunToolInput, zodHint() (+4 more)
+Nodes (10): $, base, bySlug, candidates, cheerio, fs, html, idFromAny (+2 more)
+
+### Community 142 - "form.tsx"
+Cohesion: 0.25
+Nodes (9): FormControl(), FormDescription(), FormFieldContext, FormFieldContextValue, FormItemContext, FormItemContextValue, FormLabel(), FormMessage() (+1 more)
 
 ### Community 143 - "_chk_statsbar.js"
 Cohesion: 0.22
@@ -553,9 +532,9 @@ Nodes (6): buildFtsQuery(), levenshtein(), normalize(), search(), similarity(), 
 Cohesion: 0.29
 Nodes (5): fs, https, K, SYS, WF
 
-### Community 149 - "server.ts"
-Cohesion: 0.22
-Nodes (12): ToolRegistry, buildApp(), Config, loadConfig(), createPool(), migrate(), main(), main() (+4 more)
+### Community 149 - "_test_token.js"
+Cohesion: 0.33
+Nodes (5): b64url(), crypto, fresh, now, sign()
 
 ### Community 150 - "_chk_offers.js"
 Cohesion: 0.29
@@ -569,21 +548,21 @@ Nodes (6): all, {DatabaseSync}, db, dejar, fs, update
 Cohesion: 0.29
 Nodes (6): {DatabaseSync}, db, defaultStats, r, upsert, verify
 
-### Community 153 - "read-tools.ts"
-Cohesion: 0.18
-Nodes (16): addDays(), monthShift(), parsePeriod(), previousPeriod(), startOfDay(), startOfWeek(), getInventoryReport, getProduct (+8 more)
+### Community 153 - "toggle-group.tsx"
+Cohesion: 0.43
+Nodes (5): ToggleGroup(), ToggleGroupContext, ToggleGroupItem(), Toggle(), toggleVariants
 
 ### Community 154 - "fix_ctx.js"
 Cohesion: 0.33
 Nodes (4): fs, https, JWT, K
 
-### Community 155 - "agent.ts"
-Cohesion: 0.18
-Nodes (8): AppDeps, EcommerceAdapter, AgentRouteDeps, agentRoutes(), createActionBody, publicAction(), toolCallBody, CountingAdapter
+### Community 155 - "_test_brain.js"
+Cohesion: 0.33
+Nodes (4): fs, prods, sessionStore, w
 
-### Community 156 - "compilerOptions"
-Cohesion: 0.13
-Nodes (14): compilerOptions, declaration, esModuleInterop, forceConsistentCasingInFileNames, module, moduleResolution, outDir, rootDir (+6 more)
+### Community 156 - "_test_router.js"
+Cohesion: 0.33
+Nodes (5): cases, fs, prods, router, w
 
 ### Community 157 - "_chk_auth.js"
 Cohesion: 0.33
@@ -601,21 +580,21 @@ Nodes (5): {DatabaseSync}, db, dm, marcas, promos
 Cohesion: 0.33
 Nodes (5): conSlug, {DatabaseSync}, db, sinSlug, total
 
-### Community 161 - "PROMPT DEL BOT CEREBRO — Seiva Paraguay v4"
-Cohesion: 0.14
-Nodes (13): 1. Mensaje nuevo (foto + caption o texto), 2. Estados de sesión, 3. Comandos directos (no requieren LLM), 4. Cuando hay que generar descripción, 🔄 **FLUJO DE USUARIO** — Cómo interactúa el Cerebro, 📌 **NO OLVIDAR (checklist antes de deploy)**, PROMPT DEL BOT CEREBRO — Seiva Paraguay v4, 🛒 **PROMPT SYSTEM** — Para el LLM (OpenRouter) (+5 more)
+### Community 161 - "_chk_credentials.js"
+Cohesion: 0.40
+Nodes (3): fs, https, K
 
 ### Community 162 - "export_workflow.js"
 Cohesion: 0.40
 Nodes (3): fs, https, K
 
-### Community 163 - "errors.ts"
-Cohesion: 0.20
-Nodes (8): MAX_CLASS_BY_ROLE, RANK, AppError, AppErrorOptions, ErrorCode, statusByCode, updateProductStock, updateStockSchema
+### Community 163 - "_verify_live.js"
+Cohesion: 0.40
+Nodes (3): fs, JWT, N8N_LINES
 
-### Community 164 - "navigation-menu.tsx"
-Cohesion: 0.22
-Nodes (9): NavigationMenu(), NavigationMenuContent(), NavigationMenuIndicator(), NavigationMenuItem(), NavigationMenuLink(), NavigationMenuList(), NavigationMenuTrigger(), navigationMenuTriggerStyle (+1 more)
+### Community 164 - "loadProductos"
+Cohesion: 0.40
+Nodes (5): eliminarProducto(), loadProductos(), renderProductos(), toggleProducto(), updateSortIndicators()
 
 ### Community 165 - "_chk_stats.js"
 Cohesion: 0.40
@@ -649,89 +628,25 @@ Nodes (3): {DatabaseSync}, db, rows
 Cohesion: 0.50
 Nodes (3): {DatabaseSync}, db, rows
 
-### Community 173 - "n8n — workflows"
-Cohesion: 0.25
-Nodes (4): Configuración de `telegram-inbox.json` (después de importar), Convenciones, n8n — workflows, Workflows
-
-### Community 175 - "3. Evaluación crítica de tu planteamiento (lo primero que pediste)"
-Cohesion: 0.25
-Nodes (8): 3.1 Seguridad en la Fase 10 es un error — debe ser Fase 1, 3.2 La auditoría no puede vivir solo en n8n, 3.3 Afirmación correcta: la IA NO debe tocar la base de datos, 3.4 Las tareas masivas no son un loop del agente, 3.5 Confirmar con "sí" en texto libre es débil, 3.6 El flujo de 19 pasos para importar un producto no debería ser un solo ciclo de agente, 3.7 Lo que está bien, 3. Evaluación crítica de tu planteamiento (lo primero que pediste)
-
-### Community 176 - "empty.tsx"
-Cohesion: 0.29
-Nodes (7): Empty(), EmptyContent(), EmptyDescription(), EmptyHeader(), EmptyMedia(), emptyMediaVariants, EmptyTitle()
-
-### Community 177 - "backend — Agent API"
-Cohesion: 0.29
-Nodes (7): backend — Agent API, Contrato, Estructura, Integración con el ecommerce real, Mecanismos ya implementados, Prueba rápida, Quickstart
-
-### Community 178 - "ecommerce-agent"
-Cohesion: 0.29
-Nodes (7): Componentes, Documentación, ecommerce-agent, Estado actual (Fase 0 + núcleo de Fase 1), Estructura del proyecto, Plan de fases, Reglas duras del sistema
-
-### Community 179 - "admin-assistant.js"
-Cohesion: 0.48
-Nodes (6): callLLM(), executeAction(), fmt(), interpretCommand(), parseJSONLoose(), ruleBased()
-
-### Community 180 - "_redact_json.js"
-Cohesion: 0.33
-Nodes (5): fs, jsonPath, path, s, secrets
-
-### Community 181 - "10. Diseño de memoria"
-Cohesion: 0.40
-Nodes (5): 10.1 Corto plazo (conversación), 10.2 Contexto de sesión, 10.3 Memoria de entidades (la importante para "el segundo", "ese"), 10.4 Persistente / largo plazo, 10. Diseño de memoria
-
-### Community 182 - "_fichas_db.js"
-Cohesion: 0.50
-Nodes (3): fichaEspecifica(), fichaPorNombre(), FICHAS
-
-### Community 183 - "16. Sistema de imágenes"
-Cohesion: 0.50
-Nodes (4): 16.1 Almacenamiento, 16.2 Ingesta por Telegram, 16.3 "Buscá mejores imágenes", 16. Sistema de imágenes
-
-### Community 184 - "4. Arquitectura recomendada"
-Cohesion: 0.50
-Nodes (4): 4.1 Diagrama de componentes, 4.2 Flujo de comunicación (una instrucción), 4.3 Por qué esta forma y no otra, 4. Arquitectura recomendada
-
-### Community 185 - "6. Diseño del agente IA"
-Cohesion: 0.50
-Nodes (4): 6.1 Qué modelo, 6.2 Cómo evitar que invente información, 6.3 Manejo de conversaciones largas, 6. Diseño del agente IA
-
-### Community 186 - "7. Sistema de Tools"
-Cohesion: 0.50
-Nodes (4): 7.1 Catálogo con clase de permiso, 7.2 Cómo se implementan en n8n, 7.3 Contrato único de tool (recomendado), 7. Sistema de Tools
-
-### Community 187 - "9. Diseño de la Agent API"
-Cohesion: 0.50
-Nodes (4): 9.1 Estructura de endpoints, 9.2 Autenticación y red, 9.3 Idempotencia, 9. Diseño de la Agent API
-
-### Community 188 - "loadMarcasSelect"
-Cohesion: 0.67
-Nodes (4): editarPromo(), loadMarcasSelect(), nuevoPromo(), togglePromoFields()
-
-### Community 189 - "15. Sistema de scraping"
-Cohesion: 0.67
-Nodes (3): 15.1 Stack recomendado (en capas, de más barata a más cara), 15.2 Pipeline, 15. Sistema de scraping
-
 ## Knowledge Gaps
-- **710 isolated node(s):** `fs`, `path`, `https`, `name`, `version` (+705 more)
+- **605 isolated node(s):** `fs`, `path`, `https`, `name`, `version` (+600 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **48 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `cn` to `item.tsx`, `navigation-menu.tsx`, `alert-dialog.tsx`, `sidebar.tsx`, `alert.tsx`, `accordion.tsx`, `carousel.tsx`, `react`, `drawer.tsx`, `field.tsx`, `command.tsx`, `empty.tsx`, `context-menu.tsx`, `utils.ts`, `dropdown-menu.tsx`, `input-group.tsx`?**
-  _High betweenness centrality (0.096) - this node is a cross-community bridge._
-- **Why does `dependencies` connect `dependencies` to `devDependencies`, `react`, `clsx`, `cmdk`, `date-fns`, `embla-carousel-react`, `gsap`, `@gsap/react`, `@hookform/resolvers`, `input-otp`, `lucide-react`, `next-themes`, `@radix-ui/react-accordion`, `@radix-ui/react-alert-dialog`, `@radix-ui/react-aspect-ratio`, `@radix-ui/react-avatar`, `@radix-ui/react-checkbox`, `@radix-ui/react-collapsible`, `@radix-ui/react-dialog`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-hover-card`, `@radix-ui/react-label`, `@radix-ui/react-navigation-menu`, `@radix-ui/react-popover`, `@radix-ui/react-progress`, `@radix-ui/react-radio-group`, `@radix-ui/react-separator`, `@radix-ui/react-slider`, `@radix-ui/react-slot`, `@radix-ui/react-switch`, `@radix-ui/react-tabs`, `@radix-ui/react-toggle`, `@radix-ui/react-toggle-group`, `@radix-ui/react-tooltip`, `react-day-picker`, `react-hook-form`, `react-resizable-panels`, `react-router`, `react-router-dom`, `recharts`, `sonner`, `tailwind-merge`, `vaul`, `zod`?**
-  _High betweenness centrality (0.038) - this node is a cross-community bridge._
-- **Why does `react` connect `react` to `sidebar.tsx`, `alert-dialog.tsx`, `carousel.tsx`, `field.tsx`, `utils.ts`, `dependencies`?**
-  _High betweenness centrality (0.035) - this node is a cross-community bridge._
+- **Why does `cn()` connect `cn` to `item.tsx`, `toggle-group.tsx`, `sidebar.tsx`, `alert-dialog.tsx`, `alert.tsx`, `accordion.tsx`, `carousel.tsx`, `react`, `drawer.tsx`, `field.tsx`, `command.tsx`, `form.tsx`, `menubar.tsx`, `select.tsx`, `context-menu.tsx`, `utils.ts`, `dropdown-menu.tsx`, `input-group.tsx`?**
+  _High betweenness centrality (0.118) - this node is a cross-community bridge._
+- **Why does `dependencies` connect `dependencies` to `devDependencies`, `class-variance-authority`, `react`, `clsx`, `date-fns`, `embla-carousel-react`, `gsap`, `@gsap/react`, `@hookform/resolvers`, `input-otp`, `lucide-react`, `next-themes`, `@radix-ui/react-accordion`, `@radix-ui/react-alert-dialog`, `@radix-ui/react-aspect-ratio`, `@radix-ui/react-avatar`, `@radix-ui/react-checkbox`, `@radix-ui/react-collapsible`, `@radix-ui/react-dialog`, `@radix-ui/react-dropdown-menu`, `@radix-ui/react-hover-card`, `@radix-ui/react-label`, `@radix-ui/react-navigation-menu`, `@radix-ui/react-popover`, `@radix-ui/react-progress`, `@radix-ui/react-radio-group`, `@radix-ui/react-separator`, `@radix-ui/react-slider`, `@radix-ui/react-slot`, `@radix-ui/react-switch`, `@radix-ui/react-tabs`, `@radix-ui/react-toggle`, `@radix-ui/react-toggle-group`, `@radix-ui/react-tooltip`, `react-day-picker`, `react-hook-form`, `react-resizable-panels`, `react-router`, `react-router-dom`, `recharts`, `sonner`, `tailwind-merge`, `vaul`, `zod`?**
+  _High betweenness centrality (0.051) - this node is a cross-community bridge._
+- **Why does `react` connect `react` to `sidebar.tsx`, `alert-dialog.tsx`, `carousel.tsx`, `form.tsx`, `toggle-group.tsx`, `dependencies`?**
+  _High betweenness centrality (0.047) - this node is a cross-community bridge._
 - **What connects `fs`, `path`, `https` to the rest of the system?**
-  _710 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _605 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `admin.js` be split into smaller, more focused modules?**
-  _Cohesion score 0.08095238095238096 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08669354838709678 - nodes in this community are weakly interconnected._
 - **Should `cn` be split into smaller, more focused modules?**
-  _Cohesion score 0.04812206572769953 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.058699101004759384 - nodes in this community are weakly interconnected._
 - **Should `backend/server.js` be split into smaller, more focused modules?**
-  _Cohesion score 0.03773584905660377 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.0392156862745098 - nodes in this community are weakly interconnected._

@@ -90,8 +90,8 @@
     "semantic_hash": "ddf9ba61158ae14931b01c818ed82968"
   },
   "seiva-static/admin/js/admin.js": {
-    "mtime": 1788540118.4889507,
-    "ast_hash": "83b10d7b5965e1476c2d94490f27013d",
+    "mtime": 1788188117.9760473,
+    "ast_hash": "8deaac71c4d33e7755f3fe960b5ae43c",
     "semantic_hash": ""
   },
   "seiva-static/admin/js/pwa.js": {
@@ -140,8 +140,8 @@
     "semantic_hash": ""
   },
   "seiva-static/backend/server.js": {
-    "mtime": 1788540020.212723,
-    "ast_hash": "257b8a771eaf7300b2f6391730a8c062",
+    "mtime": 1788298038.3229802,
+    "ast_hash": "5743eee5476190984ed2717acd578344",
     "semantic_hash": ""
   },
   "seiva-static/backend/sync-gallery-images.js": {
@@ -175,9 +175,9 @@
     "semantic_hash": "62ff369f2ad3184b5591699d012ddf3d"
   },
   "seiva-static/js/producto-detail.js": {
-    "mtime": 1788437636.3951502,
-    "ast_hash": "8983622d1d376b59e56d7f396177b8d1",
-    "semantic_hash": ""
+    "mtime": 1786484621.7453961,
+    "ast_hash": "37b9ba279661fa735d4e5a700d007845",
+    "semantic_hash": "37b9ba279661fa735d4e5a700d007845"
   },
   "seiva-static/js/productos.js": {
     "mtime": 1786379440.4414926,
@@ -600,8 +600,8 @@
     "semantic_hash": "726370ac23b07691a1ca484a1c6b6969"
   },
   "seivvaweb/app/src/sections/Categories.tsx": {
-    "mtime": 1788444770.3681386,
-    "ast_hash": "3466ae9e67f1c6651a7f9c5c9705e81b",
+    "mtime": 1787243988.4901483,
+    "ast_hash": "22c41c6fa54f24387ade02ab853d93df",
     "semantic_hash": ""
   },
   "seivvaweb/app/src/sections/CombosSection.tsx": {
@@ -730,8 +730,8 @@
     "semantic_hash": "c498b10c5d87ae929a2a35cb716be861"
   },
   "seiva-static/admin/index.html": {
-    "mtime": 1788540067.6563168,
-    "ast_hash": "b68850d4e22b91a5b4c3949f7624a753",
+    "mtime": 1788187536.5287771,
+    "ast_hash": "1edc8a7078f8f0f3b4f3af059748382a",
     "semantic_hash": ""
   },
   "seiva-static/contacto.html": {
@@ -770,9 +770,9 @@
     "semantic_hash": "5870f9f0dffb9f45f6656747c0e76a6e"
   },
   "seiva-static/producto.html": {
-    "mtime": 1788437629.2414236,
-    "ast_hash": "8bacfbd2dc09920054318ab972d8955b",
-    "semantic_hash": ""
+    "mtime": 1786553639.0737047,
+    "ast_hash": "56c9f1f0e42fa31b651c3c0bc702108f",
+    "semantic_hash": "56c9f1f0e42fa31b651c3c0bc702108f"
   },
   "seiva-static/qa-test.html": {
     "mtime": 1779668575.1963458,
@@ -1879,9 +1879,44 @@
     "ast_hash": "cce513cc23c9236266df1cb85e0b8db7",
     "semantic_hash": ""
   },
+  "n8n-workflows/scripts/_chk_credentials.js": {
+    "mtime": 1788267717.2081275,
+    "ast_hash": "d4ba578524404ed27adb7ab13bd84fcb",
+    "semantic_hash": ""
+  },
+  "n8n-workflows/scripts/_inspect_site.js": {
+    "mtime": 1788277421.7884448,
+    "ast_hash": "a012fbf80e2ef6593c885055d2c543de",
+    "semantic_hash": ""
+  },
+  "n8n-workflows/scripts/_test_brain.js": {
+    "mtime": 1788298097.134247,
+    "ast_hash": "19e98d7a6b5d375ec0c261571054d719",
+    "semantic_hash": ""
+  },
+  "n8n-workflows/scripts/_test_galeria.js": {
+    "mtime": 1788277508.7870579,
+    "ast_hash": "61b642f40f1d8d42ee42b7f174ba07cf",
+    "semantic_hash": ""
+  },
+  "n8n-workflows/scripts/_test_router.js": {
+    "mtime": 1788269530.4437127,
+    "ast_hash": "1c1fd439c29a20f6a097d28dae91b769",
+    "semantic_hash": ""
+  },
+  "n8n-workflows/scripts/_test_token.js": {
+    "mtime": 1788267581.252512,
+    "ast_hash": "c7e5482b3902df495ad0e5ad6701b009",
+    "semantic_hash": ""
+  },
+  "n8n-workflows/scripts/_verify_live.js": {
+    "mtime": 1788270642.4446003,
+    "ast_hash": "868cf29bc95f3bcc5e0bafe9991e8bf7",
+    "semantic_hash": ""
+  },
   "n8n-workflows/scripts/brain-source.js": {
-    "mtime": 1788613202.9889321,
-    "ast_hash": "8b5b729cb92b123c03ec3f42ac6c0bcc",
+    "mtime": 1788298124.2019951,
+    "ast_hash": "db899873b06ff8c038873a975aa545fc",
     "semantic_hash": ""
   },
   "n8n-workflows/scripts/build_v2.js": {
@@ -1930,13 +1965,13 @@
     "semantic_hash": ""
   },
   "n8n-workflows/seiva-agente-inventario-v3.json": {
-    "mtime": 1788397826.5791316,
-    "ast_hash": "208cab22dc6cacdd424e60d0bbd77d91",
+    "mtime": 1788269541.7752078,
+    "ast_hash": "64ab5d4f105f7c86a38963b1e162c157",
     "semantic_hash": ""
   },
   "n8n-workflows/seiva-agente-inventario-v4.json": {
-    "mtime": 1788613215.8469484,
-    "ast_hash": "615eb72c9342ba58c84e5077b82379e0",
+    "mtime": 1788298140.4736524,
+    "ast_hash": "b34ac43653ce81ff55c8f704b5714e3b",
     "semantic_hash": ""
   },
   "seiva-bot-productos.json": {
@@ -2082,206 +2117,6 @@
   "seiva-static/backend/img/productos/hero-1787786818048-358c2254.webp": {
     "mtime": 1787786818.054,
     "ast_hash": "93a44199f4909492bf462e6f890d5c9e",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/migrations/001_agent_tables.sql": {
-    "mtime": 1788790906.619372,
-    "ast_hash": "3010ae725d34343d1d9c4b3ff44236f9",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/package.json": {
-    "mtime": 1788790910.4158192,
-    "ast_hash": "7435f171149712e1025714ca50de4f7b",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/src/agent/permissions.ts": {
-    "mtime": 1788790906.596371,
-    "ast_hash": "0fcfe0882b781448c25f92ed4f159efd",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/src/agent/run-tool.ts": {
-    "mtime": 1788790906.5973704,
-    "ast_hash": "5fc570c3fdf8ef570fc0692f5d8b78ee",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/src/agent/tool-registry.ts": {
-    "mtime": 1788790906.5973704,
-    "ast_hash": "ac01af5163cd468a22f751579277e160",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/src/app.ts": {
-    "mtime": 1788790906.6113725,
-    "ast_hash": "d1f72fd9a159752875f08e40e9abe707",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/src/config.ts": {
-    "mtime": 1788801738.200867,
-    "ast_hash": "b4efb7f02389a42edf99fefbc43fa63a",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/src/db.ts": {
-    "mtime": 1788790906.599372,
-    "ast_hash": "c08514b90d6a5f5b397d9b700d2c4db6",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/src/ecommerce/adapter.ts": {
-    "mtime": 1788801738.081815,
-    "ast_hash": "16fbe4870921632a88084eeb55bbd44c",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/src/ecommerce/mock-adapter.ts": {
-    "mtime": 1788801738.1319778,
-    "ast_hash": "107d2fff6a8bacb8e9678beef40283e9",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/src/ecommerce/period.ts": {
-    "mtime": 1788790906.6143718,
-    "ast_hash": "e3a9db5b7955433554664f00e297b8db",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/src/ecommerce/store-api-adapter.ts": {
-    "mtime": 1788803903.1370904,
-    "ast_hash": "50a2a337d9003f2eef676a4ac3dfde16",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/src/errors.ts": {
-    "mtime": 1788790906.6103718,
-    "ast_hash": "a70e86ecee4633819acbe896fa59e52b",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/src/rateLimit.ts": {
-    "mtime": 1788790906.6013718,
-    "ast_hash": "1b74bdf3983669196c30c12b65fcae8e",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/src/routes/agent.ts": {
-    "mtime": 1788801738.1769395,
-    "ast_hash": "f084cd528c92fbeb4b2007f8aca5a245",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/src/scripts/migrate.ts": {
-    "mtime": 1788790906.6083713,
-    "ast_hash": "c63e36fc4ff563e430f77dfed983cfc5",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/src/server.ts": {
-    "mtime": 1788801738.223911,
-    "ast_hash": "4f21aa92b2ad2a459549f850e66667cd",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/src/stores/memory.ts": {
-    "mtime": 1788790906.6033728,
-    "ast_hash": "fc3326da606503911f90e30112d2a746",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/src/stores/postgres.ts": {
-    "mtime": 1788790906.6043718,
-    "ast_hash": "70db465262b47c73415f5942c95b637c",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/src/stores/types.ts": {
-    "mtime": 1788790906.602372,
-    "ast_hash": "3ec2f1c0962b78c18a83d41bc3a82239",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/src/tools/read-tools.ts": {
-    "mtime": 1788790906.6123717,
-    "ast_hash": "55c342675db64ebba45192d233fb83d9",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/src/tools/write-tools.ts": {
-    "mtime": 1788802225.6929646,
-    "ast_hash": "e128c2c3c076340f9ddbb2b22b7dadd3",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/src/types.ts": {
-    "mtime": 1788790906.598372,
-    "ast_hash": "336df9002f870b6fdfc62fccc7b64cca",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/tests/helpers.ts": {
-    "mtime": 1788801738.2479296,
-    "ast_hash": "79836d96018295623f46d38925cf8bbe",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/tests/read-tools.test.ts": {
-    "mtime": 1788790910.3748212,
-    "ast_hash": "91315e7fa46e16104c67360c21206198",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/tests/run-tool.test.ts": {
-    "mtime": 1788790910.3758178,
-    "ast_hash": "9d3ae23511f84b64c7e4ab70ae42401f",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/tests/write-tools.test.ts": {
-    "mtime": 1788802225.7178898,
-    "ast_hash": "64888d235454641e58bd811e5ed4d487",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/tsconfig.json": {
-    "mtime": 1788790910.4168184,
-    "ast_hash": "7406411f9e86e95ff221b61e41b0d8c7",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/n8n/workflows/telegram-inbox.json": {
-    "mtime": 1788790910.4208183,
-    "ast_hash": "023ce0bdf541392492afc9366589540d",
-    "semantic_hash": ""
-  },
-  "n8n-workflows/scripts/_fichas_db.js": {
-    "mtime": 1788441988.4488735,
-    "ast_hash": "f7e4ba0c910830521051bce748281b29",
-    "semantic_hash": ""
-  },
-  "n8n-workflows/scripts/_redact_json.js": {
-    "mtime": 1788444033.0079486,
-    "ast_hash": "6244a7ba70ae7e762f8695c167fb65c1",
-    "semantic_hash": ""
-  },
-  "n8n-workflows/scripts/_syntax_check.js": {
-    "mtime": 1788406566.7375536,
-    "ast_hash": "702708113c84ac89f857a3eaafca929b",
-    "semantic_hash": ""
-  },
-  "seiva-static/backend/admin-assistant.js": {
-    "mtime": 1788539982.8940392,
-    "ast_hash": "30eba267c5b31006919e61a111406552",
-    "semantic_hash": ""
-  },
-  ".github/workflows/deploy.yml": {
-    "mtime": 1788398442.8991752,
-    "ast_hash": "757adfff0ee645dbd5998960fae538ca",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/README.md": {
-    "mtime": 1788790910.4238179,
-    "ast_hash": "1b073c2bf29964ab8ec85a5c2723792a",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/backend/README.md": {
-    "mtime": 1788790910.3768184,
-    "ast_hash": "ae22cb08fe9b159da1d270dbcef88a5c",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/docker-compose.yml": {
-    "mtime": 1788790910.4258182,
-    "ast_hash": "168f6d7e9739fe74561d9d7054ca3da9",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/docs/arquitectura-agente-ecommerce.md": {
-    "mtime": 1788790910.419819,
-    "ast_hash": "afff38f8554be4ed861b01e72d55b914",
-    "semantic_hash": ""
-  },
-  "ecommerce-agent/n8n/README.md": {
-    "mtime": 1788790910.4218185,
-    "ast_hash": "f463d79bd69c98973b3098ab472fdb8a",
-    "semantic_hash": ""
-  },
-  "n8n-workflows/PROMPT-CEREBRO-V4.md": {
-    "mtime": 1788439497.8697958,
-    "ast_hash": "059c3732f41c5cd5881dfa9626303ac2",
     "semantic_hash": ""
   }
 }
