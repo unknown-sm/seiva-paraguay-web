@@ -721,7 +721,6 @@ function editarProducto(id) {
   api("/productos/all").then(function(data) {
     var prod = data.find(function(p) { return p.id === id; });
     if (!prod) return;
-    loadCategoriasSelect("prod-categoria");
     document.getElementById("modal-title").textContent = "Editar Producto";
     document.getElementById("prod-id").value = prod.id;
     document.getElementById("prod-nombre").value = prod.nombre;
@@ -765,10 +764,17 @@ function editarProducto(id) {
     } else {
       el = document.getElementById("prod-custom-image-preview"); if (el) el.style.display = "none";
     }
-    setTimeout(function() {
-      document.getElementById("prod-categoria").value = prod.categoria_id || "";
-    }, 100);
-    loadMarcasSelectProd();
+    // Cargar opciones y recién ahí setear la categoría y la marca actuales
+    // (antes había un setTimeout de 100ms que perdía la selección si el
+    // fetch tardaba, y la marca se reseteaba a "— Sin marca —" siempre).
+    Promise.all([
+      loadCategoriasSelect("prod-categoria"),
+      loadMarcasSelectProd()
+    ]).then(function() {
+      // parseInt normaliza valores viejos tipo "2.0" que quedaron en la columna TEXT
+      document.getElementById("prod-categoria").value = (prod.categoria_id != null && prod.categoria_id !== '') ? String(parseInt(prod.categoria_id, 10)) : "";
+      document.getElementById("prod-marca").value = prod.marca || "";
+    });
     document.getElementById("modal-producto").classList.remove("hidden");
   });
 }
@@ -1850,13 +1856,21 @@ function deleteCategoria(id) {
 }
 
 function loadCategoriasSelect(selectId) {
-  api("/categorias").then(function(cats) {
+  return api("/categorias").then(function(cats) {
     var sel = document.getElementById(selectId);
     if (!sel) return;
+    var current = sel.value;
     sel.innerHTML = '<option value="">Sin categor&iacute;a</option>';
     for (var c of cats) {
       if (!c.activo) continue;
       sel.innerHTML += '<option value="' + c.id + '">' + xt(c.nombre) + '</option>';
+    }
+    // Preservar la selección si la opción sigue existiendo (evita que una
+    // recarga de opciones borre lo que el usuario o el producto tenían).
+    if (current) {
+      for (var opt of sel.options) {
+        if (opt.value === current) { sel.value = current; break; }
+      }
     }
   });
 }
@@ -2055,7 +2069,16 @@ document.addEventListener("DOMContentLoaded", function() {
     api(url, { method: method, body: JSON.stringify(body) }).then(function(r) {
       if (r.error) { document.getElementById("marca-msg").textContent = r.error; document.getElementById("marca-msg").classList.remove("hidden"); return; }
       document.getElementById("modal-marca").classList.add("hidden");
-      toast("Marca guardada"); loadMarcas();
+      toast(r.existed ? "La marca ya existía — seleccionada" : "Marca guardada");
+      loadMarcas();
+      // Si el modal de producto está abierto, refrescar el select de marcas
+      // y dejar la marca recién guardada seleccionada.
+      var prodModal = document.getElementById("modal-producto");
+      if (prodModal && !prodModal.classList.contains("hidden")) {
+        loadMarcasSelectProd().then(function() {
+          document.getElementById("prod-marca").value = r.nombre || body.nombre;
+        });
+      }
     });
   });
 
@@ -3027,12 +3050,19 @@ function loadMarcasSelect() {
 }
 
 function loadMarcasSelectProd() {
-  api("/marcas/all").then(function(marcas) {
+  return api("/marcas/all").then(function(marcas) {
     var sel = document.getElementById("prod-marca");
     if (!sel) return;
+    var current = sel.value;
     sel.innerHTML = '<option value="">— Sin marca —</option>';
     for (var m of (marcas || [])) {
       sel.innerHTML += '<option value="' + xt(m.nombre) + '">' + xt(m.nombre) + '</option>';
+    }
+    // Preservar la selección actual tras recargar opciones
+    if (current) {
+      for (var opt of sel.options) {
+        if (opt.value === current) { sel.value = current; break; }
+      }
     }
   });
 }

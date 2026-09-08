@@ -1461,42 +1461,93 @@ app.post("/api/productos", auth, async (req, res) => {
 
 app.put("/api/productos/:id", auth, (req, res) => {
   try {
-    let { nombre, precio, precio_anterior, categoria, subcategoria, descripcion, descripcion_larga, galeria, etiquetas, destacado, imagen, stock, activo, categoria_id, sku, marca, seo_descripcion, meta_titulo, meta_descripcion, crosssell, upsell, slug, featured_order, precio_proveedor, delivery_gratis, variantes } = req.body;
-    let cid = categoria_id !== undefined ? categoria_id : null;
-    let catName = categoria || (cid ? db.prepare("SELECT nombre FROM categorias WHERE id=?").get(cid)?.nombre : "suplementos") || "suplementos";
-    if (!cid && catName) {
-      const catRow = db.prepare("SELECT id FROM categorias WHERE LOWER(nombre) = LOWER(?) AND activo = 1 LIMIT 1").get(catName);
-      if (catRow) cid = catRow.id;
+    // Read-modify-write: solo se pisan los campos que vienen en el body.
+    // Antes este endpoint sobrescribía TODAS las columnas y forzaba
+    // "suplementos" cuando no venía categoría.
+    const existing = db.prepare("SELECT * FROM productos WHERE id = ?").get(req.params.id);
+    if (!existing) return res.status(404).json({ error: "Producto no encontrado" });
+    const b = req.body;
+
+    // ---- Categoría: si no viene categoria_id/categoria, se conserva la actual.
+    let cid = existing.categoria_id ? parseInt(existing.categoria_id, 10) : null;
+    let catName = existing.categoria || "";
+    if (b.categoria_id !== undefined) {
+      const n = parseInt(b.categoria_id, 10);
+      if (b.categoria_id === null || b.categoria_id === "" || isNaN(n)) {
+        cid = null;
+        catName = "";
+      } else {
+        const catRow = db.prepare("SELECT id, nombre FROM categorias WHERE id = ? AND activo = 1").get(n);
+        if (!catRow) return res.status(400).json({ error: "La categoría (id " + n + ") no existe o está inactiva" });
+        cid = catRow.id;
+        catName = catRow.nombre;
+      }
+    } else if (b.categoria !== undefined && String(b.categoria).trim() !== "") {
+      // Compatibilidad: si viene el nombre, resolver el id
+      const catRow = db.prepare("SELECT id, nombre FROM categorias WHERE LOWER(nombre) = LOWER(?) AND activo = 1 LIMIT 1").get(String(b.categoria).trim());
+      if (catRow) {
+        cid = catRow.id;
+        catName = catRow.nombre;
+      } else {
+        catName = String(b.categoria).trim();
+      }
     }
-    if (marca) {
-      marca = String(marca).trim();
-      const mRow = db.prepare("SELECT nombre FROM marcas WHERE LOWER(nombre) = LOWER(?) LIMIT 1").get(marca);
-      if (mRow) marca = mRow.nombre;
+
+    // ---- Marca: normalizar contra la tabla marcas; crearla si no existe.
+    let marca = existing.marca || "";
+    if (b.marca !== undefined) {
+      marca = String(b.marca || "").trim();
+      if (marca) {
+        const mRow = db.prepare("SELECT nombre FROM marcas WHERE LOWER(nombre) = LOWER(?) LIMIT 1").get(marca);
+        if (mRow) {
+          marca = mRow.nombre;
+        } else {
+          try {
+            db.prepare("INSERT INTO marcas (nombre) VALUES (?)").run(marca);
+          } catch (e) { /* la creó otra request en paralelo */ }
+        }
+      }
     }
-    const finalSlug = slug || (nombre ? generateSlug(nombre, req.params.id) : undefined);
-    const fo = parseInt(featured_order) || 0;
-    const pp = precio_proveedor !== undefined ? (precio_proveedor !== null && precio_proveedor !== '' ? parseFloat(precio_proveedor) : null) : undefined;
-    
-    if (finalSlug) {
-      const sql = "UPDATE productos SET nombre=?, precio=?, precio_anterior=?, categoria=?, subcategoria=?, descripcion=?, descripcion_larga=?, galeria=?, etiquetas=?, destacado=?, imagen=?, stock=?, activo=?, categoria_id=?, sku=?, marca=?, seo_descripcion=?, meta_titulo=?, meta_descripcion=?, crosssell=?, upsell=?, slug=?, featured_order=?" + (pp !== undefined ? ", precio_proveedor=?" : "") + " WHERE id=?";
-      const params = [nombre, precio, precio_anterior || null, catName, subcategoria, descripcion || "", descripcion_larga || "", JSON.stringify(galeria || []), JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, cid, sku || "", marca || "", seo_descripcion || "", meta_titulo || "", meta_descripcion || "", JSON.stringify(crosssell || []), JSON.stringify(upsell || []), finalSlug, fo];
-      if (pp !== undefined) params.push(pp);
-      params.push(req.params.id);
-      db.prepare(sql).run(...params);
-    } else {
-      const sql = "UPDATE productos SET nombre=?, precio=?, precio_anterior=?, categoria=?, subcategoria=?, descripcion=?, descripcion_larga=?, galeria=?, etiquetas=?, destacado=?, imagen=?, stock=?, activo=?, categoria_id=?, sku=?, marca=?, seo_descripcion=?, meta_titulo=?, meta_descripcion=?, crosssell=?, upsell=?, featured_order=?" + (pp !== undefined ? ", precio_proveedor=?" : "") + " WHERE id=?";
-      const params = [nombre, precio, precio_anterior || null, catName, subcategoria, descripcion || "", descripcion_larga || "", JSON.stringify(galeria || []), JSON.stringify(etiquetas || []), destacado ? 1 : 0, imagen || "", stock || 0, activo !== false ? 1 : 0, cid, sku || "", marca || "", seo_descripcion || "", meta_titulo || "", meta_descripcion || "", JSON.stringify(crosssell || []), JSON.stringify(upsell || []), fo];
-      if (pp !== undefined) params.push(pp);
-      params.push(req.params.id);
-      db.prepare(sql).run(...params);
-    }
-    if (delivery_gratis !== undefined) {
-      db.prepare("UPDATE productos SET delivery_gratis = ? WHERE id = ?").run(delivery_gratis ? 1 : 0, req.params.id);
-    }
-    if (variantes !== undefined) {
-      db.prepare("UPDATE productos SET presentaciones = ? WHERE id = ?").run(JSON.stringify(variantes || []), req.params.id);
-    }
-    res.json({ ok: true, slug: finalSlug });
+
+    const nombre = b.nombre !== undefined ? b.nombre : existing.nombre;
+    const finalSlug = b.slug || (b.nombre !== undefined ? generateSlug(nombre, req.params.id) : existing.slug);
+    const fo = b.featured_order !== undefined ? (parseInt(b.featured_order) || 0) : (existing.featured_order || 0);
+    const pp = b.precio_proveedor !== undefined ? (b.precio_proveedor !== null && b.precio_proveedor !== '' ? parseFloat(b.precio_proveedor) : null) : existing.precio_proveedor;
+
+    db.prepare(
+      "UPDATE productos SET nombre=?, precio=?, precio_anterior=?, categoria=?, subcategoria=?, descripcion=?, descripcion_larga=?, galeria=?, etiquetas=?, destacado=?, imagen=?, stock=?, activo=?, categoria_id=?, sku=?, marca=?, seo_descripcion=?, meta_titulo=?, meta_descripcion=?, crosssell=?, upsell=?, slug=?, featured_order=?, precio_proveedor=?, delivery_gratis=?, presentaciones=? WHERE id=?"
+    ).run(
+      nombre,
+      b.precio !== undefined ? b.precio : existing.precio,
+      b.precio_anterior !== undefined ? (b.precio_anterior || null) : existing.precio_anterior,
+      catName,
+      b.subcategoria !== undefined ? b.subcategoria : existing.subcategoria,
+      b.descripcion !== undefined ? (b.descripcion || "") : existing.descripcion,
+      b.descripcion_larga !== undefined ? (b.descripcion_larga || "") : existing.descripcion_larga,
+      b.galeria !== undefined ? JSON.stringify(b.galeria || []) : existing.galeria,
+      b.etiquetas !== undefined ? JSON.stringify(b.etiquetas || []) : existing.etiquetas,
+      b.destacado !== undefined ? (b.destacado ? 1 : 0) : existing.destacado,
+      b.imagen !== undefined ? (b.imagen || "") : existing.imagen,
+      b.stock !== undefined ? (parseInt(b.stock, 10) || 0) : existing.stock,
+      b.activo !== undefined ? (b.activo !== false ? 1 : 0) : existing.activo,
+      // La columna es TEXT: bindear el id como texto entero ("2"), nunca
+      // como número (node:sqlite lo binda REAL y guardaría "2.0").
+      cid === null || cid === undefined ? null : String(cid),
+      b.sku !== undefined ? (b.sku || "") : existing.sku,
+      marca,
+      b.seo_descripcion !== undefined ? (b.seo_descripcion || "") : existing.seo_descripcion,
+      b.meta_titulo !== undefined ? (b.meta_titulo || "") : existing.meta_titulo,
+      b.meta_descripcion !== undefined ? (b.meta_descripcion || "") : existing.meta_descripcion,
+      b.crosssell !== undefined ? JSON.stringify(b.crosssell || []) : existing.crosssell,
+      b.upsell !== undefined ? JSON.stringify(b.upsell || []) : existing.upsell,
+      finalSlug,
+      fo,
+      pp,
+      b.delivery_gratis !== undefined ? (b.delivery_gratis ? 1 : 0) : existing.delivery_gratis,
+      b.variantes !== undefined ? JSON.stringify(b.variantes || []) : existing.presentaciones,
+      req.params.id
+    );
+    res.json({ ok: true, slug: finalSlug, categoria_id: cid, categoria: catName, marca });
   } catch (err) {
     logError("error", "PUT /api/productos/" + req.params.id, err.message);
     res.status(500).json({ error: "Error al guardar: " + err.message });
@@ -1630,12 +1681,23 @@ app.put("/api/marcas/:id", auth, (req, res) => {
 });
 
 app.post("/api/marcas", auth, (req, res) => {
-  const { nombre, prioridad, logo } = req.body;
-  if (!nombre) return res.status(400).json({ error: "Nombre requerido" });
-  const result = db.prepare("INSERT INTO marcas (nombre, prioridad, logo) VALUES (?, ?, ?)").run(
-    nombre, parseInt(prioridad) || 0, logo || ""
-  );
-  res.json({ id: result.lastInsertRowid });
+  try {
+    const nombre = String(req.body.nombre || "").trim();
+    if (!nombre) return res.status(400).json({ error: "Nombre requerido" });
+    // Idempotente: si ya existe (aunque cambien mayúsculas), devolver la existente
+    // en vez de explotar con UNIQUE constraint failed.
+    const existing = db.prepare("SELECT id, nombre FROM marcas WHERE LOWER(nombre) = LOWER(?) LIMIT 1").get(nombre);
+    if (existing) {
+      return res.json({ id: existing.id, existed: true, nombre: existing.nombre, message: "La marca '" + existing.nombre + "' ya existe" });
+    }
+    const result = db.prepare("INSERT INTO marcas (nombre, prioridad, logo) VALUES (?, ?, ?)").run(
+      nombre, parseInt(req.body.prioridad) || 0, req.body.logo || ""
+    );
+    res.json({ id: result.lastInsertRowid, nombre });
+  } catch (err) {
+    logError("error", "POST /api/marcas", err.message);
+    res.status(409).json({ error: "No se pudo crear la marca: " + err.message });
+  }
 });
 
 app.delete("/api/marcas/:id", auth, (req, res) => {
@@ -3001,6 +3063,14 @@ if (fs.existsSync(distPath)) {
 // Backfill slugs y categorías al iniciar
 backfillSlugs();
 backfillCategoriaId();
+// Self-heal: si el índice FTS está corrupto, TODO update de producto falla
+// con "database disk image is malformed" (via triggers productos_ai/au/ad).
+// El rebuild es idempotente y barato con este volumen.
+try {
+  db.exec("INSERT INTO productos_fts(productos_fts) VALUES('rebuild')");
+} catch (e) {
+  console.warn("[FTS] rebuild falló:", e.message);
+}
 
 app.listen(PORT, () => {
   console.log("Seiva backend running on http://localhost:" + PORT);
