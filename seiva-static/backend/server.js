@@ -1521,10 +1521,25 @@ app.patch("/api/productos/:id/featured", auth, (req, res) => {
 app.patch("/api/productos/stock-batch", auth, (req, res) => {
   const { updates } = req.body;
   if (!Array.isArray(updates)) return res.status(400).json({ error: "updates debe ser un array" });
-  
+
   const updateStmt = db.prepare("UPDATE productos SET stock = ? WHERE id = ?");
   for (const item of updates) {
     updateStmt.run(item.stock, item.id);
+  }
+  res.json({ ok: true, updated: updates.length });
+});
+
+// Precio dirigido (solo columna precio) — lo usa el bot de inventario
+app.patch("/api/productos/precio-batch", auth, (req, res) => {
+  const { updates } = req.body;
+  if (!Array.isArray(updates)) return res.status(400).json({ error: "updates debe ser un array" });
+
+  const updateStmt = db.prepare("UPDATE productos SET precio = ? WHERE id = ?");
+  for (const item of updates) {
+    if (!item.id || item.precio === undefined || item.precio === null || isNaN(Number(item.precio)) || Number(item.precio) < 0) {
+      return res.status(400).json({ error: "Cada update requiere id y precio (entero >= 0)" });
+    }
+    updateStmt.run(parseInt(item.precio, 10), item.id);
   }
   res.json({ ok: true, updated: updates.length });
 });
