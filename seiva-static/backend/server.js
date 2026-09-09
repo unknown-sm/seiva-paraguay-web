@@ -1614,6 +1614,31 @@ app.patch("/api/productos/precio-batch", auth, (req, res) => {
   res.json({ ok: true, updated: updates.length });
 });
 
+// Imágenes de producto dirigidas (agregar/quitar/definir principal) — bot de inventario
+app.patch("/api/productos/:id/imagen", auth, (req, res) => {
+  const { path: imgPath, action } = req.body;
+  if (!imgPath || !["add", "remove", "main"].includes(action)) {
+    return res.status(400).json({ error: "Se requiere path y action (add | remove | main)" });
+  }
+  const row = db.prepare("SELECT imagen, galeria FROM productos WHERE id = ?").get(req.params.id);
+  if (!row) return res.status(404).json({ error: "No encontrado" });
+
+  let galeria = JSON.parse(row.galeria || "[]");
+  let imagen = row.imagen || "";
+  if (action === "add") {
+    if (!galeria.includes(imgPath)) galeria.push(imgPath);
+    if (!imagen) imagen = imgPath;
+  } else if (action === "remove") {
+    galeria = galeria.filter((g) => g !== imgPath);
+    if (imagen === imgPath) imagen = galeria[0] || "";
+  } else if (action === "main") {
+    imagen = imgPath;
+    if (!galeria.includes(imgPath)) galeria.push(imgPath);
+  }
+  db.prepare("UPDATE productos SET imagen = ?, galeria = ? WHERE id = ?").run(imagen, JSON.stringify(galeria), req.params.id);
+  res.json({ ok: true, imagen, galeria });
+});
+
 app.delete("/api/productos/:id", auth, (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
