@@ -13,11 +13,15 @@ DEST_DIR="${SEIVA_BACKUP_DIR:-/e/Pagina_seiva/backups-prod}"
 KEEP="${SEIVA_BACKUP_KEEP:-14}"
 mkdir -p "$DEST_DIR"
 
-# Login (token JWT de 24h; se pide en cada corrida)
+# Login (token JWT de 24h; se pide en cada corrida).
+# Si PROD_ADMIN_USER está definido, usa login usuario+contraseña;
+# si no, el login clásico por contraseña de admin.
 export SEIVA_PW="$PROD_ADMIN_PASSWORD"
+export SEIVA_USER="${PROD_ADMIN_USER:-}"
+LOGIN_BODY=$(node -e 'console.log(JSON.stringify(process.env.SEIVA_USER ? {username:process.env.SEIVA_USER, password:process.env.SEIVA_PW} : {password:process.env.SEIVA_PW}))')
 TOKEN=$(curl -sSf -X POST "$PROD_URL/api/auth/login" \
   -H "Content-Type: application/json" \
-  -d "$(node -e 'console.log(JSON.stringify({password:process.env.SEIVA_PW}))')" \
+  -d "$LOGIN_BODY" \
   | node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{try{console.log(JSON.parse(d).token||'')}catch(e){console.log('')}})")
 [ -n "$TOKEN" ] || { echo "[backup-prod] ERROR: login fallo contra $PROD_URL"; exit 1; }
 
