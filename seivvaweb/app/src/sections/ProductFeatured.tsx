@@ -118,26 +118,31 @@ export default function ProductFeatured() {
                 className="relative w-72 h-72 lg:w-96 lg:h-96 object-contain drop-shadow-2xl"
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
               />
-              {product.stock <= 0 && (
-                <span
-                  className="absolute top-4 left-4 font-body font-black text-sm px-4 py-2 rounded-lg tracking-widest"
-                  style={{ backgroundColor: '#DC2626', color: '#FFFFFF', boxShadow: '0 4px 16px rgba(0,0,0,0.4)', zIndex: 10 }}
-                >
-                  AGOTADO
-                </span>
-              )}
             </div>
           </div>
 
           {/* Contenido */}
           <div ref={contentRef}>
-            <div
-              className="animate-in inline-flex items-center gap-1.5 font-body font-semibold text-xs px-3 py-1 rounded-full mb-6"
-              style={{ backgroundColor: 'rgba(212,168,67,0.2)', color: 'var(--theme-accent, #D4A843)' }}
-            >
-              <Star className="w-3 h-3 fill-current" />
-              PRODUCTO DESTACADO
-            </div>
+            {/* Badges: AGOTADO (negro) tiene prioridad absoluta y es el único
+                visible sin stock; con stock se muestra el pill de destacado. */}
+            {product.stock <= 0 ? (
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                <span
+                  className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full tracking-widest"
+                  style={{ backgroundColor: '#111827', color: '#FFFFFF', boxShadow: '0 0 0 1px rgba(255,255,255,0.25)' }}
+                >
+                  AGOTADO
+                </span>
+              </div>
+            ) : (
+              <div
+                className="animate-in inline-flex items-center gap-1.5 font-body font-semibold text-xs px-3 py-1 rounded-full mb-6"
+                style={{ backgroundColor: 'rgba(212,168,67,0.2)', color: 'var(--theme-accent, #D4A843)' }}
+              >
+                <Star className="w-3 h-3 fill-current" />
+                PRODUCTO DESTACADO
+              </div>
+            )}
 
             <h2
               className="animate-in font-display font-bold text-4xl lg:text-5xl leading-tight mb-4 text-white"
@@ -168,12 +173,12 @@ export default function ProductFeatured() {
               <span className="font-body font-bold text-4xl text-white">
                 {formatPrice(displayPrice)}
               </span>
-              {product.precio_anterior && product.precio_anterior > product.precio && (
+              {product.stock > 0 && product.precio_anterior && product.precio_anterior > product.precio && (
                 <>
                   <span className="font-body text-xl line-through opacity-60 text-white">
                     {formatPrice(product.precio_anterior)}
                   </span>
-                  <span className="font-body font-bold text-sm px-2 py-1 rounded-full" style={{ backgroundColor: '#E63946', color: '#FFF' }}>
+                  <span className="font-body font-bold text-sm px-2 py-1 rounded-full" style={{ backgroundColor: '#FFFFFF', color: '#2D6A4F' }}>
                     -{descuento}%
                   </span>
                 </>

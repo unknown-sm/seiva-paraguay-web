@@ -251,8 +251,8 @@ export default function ProductoPage() {
 
           {/* Details */}
           <div className="flex flex-col justify-center">
-            {descuento > 0 && (
-              <span className="self-start font-body font-bold text-xs px-3 py-1.5 rounded-full mb-3" style={{ backgroundColor: '#E63946', color: '#FFF' }}>
+            {descuento > 0 && product.stock > 0 && (
+              <span className="self-start font-body font-bold text-xs px-3 py-1.5 rounded-full mb-3" style={{ backgroundColor: '#2D6A4F', color: '#FFF' }}>
                 AHORRÁ {descuento}%
               </span>
             )}
@@ -355,14 +355,15 @@ export default function ProductoPage() {
             {/* Tags */}
             {product.etiquetas && product.etiquetas.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-4">
-                {product.etiquetas.map(tag => (
-                  <Link 
-                    key={tag} 
+                {/* Sin stock la etiqueta "oferta" no se muestra (prioridad AGOTADO) */}
+                {(product.stock > 0 ? product.etiquetas : product.etiquetas.filter(t => t !== 'oferta')).map(tag => (
+                  <Link
+                    key={tag}
                     to={`/tienda?etiqueta=${encodeURIComponent(tag)}`}
                     className="font-body font-semibold text-[11px] px-3 py-1 rounded-full hover:opacity-80 transition-opacity"
                     style={{
-                      backgroundColor: ['nuevo', 'popular'].includes(tag) ? 'rgba(45,106,79,0.1)' : 'rgba(230,57,70,0.1)',
-                      color: ['nuevo', 'popular'].includes(tag) ? 'var(--theme-primary, #1B4332)' : '#E63946',
+                      backgroundColor: ['nuevo', 'popular', 'oferta'].includes(tag) ? 'rgba(45,106,79,0.1)' : 'rgba(230,57,70,0.1)',
+                      color: ['nuevo', 'popular', 'oferta'].includes(tag) ? 'var(--theme-primary, #1B4332)' : '#E63946',
                     }}
                   >
                     <Tag className="w-3 h-3 inline mr-1" />

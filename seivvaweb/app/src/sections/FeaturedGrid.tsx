@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ShoppingCart } from 'lucide-react'
-import { fetchFeatured, formatPrice, stripHtml, getProductBadges, getTierLabel, imageSrcSet, type Product } from '../services/api'
+import { fetchFeatured, formatPrice, stripHtml, getTierLabel, imageSrcSet, type Product } from '../services/api'
 import { useCart } from '../context/CartContext'
+import ProductBadges from '../components/ProductBadges'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -126,6 +127,7 @@ export default function FeaturedGrid() {
                 (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 12px rgba(45, 106, 79, 0.10), 0 0 0 1px rgba(45, 106, 79, 0.08)'
               }}
             >
+              <ProductBadges product={product} />
               <div className="relative">
                 <div
                   className="aspect-square overflow-hidden"
@@ -159,27 +161,6 @@ export default function FeaturedGrid() {
                 <p className="font-body text-xs mt-1 leading-relaxed line-clamp-1" style={{ color: 'var(--theme-muted, #6B6B6B)' }}>
                   {stripHtml(product.descripcion)}
                 </p>
-
-                {/* Badges below description */}
-                {(product.precio_anterior && product.precio_anterior > product.precio) || product.stock <= 0 || (product.stock > 0 && getProductBadges(product).length > 0) ? (
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {product.precio_anterior && product.precio_anterior > product.precio && (
-                      <span className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#E63946', color: '#FFFFFF' }}>
-                        {Math.round((1 - product.precio / product.precio_anterior) * 100)}% OFF
-                      </span>
-                    )}
-                    {product.stock <= 0 && (
-                      <span className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}>
-                        AGOTADO
-                      </span>
-                    )}
-                    {product.stock > 0 && getProductBadges(product).map(b => (
-                      <span key={b.label} className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: b.color, color: '#fff' }}>
-                        {b.label}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
 
                 <div className="mt-auto pt-3">
                   <div className="flex flex-wrap items-baseline gap-x-2 mb-1">

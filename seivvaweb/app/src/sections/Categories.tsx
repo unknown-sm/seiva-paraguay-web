@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { ShoppingCart } from 'lucide-react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { fetchProducts, formatPrice, stripHtml, getProductBadges, getTierLabel, imageSrcSet, type Product } from '../services/api'
+import { fetchProducts, formatPrice, stripHtml, getTierLabel, imageSrcSet, type Product } from '../services/api'
 
 gsap.registerPlugin(ScrollTrigger)
 import { useCart } from '../context/CartContext'
 import ProductSkeleton from '../components/ProductSkeleton'
+import ProductBadges from '../components/ProductBadges'
 
 export default function Categories() {
   const sectionRef = useRef<HTMLDivElement>(null)
@@ -123,6 +124,7 @@ export default function Categories() {
                   (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 12px rgba(45, 106, 79, 0.10), 0 0 0 1px rgba(45, 106, 79, 0.08)'
                 }}
               >
+                <ProductBadges product={product} discountText="OFERTA" />
                 <div className="relative">
                 <div
                   className="aspect-square overflow-hidden"
@@ -155,29 +157,6 @@ export default function Categories() {
                 <p className="font-body text-xs sm:text-sm mt-1.5 leading-relaxed line-clamp-1" style={{ color: 'var(--theme-muted, #6B6B6B)' }}>
                   {stripHtml(product.descripcion)}
                 </p>
-
-                {/* Tags also below the description */}
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {product.precio_anterior && (
-                    <span className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#E63946', color: '#FFFFFF' }}>
-                      OFERTA
-                    </span>
-                  )}
-                  {product.stock <= 0 && (
-                    <span className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}>
-                      AGOTADO
-                    </span>
-                  )}
-                  {(() => {
-                    const badges = getProductBadges(product)
-                    if (!badges.length) return null
-                    return badges.map(b => (
-                      <span key={b.label} className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: b.color, color: '#fff' }}>
-                        {b.label}
-                      </span>
-                    ))
-                  })()}
-                </div>
 
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4 gap-2">
                   <div>

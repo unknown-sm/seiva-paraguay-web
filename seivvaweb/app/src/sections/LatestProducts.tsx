@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ShoppingCart } from 'lucide-react'
-import { fetchProducts, formatPrice, stripHtml, getProductBadges, getTierLabel, imageSrcSet, type Product } from '../services/api'
+import { fetchProducts, formatPrice, stripHtml, getTierLabel, imageSrcSet, type Product } from '../services/api'
 import { useCart } from '../context/CartContext'
+import ProductBadges from '../components/ProductBadges'
 
 export default function LatestProducts() {
   const sectionRef = useRef<HTMLDivElement>(null)
@@ -93,6 +94,7 @@ export default function LatestProducts() {
                 (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 12px rgba(45, 106, 79, 0.10), 0 0 0 1px rgba(45, 106, 79, 0.08)'
               }}
             >
+              <ProductBadges product={product} />
               <div className="relative">
                 <div
                   className="aspect-square overflow-hidden"
@@ -127,27 +129,6 @@ export default function LatestProducts() {
                   {stripHtml(product.descripcion)}
                 </p>
 
-                {/* Badges below description */}
-                {(product.precio_anterior && product.precio_anterior > product.precio) || product.stock <= 0 || (product.stock > 0 && getProductBadges(product).length > 0) ? (
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {product.precio_anterior && product.precio_anterior > product.precio && (
-                      <span className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#E63946', color: '#FFFFFF' }}>
-                        {Math.round((1 - product.precio / product.precio_anterior) * 100)}% OFF
-                      </span>
-                    )}
-                    {product.stock <= 0 && (
-                      <span className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}>
-                        AGOTADO
-                      </span>
-                    )}
-                    {product.stock > 0 && getProductBadges(product).map(b => (
-                      <span key={b.label} className="font-body font-semibold text-[10px] px-2 py-0.5 rounded-full" style={{ backgroundColor: b.color, color: '#fff' }}>
-                        {b.label}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-
                 <div className="mt-auto pt-3">
                   <div className="flex flex-wrap items-baseline gap-x-2 mb-1">
                     <span className="font-body font-bold text-base sm:text-lg" style={{ color: 'var(--theme-primary, #1B4332)' }}>
@@ -172,6 +153,7 @@ export default function LatestProducts() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
+                      if (!product.stock) return
                       addItem(product, 1)
                     }}
                     disabled={product.stock <= 0}
