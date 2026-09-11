@@ -3,6 +3,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useCart } from '../context/CartContext'
 import { type Product } from '../services/api'
+import ProductBadges from '../components/ProductBadges'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -74,29 +75,27 @@ export default function CombosSection() {
             return (
               <div
                 key={product.id}
-                className="combo-card rounded-2xl overflow-hidden relative group cursor-pointer"
+                className="combo-card rounded-2xl overflow-hidden relative group cursor-pointer flex flex-col"
                 style={{
                   backgroundColor: 'rgba(255,255,255,0.1)',
                   backdropFilter: 'blur(10px)',
                 }}
               >
+                {/* Badges arriba de la imagen, nunca encima de la foto */}
+                <ProductBadges
+                  product={product}
+                  onDark
+                  className="pt-3 px-4"
+                  discountText={product.precio_anterior && product.precio_anterior > product.precio
+                    ? `-${Math.round((1 - product.precio / product.precio_anterior) * 100)}%`
+                    : undefined}
+                />
                 <div className="relative h-48 overflow-hidden">
                   <img
                     src={product.imagen || '/images/placeholder.png'}
                     alt={product.nombre}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  {tieneDescuento && (
-                    <div
-                      className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold"
-                      style={{
-                        backgroundColor: '#E9C46A',
-                        color: '#1B4332',
-                      }}
-                    >
-                      -{Math.round((1 - product.precio / (product.precio_anterior || product.precio)) * 100)}%
-                    </div>
-                  )}
                 </div>
 
                 <div className="p-5">
@@ -125,14 +124,16 @@ export default function CombosSection() {
                   </div>
 
                   <button
-                    onClick={() => addItem(product, 1)}
+                    onClick={() => { if (product.stock > 0) addItem(product, 1) }}
+                    disabled={product.stock <= 0}
                     className="mt-4 w-full py-2.5 rounded-full font-body font-semibold text-sm transition-all duration-300 hover:scale-105"
                     style={{
-                      backgroundColor: '#E9C46A',
+                      backgroundColor: product.stock <= 0 ? '#9CA3AF' : '#E9C46A',
                       color: '#1B4332',
+                      cursor: product.stock <= 0 ? 'not-allowed' : 'pointer',
                     }}
                   >
-                    Agregar al carrito
+                    {product.stock <= 0 ? 'Agotado' : 'Agregar al carrito'}
                   </button>
                 </div>
               </div>
