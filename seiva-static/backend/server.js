@@ -2981,14 +2981,16 @@ app.use("/bd-backpanel", express.static(adminPath, {
 let distPath = path.join(__dirname, "dist");
 if (fs.existsSync(distPath)) {
   // New deployment: serve React SPA + API-only backend
-  // Cache de HTML en el edge: las rutas sin extensión (documentos) llevan
-  // s-maxage para que Cloudflare las sirva desde el edge y no golpee el origen.
+  // El HTML referencia bundles con hash: si el navegador lo cachea, un deploy
+  // nuevo no se ve hasta que expire (y Cloudflare reescribe max-age a 4h via
+  // Browser Cache TTL). no-store garantiza HTML fresco en cada visita; los
+  // assets siguen cacheados 1 año porque su nombre cambia con el contenido.
   app.use((req, res, next) => {
     if (req.method === "GET" &&
         !req.path.startsWith("/api") && !req.path.startsWith("/admin") &&
         !req.path.startsWith("/bd-backpanel") &&
         !path.extname(req.path)) {
-      res.set("Cache-Control", "public, max-age=300, s-maxage=300");
+      res.set("Cache-Control", "no-store");
     }
     next();
   });
