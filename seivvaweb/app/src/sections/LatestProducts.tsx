@@ -94,7 +94,6 @@ export default function LatestProducts() {
                 (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 12px rgba(45, 106, 79, 0.10), 0 0 0 1px rgba(45, 106, 79, 0.08)'
               }}
             >
-              <ProductBadges product={product} />
               <div className="relative">
                 <div
                   className="aspect-square overflow-hidden"
@@ -128,6 +127,8 @@ export default function LatestProducts() {
                 <p className="font-body text-xs mt-1 leading-relaxed line-clamp-1" style={{ color: 'var(--theme-muted, #6B6B6B)' }}>
                   {stripHtml(product.descripcion)}
                 </p>
+
+                <ProductBadges product={product} />
 
                 <div className="mt-auto pt-3">
                   <div className="flex flex-wrap items-baseline gap-x-2 mb-1">

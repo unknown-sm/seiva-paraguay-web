@@ -124,7 +124,6 @@ export default function Categories() {
                   (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 12px rgba(45, 106, 79, 0.10), 0 0 0 1px rgba(45, 106, 79, 0.08)'
                 }}
               >
-                <ProductBadges product={product} discountText="OFERTA" />
                 <div className="relative">
                 <div
                   className="aspect-square overflow-hidden"
@@ -157,6 +156,8 @@ export default function Categories() {
                 <p className="font-body text-xs sm:text-sm mt-1.5 leading-relaxed line-clamp-1" style={{ color: 'var(--theme-muted, #6B6B6B)' }}>
                   {stripHtml(product.descripcion)}
                 </p>
+
+                <ProductBadges product={product} discountText="OFERTA" />
 
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4 gap-2">
                   <div>

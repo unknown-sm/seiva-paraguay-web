@@ -43,7 +43,7 @@ export default function ProductBadges({ product, discountText, onDark, className
   if (badges.length === 0) return null
 
   return (
-    <div className={`flex flex-wrap gap-1.5 mb-2${className ? ' ' + className : ''}`}>
+    <div className={`flex flex-wrap gap-1.5 mt-2${className ? ' ' + className : ''}`}>
       {badges.map(b => (
         <span
           key={b.label}

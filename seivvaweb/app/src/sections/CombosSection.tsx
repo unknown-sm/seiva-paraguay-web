@@ -81,15 +81,6 @@ export default function CombosSection() {
                   backdropFilter: 'blur(10px)',
                 }}
               >
-                {/* Badges arriba de la imagen, nunca encima de la foto */}
-                <ProductBadges
-                  product={product}
-                  onDark
-                  className="pt-3 px-4"
-                  discountText={product.precio_anterior && product.precio_anterior > product.precio
-                    ? `-${Math.round((1 - product.precio / product.precio_anterior) * 100)}%`
-                    : undefined}
-                />
                 <div className="relative h-48 overflow-hidden">
                   <img
                     src={product.imagen || '/images/placeholder.png'}
@@ -105,6 +96,15 @@ export default function CombosSection() {
                   >
                     {product.nombre}
                   </h3>
+
+                  {/* Badges debajo del texto, nunca sobre la foto */}
+                  <ProductBadges
+                    product={product}
+                    onDark
+                    discountText={tieneDescuento
+                      ? `-${Math.round((1 - product.precio / (product.precio_anterior || product.precio)) * 100)}%`
+                      : undefined}
+                  />
 
                   <div className="flex items-center gap-3">
                     {tieneDescuento && (

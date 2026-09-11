@@ -236,7 +236,6 @@ export default function TiendaPage() {
                     (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 12px rgba(45, 106, 79, 0.10), 0 0 0 1px rgba(45, 106, 79, 0.08)'
                   }}
                 >
-                  <ProductBadges product={product} />
                   <div className="relative">
                     <div className="aspect-square overflow-hidden" style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}>
                       <img
@@ -267,6 +266,8 @@ export default function TiendaPage() {
                     <p className="font-body text-xs mt-1 leading-relaxed line-clamp-1" style={{ color: 'var(--theme-muted, #6B6B6B)' }}>
                       {stripHtml(product.descripcion)}
                     </p>
+
+                    <ProductBadges product={product} />
 
                     <div className="mt-auto pt-3">
                       <div className="flex flex-wrap items-baseline gap-x-2 mb-1">
