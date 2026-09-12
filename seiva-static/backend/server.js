@@ -3071,22 +3071,40 @@ if (fs.existsSync(distPath)) {
     res.send(out);
   });
 
-  // Dynamic XML sitemap (homepage + all active products) for search engines.
+  // Dynamic XML sitemap (static pages + all active products) for search engines.
+  // lastmod usa `creado` (única fecha disponible); cuando exista updated_at,
+  // usar esa para reflejar ediciones reales.
   app.get("/sitemap.xml", function (req, res) {
     var base = "https://seiva.com.py";
-    var urls = [base + "/"];
+    var urls = [
+      { loc: base + "/", priority: "1.0", changefreq: "daily" },
+      { loc: base + "/tienda", priority: "0.9", changefreq: "daily" },
+      { loc: base + "/promos", priority: "0.7", changefreq: "weekly" },
+      { loc: base + "/faq", priority: "0.5", changefreq: "monthly" },
+      { loc: base + "/contacto", priority: "0.5", changefreq: "monthly" },
+      { loc: base + "/politicas", priority: "0.3", changefreq: "yearly" }
+    ];
     try {
       var rows = db.prepare(
-        "SELECT slug FROM productos WHERE activo = 1 AND slug IS NOT NULL AND slug != ''"
+        "SELECT slug, creado FROM productos WHERE activo = 1 AND slug IS NOT NULL AND slug != ''"
       ).all();
       rows.forEach(function (r) {
-        urls.push(base + "/producto/" + encodeURIComponent(r.slug));
+        urls.push({
+          loc: base + "/producto/" + encodeURIComponent(r.slug),
+          lastmod: r.creado ? String(r.creado).replace(" ", "T").split(".")[0] + "+00:00" : null,
+          priority: "0.8",
+          changefreq: "weekly"
+        });
       });
     } catch (e) { /* ignore */ }
     var xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
     urls.forEach(function (u) {
-      xml += "  <url><loc>" + escapeHtml(u) + "</loc></url>\n";
+      xml += "  <url><loc>" + escapeHtml(u.loc) + "</loc>";
+      if (u.lastmod) { xml += "<lastmod>" + u.lastmod + "</lastmod>"; }
+      if (u.changefreq) { xml += "<changefreq>" + u.changefreq + "</changefreq>"; }
+      if (u.priority) { xml += "<priority>" + u.priority + "</priority>"; }
+      xml += "</url>\n";
     });
     xml += "</urlset>\n";
     res.set("Content-Type", "application/xml; charset=utf-8");
