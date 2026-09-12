@@ -3017,6 +3017,20 @@ if (fs.existsSync(distPath)) {
   function stripHtml(s) {
     return String(s || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
   }
+  function jsonLdScript(obj) {
+    // \u003c evita que un "</script>" embebido en datos cierre el bloque
+    return '<script type="application/ld+json">' + JSON.stringify(obj).replace(/</g, "\\u003c") + "</script>";
+  }
+  function absUrl(u) {
+    if (!u) { return null; }
+    return u.indexOf("http") === 0 ? u : OG_BASE + (u.charAt(0) === "/" ? u : "/" + u);
+  }
+  function parseGallery(g) {
+    try {
+      var arr = JSON.parse(g || "[]");
+      return Array.isArray(arr) ? arr : [];
+    } catch (e) { return []; }
+  }
   var OG_BASE = "https://seiva.com.py";
 
   app.get(/^\/producto\/([^/]+)\/?$/, function (req, res) {
@@ -3024,7 +3038,7 @@ if (fs.existsSync(distPath)) {
     var product = null;
     try {
       product = db.prepare(
-        "SELECT nombre, precio, descripcion, seo_descripcion, meta_titulo, meta_descripcion, imagen FROM productos WHERE activo = 1 AND (slug = ? OR id = ?) LIMIT 1"
+        "SELECT nombre, precio, descripcion, seo_descripcion, meta_titulo, meta_descripcion, imagen, galeria, sku, marca, stock, categoria, subcategoria, slug FROM productos WHERE activo = 1 AND (slug = ? OR id = ?) LIMIT 1"
       ).get(slug, Number(slug) || -1);
     } catch (e) { product = null; }
 
@@ -3044,6 +3058,7 @@ if (fs.existsSync(distPath)) {
     var og = [
       "<title>" + escapeHtml(title) + "</title>",
       '<meta name="description" content="' + escapeHtml(desc) + '" />',
+      '<link rel="canonical" href="' + escapeHtml(url) + '" />',
       '<meta property="og:title" content="' + escapeHtml(title) + '" />',
       '<meta property="og:description" content="' + escapeHtml(desc) + '" />',
       '<meta property="og:image" content="' + escapeHtml(img) + '" />',
@@ -3059,34 +3074,92 @@ if (fs.existsSync(distPath)) {
       '<meta name="twitter:image" content="' + escapeHtml(img) + '" />'
     ].join("\n    ");
 
+    // Product + Breadcrumb JSON-LD: crawlers sin JS (incluidos bots de IA)
+    // dependen de este markup para entender precio/disponibilidad/marca.
+    var ldBlocks = "";
+    if (product) {
+      var images = [absUrl(product.imagen)].concat(parseGallery(product.galeria).map(absUrl)).filter(Boolean);
+      var categoryPath = [product.categoria, product.subcategoria].filter(Boolean).join(" > ");
+      var productLd = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "@id": OG_BASE + "/producto/" + product.slug + "#product",
+        "name": product.nombre,
+        "url": url,
+        "description": desc || stripHtml(product.descripcion) || undefined,
+        "sku": product.sku || undefined,
+        "brand": product.marca ? { "@type": "Brand", "name": product.marca } : undefined,
+        "category": categoryPath || undefined,
+        "image": images.length ? images : undefined,
+        "offers": {
+          "@type": "Offer",
+          "url": url,
+          "price": String(Math.round(Number(product.precio) || 0)),
+          "priceCurrency": "PYG",
+          "itemCondition": "https://schema.org/NewCondition",
+          "availability": (Number(product.stock) > 0) ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+          "seller": { "@id": OG_BASE + "/#organization" }
+        }
+      };
+      var breadcrumbLd = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Inicio", "item": OG_BASE + "/" },
+          { "@type": "ListItem", "position": 2, "name": "Tienda", "item": OG_BASE + "/tienda" },
+          { "@type": "ListItem", "position": 3, "name": product.nombre }
+        ]
+      };
+      ldBlocks = "\n    " + jsonLdScript(productLd) + "\n    " + jsonLdScript(breadcrumbLd);
+    }
+
     var out = html
       .replace(/<title>[\s\S]*?<\/title>/i, "")
       .replace(/<meta\s+name="description"[^>]*>/gi, "")
+      .replace(/<link\s+rel="canonical"[^>]*>/gi, "")
       .replace(/<meta\s+property="og:[^>]*>/gi, "")
       .replace(/<meta\s+property="product:[^>]*>/gi, "")
       .replace(/<meta\s+name="twitter:[^>]*>/gi, "");
-    out = out.replace(/(<head[^>]*>)/i, "$1\n    " + og + "\n  ");
+    out = out.replace(/(<head[^>]*>)/i, "$1\n    " + og + ldBlocks + "\n  ");
 
     res.set("Content-Type", "text/html; charset=utf-8");
     res.send(out);
   });
 
-  // Dynamic XML sitemap (homepage + all active products) for search engines.
+  // Dynamic XML sitemap (static pages + all active products) for search engines.
+  // lastmod usa `creado` (única fecha disponible); cuando exista updated_at,
+  // usar esa para reflejar ediciones reales.
   app.get("/sitemap.xml", function (req, res) {
     var base = "https://seiva.com.py";
-    var urls = [base + "/"];
+    var urls = [
+      { loc: base + "/", priority: "1.0", changefreq: "daily" },
+      { loc: base + "/tienda", priority: "0.9", changefreq: "daily" },
+      { loc: base + "/promos", priority: "0.7", changefreq: "weekly" },
+      { loc: base + "/faq", priority: "0.5", changefreq: "monthly" },
+      { loc: base + "/contacto", priority: "0.5", changefreq: "monthly" },
+      { loc: base + "/politicas", priority: "0.3", changefreq: "yearly" }
+    ];
     try {
       var rows = db.prepare(
-        "SELECT slug FROM productos WHERE activo = 1 AND slug IS NOT NULL AND slug != ''"
+        "SELECT slug, creado FROM productos WHERE activo = 1 AND slug IS NOT NULL AND slug != ''"
       ).all();
       rows.forEach(function (r) {
-        urls.push(base + "/producto/" + encodeURIComponent(r.slug));
+        urls.push({
+          loc: base + "/producto/" + encodeURIComponent(r.slug),
+          lastmod: r.creado ? String(r.creado).replace(" ", "T").split(".")[0] + "+00:00" : null,
+          priority: "0.8",
+          changefreq: "weekly"
+        });
       });
     } catch (e) { /* ignore */ }
     var xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
     urls.forEach(function (u) {
-      xml += "  <url><loc>" + escapeHtml(u) + "</loc></url>\n";
+      xml += "  <url><loc>" + escapeHtml(u.loc) + "</loc>";
+      if (u.lastmod) { xml += "<lastmod>" + u.lastmod + "</lastmod>"; }
+      if (u.changefreq) { xml += "<changefreq>" + u.changefreq + "</changefreq>"; }
+      if (u.priority) { xml += "<priority>" + u.priority + "</priority>"; }
+      xml += "</url>\n";
     });
     xml += "</urlset>\n";
     res.set("Content-Type", "application/xml; charset=utf-8");
@@ -3095,7 +3168,20 @@ if (fs.existsSync(distPath)) {
 
   app.get("*", (req, res) => {
     if (!req.path.startsWith("/api") && !req.path.startsWith("/admin")) {
-      res.sendFile(path.join(distPath, "index.html"));
+      var html = getIndexHtml();
+      if (!html) { return res.sendFile(path.join(distPath, "index.html")); }
+      // El index.html trae canonical y robots apuntando a la home; para que
+      // cada ruta pública declare su propia URL canónica se reinyectan aquí.
+      var canonical = OG_BASE + (req.path === "/" ? "/" : (req.path.replace(/\/+$/, "") || "/"));
+      var noindex = req.path === "/carrito" || req.path === "/checkout";
+      var tags = '<link rel="canonical" href="' + escapeHtml(canonical) + '" />' +
+        '<meta name="robots" content="' + (noindex ? "noindex, follow" : "index, follow, max-image-preview:large") + '" />';
+      var out = html
+        .replace(/<link\s+rel="canonical"[^>]*>/gi, "")
+        .replace(/<meta\s+name="robots"[^>]*>/gi, "");
+      out = out.replace(/(<head[^>]*>)/i, "$1\n    " + tags + "\n  ");
+      res.set("Content-Type", "text/html; charset=utf-8");
+      res.send(out);
     }
   });
   console.log("Serving React SPA from dist/");
