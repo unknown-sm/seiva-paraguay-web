@@ -14,6 +14,31 @@ const CATEGORIAS = [
 
 const PRODUCTS_PER_PAGE_OPTIONS = [10, 20, 30, 40, 50]
 
+// Normalización para búsqueda: minúsculas, sin acentos, solo alfanuméricos
+// (para que "capsulas" encuentre "Cápsulas" y "proteina" encuentre "Proteína").
+const normalizeSearch = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+// Todos los campos por los que se puede buscar, normalizados y en un solo texto.
+const searchHaystack = (p: Product) =>
+  [
+    p.nombre,
+    p.marca || '',
+    p.categoria || '',
+    p.subcategoria || '',
+    (p.etiquetas || []).join(' '),
+    p.sku || '',
+    stripHtml(p.descripcion || ''),
+  ]
+    .map(normalizeSearch)
+    .join(' ')
+
 export default function TiendaPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -65,11 +90,27 @@ export default function TiendaPage() {
       result = result.filter(p => p.marca?.toLowerCase() === filterMarca.toLowerCase())
     }
     if (search.trim()) {
-      const q = search.toLowerCase()
-      result = result.filter(p =>
-        p.nombre.toLowerCase().includes(q) ||
-        (p.descripcion && p.descripcion.toLowerCase().includes(q))
-      )
+      // Búsqueda por palabras: cada palabra debe aparecer en algún campo,
+      // sin importar acentos ni orden ("citrato magnesio" encuentra
+      // "Magnesio Citrato Polvo"). Si nada coincide con todas las palabras,
+      // se muestran las que coinciden con alguna, por relevancia.
+      const tokens = normalizeSearch(search).split(' ').filter(t => t.length >= 2)
+      if (tokens.length) {
+        const scored = result.map(p => {
+          const nombre = normalizeSearch(p.nombre)
+          const haystack = searchHaystack(p)
+          return {
+            p,
+            hits: tokens.filter(t => haystack.includes(t)).length,
+            nameHits: tokens.filter(t => nombre.includes(t)).length,
+          }
+        })
+        const andMatches = scored.filter(x => x.hits === tokens.length)
+        const picked = andMatches.length ? andMatches : scored.filter(x => x.hits > 0)
+        result = picked
+          .sort((a, b) => b.hits - a.hits || b.nameHits - a.nameHits)
+          .map(x => x.p)
+      }
     }
     // Productos con stock primero, agotados al final
     result = [...result].sort((a, b) => {
