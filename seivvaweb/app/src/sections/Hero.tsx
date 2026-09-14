@@ -164,7 +164,7 @@ export default function Hero() {
                  textShadow: '0 4px 24px rgba(0,0,0,0.2)',
                }}
              >
-               {(heroTitle || 'SUPLEMENTOS<br />PREMIUM PARA<br />TU SALUT').split('\n').map((line, i, arr) => (
+               {(heroTitle || 'SUPLEMENTOS<br />PREMIUM PARA<br />TU SALUD').split('\n').map((line, i, arr) => (
                  <span key={i}>
                    {line}{i < arr.length - 1 && <br />}
                  </span>

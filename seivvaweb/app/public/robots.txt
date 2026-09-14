@@ -1,4 +1,60 @@
+# Seiva — política de crawlers
+# Objetivo: máxima recuperabilidad por buscadores y motores de respuesta IA
+# (ChatGPT, Claude, Perplexity, Gemini). Ver docs/seo/spec-storefront.md §7.
+# IMPORTANTE: si Cloudflare sirve este archivo con Content Signals / AI Crawl
+# Control activado, esa configuración pisa este archivo — desactivarla en el
+# panel de Cloudflare para que esta política aplique.
+
 User-agent: *
 Allow: /
+Disallow: /carrito
+Disallow: /checkout
+
+# Motores de respuesta IA — permitidos (decisión del dueño, 2026-09)
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+# Crawlers abusivos — bloqueados
+User-agent: Bytespider
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
 
 Sitemap: https://seiva.com.py/sitemap.xml
