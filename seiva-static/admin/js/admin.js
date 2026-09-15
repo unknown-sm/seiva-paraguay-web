@@ -900,6 +900,10 @@ document.getElementById("btn-scrape-url").addEventListener("click", async functi
 
     if (barEl) barEl.style.width = "80%";
     if (statusEl) statusEl.textContent = "⏳ Procesando imagen...";
+    // Asignar la imagen scrapeada apenas llega la respuesta: antes estaba
+    // dentro del setTimeout de 500ms y podía pisar una imagen custom subida
+    // en ese intervalo (o guardar la vieja si el submit ganaba la carrera).
+    window._scrapedImage = res.imagen;
     setTimeout(() => {
       if (barEl) barEl.style.width = "100%";
       if (statusEl) { statusEl.textContent = "✅ Datos extraídos"; statusEl.style.color = "var(--success)"; }
@@ -917,7 +921,6 @@ document.getElementById("btn-scrape-url").addEventListener("click", async functi
       document.getElementById("prod-descripcion").value = res.descripcion || "";
       document.getElementById("prod-descripcion_larga").value = res.descripcion_larga || res.descripcion || "";
       if (res.precio) document.getElementById("prod-precio").value = res.precio;
-      window._scrapedImage = res.imagen;
     }, 500);
   } catch (err) {
     if (barEl) { barEl.style.width = "100%"; barEl.style.background = "var(--danger)"; }

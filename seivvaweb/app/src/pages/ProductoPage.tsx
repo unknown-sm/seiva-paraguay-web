@@ -140,12 +140,16 @@ export default function ProductoPage() {
   }
 
   const crosssell = getCrosssell()
-  const allImages = product?.galeria?.length
-    ? product.galeria.map((img: string) => fixImageUrl(img))
-    : product?.imagen ? [product.imagen] : []
+  // La imagen principal (product.imagen) siempre va primera; el resto de la
+  // galería queda como miniaturas. Antes, si había galería, la imagen
+  // principal nunca se mostraba en esta página.
+  const allImages = product
+    ? [...new Set([product.imagen, ...(product.galeria || [])].filter(Boolean).map(fixImageUrl))]
+    : []
 
   const prevImage = () => setSelectedImage(i => (i > 0 ? i - 1 : allImages.length - 1))
   const nextImage = () => setSelectedImage(i => (i < allImages.length - 1 ? i + 1 : 0))
+  const currentImage = allImages[Math.min(selectedImage, allImages.length - 1)]
 
   if (loading) {
     return (
@@ -218,9 +222,9 @@ export default function ProductoPage() {
           <div>
             <div className="relative rounded-3xl overflow-hidden group" style={{ backgroundColor: 'var(--theme-border, #E8E0D5)', boxShadow: '0 8px 32px rgba(27,67,50,0.12)' }}>
               <img
-                src={imageSrcSet(allImages[selectedImage]).src}
-                srcSet={imageSrcSet(allImages[selectedImage]).srcset}
-                sizes={imageSrcSet(allImages[selectedImage]).sizes}
+                src={imageSrcSet(currentImage).src}
+                srcSet={imageSrcSet(currentImage).srcset}
+                sizes={imageSrcSet(currentImage).sizes}
                 alt={product.nombre}
                 className="w-full aspect-square object-contain"
                 fetchPriority="high"
