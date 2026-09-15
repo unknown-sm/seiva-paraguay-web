@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Sparkles, Gift, ShoppingCart, Percent, Tags } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { fetchProducts, formatPrice, type Product } from '../services/api'
+import { useCart } from '../context/CartContext'
+import ProductBadges from '../components/ProductBadges'
+import { fetchProducts, formatPrice, imageSrcSet, stripHtml, type Product } from '../services/api'
 
 interface Promo {
   id: number
@@ -67,6 +69,7 @@ export default function PromosPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+  const { addItem } = useCart()
 
   useEffect(() => {
     Promise.all([
@@ -84,6 +87,9 @@ export default function PromosPage() {
       setLoading(false)
     })
   }, [])
+
+  // Todos los productos de la categoría combos se muestran en Promos
+  const combos = products.filter(p => (p.categoria || '').toLowerCase() === 'combos')
 
   return (
     <main className="pt-24 pb-20" style={{ backgroundColor: 'var(--theme-bg, #FAF3E8)', minHeight: '100vh' }}>
@@ -108,7 +114,7 @@ export default function PromosPage() {
               <div key={i} className="rounded-2xl h-48 animate-pulse" style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }} />
             ))}
           </div>
-        ) : promos.length === 0 ? (
+        ) : promos.length === 0 && combos.length === 0 ? (
           <div className="text-center py-20">
             <Sparkles className="w-16 h-16 mx-auto mb-4" style={{ color: 'var(--theme-muted, #CCC)' }} />
             <h2 className="font-display font-bold text-2xl mb-2" style={{ color: 'var(--theme-text, #3D2817)' }}>
@@ -119,8 +125,10 @@ export default function PromosPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {promos.map(promo => {
+          <>
+            {promos.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {promos.map(promo => {
               const Icon = tipoIcons[promo.tipo] || Gift
               return (
                 <div
@@ -192,7 +200,111 @@ export default function PromosPage() {
                 </div>
               )
             })}
-          </div>
+              </div>
+            )}
+
+            {combos.length > 0 && (
+              <div className="mt-16">
+                <div className="text-center mb-8">
+                  <div
+                    className="inline-flex items-center gap-2 font-body font-semibold text-xs tracking-[0.1em] px-4 py-2 rounded-full mb-4"
+                    style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: 'var(--theme-text-on-primary, #FFFFFF)' }}
+                  >
+                    <Tags className="w-4 h-4" />
+                    COMBOS
+                  </div>
+                  <h2 className="font-display font-bold text-3xl sm:text-4xl mb-3" style={{ color: 'var(--theme-text, #3D2817)' }}>
+                    Combos de la tienda
+                  </h2>
+                  <p className="font-body text-base max-w-md mx-auto" style={{ color: 'var(--theme-muted, #5C4033)' }}>
+                    Productos combinados a un precio especial.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                  {combos.map(product => (
+                    <div
+                      key={product.id}
+                      className="group rounded-2xl p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1.5 cursor-pointer flex flex-col"
+                      style={{
+                        backgroundColor: 'var(--theme-surface, #FFFFFF)',
+                        boxShadow: '0 2px 12px rgba(45, 106, 79, 0.10), 0 0 0 1px var(--theme-border, rgba(45, 106, 79, 0.08))',
+                      }}
+                      onClick={() => navigate(`/producto/${product.slug || product.id}`)}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 32px rgba(45, 106, 79, 0.18), 0 0 0 1px rgba(45, 106, 79, 0.12)'
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 12px rgba(45, 106, 79, 0.10), 0 0 0 1px var(--theme-border, rgba(45, 106, 79, 0.08))'
+                      }}
+                    >
+                      <div className="relative">
+                        <div
+                          className="aspect-square overflow-hidden"
+                          style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}
+                        >
+                          <img
+                            src={imageSrcSet(product.imagen).src}
+                            srcSet={imageSrcSet(product.imagen).srcset}
+                            sizes={imageSrcSet(product.imagen).sizes}
+                            alt={product.nombre}
+                            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                            loading="lazy"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col flex-1 mt-3">
+                        <h3
+                          className="font-body font-semibold text-sm sm:text-[15px] leading-snug line-clamp-2"
+                          style={{ color: 'var(--theme-text, #1A1A1A)' }}
+                        >
+                          {product.nombre}
+                        </h3>
+                        <p className="font-body text-xs mt-1 leading-relaxed line-clamp-1" style={{ color: 'var(--theme-muted, #6B6B6B)' }}>
+                          {stripHtml(product.descripcion)}
+                        </p>
+
+                        <ProductBadges product={product} />
+
+                        <div className="mt-auto pt-3">
+                          <div className="flex flex-wrap items-baseline gap-x-2 mb-1">
+                            <span className="font-body font-bold text-base sm:text-lg" style={{ color: 'var(--theme-primary, #1B4332)' }}>
+                              {formatPrice(product.precio)}
+                            </span>
+                            {product.precio_anterior && product.precio_anterior > product.precio && (
+                              <span className="font-body text-xs line-through" style={{ color: 'var(--theme-muted, #999)' }}>
+                                {formatPrice(product.precio_anterior)}
+                              </span>
+                            )}
+                          </div>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              if (!product.stock) return
+                              addItem(product, 1)
+                            }}
+                            disabled={product.stock <= 0}
+                            className="font-body font-semibold text-xs px-5 py-2.5 rounded-full transition-all duration-300 hover:scale-105 inline-flex items-center justify-center gap-1.5 w-full"
+                            style={{
+                              backgroundColor: product.stock <= 0 ? '#9CA3AF' : 'var(--theme-primary, #1B4332)',
+                              color: 'var(--theme-text-on-primary, #FFFFFF)',
+                              letterSpacing: '0.04em',
+                              cursor: product.stock <= 0 ? 'not-allowed' : 'pointer',
+                            }}
+                          >
+                            <ShoppingCart className="w-3.5 h-3.5" />
+                            {product.stock <= 0 ? 'Agotado' : 'Agregar'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </main>
