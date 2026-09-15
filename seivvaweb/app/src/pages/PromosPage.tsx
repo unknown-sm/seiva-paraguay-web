@@ -88,8 +88,11 @@ export default function PromosPage() {
     })
   }, [])
 
-  // Todos los productos de la categoría combos se muestran en Promos
-  const combos = products.filter(p => (p.categoria || '').toLowerCase() === 'combos')
+  // Van a Promos los productos etiquetados manualmente con 'oferta' o
+  // 'combo' desde el admin (checkboxes de etiquetas del producto)
+  const combos = products.filter(p =>
+    (p.etiquetas || []).includes('oferta') || (p.etiquetas || []).includes('combo')
+  )
 
   return (
     <main className="pt-24 pb-20" style={{ backgroundColor: 'var(--theme-bg, #FAF3E8)', minHeight: '100vh' }}>
@@ -211,13 +214,13 @@ export default function PromosPage() {
                     style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: 'var(--theme-text-on-primary, #FFFFFF)' }}
                   >
                     <Tags className="w-4 h-4" />
-                    COMBOS
+                    OFERTAS Y COMBOS
                   </div>
                   <h2 className="font-display font-bold text-3xl sm:text-4xl mb-3" style={{ color: 'var(--theme-text, #3D2817)' }}>
-                    Combos de la tienda
+                    Ofertas y Combos
                   </h2>
                   <p className="font-body text-base max-w-md mx-auto" style={{ color: 'var(--theme-muted, #5C4033)' }}>
-                    Productos combinados a un precio especial.
+                    Productos en oferta y combos a precio especial. Se agregan y quitan desde el panel con las etiquetas Oferta y Combo.
                   </p>
                 </div>
 

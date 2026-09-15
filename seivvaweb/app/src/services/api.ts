@@ -149,6 +149,7 @@ export function getProductBadges(product: Product): { label: string; color: stri
     nuevo: { label: 'Nuevo', color: '#3B82F6' },
     popular: { label: 'Popular', color: '#F59E0B' },
     oferta: { label: 'Oferta', color: '#2D6A4F' },
+    combo: { label: 'Combo', color: '#2D6A4F' },
     envio_gratis: { label: 'Envío gratis', color: '#10B981' },
     mas_vendido: { label: 'Más vendido', color: '#8B5CF6' },
     '2x1': { label: '2x1', color: '#EC4899' },
