@@ -208,6 +208,12 @@ export default function PromosPage() {
 
             {combos.length > 0 && (
               <div className={promos.length > 0 ? 'mt-16' : ''}>
+                {/* Encabezado para SEO/lectores de pantalla: oculto visualmente
+                    para no duplicar el título de la página */}
+                <div className="sr-only">
+                  <h2>Ofertas y Combos</h2>
+                  <p>Aprovechá ofertas y combos de suplementos a precio especial.</p>
+                </div>
                 <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
                   {combos.map(product => (
                     <div
