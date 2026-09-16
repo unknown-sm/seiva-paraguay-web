@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useCart } from '../context/CartContext'
-import { type Product } from '../services/api'
+import { type Product, fixImageUrl } from '../services/api'
 import ProductBadges from '../components/ProductBadges'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -83,7 +83,7 @@ export default function CombosSection() {
               >
                 <div className="relative h-48 overflow-hidden">
                   <img
-                    src={product.imagen || '/images/placeholder.png'}
+                    src={fixImageUrl(product.imagen || '') || '/images/placeholder.png'}
                     alt={product.nombre}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
