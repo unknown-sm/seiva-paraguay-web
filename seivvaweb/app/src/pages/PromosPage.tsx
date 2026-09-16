@@ -207,23 +207,7 @@ export default function PromosPage() {
             )}
 
             {combos.length > 0 && (
-              <div className="mt-16">
-                <div className="text-center mb-8">
-                  <div
-                    className="inline-flex items-center gap-2 font-body font-semibold text-xs tracking-[0.1em] px-4 py-2 rounded-full mb-4"
-                    style={{ backgroundColor: 'var(--theme-primary, #1B4332)', color: 'var(--theme-text-on-primary, #FFFFFF)' }}
-                  >
-                    <Tags className="w-4 h-4" />
-                    OFERTAS Y COMBOS
-                  </div>
-                  <h2 className="font-display font-bold text-3xl sm:text-4xl mb-3" style={{ color: 'var(--theme-text, #3D2817)' }}>
-                    Ofertas y Combos
-                  </h2>
-                  <p className="font-body text-base max-w-md mx-auto" style={{ color: 'var(--theme-muted, #5C4033)' }}>
-                    Productos en oferta y combos a precio especial. Se agregan y quitan desde el panel con las etiquetas Oferta y Combo.
-                  </p>
-                </div>
-
+              <div className={promos.length > 0 ? 'mt-16' : ''}>
                 <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
                   {combos.map(product => (
                     <div
