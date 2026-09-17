@@ -301,11 +301,12 @@ function loadDashboard() {
 
   // Stock crítico
   api("/stock-alertas?limite=5").then(function(alertas) {
+    var activas = (alertas || []).filter(function(a) { return a.alerta_stock !== 0; });
     var sc = document.getElementById("stats-stock-critico");
-    if (sc) sc.textContent = alertas.length + " productos con stock bajo";
-    if (alertas.length > 0) {
+    if (sc) sc.textContent = activas.length + " productos con stock bajo";
+    if (activas.length > 0) {
       var scv = document.getElementById("stats-stock-critico-val");
-      if (scv) scv.textContent = alertas.length;
+      if (scv) scv.textContent = activas.length;
     }
   });
 
@@ -330,14 +331,20 @@ function renderStockAlertas() {
     return;
   }
 
-  var totalPages = Math.ceil(stockAlertasData.length / stockPerPage);
+  // Activas primero (stock ascendente); desactivadas al final
+  var sorted = stockAlertasData.slice().sort(function(a, b) {
+    var aa = a.alerta_stock !== 0 ? 1 : 0, bb = b.alerta_stock !== 0 ? 1 : 0;
+    return bb - aa || a.stock - b.stock;
+  });
+  var totalPages = Math.ceil(sorted.length / stockPerPage);
   var start = (stockPage - 1) * stockPerPage;
-  var paginated = stockAlertasData.slice(start, start + stockPerPage);
+  var paginated = sorted.slice(start, start + stockPerPage);
 
   var html = '<div class="stock-grid">' +
     paginated.map(function(a) {
       var currentStock = stockChanges[a.id] !== undefined ? stockChanges[a.id] : a.stock;
-      return '<div class="stock-card">' +
+      var alertaOn = a.alerta_stock !== 0;
+      return '<div class="stock-card"' + (alertaOn ? '' : ' style="opacity:0.55"') + '>' +
         '<div class="stock-card-header">' +
           '<span class="stock-card-id">#' + a.id + '</span>' +
           '<span class="stock-card-stock">Stock: ' + a.stock + '</span>' +
@@ -349,6 +356,11 @@ function renderStockAlertas() {
             '<label>Nuevo stock:</label>' +
             '<input type="number" class="stock-input" value="' + currentStock + '" min="0" onchange="stockChanges[' + a.id + '] = parseInt(this.value) || 0">' +
           '</div>' +
+          '<button type="button" onclick="toggleStockAlerta(' + a.id + ')" ' +
+            'style="margin-top:8px;font-size:0.75rem;padding:4px 10px;border-radius:999px;border:1px solid transparent;cursor:pointer;font-weight:600;' +
+            (alertaOn ? 'background:rgba(45,106,79,0.12);color:var(--primary,#1B4332)' : 'background:#F3F4F6;color:#6B7280') + '">' +
+            (alertaOn ? '&#128276; Alerta activada' : '&#128277; Alerta desactivada') +
+          '</button>' +
         '</div>' +
       '</div>';
     }).join("") +
@@ -378,6 +390,18 @@ function renderStockAlertas() {
 window.goStockPage = function(page) {
   stockPage = page;
   renderStockAlertas();
+}
+
+window.toggleStockAlerta = function(id) {
+  var item = stockAlertasData.find(function(a) { return a.id === id; });
+  if (!item) return;
+  var nueva = item.alerta_stock === 0 ? 1 : 0;
+  api("/productos/" + id + "/alerta-stock", { method: "PATCH", body: JSON.stringify({ activa: nueva === 1 }) }).then(function(r) {
+    if (r.error) { toast(r.error, "error"); return; }
+    item.alerta_stock = nueva;
+    toast(nueva ? "🔔 Alerta activada para #" + id : "🔕 Alerta desactivada para #" + id + " (va al final de la lista)");
+    renderStockAlertas();
+  });
 }
 
 window.saveStockChanges = function() {

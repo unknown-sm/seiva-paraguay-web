@@ -568,6 +568,7 @@ for (const [key, value] of Object.entries(contenidoDefault)) {
   insertContenido.run(key, value);
 }
 
+try { db.exec("ALTER TABLE productos ADD COLUMN alerta_stock INTEGER DEFAULT 1"); } catch (e) {}
 try { db.exec("ALTER TABLE productos ADD COLUMN categoria_id INTEGER DEFAULT NULL REFERENCES categorias(id)"); } catch (e) {}
 try { db.exec("ALTER TABLE productos ADD COLUMN descripcion_larga TEXT DEFAULT ''"); } catch (e) {}
 try { db.exec("ALTER TABLE productos ADD COLUMN galeria TEXT DEFAULT '[]'"); } catch (e) {}
@@ -2899,8 +2900,19 @@ app.delete("/api/pedidos/:id", auth, (req, res) => {
 // ---------- STOCK ALERTAS ----------
 app.get("/api/stock-alertas", auth, (req, res) => {
   const limite = parseInt(req.query.limite) || 10;
-  const rows = db.prepare("SELECT id, nombre, stock, marca FROM productos WHERE stock <= ? AND activo = 1 ORDER BY stock ASC").all(limite);
+  // Alertas activas primero (stock ascendente); las desactivadas al final
+  // para que no estorben pero sigan visibles/reactivables.
+  const rows = db.prepare("SELECT id, nombre, stock, marca, COALESCE(alerta_stock, 1) as alerta_stock FROM productos WHERE stock <= ? AND activo = 1 ORDER BY COALESCE(alerta_stock, 1) DESC, stock ASC").all(limite);
   res.json(rows);
+});
+
+// Toggle de la alerta de stock por producto (no toca stock ni activo)
+app.patch("/api/productos/:id/alerta-stock", auth, (req, res) => {
+  const { activa } = req.body;
+  const row = db.prepare("SELECT id FROM productos WHERE id = ?").get(req.params.id);
+  if (!row) return res.status(404).json({ error: "No encontrado" });
+  db.prepare("UPDATE productos SET alerta_stock = ? WHERE id = ?").run(activa ? 1 : 0, req.params.id);
+  res.json({ ok: true, alerta_stock: activa ? 1 : 0 });
 });
 
 // ---------- ERROR LOG ----------
