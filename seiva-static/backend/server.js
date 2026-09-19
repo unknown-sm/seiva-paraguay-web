@@ -2981,6 +2981,20 @@ if (!fs.existsSync(adminPath)) {
 console.log("adminPath: " + adminPath + " exists: " + fs.existsSync(adminPath));
 // No cachear el SW ni el JS del admin: un SW obsoleto (que fetched recursos
 // externos) no debe quedar cacheado en el edge (Cloudflare lo guardaba 4h).
+// BOOT_ID versiona js/admin.js en el HTML: cada deploy rearranca el server,
+// cambia la URL del script y el navegador no puede reusar el JS viejo.
+const ADMIN_BOOT_ID = Date.now().toString(36);
+var adminHtmlCache = null;
+function sendAdminIndex(req, res) {
+  if (adminHtmlCache === null) {
+    try { adminHtmlCache = fs.readFileSync(path.join(adminPath, "index.html"), "utf8"); }
+    catch (e) { adminHtmlCache = ""; }
+  }
+  res.setHeader("Cache-Control", "no-store");
+  res.send(adminHtmlCache.replace('src="js/admin.js"', 'src="js/admin.js?v=' + ADMIN_BOOT_ID + '"'));
+}
+app.get("/bd-backpanel", sendAdminIndex);
+app.get("/bd-backpanel/", sendAdminIndex);
 app.use("/bd-backpanel", express.static(adminPath, {
   maxAge: 0,
   setHeaders: function (res, filePath) {
