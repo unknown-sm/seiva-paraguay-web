@@ -2984,9 +2984,10 @@ console.log("adminPath: " + adminPath + " exists: " + fs.existsSync(adminPath));
 app.use("/bd-backpanel", express.static(adminPath, {
   maxAge: 0,
   setHeaders: function (res, filePath) {
-    if (/[\\/](sw\.js|pwa\.js|admin\.js)$/.test(filePath)) {
-      res.setHeader("Cache-Control", "no-cache");
-    }
+    // Panel interno: sin cache de navegador. Cloudflare reescribe max-age
+    // a 4h (Browser Cache TTL) salvo que el origen mande no-store, y sin
+    // esto tras un deploy el admin seguia corriendo el JS viejo 4 horas.
+    res.setHeader("Cache-Control", "no-store");
   }
 }));
 
