@@ -344,7 +344,7 @@ function renderStockAlertas() {
     paginated.map(function(a) {
       var currentStock = stockChanges[a.id] !== undefined ? stockChanges[a.id] : a.stock;
       var alertaOn = a.alerta_stock !== 0;
-      return '<div class="stock-card"' + (alertaOn ? '' : ' style="opacity:0.55"') + '>' +
+      return '<div class="stock-card" data-id="' + a.id + '"' + (alertaOn ? '' : ' style="opacity:0.55"') + '>' +
         '<div class="stock-card-header">' +
           '<span class="stock-card-id">#' + a.id + '</span>' +
           '<span class="stock-card-stock">Stock: ' + a.stock + '</span>' +
@@ -354,7 +354,7 @@ function renderStockAlertas() {
           (a.marca ? '<div class="stock-card-marca">' + xt(a.marca) + '</div>' : '') +
           '<div class="stock-card-input-row">' +
             '<label>Nuevo stock:</label>' +
-            '<input type="number" class="stock-input" value="' + currentStock + '" min="0" onchange="stockChanges[' + a.id + '] = parseInt(this.value) || 0">' +
+            '<input type="number" class="stock-input" value="' + currentStock + '" min="0" onchange="saveStockInput(' + a.id + ', this.value)">' +
           '</div>' +
           '<button type="button" onclick="toggleStockAlerta(' + a.id + ')" ' +
             'style="margin-top:8px;font-size:0.75rem;padding:4px 10px;border-radius:999px;border:1px solid transparent;cursor:pointer;font-weight:600;' +
@@ -366,21 +366,20 @@ function renderStockAlertas() {
     }).join("") +
     '</div>';
 
-  // Save button
-  html += '<div class="stock-save-area">' +
-    '<button class="btn btn-primary btn-lg" onclick="saveStockChanges()">&#128190; Guardar Cambios</button>' +
-    '</div>';
+  // Guardado automatico por producto: no hace falta boton ni reordenar
+  // en vivo (el reorden ocurre al recargar la pestaña, evita el salto
+  // que hacia parecer que el cambio no se guardaba).
+  html += '<p style="color:var(--muted);font-size:0.75rem;margin-top:10px">Los cambios de stock se guardan autom&aacute;ticamente.</p>';
 
-  // Pagination
+  // Pagination numerada (igual que la pestaña Productos)
   if (totalPages > 1) {
     html += '<div class="stock-pagination">';
-    html += '<div class="stock-dots">';
+    html += '<div style="display:flex;gap:4px;flex-wrap:wrap">';
     for (var i = 1; i <= totalPages; i++) {
-      var active = i === stockPage ? 'active' : '';
-      html += '<button class="stock-dot ' + active + '" onclick="goStockPage(' + i + ')"></button>';
+      html += '<button onclick="stockPage=' + i + ';renderStockAlertas()" style="padding:4px 8px;border:1px solid ' + (i === stockPage ? 'var(--primary)' : 'var(--border)') + ';border-radius:4px;background:' + (i === stockPage ? 'var(--primary)' : 'var(--bg)') + ';color:' + (i === stockPage ? '#fff' : 'var(--muted)') + ';font-size:0.8rem;cursor:pointer">' + i + '</button>';
     }
     html += '</div>';
-    html += '<span class="stock-info">' + stockAlertasData.length + ' productos en total</span>';
+    html += '<span class="stock-info">' + sorted.length + ' productos en total</span>';
     html += '</div>';
   }
 
@@ -392,8 +391,30 @@ window.goStockPage = function(page) {
   renderStockAlertas();
 }
 
-window.toggleStockAlerta = function(id) {
+// Guardado automatico del stock al cambiar el numero: confirma en la
+// misma tarjeta sin reordenar la lista (evita que parezca que no guardo).
+window.saveStockInput = function(id, value) {
+  var stock = parseInt(value) || 0;
   var item = stockAlertasData.find(function(a) { return a.id === id; });
+  if (!item || item.stock === stock) return;
+  api("/productos/stock-batch", {
+    method: "PATCH",
+    body: JSON.stringify({ updates: [{ id: id, stock: stock }] })
+  }).then(function(r) {
+    if (r.error) { toast("Error: " + r.error, "error"); return; }
+    item.stock = stock;
+    toast("✅ Stock de #" + id + " actualizado a " + stock);
+    var card = document.querySelector('.stock-card[data-id="' + id + '"]');
+    if (card) {
+      var badge = card.querySelector(".stock-card-stock");
+      if (badge) badge.textContent = "Stock: " + stock;
+      card.style.outline = "2px solid var(--success)";
+      setTimeout(function() { card.style.outline = ""; }, 1500);
+    }
+  }).catch(function(err) { toast("Error: " + err.message, "error"); });
+}
+
+window.toggleStockAlerta = function(id) {  var item = stockAlertasData.find(function(a) { return a.id === id; });
   if (!item) return;
   var nueva = item.alerta_stock === 0 ? 1 : 0;
   api("/productos/" + id + "/alerta-stock", { method: "PATCH", body: JSON.stringify({ activa: nueva === 1 }) }).then(function(r) {
