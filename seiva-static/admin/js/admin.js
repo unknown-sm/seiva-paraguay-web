@@ -255,8 +255,28 @@ function toggleTheme() {
 }
 
 function toggleSidebar() {
-  document.querySelector(".sidebar").classList.toggle("collapsed");
+  var sidebar = document.querySelector(".sidebar");
+  if (window.matchMedia("(max-width: 768px)").matches) {
+    // Movil: menu off-canvas con overlay para cerrar
+    var open = sidebar.classList.toggle("open");
+    var overlay = document.getElementById("sidebar-overlay");
+    if (overlay) overlay.classList.toggle("hidden", !open);
+  } else {
+    sidebar.classList.toggle("collapsed");
+  }
 }
+
+// En movil, cerrar el menu al elegir una seccion
+(function() {
+  var nav = document.querySelector(".sidebar-nav");
+  if (nav) nav.addEventListener("click", function() {
+    if (!window.matchMedia("(max-width: 768px)").matches) return;
+    var sidebar = document.querySelector(".sidebar");
+    if (sidebar) sidebar.classList.remove("open");
+    var overlay = document.getElementById("sidebar-overlay");
+    if (overlay) overlay.classList.add("hidden");
+  });
+})();
 
 // ---------- DASHBOARD ----------
 function loadDashboard() {

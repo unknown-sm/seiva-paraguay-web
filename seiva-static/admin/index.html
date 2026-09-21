@@ -56,9 +56,14 @@
     </div>
   </aside>
 
+  <div id="sidebar-overlay" class="sidebar-overlay hidden" onclick="toggleSidebar()"></div>
+
   <main class="main-content">
     <header class="content-header">
-      <h1 class="content-title" id="page-title">Dashboard</h1>
+      <div style="display:flex;align-items:center;gap:12px;min-width:0">
+        <button id="btn-mobile-menu" class="btn-mobile-menu" onclick="toggleSidebar()" title="Men&uacute;">&#9776;</button>
+        <h1 class="content-title" id="page-title">Dashboard</h1>
+      </div>
       <span id="version-label">Cargando...</span>
     </header>
 

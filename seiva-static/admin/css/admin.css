@@ -609,15 +609,58 @@ textarea.form-input { resize: vertical; }
 
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 768px) {
-  .sidebar { transform: translateX(-100%); }
-  .sidebar.open { transform: translateX(0); }
+  /* Sidebar off-canvas: fuera del flujo (fixed) para no dejar hueco */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    height: 100dvh;
+    z-index: 1001;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+  }
+  .sidebar.open { transform: translateX(0); box-shadow: 0 0 40px rgba(0,0,0,0.45); }
+  .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; }
+  .sidebar-overlay.hidden { display: none; }
+  .btn-mobile-menu { display: inline-flex; }
+
   .main-content { margin-left: 0 !important; }
-  .content-header { padding: 16px 16px 0; }
-  .tab-content.active { padding: 16px; }
+  .content-header { padding: max(12px, env(safe-area-inset-top)) 16px 0; }
+  .tab-content.active { padding: 16px; padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
   .dashboard-grid { grid-template-columns: 1fr; }
   .form-grid { grid-template-columns: 1fr; }
   .stats-grid { grid-template-columns: 1fr 1fr; }
   .card-header { flex-direction: column; align-items: flex-start; }
+
+  /* Tablas anchas: scroll horizontal dentro de su tarjeta */
+  .card-body { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .admin-table { min-width: 640px; }
+
+  /* iOS: inputs menores a 16px hacen zoom al enfocar */
+  .form-input, .stock-input, .login-input, .search-input,
+  input[type="text"], input[type="number"], input[type="password"],
+  input[type="email"], select, textarea { font-size: 16px !important; }
+
+  /* Botones de accion tactiles mas grandes */
+  .btn-icon { min-width: 36px; min-height: 36px; font-size: 16px; }
+
+  /* Modales: un poco mas de aire vertical */
+  .modal-content { width: 96vw; max-height: 92dvh; }
+
+  /* Login compacto */
+  .login-card { padding: 28px 22px; width: 92vw; max-width: 380px; }
+}
+
+/* Boton hamburguesa del header: solo visible en movil */
+.btn-mobile-menu {
+  display: none;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 20px;
+  line-height: 1;
+  padding: 6px 10px;
+  cursor: pointer;
+  color: var(--text);
 }
 
 /* ============================================
