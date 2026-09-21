@@ -607,6 +607,20 @@ textarea.form-input { resize: vertical; }
 /* ---------- PAGINATION (dynamic) ---------- */
 [id$="-footer"] { flex-wrap: wrap; }
 
+/* Boton hamburguesa del header: solo visible en movil (regla base ANTES
+   del media query para que el media query pueda pisarla) */
+.btn-mobile-menu {
+  display: none;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 20px;
+  line-height: 1;
+  padding: 6px 10px;
+  cursor: pointer;
+  color: var(--text);
+}
+
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 768px) {
   /* Sidebar off-canvas: fuera del flujo (fixed) para no dejar hueco */
@@ -648,19 +662,6 @@ textarea.form-input { resize: vertical; }
 
   /* Login compacto */
   .login-card { padding: 28px 22px; width: 92vw; max-width: 380px; }
-}
-
-/* Boton hamburguesa del header: solo visible en movil */
-.btn-mobile-menu {
-  display: none;
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-size: 20px;
-  line-height: 1;
-  padding: 6px 10px;
-  cursor: pointer;
-  color: var(--text);
 }
 
 /* ============================================
