@@ -2993,7 +2993,12 @@ function sendAdminIndex(req, res) {
   res.setHeader("Cache-Control", "no-store");
   res.send(adminHtmlCache.replace('src="js/admin.js"', 'src="js/admin.js?v=' + ADMIN_BOOT_ID + '"'));
 }
-app.get("/bd-backpanel", sendAdminIndex);
+app.get("/bd-backpanel", function(req, res) {
+  // Sin la barra final los recursos relativos (css/admin.css) resuelven
+  // contra la raiz y caen en el fallback del SPA (HTML => panel sin estilos,
+  // tal cual le pasaba a la PWA instalada). Redirigir SIEMPRE con barra.
+  res.redirect(301, "/bd-backpanel/");
+});
 app.get("/bd-backpanel/", sendAdminIndex);
 app.use("/bd-backpanel", express.static(adminPath, {
   maxAge: 0,

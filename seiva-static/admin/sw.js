@@ -29,7 +29,7 @@ self.addEventListener("push", function(e) {
       badge: "/bd-backpanel/icon-192.png",
       vibrate: [200, 100, 200, 100, 200],
       tag: "seiva-notif",
-      data: { url: data.url || "/bd-backpanel" },
+        data: { url: data.url || "/bd-backpanel/" },
       requireInteraction: true
     };
     e.waitUntil(
@@ -55,7 +55,7 @@ self.addEventListener("push", function(e) {
 
 self.addEventListener("notificationclick", function(e) {
   e.notification.close();
-  var url = e.notification.data && e.notification.data.url ? e.notification.data.url : "/bd-backpanel";
+  var url = e.notification.data && e.notification.data.url ? e.notification.data.url : "/bd-backpanel/";
   e.waitUntil(
     self.clients.matchAll({ type: "window" }).then(function(clients) {
       var found = null;
