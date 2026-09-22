@@ -2994,6 +2994,9 @@ function sendAdminIndex(req, res) {
   res.send(adminHtmlCache.replace('src="js/admin.js"', 'src="js/admin.js?v=' + ADMIN_BOOT_ID + '"'));
 }
 app.get("/bd-backpanel", function(req, res) {
+  // Express (strict routing off) trata "/bd-backpanel" y "/bd-backpanel/"
+  // como la misma ruta: distinguir por la URL real para no meter un loop.
+  if (req.originalUrl.split("?")[0].endsWith("/")) return sendAdminIndex(req, res);
   // Sin la barra final los recursos relativos (css/admin.css) resuelven
   // contra la raiz y caen en el fallback del SPA (HTML => panel sin estilos,
   // tal cual le pasaba a la PWA instalada). Redirigir SIEMPRE con barra.
