@@ -36,6 +36,12 @@ async function makeVariants(buf, baseName) {
       .webp({ quality: WEBP_QUALITY, effort: 4 })
       .toFile(path.join(IMG_DIR, `${baseName}-${w}w.webp`))
   }
+  // Variante para previews de share: WhatsApp no renderiza WebP en og:image
+  await sharp(buf)
+    .resize(1200, 630, { fit: 'contain', background: '#ffffff' })
+    .flatten({ background: '#ffffff' })
+    .jpeg({ quality: 82 })
+    .toFile(path.join(IMG_DIR, baseName + '-og.jpg'))
 }
 
 function stripExt(name) {
@@ -137,6 +143,33 @@ async function ensureVariantForRequest(relPath) {
   try { return await p } finally { inFlight.delete(relPath) }
 }
 
+// Genera (una vez) el {base}-og.jpg para cualquier imagen del producto:
+// WhatsApp ignora og:image en WebP, asi que el share siempre usa JPEG.
+// imagenPath puede ser "/img/productos/hero-x.webp" o "foo.png".
+async function ensureOgVariant(imagenPath) {
+  if (!imagenPath || /^https?:/i.test(imagenPath)) return null
+  const base = stripExt(imagenPath.replace(/^\/img\/productos\//, ''))
+  if (!base) return null
+  const out = path.join(IMG_DIR, base + '-og.jpg')
+  if (fs.existsSync(out)) return '/img/productos/' + base + '-og.jpg'
+  const src = buildSources(base).find(f => fs.existsSync(f))
+  if (!src) return null
+  ensureDir()
+  const tmp = out + '.tmp-' + process.pid + '-' + Date.now()
+  try {
+    await sharp(src)
+      .resize(1200, 630, { fit: 'contain', background: '#ffffff' })
+      .flatten({ background: '#ffffff' })
+      .jpeg({ quality: 82 })
+      .toFile(tmp)
+    fs.renameSync(tmp, out)
+    return '/img/productos/' + base + '-og.jpg'
+  } catch (e) {
+    try { fs.unlinkSync(tmp) } catch (_) {}
+    return null
+  }
+}
+
 // Find the original source for a variant path (fallback when generation
 // is not possible) so the image is never broken — just unoptimized.
 function findOriginalForVariant(relPath) {
@@ -186,6 +219,7 @@ module.exports = {
   processQrImage,
   ensureVariantsForFile,
   ensureVariantForRequest,
+  ensureOgVariant,
   findOriginalForVariant,
   findSource,
   stripExt,

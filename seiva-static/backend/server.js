@@ -3068,7 +3068,7 @@ if (fs.existsSync(distPath)) {
   }
   var OG_BASE = "https://seiva.com.py";
 
-  app.get(/^\/producto\/([^/]+)\/?$/, function (req, res) {
+  app.get(/^\/producto\/([^/]+)\/?$/, async function (req, res) {
     var slug = req.params[0];
     var product = null;
     try {
@@ -3082,7 +3082,12 @@ if (fs.existsSync(distPath)) {
 
     var img = OG_BASE + "/logo.png";
     if (product && product.imagen) {
-      img = product.imagen.indexOf("http") === 0 ? product.imagen : OG_BASE + product.imagen;
+      // WhatsApp ignora og:image en WebP: usar la variante JPEG de share
+      // (se genera una vez, en el primer scrape, y queda en disco).
+      var ogLocal = null;
+      try { ogLocal = await imageService.ensureOgVariant(product.imagen); } catch (e) { ogLocal = null; }
+      var chosen = ogLocal || product.imagen;
+      img = chosen.indexOf("http") === 0 ? chosen : OG_BASE + chosen;
     }
     var title = (product ? (product.meta_titulo || product.nombre) : "Seiva Paraguay") + " - Seiva Paraguay";
     var desc = product
