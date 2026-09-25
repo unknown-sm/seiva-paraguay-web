@@ -114,6 +114,7 @@
         <button class="offer-tab" data-offer="marcas-list">Marcas</button>
         <button class="offer-tab" data-offer="categorias">Categorías</button>
         <button class="offer-tab" data-offer="stock">Stock</button>
+        <button class="offer-tab" data-offer="etiquetas">Etiquetas</button>
       </div>
       <div class="offer-content" data-offer-panel="productos-list">
         <div class="card">
@@ -166,6 +167,22 @@
             <span style="color:var(--muted);font-size:0.85rem">Productos con stock menor a 5 unidades</span>
           </div>
           <div class="card-body" id="stock-alertas-page"></div>
+        </div>
+      </div>
+
+      <div class="offer-content" data-offer-panel="etiquetas" style="display:none">
+        <div class="card">
+          <div class="card-header" style="justify-content:space-between">
+            <h3>Etiquetas</h3>
+            <span style="color:var(--muted);font-size:0.85rem">Aparecen como casillas en el producto; <b>oferta</b> y <b>combo</b> activan la secci&oacute;n de Promos</span>
+          </div>
+          <div class="card-body">
+            <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+              <input type="text" id="etiqueta-nueva" class="form-input" placeholder="Nueva etiqueta (ej: liquidacion)" maxlength="30" style="max-width:300px">
+              <button id="btn-crear-etiqueta" class="btn btn-primary">+ Crear etiqueta</button>
+            </div>
+            <div id="etiquetas-lista">Cargando...</div>
+          </div>
         </div>
       </div>
     </div>
@@ -758,16 +775,7 @@
           <!-- Etiquetas -->
           <div class="form-group" style="background:var(--surface);padding:14px;border-radius:8px;border:1px solid var(--border)">
             <h4 style="margin:0 0 10px;font-size:0.85rem;text-transform:uppercase;color:var(--muted);letter-spacing:0.05em">Etiquetas</h4>
-            <div style="display:flex;gap:10px;flex-wrap:wrap">
-              <label style="font-size:0.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" class="prod-etiqueta" value="nuevo"> Nuevo</label>
-              <label style="font-size:0.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" class="prod-etiqueta" value="popular"> Popular</label>
-              <label style="font-size:0.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" class="prod-etiqueta" value="oferta"> Oferta</label>
-              <label style="font-size:0.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" class="prod-etiqueta" value="combo"> Combo</label>
-              <label style="font-size:0.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" class="prod-etiqueta" value="envio_gratis"> Envío gratis</label>
-              <label style="font-size:0.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" class="prod-etiqueta" value="mas_vendido"> Más vendido</label>
-              <label style="font-size:0.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" class="prod-etiqueta" value="2x1"> 2x1</label>
-              <label style="font-size:0.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" class="prod-etiqueta" value="3x2"> 3x2</label>
-            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap" id="prod-etiquetas"></div>
           </div>
 
           <!-- Cross-sell / Up-sell -->

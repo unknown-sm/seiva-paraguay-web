@@ -210,7 +210,7 @@ function switchTab(tabId, skipUrl) {
   if (tabId === "tab-dashboard") loadDashboard();
   if (tabId === "tab-pedidos") loadPedidos();
   if (tabId === "tab-usuarios") loadUsuarios();
-  if (tabId === "tab-productos") { loadProductos(); loadMarcas(); loadCategorias(); loadStockAlertas(); }
+  if (tabId === "tab-productos") { loadProductos(); loadMarcas(); loadCategorias(); loadStockAlertas(); loadEtiquetasCache(); }
   if (tabId === "tab-carritos") loadCarritos();
   if (tabId === "tab-ofertas") { loadDescuentos(); loadDescuentosMarca(); loadPromos(); loadBundles(); }
   if (tabId === "tab-pagos") loadPagos();
@@ -337,6 +337,77 @@ function loadDashboard() {
     if (cn) cn.textContent = noNotif;
   });
 }
+
+// ---------- ETIQUETAS (registro central) ----------
+var etiquetasCache = [];
+
+function loadEtiquetasCache() {
+  return api("/etiquetas").then(function(list) {
+    etiquetasCache = list || [];
+  }).catch(function() { etiquetasCache = []; });
+}
+
+// Checkboxes del formulario de producto, desde el registro de etiquetas
+function renderProdEtiquetas(selected) {
+  var el = document.getElementById("prod-etiquetas");
+  if (!el) return;
+  var sel = (selected || []).map(function(s) { return String(s).toLowerCase(); });
+  el.innerHTML = etiquetasCache.length
+    ? etiquetasCache.map(function(e) {
+        var checked = sel.indexOf(String(e.nombre).toLowerCase()) !== -1 ? " checked" : "";
+        return '<label style="font-size:0.8rem;display:flex;align-items:center;gap:4px"><input type="checkbox" class="prod-etiqueta" value="' + xt(e.nombre) + '"' + checked + '> ' + xt(e.nombre) + '</label>';
+      }).join("")
+    : '<span style="color:var(--muted);font-size:0.8rem">No hay etiquetas — crealas en Productos &gt; Etiquetas</span>';
+}
+
+// Pestaña Productos > Etiquetas: listar / crear / borrar
+function loadEtiquetas() {
+  api("/etiquetas").then(function(list) {
+    etiquetasCache = list || [];
+    var el = document.getElementById("etiquetas-lista");
+    if (!el) return;
+    if (!etiquetasCache.length) {
+      el.innerHTML = '<p style="color:var(--muted);font-size:0.9rem">No hay etiquetas. Creá la primera arriba.</p>';
+      return;
+    }
+    el.innerHTML = '<table class="admin-table"><thead><tr><th>Etiqueta</th><th style="width:110px">Acciones</th></tr></thead><tbody>' +
+      etiquetasCache.map(function(e) {
+        var safe = xt(e.nombre).replace(/'/g, "\\'");
+        return '<tr><td>' + xt(e.nombre) + '</td><td><button class="btn btn-danger btn-sm" onclick="borrarEtiqueta(' + e.id + ', \'' + safe + '\')">Eliminar</button></td></tr>';
+      }).join("") +
+      '</tbody></table>';
+  });
+}
+
+window.crearEtiqueta = function() {
+  var input = document.getElementById("etiqueta-nueva");
+  var nombre = (input.value || "").trim();
+  if (!nombre) { toast("Escribí un nombre para la etiqueta", "error"); return; }
+  api("/etiquetas", { method: "POST", body: JSON.stringify({ nombre: nombre }) }).then(function(r) {
+    if (r.error) { toast(r.error, "error"); return; }
+    toast("Etiqueta '" + r.nombre + "' creada");
+    input.value = "";
+    loadEtiquetas();
+    loadEtiquetasCache();
+  });
+};
+
+window.borrarEtiqueta = function(id, nombre) {
+  if (!confirm("¿Borrar la etiqueta '" + nombre + "'? Se quitará de todos los productos que la usen.")) return;
+  api("/etiquetas/" + id, { method: "DELETE" }).then(function(r) {
+    if (r.error) { toast(r.error, "error"); return; }
+    toast("Etiqueta eliminada" + (r.productos_actualizados ? " (" + r.productos_actualizados + " productos actualizados)" : ""));
+    loadEtiquetas();
+    loadEtiquetasCache();
+  });
+};
+
+var btnCrearEt = document.getElementById("btn-crear-etiqueta");
+if (btnCrearEt) btnCrearEt.addEventListener("click", crearEtiqueta);
+var etInput = document.getElementById("etiqueta-nueva");
+if (etInput) etInput.addEventListener("keydown", function(e) {
+  if (e.key === "Enter") { e.preventDefault(); crearEtiqueta(); }
+});
 
 // ---------- ALERTAS DE STOCK ----------
 var stockPage = 1;
@@ -816,7 +887,8 @@ function editarProducto(id) {
         addVarianteRow(v.nombre || v, v.precio || "", v.stock || "");
       });
     }
-    document.querySelectorAll(".prod-etiqueta").forEach(function(cb) { cb.checked = (prod.etiquetas || []).indexOf(cb.value) !== -1; });
+    document.querySelectorAll(".prod-etiqueta").forEach(function(cb) { cb.remove(); });
+    loadEtiquetasCache().then(function() { renderProdEtiquetas(prod.etiquetas || []); });
     // Preservar imagen actual para que no se pierda al guardar sin scrape
     window._scrapedImage = prod.imagen || "";
     // Cargar galería existente
@@ -926,7 +998,7 @@ function nuevoProducto() {
   document.getElementById("prod-upsell").value = "";
   var vc = document.getElementById("prod-variantes-container");
   if (vc) vc.innerHTML = "";
-  document.querySelectorAll(".prod-etiqueta").forEach(function(cb) { cb.checked = false; });
+  loadEtiquetasCache().then(function() { renderProdEtiquetas([]); });
   document.getElementById("scrape-url").value = "";
   var el;
   el = document.getElementById("scrape-progress"); if (el) el.style.display = "none";
@@ -3320,6 +3392,7 @@ window.switchOfferTab = function(tab) {
   if (tab === "promos") loadPromos();
   if (tab === "bundles") loadBundles();
   if (tab === "productos-list") loadProductos();
+  if (tab === "etiquetas") loadEtiquetas();
   if (tab === "marcas-list") loadMarcas();
   if (tab === "categorias") loadCategorias();
   if (tab === "stock") loadStockAlertas();

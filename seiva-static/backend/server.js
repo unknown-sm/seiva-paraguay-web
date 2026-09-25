@@ -2897,6 +2897,54 @@ app.delete("/api/pedidos/:id", auth, (req, res) => {
   res.json({ ok: true });
 });
 
+// ---------- ETIQUETAS (registro central para el form de productos y Promos) ----------
+db.exec(`CREATE TABLE IF NOT EXISTS etiquetas (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nombre TEXT NOT NULL UNIQUE,
+  creado TEXT DEFAULT (datetime('now'))
+)`);
+["nuevo", "popular", "oferta", "combo", "envio_gratis", "mas_vendido", "2x1", "3x2"].forEach(function (n) {
+  try { db.prepare("INSERT OR IGNORE INTO etiquetas (nombre) VALUES (?)").run(n); } catch (e) {}
+});
+
+app.get("/api/etiquetas", auth, (req, res) => {
+  res.json(db.prepare("SELECT * FROM etiquetas ORDER BY nombre COLLATE NOCASE").all());
+});
+
+app.post("/api/etiquetas", auth, (req, res) => {
+  const nombre = String(req.body.nombre || "").trim().replace(/\s+/g, " ");
+  if (!nombre) return res.status(400).json({ error: "Nombre requerido" });
+  if (nombre.length > 30) return res.status(400).json({ error: "Máximo 30 caracteres" });
+  const dup = db.prepare("SELECT id FROM etiquetas WHERE LOWER(nombre) = LOWER(?)").get(nombre);
+  if (dup) return res.status(409).json({ error: "Esa etiqueta ya existe" });
+  try {
+    const result = db.prepare("INSERT INTO etiquetas (nombre) VALUES (?)").run(nombre);
+    res.json({ id: result.lastInsertRowid, nombre });
+  } catch (e) {
+    res.status(409).json({ error: "No se pudo crear: " + e.message });
+  }
+});
+
+app.delete("/api/etiquetas/:id", auth, (req, res) => {
+  const row = db.prepare("SELECT nombre FROM etiquetas WHERE id = ?").get(req.params.id);
+  if (!row) return res.status(404).json({ error: "No encontrada" });
+  const lower = row.nombre.toLowerCase();
+  // Quitar la etiqueta de todos los productos que la tengan
+  const prods = db.prepare("SELECT id, etiquetas FROM productos WHERE etiquetas LIKE ?").all("%" + row.nombre + "%");
+  const upd = db.prepare("UPDATE productos SET etiquetas = ? WHERE id = ?");
+  let n = 0;
+  for (const p of prods) {
+    try {
+      const arr = JSON.parse(p.etiquetas);
+      if (!Array.isArray(arr)) continue;
+      const filtered = arr.filter(t => String(t).toLowerCase() !== lower);
+      if (filtered.length !== arr.length) { upd.run(JSON.stringify(filtered), p.id); n++; }
+    } catch (e) {}
+  }
+  db.prepare("DELETE FROM etiquetas WHERE id = ?").run(req.params.id);
+  res.json({ ok: true, productos_actualizados: n });
+});
+
 // ---------- STOCK ALERTAS ----------
 app.get("/api/stock-alertas", auth, (req, res) => {
   const limite = parseInt(req.query.limite) || 10;
