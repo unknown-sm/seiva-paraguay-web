@@ -592,11 +592,41 @@ function loadProductos() {
   });
 }
 
+// Normalizacion para el buscador: sin acentos ni signos (igual que la tienda)
+function normalizeSearchJs(s) {
+  return String(s || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+// Todo el texto del producto por el que se puede buscar, en un solo string
+function productoHaystackJs(p) {
+  var etiquetas = p.etiquetas;
+  if (typeof etiquetas === "string") {
+    try { etiquetas = JSON.parse(etiquetas); } catch (e) { etiquetas = []; }
+  }
+  if (!Array.isArray(etiquetas)) etiquetas = [];
+  return normalizeSearchJs([
+    p.nombre, p.marca || "", p.categoria || "", p.subcategoria || "",
+    etiquetas.join(" "), p.sku || "", p.descripcion || ""
+  ].join(" "));
+}
+
 function renderProductos(searchVal, filterCat, filterActivo) {
   var data = prodAllData;
   if (searchVal) {
-    var q = searchVal.toLowerCase();
-    data = data.filter(function(p) { return p.nombre.toLowerCase().indexOf(q) !== -1; });
+    // Tolerante: sin acentos, cualquier orden de palabras, busca en
+    // nombre/marca/categoria/etiquetas/sku/descripcion
+    var words = normalizeSearchJs(searchVal).split(" ").filter(Boolean);
+    if (words.length) {
+      data = data.filter(function(p) {
+        var hay = productoHaystackJs(p);
+        return words.every(function(w) { return hay.indexOf(w) !== -1; });
+      });
+    }
   }
   if (filterCat) {
     data = data.filter(function(p) { return p.categoria.toLowerCase() === filterCat.toLowerCase(); });
