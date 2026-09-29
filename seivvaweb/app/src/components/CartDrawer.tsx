@@ -1,10 +1,23 @@
 import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import { X, Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { formatPrice, getDiscountedPrice, getNextTier, imageSrcSet } from '../services/api'
 
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:3001/api'
+  : '/api'
+
 export default function CartDrawer() {
   const { items, isOpen, removeItem, updateQuantity, closeCart, totalItems, totalPrice, totalSavings } = useCart()
+  // Mismo mínimo configurable que usa el checkout (0 = solo vale el flag del producto)
+  const [envioMinimoGratis, setEnvioMinimoGratis] = useState(0)
+
+  useEffect(() => {
+    fetch(`${API_BASE}/contenido`).then(r => r.json()).then((data) => {
+      setEnvioMinimoGratis(parseInt(data.envio_minimo_gratis) || 0)
+    }).catch(() => {})
+  }, [])
 
   return (
     <>
@@ -164,18 +177,34 @@ export default function CartDrawer() {
             )}
 
             {(() => {
-              const minimo = 150000; // Default minimum
-              const hasFreeDelivery = items.some(i => i.product.delivery_gratis);
-              if (hasFreeDelivery) return null; // Don't show if any product has free delivery
-              if (totalPrice < minimo) {
+              const hasFreeDelivery = items.some(i => i.product.delivery_gratis)
+              const gratisPorMonto = envioMinimoGratis > 0 && totalPrice >= envioMinimoGratis
+              if (hasFreeDelivery || gratisPorMonto) {
+                return (
+                  <div className="mb-3">
+                    <div className="flex justify-between font-body text-xs mb-1" style={{ color: '#2D6A4F' }}>
+                      <span>
+                        {hasFreeDelivery
+                          ? '🚚 ¡Tu carrito incluye delivery gratis!'
+                          : '🎉 ¡Alcanzaste el delivery gratis!'}
+                      </span>
+                      <span>100%</span>
+                    </div>
+                    <div className="h-1.5 rounded-full" style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}>
+                      <div className="h-1.5 rounded-full" style={{ width: '100%', backgroundColor: '#2D6A4F' }} />
+                    </div>
+                  </div>
+                );
+              }
+              if (envioMinimoGratis > 0) {
                 return (
                   <div className="mb-3">
                     <div className="flex justify-between font-body text-xs mb-1" style={{ color: 'var(--theme-muted, #5C4033)' }}>
-                      <span>Te faltan {formatPrice(minimo - totalPrice)} para delivery gratis</span>
-                      <span>{Math.round(totalPrice / (minimo / 100))}%</span>
+                      <span>Te faltan {formatPrice(envioMinimoGratis - totalPrice)} para delivery gratis</span>
+                      <span>{Math.round(totalPrice / (envioMinimoGratis / 100))}%</span>
                     </div>
                     <div className="h-1.5 rounded-full" style={{ backgroundColor: 'var(--theme-border, #E8E0D5)' }}>
-                      <div className="h-1.5 rounded-full transition-all" style={{ width: Math.min(100, Math.round(totalPrice / (minimo / 100))) + '%', backgroundColor: 'var(--theme-primary, #1B4332)' }} />
+                      <div className="h-1.5 rounded-full transition-all" style={{ width: Math.min(100, Math.round(totalPrice / (envioMinimoGratis / 100))) + '%', backgroundColor: 'var(--theme-primary, #1B4332)' }} />
                     </div>
                   </div>
                 );
