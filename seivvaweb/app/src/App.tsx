@@ -19,6 +19,7 @@ import ContactoPage from './pages/ContactoPage'
 import PoliticasPage from './pages/PoliticasPage'
 import PromosPage from './pages/PromosPage'
 import DynamicPage from './pages/DynamicPage'
+import LegalPage from './pages/LegalPage'
 
 function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation()
@@ -57,6 +58,9 @@ export default function App() {
             <Route path="/politicas" element={<Layout><PoliticasPage /></Layout>} />
             <Route path="/promos" element={<Layout><PromosPage /></Layout>} />
             <Route path="/pagina/:slug" element={<Layout><DynamicPage /></Layout>} />
+            <Route path="/terminos" element={<Layout><LegalPage kind="terminos" /></Layout>} />
+            <Route path="/privacidad" element={<Layout><LegalPage kind="privacidad" /></Layout>} />
+            <Route path="/cookies" element={<Layout><LegalPage kind="cookies" /></Layout>} />
           </Routes>
           </BrowserRouter>
         </CurrentProductProvider>

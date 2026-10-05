@@ -208,17 +208,17 @@ export default function Footer() {
             © 2026 Seiva Paraguay. Todos los derechos reservados.
           </span>
           <div className="flex items-center gap-6">
-            {['Términos', 'Privacidad', 'Cookies'].map((link) => (
-              <a
-                key={link}
-                href="#"
+            {[{ label: 'Términos', to: '/terminos' }, { label: 'Privacidad', to: '/privacidad' }, { label: 'Cookies', to: '/cookies' }].map(({ label, to }) => (
+              <Link
+                key={label}
+                to={to}
                 className="font-body text-xs transition-colors duration-300"
                 style={{ color: 'rgba(255,255,255,0.5)' }}
                 onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = '#FFFFFF' }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.5)' }}
               >
-                {link}
-              </a>
+                {label}
+              </Link>
             ))}
           </div>
         </div>
