@@ -1376,6 +1376,7 @@ function renderHistorico() {
 }
 
 // ---------- CONTENIDO ----------
+var statsBarLoaded = false;
 function loadContenido() {
    api("/contenido").then(function(data) {
      for (var key in data) {
@@ -1392,6 +1393,7 @@ function loadContenido() {
    loadHeroProduct();
    // Load stats bar
    api("/stats-bar").then(function(stats) {
+     statsBarLoaded = true;
      for (var i = 0; i < 4; i++) {
        var s = stats[i] || {};
        var iconEl = document.getElementById("stat-" + i + "-icon");
@@ -1414,17 +1416,20 @@ function loadContenido() {
       var el = document.getElementById("contenido-" + keys[i]);
       body[keys[i]] = el ? el.value : "";
     }
-   // Save stats bar
-   var stats = [];
-   for (var j = 0; j < 4; j++) {
-     stats.push({
-       icon: document.getElementById("stat-" + j + "-icon").value,
-       value: document.getElementById("stat-" + j + "-value").value,
-       label: document.getElementById("stat-" + j + "-label").value,
-       fill: document.getElementById("stat-" + j + "-fill").value === "true"
-     });
+   // Solo enviar la barra de estadisticas si termino de cargar: enviarla
+   // con los inputs vacios borraba los textos reales en produccion.
+   if (statsBarLoaded) {
+     var stats = [];
+     for (var j = 0; j < 4; j++) {
+       stats.push({
+         icon: document.getElementById("stat-" + j + "-icon").value,
+         value: document.getElementById("stat-" + j + "-value").value,
+         label: document.getElementById("stat-" + j + "-label").value,
+         fill: document.getElementById("stat-" + j + "-fill").value === "true"
+       });
+     }
+     api("/stats-bar", { method: "PUT", body: JSON.stringify({ stats: stats }) });
    }
-   api("/stats-bar", { method: "PUT", body: JSON.stringify({ stats: stats }) });
    api("/contenido", { method: "PUT", body: JSON.stringify(body) }).then(function() {
      toast("Contenido guardado");
    });
